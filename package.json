@@ -13,10 +13,10 @@
     },
     "dependencies": {
         "@tailwindcss/vite": "^4.2.1",
+        "@reduxjs/toolkit": "latest",
         "firebase": "latest",
-        "mobx": "latest",
-        "mobx-react-lite": "latest",
         "react": "latest",
+        "react-redux": "latest",
         "react-dom": "latest",
         "react-router-dom": "latest",
         "tailwindcss": "^4.2.1"

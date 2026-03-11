@@ -1,7 +1,12 @@
-// TODO make a reactive model (application state), pass it as prop to the components used
 import { createRoot } from "react-dom/client";
-import './index.css'
+import { Provider } from "react-redux";
+import './index.css';
 import App from "./App";
+import { store } from "./store/store";
 
-const mountedApp = createRoot(document.getElementById('root')!)
-mountedApp.render(<App />);
+const mountedApp = createRoot(document.getElementById('root')!);
+mountedApp.render(
+    <Provider store={store}>
+        <App />
+    </Provider>
+);
