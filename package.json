@@ -12,11 +12,13 @@
         "vite": "latest"
     },
     "dependencies": {
+        "@tailwindcss/vite": "^4.2.1",
         "firebase": "latest",
         "mobx": "latest",
         "mobx-react-lite": "latest",
         "react": "latest",
         "react-dom": "latest",
-        "react-router-dom": "latest"
+        "react-router-dom": "latest",
+        "tailwindcss": "^4.2.1"
     }
 }
