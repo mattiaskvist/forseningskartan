@@ -4,6 +4,7 @@ import { DepartureResponse, Site } from "../types/sl";
 
 type SitesState = {
     data: Site[] | null;
+    selectedSiteId: number | null;
     isLoading: boolean;
     error: Error | null;
 };
@@ -16,8 +17,12 @@ type DeparturesState = {
 
 export const sitesSlice = createSlice({
     name: "sites",
-    initialState: { data: null, isLoading: false, error: null } as SitesState,
-    reducers: {},
+    initialState: { data: null, selectedSiteId: null, isLoading: false, error: null } as SitesState,
+    reducers: {
+        setSelectedSiteId: (state: SitesState, action: { payload: number }) => {
+            state.selectedSiteId = action.payload;
+        },
+    },
     extraReducers: (builder) => {
         builder
             .addCase(getSites.pending, (state, action) => {
@@ -36,6 +41,8 @@ export const sitesSlice = createSlice({
             });
     },
 });
+
+export const { setSelectedSiteId } = sitesSlice.actions;
 
 export const departuresSlice = createSlice({
     name: "departures",

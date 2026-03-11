@@ -61,4 +61,4 @@ type DepartureResponse = {
     stop_deviations: StopDeviation[];
 }
 
-export type { Site, DepartureResponse };
+export type { Site, DepartureResponse, Departure };
