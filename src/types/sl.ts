@@ -2,6 +2,7 @@
 
 type Site = {
     id: number;
+    gid: number;
     name: string;
     lat: number;
     lon: number;
