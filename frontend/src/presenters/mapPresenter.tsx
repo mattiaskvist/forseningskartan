@@ -2,12 +2,7 @@ import { MapView } from "../views/mapView";
 import { getDepartures, getStopDelays } from "../store/actions";
 import { setSelectedSiteId } from "../store/reducers";
 import { useAppDispatch, useAppSelector } from "../store/store";
-import {
-    getSitesCB,
-    getSelectedSiteCB,
-    getStopPointsCB,
-    getStopDelaysCB,
-} from "../store/selectors";
+import { getSitesCB, getSelectedSiteCB, getStopPointsCB } from "../store/selectors";
 import { Site, StopPoint } from "../types/sl";
 
 export function MapPresenter() {
@@ -16,7 +11,6 @@ export function MapPresenter() {
     const sites = useAppSelector(getSitesCB);
     const selectedSite = useAppSelector(getSelectedSiteCB);
     const stopPoints = useAppSelector(getStopPointsCB) ?? [];
-    const stopDelays = useAppSelector(getStopDelaysCB) ?? [];
 
     function handleSelectSiteCB(siteId: number) {
         dispatch(setSelectedSiteId(siteId));
@@ -50,8 +44,6 @@ export function MapPresenter() {
         <MapView
             sites={sites}
             selectedSite={selectedSite}
-            stopDelays={stopDelays}
-            stopPoints={stopPoints}
             handleSelectSiteCB={handleSelectSiteCB}
         />
     ) : (
