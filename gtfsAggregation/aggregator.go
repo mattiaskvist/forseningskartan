@@ -376,15 +376,6 @@ func summarizeBuckets(source map[string]*bucket, kind bucketKind, staticIndex *s
 	return result
 }
 
-func firstNonEmpty(values ...string) string {
-	for _, value := range values {
-		if strings.TrimSpace(value) != "" {
-			return value
-		}
-	}
-	return ""
-}
-
 func buildRealizedEventKey(tripDescriptor *gtfs.TripDescriptor, stopUpdate *gtfs.TripUpdate_StopTimeUpdate, isArrival bool) string {
 	eventType := "D"
 	if isArrival {
