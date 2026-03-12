@@ -15,6 +15,21 @@ import (
 // which should be well within Firestore document limits.
 const firestoreByStopChunkCount = 256
 
+// marshal and unmarshal to use json tags insted of go struct field names
+func toFirestoreDocument(value any) (map[string]any, error) {
+	b, err := json.Marshal(value)
+	if err != nil {
+		return nil, fmt.Errorf("marshal firestore payload: %w", err)
+	}
+
+	var document map[string]any
+	if err := json.Unmarshal(b, &document); err != nil {
+		return nil, fmt.Errorf("unmarshal firestore payload: %w", err)
+	}
+
+	return document, nil
+}
+
 func writeByRouteToFirestore(result aggregationResult, projectID string, dateFromPath string) error {
 	projectID = strings.TrimSpace(projectID)
 	if projectID == "" {
@@ -40,6 +55,11 @@ func writeByRouteToFirestore(result aggregationResult, projectID string, dateFro
 		"byRoute":    result.ByRoute,
 	}
 
+	firestorePayload, err := toFirestoreDocument(payload)
+	if err != nil {
+		return fmt.Errorf("prepare byRoute firestore payload: %w", err)
+	}
+
 	// Print approximate document size
 	b, err := json.Marshal(payload)
 	if err != nil {
@@ -47,7 +67,7 @@ func writeByRouteToFirestore(result aggregationResult, projectID string, dateFro
 	}
 	fmt.Printf("By route document size: %d bytes (%.2f KB)\n", len(b), float64(len(b))/1024)
 
-	if _, err := docRef.Set(ctx, payload); err != nil {
+	if _, err := docRef.Set(ctx, firestorePayload); err != nil {
 		return fmt.Errorf("write byRoute document: %w", err)
 	}
 
@@ -103,6 +123,11 @@ func writeByStopToFirestore(result aggregationResult, projectID string, dateFrom
 			"stops":     chunkStops,
 		}
 
+		firestorePayload, err := toFirestoreDocument(payload)
+		if err != nil {
+			return fmt.Errorf("prepare byStop firestore payload: %w", err)
+		}
+
 		// Print approximate document size for chunk payload
 		b, err := json.Marshal(payload)
 		if err != nil {
@@ -110,7 +135,7 @@ func writeByStopToFirestore(result aggregationResult, projectID string, dateFrom
 		}
 		fmt.Printf("By stop chunk %s size: %d bytes (%.2f KB)\n", chunkID, len(b), float64(len(b))/1024)
 
-		if _, err := docRef.Set(ctx, payload); err != nil {
+		if _, err := docRef.Set(ctx, firestorePayload); err != nil {
 			return fmt.Errorf("write byStop chunk document: %w", err)
 		}
 		totalWrite++
