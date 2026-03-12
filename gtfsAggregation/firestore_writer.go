@@ -70,10 +70,16 @@ func writeByRouteToFirestore(result aggregationResult, projectID string, dateFro
 	if _, err := docRef.Set(ctx, firestorePayload); err != nil {
 		return fmt.Errorf("write byRoute document: %w", err)
 	}
-
 	fmt.Println("Stored by route in firestore")
 
 	return nil
+}
+
+type fileSizeStats struct {
+	total int
+	count int
+	min   int
+	max   int
 }
 
 func writeByStopToFirestore(result aggregationResult, projectID string, dateFromPath string) error {
@@ -107,6 +113,7 @@ func writeByStopToFirestore(result aggregationResult, projectID string, dateFrom
 	}
 
 	var totalWrite int
+	fileSizeStats := fileSizeStats{}
 
 	for chunkIdx, chunkStops := range chunks {
 		chunkID := fmt.Sprintf("chunk_%d", chunkIdx)
@@ -133,7 +140,14 @@ func writeByStopToFirestore(result aggregationResult, projectID string, dateFrom
 		if err != nil {
 			return fmt.Errorf("marshal payload for size check: %w", err)
 		}
-		fmt.Printf("By stop chunk %s size: %d bytes (%.2f KB)\n", chunkID, len(b), float64(len(b))/1024)
+		fileSizeStats.total += len(b)
+		fileSizeStats.count++
+		if fileSizeStats.min == 0 || len(b) < fileSizeStats.min {
+			fileSizeStats.min = len(b)
+		}
+		if len(b) > fileSizeStats.max {
+			fileSizeStats.max = len(b)
+		}
 
 		if _, err := docRef.Set(ctx, firestorePayload); err != nil {
 			return fmt.Errorf("write byStop chunk document: %w", err)
@@ -142,6 +156,7 @@ func writeByStopToFirestore(result aggregationResult, projectID string, dateFrom
 	}
 
 	fmt.Printf("Stored by stop in firestore (%d chunk writes, %d total stops)\n", totalWrite, len(result.ByStop))
+	fmt.Printf("By stop chunk file size stats - Min: %d KB, Max: %d KB, Average: %d KB\n", fileSizeStats.min/1024, fileSizeStats.max/1024, fileSizeStats.total/(fileSizeStats.count*1024))
 	return nil
 }
 

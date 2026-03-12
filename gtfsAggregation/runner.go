@@ -45,8 +45,8 @@ func runAggregation(config Config) error {
 			return fmt.Errorf("could not add file %v: %w", path, err)
 		}
 
-		if agg.filesParsed%100 == 0 {
-			fmt.Printf("Processed %d files\n", agg.filesParsed)
+		if agg.filesParsed%500 == 0 {
+			fmt.Printf("Processed %d files for %s, %s\n", agg.filesParsed, config.Operator, config.Date)
 		}
 		return nil
 	})

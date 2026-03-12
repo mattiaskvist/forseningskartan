@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -27,12 +28,10 @@ func (p Files) Cleanup() {
 }
 
 func getInputFiles(config Config) (Files, error) {
-	// tmpDir, err := os.MkdirTemp("", "gtfsAggregation-*")
-	tmpDir := "temp"
-	// err := os.Mkdir("temp", 0755)
-	// if err != nil {
-	// 	return Files{}, fmt.Errorf("create temp dir: %w", err)
-	// }
+	tmpDir, err := os.MkdirTemp("", "gtfsAggregation-*")
+	if err != nil {
+		return Files{}, fmt.Errorf("create temp dir: %w", err)
+	}
 
 	files := Files{
 		cleanup: func() {
@@ -43,15 +42,15 @@ func getInputFiles(config Config) (Files, error) {
 	// uses 7zip
 	realtimeArchivePath := filepath.Join(tmpDir, "tripupdates.7z")
 	realtimeExtractDir := filepath.Join(tmpDir, "tripupdates")
-	// realtimeURL := fmt.Sprintf("https://api.koda.trafiklab.se/KoDa/api/v2/gtfs-rt/%s/TripUpdates?date=%s&key=%s",
-	// 	url.PathEscape(config.Operator),
-	// 	url.QueryEscape(config.Date),
-	// 	url.QueryEscape(config.APIKey),
-	// )
-	// if err := downloadFile(realtimeURL, realtimeArchivePath); err != nil {
-	// 	files.Cleanup()
-	// 	return Files{}, fmt.Errorf("download gtfs-rt archive: %w", err)
-	// }
+	realtimeURL := fmt.Sprintf("https://api.koda.trafiklab.se/KoDa/api/v2/gtfs-rt/%s/TripUpdates?date=%s&key=%s",
+		url.PathEscape(config.Operator),
+		url.QueryEscape(config.Date),
+		url.QueryEscape(config.APIKey),
+	)
+	if err := downloadFile(realtimeURL, realtimeArchivePath); err != nil {
+		files.Cleanup()
+		return Files{}, fmt.Errorf("download gtfs-rt archive: %w", err)
+	}
 	if err := extractArchive(realtimeArchivePath, realtimeExtractDir); err != nil {
 		files.Cleanup()
 		return Files{}, fmt.Errorf("extract gtfs-rt archive: %w", err)
@@ -61,15 +60,15 @@ func getInputFiles(config Config) (Files, error) {
 	// uses zip
 	staticArchivePath := filepath.Join(tmpDir, "static.zip")
 	staticExtractDir := filepath.Join(tmpDir, "static")
-	// staticURL := fmt.Sprintf("https://api.koda.trafiklab.se/KoDa/api/v2/gtfs-static/%s?date=%s&key=%s",
-	// 	url.PathEscape(config.Operator),
-	// 	url.QueryEscape(config.Date),
-	// 	url.QueryEscape(config.APIKey),
-	// )
-	// if err := downloadFile(staticURL, staticArchivePath); err != nil {
-	// 	files.Cleanup()
-	// 	return Files{}, fmt.Errorf("download gtfs-static archive: %w", err)
-	// }
+	staticURL := fmt.Sprintf("https://api.koda.trafiklab.se/KoDa/api/v2/gtfs-static/%s?date=%s&key=%s",
+		url.PathEscape(config.Operator),
+		url.QueryEscape(config.Date),
+		url.QueryEscape(config.APIKey),
+	)
+	if err := downloadFile(staticURL, staticArchivePath); err != nil {
+		files.Cleanup()
+		return Files{}, fmt.Errorf("download gtfs-static archive: %w", err)
+	}
 	if err := extractArchive(staticArchivePath, staticExtractDir); err != nil {
 		files.Cleanup()
 		return Files{}, fmt.Errorf("extract gtfs-static archive: %w", err)
@@ -163,7 +162,7 @@ func extractEntry(destDir, name string, isDir bool, open func() (io.ReadCloser, 
 	if err != nil {
 		return fmt.Errorf("open archive entry %q: %w", name, err)
 	}
-	defer src.Close()
+	defer func() { _ = src.Close() }()
 
 	dst, err := os.Create(targetPath)
 	if err != nil {
@@ -188,7 +187,7 @@ func extractSevenZipArchive(archivePath string, destDir string) error {
 	if err != nil {
 		return fmt.Errorf("open 7z: %w", err)
 	}
-	defer zr.Close()
+	defer func() { _ = zr.Close() }()
 
 	for _, file := range zr.File {
 		err := extractEntry(
