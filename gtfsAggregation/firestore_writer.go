@@ -95,7 +95,6 @@ func writeByStopToFirestore(result aggregationResult, projectID string, dateFrom
 
 		payload := map[string]any{
 			"date":      dateFromPath,
-			"chunkId":   chunkID,
 			"stopCount": len(chunkStops),
 			"stops":     chunkStops,
 		}
