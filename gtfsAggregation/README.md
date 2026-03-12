@@ -65,7 +65,6 @@ Each byRoute document contains:
 ```go
 type summary struct {
 	Key             string     `json:"key"`
-	Name            string     `json:"name"`
 	Route           *routeMeta `json:"route,omitempty"` // empty for by stop
 	Stop            *stopMeta  `json:"stop,omitempty"` // empty for by route
 	ByRoute         []summary  `json:"byRoute,omitempty"` // empty for by route

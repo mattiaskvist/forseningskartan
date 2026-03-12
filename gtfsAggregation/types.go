@@ -8,7 +8,6 @@ type delayStats struct {
 
 type summary struct {
 	Key             string     `json:"key"`
-	Name            string     `json:"name"`
 	Route           *routeMeta `json:"route,omitempty"`
 	Stop            *stopMeta  `json:"stop,omitempty"`
 	ByRoute         []summary  `json:"byRoute,omitempty"`

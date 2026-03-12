@@ -347,7 +347,6 @@ func summarizeBuckets(source map[string]*bucket, kind bucketKind, staticIndex *s
 			switch kind {
 			case bucketKindRoute:
 				if routeValue, ok := staticIndex.routes[key]; ok {
-					summaryValue.Name = firstNonEmpty(routeValue.LongName, routeValue.ShortName)
 					summaryValue.Route = &routeMeta{
 						AgencyID:  routeValue.AgencyID,
 						ShortName: routeValue.ShortName,
@@ -358,7 +357,6 @@ func summarizeBuckets(source map[string]*bucket, kind bucketKind, staticIndex *s
 				}
 			case bucketKindStop:
 				if stopValue, ok := staticIndex.stops[key]; ok {
-					summaryValue.Name = stopValue.Name
 					summaryValue.Stop = &stopMeta{
 						Name:         stopValue.Name,
 						Lat:          stopValue.Lat,

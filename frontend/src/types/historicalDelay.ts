@@ -21,7 +21,6 @@ type StopMeta = {
 
 type StopDelaySummary = {
     key: string;
-    name: string;
     route?: RouteMeta;
     stop?: StopMeta;
     byRoute?: StopDelaySummary[];
