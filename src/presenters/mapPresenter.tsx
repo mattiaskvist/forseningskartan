@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { MapView } from "../views/mapView";
 import { getDepartures } from "../store/actions";
 import { setSelectedSiteId } from "../store/reducers";

@@ -25,7 +25,7 @@ export const sitesSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            .addCase(getSites.pending, (state, action) => {
+            .addCase(getSites.pending, (state) => {
                 state.isLoading = true;
                 state.error = null;
             })
@@ -50,7 +50,7 @@ export const departuresSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
-            .addCase(getDepartures.pending, (state, action) => {
+            .addCase(getDepartures.pending, (state) => {
                 state.isLoading = true;
                 state.error = null;
             })
@@ -66,4 +66,3 @@ export const departuresSlice = createSlice({
             });
     },
 });
-
