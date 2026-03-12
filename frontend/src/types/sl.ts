@@ -111,6 +111,7 @@ type StopPoint = {
     gid: number;
     name?: string;
     sname?: string; // short name
+    designation?: string;
     type:
         | "PLATFORM"
         | "BUSSTOP"

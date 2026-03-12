@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { getSites, getDepartures, getStopPoints } from "./actions";
+import { getSites, getDepartures, getStopPoints, getStopDelays } from "./actions";
 import { DepartureResponse, Site, StopPoint } from "../types/sl";
+import { StopDelaySummary } from "../types/historicalDelay";
 
 type SitesState = {
     data: Site[] | null;
@@ -17,6 +18,12 @@ type DeparturesState = {
 
 type StopPointsState = {
     data: StopPoint[] | null;
+    isLoading: boolean;
+    error: Error | null;
+};
+
+type StopDelaysState = {
+    data: StopDelaySummary[] | null;
     isLoading: boolean;
     error: Error | null;
 };
@@ -92,6 +99,29 @@ export const stopPointsSlice = createSlice({
                 state.isLoading = false;
                 state.error = action.error as Error;
                 console.error("Failed to fetch stop points:", action.error);
+            });
+    },
+});
+
+export const stopDelaysSlice = createSlice({
+    name: "stopDelays",
+    initialState: { data: null, isLoading: false, error: null } as StopDelaysState,
+    reducers: {},
+    extraReducers: (builder) => {
+        builder
+            .addCase(getStopDelays.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(getStopDelays.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.data = action.payload;
+                state.error = null;
+            })
+            .addCase(getStopDelays.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error as Error;
+                console.error("Failed to fetch stop delays:", action.error);
             });
     },
 });

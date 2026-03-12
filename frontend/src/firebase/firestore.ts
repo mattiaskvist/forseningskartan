@@ -27,21 +27,50 @@ function hashToChunk(stopKey: string): number {
     return hash % 256;
 }
 
-export function getStopDelays(stopId: string, date: string): Promise<StopDelaySummary | null> {
-    const chunkId = `chunk_${hashToChunk(stopId)}`;
-    const byStopDocRef = doc(db, date, "byStop", chunkId, "data");
+export function fetchStopDelays(
+    stopPointGIDs: string[],
+    date: string
+): Promise<StopDelaySummary[] | null> {
+    const chunkIds = new Set<string>();
 
-    function isCorrectStopCB(stop: StopDelaySummary) {
-        return stop.key === stopId;
+    // Get unique chunks that we need to download
+    for (const stopId of stopPointGIDs) {
+        const chunkId = `chunk_${hashToChunk(stopId)}`;
+        chunkIds.add(chunkId);
     }
 
-    function handleDocACB(byStopDoc: DocumentSnapshot) {
-        if (!byStopDoc.exists()) {
-            return null;
+    // Create promise for each chunk download
+    function createChunkPromiseCB(chunkId: string) {
+        const byStopDocRef = doc(db, date, "byStop", chunkId, "data");
+        console.log(`Fetching stop delay chunk: ${chunkId}`);
+        return getDoc(byStopDocRef);
+    }
+    const chunkPromises = Array.from(chunkIds).map(createChunkPromiseCB);
+
+    console.log(stopPointGIDs);
+
+    function processDocsACB(docs: DocumentSnapshot[]) {
+        const results: StopDelaySummary[] = [];
+
+        function processDocCB(docSnapshot: DocumentSnapshot) {
+            if (!docSnapshot.exists()) {
+                return;
+            }
+
+            const chunkData = docSnapshot.data() as ByStopChunkDocument;
+
+            function processStopCB(stop: StopDelaySummary) {
+                if (stopPointGIDs.includes(stop.key)) {
+                    results.push(stop);
+                }
+            }
+
+            chunkData.stops.forEach(processStopCB);
         }
 
-        const chunkData = byStopDoc.data() as ByStopChunkDocument;
-        return chunkData.stops.find(isCorrectStopCB) ?? null;
+        docs.forEach(processDocCB);
+
+        return results;
     }
 
     function catchErrorACB(error: unknown) {
@@ -49,5 +78,5 @@ export function getStopDelays(stopId: string, date: string): Promise<StopDelaySu
         return null;
     }
 
-    return getDoc(byStopDocRef).then(handleDocACB).catch(catchErrorACB);
+    return Promise.all(chunkPromises).then(processDocsACB).catch(catchErrorACB);
 }
