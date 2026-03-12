@@ -10,18 +10,23 @@ import (
 )
 
 func runAggregation(config Config) error {
-	absRoot, err := filepath.Abs(config.RootPath)
+	files, err := getInputFiles(config)
+	if err != nil {
+		return fmt.Errorf("failed to get input files: %w", err)
+	}
+	defer files.Cleanup()
+
+	absRoot, err := filepath.Abs(files.RootPath)
 	if err != nil {
 		return fmt.Errorf("could not resolve root path: %w", err)
 	}
 
-	staticIndex, err := loadStaticIndex(config.StaticPath)
+	staticIndex, err := loadStaticIndex(files.StaticPath)
 	if err != nil {
 		return fmt.Errorf("could not load static GTFS files: %w", err)
 	}
 
 	agg := newAggregator(absRoot, staticIndex)
-	firstPBPath := ""
 	err = filepath.WalkDir(absRoot, func(path string, entry fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return fmt.Errorf("could not walk dir %v: %w", path, walkErr)
@@ -33,10 +38,6 @@ func runAggregation(config Config) error {
 
 		if !strings.EqualFold(filepath.Ext(entry.Name()), ".pb") {
 			return nil
-		}
-
-		if firstPBPath == "" {
-			firstPBPath = path
 		}
 
 		// found a pb file, process it
@@ -55,17 +56,7 @@ func runAggregation(config Config) error {
 
 	result := agg.finalize()
 	if config.FirestoreProjectID != "" {
-		if strings.TrimSpace(firstPBPath) == "" {
-			return fmt.Errorf("failed to export firestore data: no protobuf files found under root")
-		}
-
-		sourceDate, err := parseObservedAtFromPath(absRoot, firstPBPath)
-		if err != nil {
-			return fmt.Errorf("failed to export firestore data: could not parse date from path %q: %w", firstPBPath, err)
-		}
-
-		archiveDate := sourceDate.Format("2006-01-02")
-
+		archiveDate := strings.TrimSpace(config.Date)
 		if err := writeByRouteToFirestore(result, config.FirestoreProjectID, archiveDate); err != nil {
 			return fmt.Errorf("failed to export byRoute to firestore: %w", err)
 		}

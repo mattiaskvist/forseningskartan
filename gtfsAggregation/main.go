@@ -5,38 +5,48 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 )
 
 type Config struct {
-	RootPath           string
 	OutputPath         string
-	StaticPath         string
 	FirestoreProjectID string
+	APIKey             string
+	Date               string
+	Operator           string
 }
 
 func parseArgs() (config Config, err error) {
-	rootPathFlag := flag.String("root", "", "Path to the GTFS-Realtime protobuf directory root")
 	outputPathFlag := flag.String("output", "", "Path for the aggregation JSON output")
-	staticPathFlag := flag.String("static", "", "Path to GTFS static directory (containing routes.txt, stops.txt, trips.txt)")
 	firestoreProjectFlag := flag.String("firestore-project", "", "Optional Google Cloud project id for Firestore byRoute export")
+	apiKeyFlag := flag.String("api-key", "", "KoDa API key used to download GTFS data")
+	dateFlag := flag.String("date", "", "Date to download/process in YYYY-MM-DD format")
+	operatorFlag := flag.String("operator", "sl", "Operator for API downloads")
 	flag.Parse()
-
-	config.RootPath = strings.TrimSpace(*rootPathFlag)
-	if config.RootPath == "" {
-		return config, fmt.Errorf("missing required -root argument")
-	}
 
 	config.OutputPath = strings.TrimSpace(*outputPathFlag)
 	if config.OutputPath == "" {
 		return config, fmt.Errorf("missing required -output argument")
 	}
 
-	config.StaticPath = strings.TrimSpace(*staticPathFlag)
-	if config.StaticPath == "" {
-		return config, fmt.Errorf("missing required -static argument")
+	config.FirestoreProjectID = strings.TrimSpace(*firestoreProjectFlag)
+	config.APIKey = strings.TrimSpace(*apiKeyFlag)
+	config.Date = strings.TrimSpace(*dateFlag)
+	config.Operator = strings.TrimSpace(*operatorFlag)
+
+	if config.Operator == "" {
+		config.Operator = "sl"
+	}
+	if config.APIKey == "" {
+		return config, fmt.Errorf("missing required -api-key argument")
+	}
+	if config.Date == "" {
+		return config, fmt.Errorf("missing required -date argument")
+	}
+	if _, err := time.Parse("2006-01-02", config.Date); err != nil {
+		return config, fmt.Errorf("invalid -date %q, expected YYYY-MM-DD: %w", config.Date, err)
 	}
 
-	config.FirestoreProjectID = strings.TrimSpace(*firestoreProjectFlag)
 	return config, nil
 }
 

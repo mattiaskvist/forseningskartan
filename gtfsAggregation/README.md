@@ -1,6 +1,6 @@
 # GTFS historical TripUpdate aggregation
 
-The script currently parses a directory of GTFS-Realtime protobuf files and aggregates `TripUpdate` data.
+The script downloads GTFS realtime and GTFS static archives for a given date, aggregates `TripUpdate` data, and removes temporary downloaded files automatically.
 
 ## Required data
 
@@ -13,7 +13,7 @@ https://api.koda.trafiklab.se/KoDa/api/v2/gtfs-rt/{operator}/{feed}?date={date}&
 https://api.koda.trafiklab.se/KoDa/api/v2/gtfs-rt/sl/TripUpdates?date=2026-03-01&key={api_key}
 ```
 
-Expected directory structure:
+The downloaded GTFS realtime archive is expected to contain this structure:
 
 ```text
 <root>/<year>/<month>/<day>/<hour>/*.pb
@@ -31,16 +31,24 @@ https://api.koda.trafiklab.se/KoDa/api/v2/gtfs-static/sl?date=2026-03-01&key={ap
 
 ## Running the script
 
+Run the script by providing an API key and a date:
+
 ```bash
-go run . -root "path/to/TripUpdates" -output "out.json" -static "path/to/static/dir"
+go run . -output "out.json" -api-key "<koda_api_key>" -date "2026-03-01"
+```
+
+By default, downloads use `operator=sl`. You can override this:
+
+```bash
+go run . -output "out.json" -api-key "<koda_api_key>" -date "2026-03-01" -operator "sl"
 ```
 
 ## Firestore export
 
-Optionally, the data aggregated **by route** and **by stop** can be stored in firebase:
+Optionally, the data aggregated **by route** and **by stop** can be stored in firebase by providing a firestore project id:
 
 ```bash
-go run . -root "path/to/TripUpdates" -output "out.json" -static "path/to/static/dir" -firestore-project "forseningskartan"
+go run . -output "out.json" -api-key "<koda_api_key>" -date "2026-03-01" -firestore-project "forseningskartan"
 ```
 
 Exporting to firestore locally requires the following:
