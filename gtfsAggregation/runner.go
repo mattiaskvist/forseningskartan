@@ -10,6 +10,8 @@ import (
 )
 
 func runAggregation(config Config) error {
+	fmt.Printf("---------- Starting aggregation for date %s ----------\n", config.Date)
+
 	files, err := getInputFiles(config)
 	if err != nil {
 		return fmt.Errorf("failed to get input files: %w", err)
@@ -46,7 +48,7 @@ func runAggregation(config Config) error {
 		}
 
 		if agg.filesParsed%500 == 0 {
-			fmt.Printf("Processed %d files for %s, %s\n", agg.filesParsed, config.Operator, config.Date)
+			fmt.Printf("Processed %d files\n", agg.filesParsed)
 		}
 		return nil
 	})
@@ -81,5 +83,7 @@ func runAggregation(config Config) error {
 	if _, err := os.Stdout.Write(append(output, '\n')); err != nil {
 		return fmt.Errorf("failed to write stdout: %w", err)
 	}
+
+	fmt.Printf("---------- Finished aggregation for date %s ----------\n", config.Date)
 	return nil
 }

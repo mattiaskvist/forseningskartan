@@ -15,6 +15,8 @@ import (
 	"github.com/bodgit/sevenzip"
 )
 
+const operator = "sl"
+
 type Files struct {
 	RootPath   string
 	StaticPath string
@@ -43,7 +45,7 @@ func getInputFiles(config Config) (Files, error) {
 	realtimeArchivePath := filepath.Join(tmpDir, "tripupdates.7z")
 	realtimeExtractDir := filepath.Join(tmpDir, "tripupdates")
 	realtimeURL := fmt.Sprintf("https://api.koda.trafiklab.se/KoDa/api/v2/gtfs-rt/%s/TripUpdates?date=%s&key=%s",
-		url.PathEscape(config.Operator),
+		url.PathEscape(operator),
 		url.QueryEscape(config.Date),
 		url.QueryEscape(config.APIKey),
 	)
@@ -55,13 +57,13 @@ func getInputFiles(config Config) (Files, error) {
 		files.Cleanup()
 		return Files{}, fmt.Errorf("extract gtfs-rt archive: %w", err)
 	}
-	files.RootPath = filepath.Join(realtimeExtractDir, config.Operator, "TripUpdates")
+	files.RootPath = filepath.Join(realtimeExtractDir, operator, "TripUpdates")
 
 	// uses zip
 	staticArchivePath := filepath.Join(tmpDir, "static.zip")
 	staticExtractDir := filepath.Join(tmpDir, "static")
 	staticURL := fmt.Sprintf("https://api.koda.trafiklab.se/KoDa/api/v2/gtfs-static/%s?date=%s&key=%s",
-		url.PathEscape(config.Operator),
+		url.PathEscape(operator),
 		url.QueryEscape(config.Date),
 		url.QueryEscape(config.APIKey),
 	)

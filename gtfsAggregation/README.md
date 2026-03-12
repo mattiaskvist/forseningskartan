@@ -31,27 +31,29 @@ https://api.koda.trafiklab.se/KoDa/api/v2/gtfs-static/sl?date=2026-03-01&key={ap
 
 ## Running the script
 
-Run the script by providing an API key and a date:
+There are three ways of running the script:
+
+1. Aggregate the data for a specified date and save it to `out.json`:
 
 ```bash
 go run . -output "out.json" -api-key "<koda_api_key>" -date "2026-03-01"
 ```
 
-By default, downloads use `operator=sl`. You can override this:
-
-```bash
-go run . -output "out.json" -api-key "<koda_api_key>" -date "2026-03-01" -operator "sl"
-```
-
-## Firestore export
-
-Optionally, the data aggregated **by route** and **by stop** can be stored in firebase by providing a firestore project id:
+2. Aggregate the data for a specified date and save it to `out.json` and to firestore:
 
 ```bash
 go run . -output "out.json" -api-key "<koda_api_key>" -date "2026-03-01" -firestore-project "forseningskartan"
 ```
 
-Exporting to firestore locally requires the following:
+3. Aggregate the data for the last N days (not including todays date) that don't have a top-level Firestore collections like `2026-03-01`. Recent days is 30 by default:
+
+```bash
+go run . -api-key "<koda_api_key>" -firestore-project "forseningskartan" -recent-days 30
+```
+
+## Firestore export
+
+Optionally, the data aggregated **by route** and **by stop** can be stored in firebase by providing a firestore project id. Exporting to firestore locally requires the following:
 
 1. Install the Google Cloud CLI https://docs.cloud.google.com/sdk/docs/install-sdk
 2. Run `gcloud auth application-default login`
