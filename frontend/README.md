@@ -1,11 +1,21 @@
-# Project Repo
+# Frontend
 
-This repo is for you project, you and you project collegues should have access to it. If not write to the Head TA
+## Setup
 
-## Necessary files
+Create a `.env` file in the root `frontend/` directory with the following:
 
-Depending on the course you are taking you can find Minimal Project Setup here: [React](https://canvas.kth.se/courses/59201/pages/minimal-react-web-project-setup?module_item_id=1360840), [Vue](https://canvas.kth.se/courses/59201/pages/minimal-vue-project-setup?module_item_id=1360842) and for [native](https://canvas.kth.se/courses/59201/pages/minimal-react-native-project-setup?module_item_id=1360841)
+```
+VITE_FIREBASE_API_KEY=your-api-key
+VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project-id
+VITE_FIREBASE_STORAGE_BUCKET=your-project.firebasestorage.app
+VITE_FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id
+VITE_FIREBASE_APP_ID=your-app-id
+```
 
-After the setup works, you can delete or edit this README.md file to explain what your project does and how to use it.
+## Running the frontend
 
-Good luck with the Project!
+```bash
+npm install
+npm run dev
+```
