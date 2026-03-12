@@ -22,10 +22,7 @@ export function MapView({ sites, selectedSiteId, handleSelectSiteCB }: MapViewPr
     return (
         <div className="flex flex-col gap-4">
             {sites.length} sites. Select site:
-            <select
-                value={selectedSiteId ?? 0}
-                onChange={onSelectSiteACB}
-            >
+            <select value={selectedSiteId ?? 0} onChange={onSelectSiteACB}>
                 {sites.map(getSiteOptionCB)}
             </select>
         </div>

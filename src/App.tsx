@@ -12,13 +12,18 @@ function App() {
         dispatch(getSites());
     }, [dispatch]);
 
-    return (<>
-        <div className="flex flex-row gap-4">
-            <div className="border"><MapPresenter /></div>
-            <div className="border"><DeparturePresenter /></div>
-        </div>
-    </>
-    )
+    return (
+        <>
+            <div className="flex flex-row gap-4">
+                <div className="border">
+                    <MapPresenter />
+                </div>
+                <div className="border">
+                    <DeparturePresenter />
+                </div>
+            </div>
+        </>
+    );
 }
 
 export default App;
