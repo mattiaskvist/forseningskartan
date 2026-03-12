@@ -14,8 +14,13 @@ export function MapPresenter() {
         return state.sites.selectedSiteId;
     }
 
+    function getStopPointsCB(state: RootState) {
+        return state.stopPoints.data;
+    }
+
     const sites = useAppSelector(getSitesCB);
     const selectedSiteId = useAppSelector(getSelectedSiteIdCB);
+    const stopPoints = useAppSelector(getStopPointsCB);
 
     function handleSelectSiteCB(siteId: number) {
         dispatch(setSelectedSiteId(siteId));
@@ -25,6 +30,7 @@ export function MapPresenter() {
     return sites ? (
         <MapView
             sites={sites}
+            stopPoints={stopPoints ?? []}
             selectedSiteId={selectedSiteId}
             handleSelectSiteCB={handleSelectSiteCB}
         />

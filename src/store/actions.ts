@@ -1,8 +1,10 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { fetchSitesACB, fetchDeparturesACB } from "../api/sl";
+import { fetchSitesACB, fetchDeparturesACB, fetchStopPointsACB } from "../api/sl";
 
 export const getSites = createAsyncThunk("sites/fetch", fetchSitesACB);
 
 export const getDepartures = createAsyncThunk("departures/fetch", (siteId: number) =>
     fetchDeparturesACB(siteId)
 );
+
+export const getStopPoints = createAsyncThunk("stopPoints/fetch", () => fetchStopPointsACB());

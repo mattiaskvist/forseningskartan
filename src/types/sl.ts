@@ -9,6 +9,22 @@ type Site = {
     stop_areas?: number[];
 };
 
+type StopArea = {
+    id: number;
+    name: string;
+    sname?: string; // short name
+    type?:
+        | "BUSTERM"
+        | "METROSTN"
+        | "TRAMSTN"
+        | "RAILWSTN"
+        | "SHIPBER"
+        | "FERRYBER"
+        | "AIRPORT"
+        | "TAXITERM"
+        | "UNKNOWN";
+};
+
 type DepartureDeviation = {
     importance_level: number;
     consequence: string;
@@ -63,21 +79,7 @@ type Departure = {
             | "PASSENGERSLEFTBEHIND"
             | "UNKNOWN";
     };
-    stop_area: {
-        id: number;
-        name: string;
-        sname?: string; // short name
-        type?:
-            | "BUSTERM"
-            | "METROSTN"
-            | "TRAMSTN"
-            | "RAILWSTN"
-            | "SHIPBER"
-            | "FERRYBER"
-            | "AIRPORT"
-            | "TAXITERM"
-            | "UNKNOWN";
-    };
+    stop_area: StopArea;
     stop_point: {
         id: number;
         name?: string;
@@ -104,4 +106,25 @@ type DepartureResponse = {
     stop_deviations: StopDeviation[];
 };
 
-export type { Site, DepartureResponse, Departure };
+type StopPoint = {
+    id: number;
+    gid: number;
+    name?: string;
+    sname?: string; // short name
+    type:
+        | "PLATFORM"
+        | "BUSSTOP"
+        | "ENTRANCE"
+        | "EXIT"
+        | "GATE"
+        | "REFUGE"
+        | "PIER"
+        | "TRACK"
+        | "UNKNOWN";
+    has_entrance: boolean;
+    lat?: number;
+    lon?: number;
+    stop_area: StopArea;
+};
+
+export type { Site, DepartureResponse, Departure, StopPoint };
