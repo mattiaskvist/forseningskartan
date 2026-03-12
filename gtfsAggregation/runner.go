@@ -54,6 +54,26 @@ func runAggregation(config Config) error {
 	}
 
 	result := agg.finalize()
+	if config.FirestoreProjectID != "" {
+		if strings.TrimSpace(firstPBPath) == "" {
+			return fmt.Errorf("failed to export firestore data: no protobuf files found under root")
+		}
+
+		sourceDate, err := parseObservedAtFromPath(absRoot, firstPBPath)
+		if err != nil {
+			return fmt.Errorf("failed to export firestore data: could not parse date from path %q: %w", firstPBPath, err)
+		}
+
+		archiveDate := sourceDate.Format("2006-01-02")
+
+		if err := writeByRouteToFirestore(result, config.FirestoreProjectID, archiveDate); err != nil {
+			return fmt.Errorf("failed to export byRoute to firestore: %w", err)
+		}
+
+		if err := writeByStopToFirestore(result, config.FirestoreProjectID, archiveDate); err != nil {
+			return fmt.Errorf("failed to export byStop to firestore: %w", err)
+		}
+	}
 
 	output, err := json.Marshal(result)
 	if err != nil {
