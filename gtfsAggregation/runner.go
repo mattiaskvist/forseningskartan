@@ -77,11 +77,7 @@ func runAggregation(config Config) error {
 		if err := os.WriteFile(config.OutputPath, append(output, '\n'), 0644); err != nil {
 			return fmt.Errorf("failed to write output: %w", err)
 		}
-		return nil
-	}
-
-	if _, err := os.Stdout.Write(append(output, '\n')); err != nil {
-		return fmt.Errorf("failed to write stdout: %w", err)
+		fmt.Printf("Wrote output to %s\n", config.OutputPath)
 	}
 
 	fmt.Printf("---------- Finished aggregation for date %s ----------\n", config.Date)
