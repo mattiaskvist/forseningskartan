@@ -64,6 +64,6 @@ func findMissingRecentDates(existingDates map[string]struct{}, recentDays int) [
 		}
 	}
 
-	sort.Strings(missingDates)
+	slices.Sort(missingDates)
 	return missingDates
 }
