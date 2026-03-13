@@ -53,7 +53,6 @@ func listFirestoreDateCollections(projectID string) (map[string]struct{}, error)
 }
 
 func findMissingRecentDates(existingDates map[string]struct{}, recentDays int) []string {
-	now := time.Now().UTC()
 	if recentDays <= 0 {
 		return nil
 	}
