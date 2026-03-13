@@ -28,7 +28,11 @@ func runAggregation(config Config) error {
 		return fmt.Errorf("could not load static GTFS files: %w", err)
 	}
 
-	agg := newAggregator(absRoot, staticIndex)
+	agg, err := newAggregator(absRoot, staticIndex)
+	if err != nil {
+		return fmt.Errorf("could not create aggregator: %w", err)
+	}
+
 	err = filepath.WalkDir(absRoot, func(path string, entry fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return fmt.Errorf("could not walk dir %v: %w", path, walkErr)

@@ -34,10 +34,9 @@ type aggregator struct {
 	byStop               map[string]*bucket
 }
 
-func newAggregator(rootPath string, staticIndex *staticIndex) *aggregator {
+func newAggregator(rootPath string, staticIndex *staticIndex) (*aggregator, error) {
 	if staticIndex == nil {
-		fmt.Println("Static index not provided, exiting")
-		os.Exit(1)
+		return nil, fmt.Errorf("static index not provided")
 	}
 
 	return &aggregator{
@@ -50,7 +49,7 @@ func newAggregator(rootPath string, staticIndex *staticIndex) *aggregator {
 		byHour:        make(map[string]*bucket),
 		byRoute:       make(map[string]*bucket),
 		byStop:        make(map[string]*bucket),
-	}
+	}, nil
 }
 
 func (a *aggregator) bucketFor(group map[string]*bucket, key string) *bucket {
