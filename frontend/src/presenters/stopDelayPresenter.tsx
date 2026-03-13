@@ -8,10 +8,12 @@ export function StopDelayPresenter() {
     const stopPoints = useAppSelector(getStopPointsCB) ?? [];
 
     return (
-        <StopDelayView
-            selectedSite={selectedSite}
-            stopDelays={stopDelays}
-            stopPoints={stopPoints}
-        />
+        selectedSite && (
+            <StopDelayView
+                selectedSite={selectedSite}
+                stopDelays={stopDelays}
+                stopPoints={stopPoints}
+            />
+        )
     );
 }

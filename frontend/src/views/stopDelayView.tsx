@@ -2,7 +2,7 @@ import { StopDelaySummary } from "../types/historicalDelay";
 import { Site, StopPoint } from "../types/sl";
 
 type StopDelayViewProps = {
-    selectedSite: Site | null;
+    selectedSite: Site;
     stopDelays: StopDelaySummary[];
     stopPoints: StopPoint[];
 };
@@ -66,7 +66,7 @@ export function StopDelayView({ selectedSite, stopDelays, stopPoints }: StopDela
         );
     }
 
-    return selectedSite ? (
+    return (
         <div className="flex flex-col gap-4 text-blue-600 max-w-[800px]">
             <span>
                 Selected site: {selectedSite.name} gid: {selectedSite.gid} id: {selectedSite.id}
@@ -74,5 +74,5 @@ export function StopDelayView({ selectedSite, stopDelays, stopPoints }: StopDela
             <span>Stop delays for selected site:</span>
             <ul>{stopDelays.map(renderStopDelayCB)}</ul>
         </div>
-    ) : null;
+    );
 }
