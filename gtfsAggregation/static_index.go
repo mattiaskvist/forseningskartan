@@ -170,7 +170,7 @@ func readCSV(path string) ([]map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	file.Close() // nolint: errcheck
+	defer file.Close() // nolint: errcheck
 
 	reader := csv.NewReader(file)
 	reader.FieldsPerRecord = -1

@@ -26,7 +26,7 @@ func writeByRouteToFirestore(result aggregationResult, projectID string, dateFro
 	if err != nil {
 		return fmt.Errorf("create firestore client: %w", err)
 	}
-	client.Close() // nolint: errcheck
+	defer client.Close() // nolint: errcheck
 
 	// Single write: one document with all byRoute rows for the day.
 	// Firestore path: <YYYY-MM-DD>/byRoute
@@ -71,7 +71,7 @@ func writeByStopToFirestore(result aggregationResult, projectID string, dateFrom
 	if err != nil {
 		return fmt.Errorf("create firestore client: %w", err)
 	}
-	client.Close() // nolint: errcheck
+	defer client.Close() // nolint: errcheck
 
 	if len(result.ByStop) == 0 {
 		fmt.Println("No by stop data to export")

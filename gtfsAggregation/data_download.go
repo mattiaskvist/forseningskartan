@@ -85,7 +85,7 @@ func downloadFile(fileURL string, destPath string) error {
 	if err != nil {
 		return fmt.Errorf("request %q failed: %w", fileURL, err)
 	}
-	resp.Body.Close() // nolint: errcheck
+	defer resp.Body.Close() // nolint: errcheck
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return fmt.Errorf("request %q returned %s", fileURL, resp.Status)
@@ -95,7 +95,7 @@ func downloadFile(fileURL string, destPath string) error {
 	if err != nil {
 		return fmt.Errorf("create %q: %w", destPath, err)
 	}
-	out.Close() // nolint: errcheck
+	defer out.Close() // nolint: errcheck
 
 	if _, err := io.Copy(out, resp.Body); err != nil {
 		return fmt.Errorf("write %q: %w", destPath, err)
@@ -160,7 +160,7 @@ func extractEntry(destDir, name string, isDir bool, open func() (io.ReadCloser, 
 	if err != nil {
 		return fmt.Errorf("open archive entry %q: %w", name, err)
 	}
-	src.Close() // nolint: errcheck
+	defer src.Close() // nolint: errcheck
 
 	dst, err := os.Create(targetPath)
 	if err != nil {
@@ -185,7 +185,7 @@ func extractSevenZipArchive(archivePath string, destDir string) error {
 	if err != nil {
 		return fmt.Errorf("open 7z: %w", err)
 	}
-	zr.Close() // nolint: errcheck
+	defer zr.Close() // nolint: errcheck
 
 	for _, file := range zr.File {
 		err := extractEntry(

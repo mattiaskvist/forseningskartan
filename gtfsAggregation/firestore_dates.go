@@ -28,7 +28,7 @@ func listFirestoreDateCollections(projectID string) (map[string]struct{}, error)
 	if err != nil {
 		return nil, fmt.Errorf("create firestore client: %w", err)
 	}
-	client.Close() // nolint: errcheck
+	defer client.Close() // nolint: errcheck
 
 	dateCollections := make(map[string]struct{})
 	iter := client.Collections(ctx)
