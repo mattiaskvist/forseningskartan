@@ -58,7 +58,7 @@ func findMissingRecentDates(existingDates map[string]struct{}, recentDays int) [
 		return nil
 	}
 
-	currentDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	currentDay := time.Now().UTC().Truncate(24 * time.Hour)
 	missingDates := make([]string, 0, recentDays)
 	for dayOffset := recentDays; dayOffset > 0; dayOffset-- {
 		date := currentDay.AddDate(0, 0, -dayOffset).Format(firestoreDateLayout)
