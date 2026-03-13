@@ -1,6 +1,6 @@
-import { Site, DepartureResponse } from "../types/sl";
+import { Site, DepartureResponse, StopPoint } from "../types/sl";
 
-const BASE_URL = "https://transport.integration.sl.se/v1";
+const BASE_URL = "/sl";
 
 function handleResponseACB(response: Response) {
     if (!response.ok) {
@@ -36,5 +36,26 @@ export function fetchSitesACB(): Promise<Site[]> {
 export function fetchDeparturesACB(siteId: number): Promise<DepartureResponse> {
     return fetch(`${BASE_URL}/sites/${siteId}/departures`)
         .then(handleResponseACB)
+        .catch(throwErrorACB);
+}
+
+function isStopPointCB(stopPoint: unknown): stopPoint is StopPoint {
+    if (typeof stopPoint !== "object" || stopPoint === null) {
+        return false;
+    }
+
+    const candidate = stopPoint as Partial<StopPoint>;
+    return typeof candidate.stop_area === "object" && candidate.stop_area !== null;
+}
+
+function filterStopPointsACB(stopPoints: unknown[]): StopPoint[] {
+    return stopPoints.filter(isStopPointCB);
+}
+
+// this endpoint requires a cors proxy :(
+export function fetchStopPointsACB(): Promise<StopPoint[]> {
+    return fetch(`${BASE_URL}/stop-points`)
+        .then(handleResponseACB)
+        .then(filterStopPointsACB)
         .catch(throwErrorACB);
 }

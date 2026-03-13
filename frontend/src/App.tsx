@@ -1,8 +1,9 @@
 import { useEffect } from "react";
 import { MapPresenter } from "./presenters/mapPresenter";
-import { getSites } from "./store/actions";
+import { getSites, getStopPoints } from "./store/actions";
 import { useAppDispatch } from "./store/store";
 import { DeparturePresenter } from "./presenters/departurePresenter";
+import { StopDelayPresenter } from "./presenters/stopDelayPresenter";
 
 function App() {
     const dispatch = useAppDispatch();
@@ -10,6 +11,11 @@ function App() {
     // Fetch sites on app load
     useEffect(() => {
         dispatch(getSites());
+    }, [dispatch]);
+
+    // Fetch stop points on app load
+    useEffect(() => {
+        dispatch(getStopPoints());
     }, [dispatch]);
 
     return (
@@ -20,6 +26,9 @@ function App() {
                 </div>
                 <div className="border">
                     <DeparturePresenter />
+                </div>
+                <div className="border">
+                    <StopDelayPresenter />
                 </div>
             </div>
         </>

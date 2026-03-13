@@ -1,11 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { sitesSlice, departuresSlice } from "./reducers";
+import { sitesSlice, departuresSlice, stopPointsSlice, stopDelaysSlice } from "./reducers";
 import { useDispatch, useSelector } from "react-redux";
 
 export const store = configureStore({
     reducer: {
         sites: sitesSlice.reducer,
         departures: departuresSlice.reducer,
+        stopPoints: stopPointsSlice.reducer,
+        stopDelays: stopDelaysSlice.reducer,
     },
 });
 

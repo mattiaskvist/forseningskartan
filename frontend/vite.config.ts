@@ -11,6 +11,13 @@ export default defineConfig({
     },
     server: {
         port: 8080,
+        proxy: {
+            "/sl": {
+                target: "https://transport.integration.sl.se/v1",
+                changeOrigin: true,
+                rewrite: (path) => path.replace(/^\/sl/, ""),
+            },
+        },
     },
     build: {
         sourcemap: true,

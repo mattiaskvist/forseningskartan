@@ -1,0 +1,41 @@
+name: Frontend
+
+on:
+  push:
+    paths:
+      - "frontend/**"
+  pull_request:
+    paths:
+      - "frontend/**"
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Quality Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: cd frontend && npm ci
+
+      - name: Lint
+        run: cd frontend && npm run lint
+
+      - name: Format check
+        run: cd frontend && npm run format:check
+
+      - name: Run tests
+        run: cd frontend && npm run test:run

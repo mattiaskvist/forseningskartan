@@ -1,11 +1,11 @@
-# Project Repo
+# Förseningskartan
 
-This repo is for you project, you and you project collegues should have access to it. If not write to the Head TA
+TODO
 
-## Necessary files
+## SL API concepts
 
-Depending on the course you are taking you can find Minimal Project Setup here: [React](https://canvas.kth.se/courses/59201/pages/minimal-react-web-project-setup?module_item_id=1360840), [Vue](https://canvas.kth.se/courses/59201/pages/minimal-vue-project-setup?module_item_id=1360842) and for [native](https://canvas.kth.se/courses/59201/pages/minimal-react-native-project-setup?module_item_id=1360841)
+**Site**: A Site is a grouping of StopAreas, e.g. Odenplan which has three stop areas (1131 metro station, 10151 bus station, 5320 railway station).
 
-After the setup works, you can delete or edit this README.md file to explain what your project does and how to use it.
+**Stop Area**: A Stop Area is a grouping of Stop Points with the same traffic type and name, e.g. the Odenplan railway station 5320 which has the name "Stockholm Odenplan". GTFS codes starting with 9021 are stop areas.
 
-Good luck with the Project!
+**Stop Points**: A Stop Point is a stopping point. A stop area for buses may for example contain one stop point on each side of the road, e.g. the Odenplan bus station stop area 10151 has 12 stop points. GTFS codes starting with 9022 are stop points.

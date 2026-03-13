@@ -2,11 +2,11 @@ import { Site } from "../types/sl";
 
 type MapViewProps = {
     sites: Site[];
-    selectedSiteId: number | null;
+    selectedSite: Site | null;
     handleSelectSiteCB: (siteId: number) => void;
 };
 
-export function MapView({ sites, selectedSiteId, handleSelectSiteCB }: MapViewProps) {
+export function MapView({ sites, selectedSite, handleSelectSiteCB }: MapViewProps) {
     function onSelectSiteACB(evt: React.ChangeEvent<HTMLSelectElement>) {
         handleSelectSiteCB(Number(evt.target.value));
     }
@@ -22,7 +22,7 @@ export function MapView({ sites, selectedSiteId, handleSelectSiteCB }: MapViewPr
     return (
         <div className="flex flex-col gap-4">
             {sites.length} sites. Select site:
-            <select value={selectedSiteId ?? 0} onChange={onSelectSiteACB}>
+            <select value={selectedSite?.id ?? 0} onChange={onSelectSiteACB}>
                 {sites.map(getSiteOptionCB)}
             </select>
         </div>
