@@ -40,7 +40,7 @@ export function fetchStopDelays(
     }
 
     // Create promise for each chunk download
-    function createChunkPromiseCB(chunkId: string) {
+    function createChunkPromiseCB(chunkId: string): Promise<DocumentSnapshot> {
         const byStopDocRef = doc(db, date, "byStop", chunkId, "data");
         console.log(`Fetching stop delay chunk: ${chunkId}`);
         return getDoc(byStopDocRef);
@@ -49,7 +49,7 @@ export function fetchStopDelays(
 
     console.log(stopPointGIDs);
 
-    function processDocsACB(docs: DocumentSnapshot[]) {
+    function processDocsACB(docs: DocumentSnapshot[]): StopDelaySummary[] {
         const results: StopDelaySummary[] = [];
 
         function processDocCB(docSnapshot: DocumentSnapshot) {
