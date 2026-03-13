@@ -62,10 +62,9 @@ func findMissingRecentDates(existingDates map[string]struct{}, recentDays int) [
 	missingDates := make([]string, 0, recentDays)
 	for dayOffset := recentDays; dayOffset > 0; dayOffset-- {
 		date := currentDay.AddDate(0, 0, -dayOffset).Format(firestoreDateLayout)
-		if _, exists := existingDates[date]; exists {
-			continue
+		if _, exists := existingDates[date]; !exists {
+			missingDates = append(missingDates, date)
 		}
-		missingDates = append(missingDates, date)
 	}
 
 	sort.Strings(missingDates)
