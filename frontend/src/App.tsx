@@ -20,7 +20,7 @@ function App() {
 
     return (
         <>
-            <div className="flex flex-row gap-4">
+            <div className="flex flex-row gap-4 ml-2 mt-2">
                 <div className="border">
                     <MapPresenter />
                 </div>

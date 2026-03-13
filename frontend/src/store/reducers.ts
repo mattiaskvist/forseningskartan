@@ -32,7 +32,7 @@ export const sitesSlice = createSlice({
     name: "sites",
     initialState: { data: null, selectedSiteId: null, isLoading: false, error: null } as SitesState,
     reducers: {
-        setSelectedSiteId: (state: SitesState, action: { payload: number }) => {
+        setSelectedSiteId: (state: SitesState, action: { payload: number | null }) => {
             state.selectedSiteId = action.payload;
         },
     },

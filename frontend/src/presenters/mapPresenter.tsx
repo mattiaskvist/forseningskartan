@@ -1,6 +1,4 @@
 import { MapView } from "../views/mapView";
-import { getDepartures, getStopDelays } from "../store/actions";
-import { setSelectedSiteId } from "../store/reducers";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import { getSitesCB, getSelectedSiteCB, getStopPointsCB } from "../store/selectors";
 import { selectSiteCB } from "../store/selection";
