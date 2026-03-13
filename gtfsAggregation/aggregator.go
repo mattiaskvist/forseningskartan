@@ -318,10 +318,7 @@ const (
 )
 
 func summarizeBuckets(source map[string]*bucket, kind bucketKind, staticIndex *staticIndex) []summary {
-	keys := make([]string, 0, len(source))
-	for key := range source {
-		keys = append(keys, key)
-	}
+	keys := slices.Collect(maps.Keys(source))
 	sort.Strings(keys)
 
 	result := make([]summary, 0, len(keys))
