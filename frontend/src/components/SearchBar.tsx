@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import Autocomplete, {
     AutocompleteRenderInputParams,
     createFilterOptions,
@@ -19,13 +18,6 @@ type SearchBarProps = {
 };
 
 export function SearchBar({ sites, selectedSite, handleSelectSiteCB }: SearchBarProps) {
-    const [inputValue, setInputValue] = useState(""); // site name in input field
-
-    function setInputValueStateCB() {
-        setInputValue(selectedSite?.name ?? "");
-    }
-    useEffect(setInputValueStateCB, [selectedSite]);
-
     function getSiteNameCB(site: Site): string {
         return site.name;
     }
@@ -34,14 +26,9 @@ export function SearchBar({ sites, selectedSite, handleSelectSiteCB }: SearchBar
         return option.id === value.id;
     }
 
-    function handleChangeCB(_: React.ChangeEvent<{}>, site: Site | null) {
+    function handleChangeCB(_: unknown, site: Site | null) {
         // when user selects option
         handleSelectSiteCB(site?.id ?? null);
-        setInputValue(site?.name ?? "");
-    }
-    function handleInputChangeCB(_: React.ChangeEvent<{}>, newInputValue: string) {
-        // when user types in input
-        setInputValue(newInputValue);
     }
 
     function getRenderInputCB(params: AutocompleteRenderInputParams): React.ReactNode {
@@ -64,11 +51,9 @@ export function SearchBar({ sites, selectedSite, handleSelectSiteCB }: SearchBar
         <Autocomplete
             filterOptions={filterOptions}
             getOptionLabel={getSiteNameCB}
-            inputValue={inputValue}
             isOptionEqualToValue={isOptionEqualToValueCB}
-            noOptionsText={inputValue ? "No stops found" : "Start typing to search stops"}
+            noOptionsText="No stops found"
             onChange={handleChangeCB}
-            onInputChange={handleInputChangeCB}
             openOnFocus
             options={sites}
             renderInput={getRenderInputCB}
