@@ -224,6 +224,10 @@ func extractZipArchive(data []byte, destDir string) error {
 	return nil
 }
 
+// safeJoin safely joins an archive entry path with baseDir.
+// archiveName is expected to be a relative archive path
+// (as commonly stored in tar/zip files) using "/" separators. "\" separators are normalized.
+// Absolute paths and paths that escape baseDir (e.g. via "..") are rejected to prevent path traversal during extraction.
 func safeJoin(baseDir string, archiveName string) (string, error) {
 	cleanName := path.Clean(strings.ReplaceAll(archiveName, "\\", "/"))
 	if cleanName == "." || cleanName == "/" {
