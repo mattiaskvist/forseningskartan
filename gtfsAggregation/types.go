@@ -1,62 +1,62 @@
 package main
 
 type delayStats struct {
-	Count      int64   `json:"count"`
-	MaxSeconds int64   `json:"maxSeconds"`
-	AvgSeconds float64 `json:"avgSeconds"`
+	Count      int64   `firestore:"count" json:"count"`
+	MaxSeconds int64   `firestore:"maxSeconds" json:"maxSeconds"`
+	AvgSeconds float64 `firestore:"avgSeconds" json:"avgSeconds"`
 }
 
 type summary struct {
-	Key             string     `json:"key"`
-	Route           *routeMeta `json:"route,omitempty"`
-	Stop            *stopMeta  `json:"stop,omitempty"`
-	ByRoute         []summary  `json:"byRoute,omitempty"`
-	TripUpdates     int64      `json:"tripUpdates"`
-	StopTimeUpdates int64      `json:"stopTimeUpdates"`
-	UniqueRoutes    int        `json:"uniqueRoutes"`
-	UniqueTrips     int        `json:"uniqueTrips"`
-	UniqueVehicles  int        `json:"uniqueVehicles"`
-	ArrivalDelay    delayStats `json:"arrivalDelayStats"`
-	DepartureDelay  delayStats `json:"departureDelayStats"`
-	ArrivalAhead    delayStats `json:"arrivalAheadStats"`
-	DepartureAhead  delayStats `json:"departureAheadStats"`
-	ArrivalOnTime   int64      `json:"arrivalOnTimeCount"`
-	DepartureOnTime int64      `json:"departureOnTimeCount"`
+	Key             string     `firestore:"key" json:"key"`
+	Route           *routeMeta `firestore:"route" json:"route,omitempty"`
+	Stop            *stopMeta  `firestore:"stop" json:"stop,omitempty"`
+	ByRoute         []summary  `firestore:"byRoute" json:"byRoute,omitempty"`
+	TripUpdates     int64      `firestore:"tripUpdates" json:"tripUpdates"`
+	StopTimeUpdates int64      `firestore:"stopTimeUpdates" json:"stopTimeUpdates"`
+	UniqueRoutes    int        `firestore:"uniqueRoutes" json:"uniqueRoutes"`
+	UniqueTrips     int        `firestore:"uniqueTrips" json:"uniqueTrips"`
+	UniqueVehicles  int        `firestore:"uniqueVehicles" json:"uniqueVehicles"`
+	ArrivalDelay    delayStats `firestore:"arrivalDelayStats" json:"arrivalDelayStats"`
+	DepartureDelay  delayStats `firestore:"departureDelayStats" json:"departureDelayStats"`
+	ArrivalAhead    delayStats `firestore:"arrivalAheadStats" json:"arrivalAheadStats"`
+	DepartureAhead  delayStats `firestore:"departureAheadStats" json:"departureAheadStats"`
+	ArrivalOnTime   int64      `firestore:"arrivalOnTimeCount" json:"arrivalOnTimeCount"`
+	DepartureOnTime int64      `firestore:"departureOnTimeCount" json:"departureOnTimeCount"`
 }
 
 type routeMeta struct {
-	AgencyID  string `json:"agencyId"`
-	ShortName string `json:"shortName"`
-	LongName  string `json:"longName"`
-	Type      string `json:"type"`
-	Desc      string `json:"desc"`
+	AgencyID  string `firestore:"agencyId" json:"agencyId"`
+	ShortName string `firestore:"shortName" json:"shortName"`
+	LongName  string `firestore:"longName" json:"longName"`
+	Type      string `firestore:"type" json:"type"`
+	Desc      string `firestore:"desc" json:"desc"`
 }
 
 type stopMeta struct {
-	Name         string `json:"name"`
-	Lat          string `json:"lat"`
-	Lon          string `json:"lon"`
-	LocationType string `json:"locationType"`
+	Name         string `firestore:"name" json:"name"`
+	Lat          string `firestore:"lat" json:"lat"`
+	Lon          string `firestore:"lon" json:"lon"`
+	LocationType string `firestore:"locationType" json:"locationType"`
 }
 
 type aggregationResult struct {
-	FilesDiscovered     int64      `json:"filesDiscovered"`
-	FilesParsed         int64      `json:"filesParsed"`
-	FeedsWithTripUpdate int64      `json:"feedsWithTripUpdate"`
-	TripUpdates         int64      `json:"tripUpdates"`
-	StopTimeUpdates     int64      `json:"stopTimeUpdates"`
-	UniqueRoutes        int        `json:"uniqueRoutes"`
-	UniqueTrips         int        `json:"uniqueTrips"`
-	UniqueVehicles      int        `json:"uniqueVehicles"`
-	ArrivalDelay        delayStats `json:"arrivalDelayStats"`
-	DepartureDelay      delayStats `json:"departureDelayStats"`
-	ArrivalAhead        delayStats `json:"arrivalAheadStats"`
-	DepartureAhead      delayStats `json:"departureAheadStats"`
-	ArrivalOnTime       int64      `json:"arrivalOnTimeCount"`
-	DepartureOnTime     int64      `json:"departureOnTimeCount"`
-	ByHour              []summary  `json:"byHour"`
-	ByRoute             []summary  `json:"byRoute"`
-	ByStop              []summary  `json:"byStop"`
+	FilesDiscovered     int64      `firestore:"filesDiscovered" json:"filesDiscovered"`
+	FilesParsed         int64      `firestore:"filesParsed" json:"filesParsed"`
+	FeedsWithTripUpdate int64      `firestore:"feedsWithTripUpdate" json:"feedsWithTripUpdate"`
+	TripUpdates         int64      `firestore:"tripUpdates" json:"tripUpdates"`
+	StopTimeUpdates     int64      `firestore:"stopTimeUpdates" json:"stopTimeUpdates"`
+	UniqueRoutes        int        `firestore:"uniqueRoutes" json:"uniqueRoutes"`
+	UniqueTrips         int        `firestore:"uniqueTrips" json:"uniqueTrips"`
+	UniqueVehicles      int        `firestore:"uniqueVehicles" json:"uniqueVehicles"`
+	ArrivalDelay        delayStats `firestore:"arrivalDelayStats" json:"arrivalDelayStats"`
+	DepartureDelay      delayStats `firestore:"departureDelayStats" json:"departureDelayStats"`
+	ArrivalAhead        delayStats `firestore:"arrivalAheadStats" json:"arrivalAheadStats"`
+	DepartureAhead      delayStats `firestore:"departureAheadStats" json:"departureAheadStats"`
+	ArrivalOnTime       int64      `firestore:"arrivalOnTimeCount" json:"arrivalOnTimeCount"`
+	DepartureOnTime     int64      `firestore:"departureOnTimeCount" json:"departureOnTimeCount"`
+	ByHour              []summary  `firestore:"byHour" json:"byHour"`
+	ByRoute             []summary  `firestore:"byRoute" json:"byRoute"`
+	ByStop              []summary  `firestore:"byStop" json:"byStop"`
 }
 
 type statsAccumulator struct {
