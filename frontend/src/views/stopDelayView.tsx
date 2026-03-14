@@ -1,13 +1,43 @@
+import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { StopDelaySummary } from "../types/historicalDelay";
 import { Site, StopPoint } from "../types/sl";
+import dayjs, { Dayjs } from "dayjs";
+import minMax from "dayjs/plugin/minMax";
+dayjs.extend(minMax);
 
 type StopDelayViewProps = {
     selectedSite: Site;
     stopDelays: StopDelaySummary[];
     stopPoints: StopPoint[];
+    availableDates: string[];
+    handleSelectDateCB: (date: string) => void;
 };
 
-export function StopDelayView({ selectedSite, stopDelays, stopPoints }: StopDelayViewProps) {
+export function StopDelayView({
+    selectedSite,
+    stopDelays,
+    stopPoints,
+    availableDates,
+    handleSelectDateCB,
+}: StopDelayViewProps) {
+    function getDayjsDate(date: string): Dayjs {
+        return dayjs(date);
+    }
+    const dayjsDates = availableDates.map(getDayjsDate);
+    const minDate = dayjs.min(dayjsDates) ?? undefined;
+    const maxDate = dayjs.max(dayjsDates) ?? undefined;
+
+    function shouldDisableDateCB(date: Dayjs): boolean {
+        return !availableDates.includes(date.format("YYYY-MM-DD"));
+    }
+
+    function handleDateChangeCB(selectedDate: Dayjs | null) {
+        if (selectedDate) {
+            handleSelectDateCB(selectedDate.format("YYYY-MM-DD"));
+        }
+    }
+
     function renderRouteDelayCB(br: StopDelaySummary) {
         // NOTE: totalDepartures and totalArrivals are sometimes not the same
         // This happens when a station is a start/end station for a route, and thus has only departures or arrivals
@@ -71,6 +101,17 @@ export function StopDelayView({ selectedSite, stopDelays, stopPoints }: StopDela
             <span>
                 Selected site: {selectedSite.name} gid: {selectedSite.gid} id: {selectedSite.id}
             </span>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker
+                    disabled={availableDates.length === 0}
+                    format="YYYY-MM-DD"
+                    label="Select delay date"
+                    minDate={minDate}
+                    maxDate={maxDate}
+                    onChange={handleDateChangeCB}
+                    shouldDisableDate={shouldDisableDateCB}
+                />
+            </LocalizationProvider>
             <span>Stop delays for selected site:</span>
             <ul>{stopDelays.map(renderStopDelayCB)}</ul>
         </div>

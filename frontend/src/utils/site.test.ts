@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getStopPointGidsForSite } from "./selection";
+import { getStopPointGidsForSite } from "./site";
 import { Site, StopPoint } from "../types/sl";
 
 describe("getStopPointGidsForSite", () => {
