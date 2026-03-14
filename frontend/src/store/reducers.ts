@@ -1,5 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { getSites, getDepartures, getStopPoints, getStopDelays } from "./actions";
+import {
+    getSites,
+    getDepartures,
+    getStopPoints,
+    getStopDelays,
+    getAggregatedDates,
+} from "./actions";
 import { DepartureResponse, Site, StopPoint } from "../types/sl";
 import { StopDelaySummary } from "../types/historicalDelay";
 
@@ -24,6 +30,12 @@ type StopPointsState = {
 
 type StopDelaysState = {
     data: StopDelaySummary[] | null;
+    isLoading: boolean;
+    error: Error | null;
+};
+
+type AggregatedDatesState = {
+    data: string[];
     isLoading: boolean;
     error: Error | null;
 };
@@ -122,6 +134,33 @@ export const stopDelaysSlice = createSlice({
                 state.isLoading = false;
                 state.error = action.error as Error;
                 console.error("Failed to fetch stop delays:", action.error);
+            });
+    },
+});
+
+export const aggregatedDatesSlice = createSlice({
+    name: "aggregatedDates",
+    initialState: {
+        data: [],
+        isLoading: false,
+        error: null,
+    } as AggregatedDatesState,
+    reducers: {},
+    extraReducers: (builder) => {
+        builder
+            .addCase(getAggregatedDates.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(getAggregatedDates.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.data = action.payload;
+                state.error = null;
+            })
+            .addCase(getAggregatedDates.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error as Error;
+                console.error("Failed to fetch aggregated dates:", action.error);
             });
     },
 });

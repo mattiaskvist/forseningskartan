@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { MapPresenter } from "./presenters/mapPresenter";
-import { getSites, getStopPoints } from "./store/actions";
+import { getAggregatedDates, getSites, getStopPoints } from "./store/actions";
 import { useAppDispatch } from "./store/store";
 import { DeparturePresenter } from "./presenters/departurePresenter";
 import { StopDelayPresenter } from "./presenters/stopDelayPresenter";
@@ -16,6 +16,11 @@ function App() {
     // Fetch stop points on app load
     useEffect(() => {
         dispatch(getStopPoints());
+    }, [dispatch]);
+
+    // Fetch aggregated dates on app load
+    useEffect(() => {
+        dispatch(getAggregatedDates());
     }, [dispatch]);
 
     return (

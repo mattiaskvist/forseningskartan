@@ -80,3 +80,22 @@ export function fetchStopDelays(
 
     return Promise.all(chunkPromises).then(processDocsACB).catch(catchErrorACB);
 }
+
+// get dates for which aggregated data is available in firestore
+export function fetchAggregatedDates(): Promise<string[]> {
+    const dateIndexDocRef = doc(db, "index", "dates");
+
+    function processDocACB(docSnapshot: DocumentSnapshot): string[] {
+        if (!docSnapshot.exists()) {
+            return [];
+        }
+        return docSnapshot.data().dates as string[];
+    }
+
+    function catchErrorACB(error: unknown) {
+        console.error(error);
+        return [];
+    }
+
+    return getDoc(dateIndexDocRef).then(processDocACB).catch(catchErrorACB);
+}

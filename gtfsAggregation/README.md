@@ -137,6 +137,10 @@ Each `data` document contains:
 - A string `date` like "2026-03-01".
 - An integer `stopCount`.
 
+### Date index
+
+An additional index file is stored in index/dates with a `dates` field containing a list of all dates for which an aggregated data collection exists. The dates are strings like "2026-03-01".
+
 ## Realized events
 
 - Delay/ahead stats are counted only for realized stop events, where `event.time <= observedAt` for the feed file.

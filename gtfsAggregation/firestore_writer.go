@@ -5,7 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"hash/fnv"
-	"strings"
+	"maps"
+	"slices"
 
 	"cloud.google.com/go/firestore"
 )
@@ -16,11 +17,6 @@ import (
 const firestoreByStopChunkCount = 256
 
 func writeByRouteToFirestore(result aggregationResult, projectID string, dateFromPath string) error {
-	projectID = strings.TrimSpace(projectID)
-	if projectID == "" {
-		return nil
-	}
-
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
@@ -61,11 +57,6 @@ type fileSizeStats struct {
 }
 
 func writeByStopToFirestore(result aggregationResult, projectID string, dateFromPath string) error {
-	projectID = strings.TrimSpace(projectID)
-	if projectID == "" {
-		return nil
-	}
-
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
@@ -135,4 +126,34 @@ func hashToChunk(stopKey string) int {
 	h := fnv.New32a()
 	_, _ = h.Write([]byte(stopKey))
 	return int(h.Sum32() % uint32(firestoreByStopChunkCount))
+}
+
+// reads current date collections from firestore, merges in newDate,
+// and stores the sorted list to index/dates document.
+func writeDateIndex(projectID string, newDate string) error {
+	existingDates, err := listFirestoreDateCollections(projectID)
+	if err != nil {
+		return fmt.Errorf("list firestore date collections: %w", err)
+	}
+
+	existingDates[newDate] = struct{}{}
+
+	dates := slices.Collect(maps.Keys(existingDates))
+	slices.Sort(dates)
+
+	ctx := context.Background()
+	client, err := firestore.NewClient(ctx, projectID)
+	if err != nil {
+		return fmt.Errorf("create firestore client: %w", err)
+	}
+	defer client.Close() // nolint: errcheck
+
+	docRef := client.Collection("index").Doc("dates")
+	_, err = docRef.Set(ctx, map[string][]string{"dates": dates})
+	if err != nil {
+		return fmt.Errorf("write index/dates document: %w", err)
+	}
+
+	fmt.Printf("Updated index/dates with %d date(s)\n", len(dates))
+	return nil
 }
