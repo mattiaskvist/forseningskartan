@@ -1,6 +1,6 @@
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { StopDelaySummary } from "../types/historicalDelay";
+import { routeToString, StopDelaySummary } from "../types/historicalDelay";
 import { Site, StopPoint } from "../types/sl";
 import dayjs, { Dayjs } from "dayjs";
 import minMax from "dayjs/plugin/minMax";
@@ -45,10 +45,11 @@ export function StopDelayView({
             br.departureDelayStats.count + br.departureAheadStats.count + br.departureOnTimeCount;
         const totalArrivals =
             br.arrivalDelayStats.count + br.arrivalAheadStats.count + br.arrivalOnTimeCount;
+        const routeTypeString = br.route?.type ? routeToString[br.route.type] : "Route";
         return (
             <div key={br.key} className="mb-1">
                 <dt className="font-semibold">
-                    Route {br.route?.desc} {br.route?.shortName} {br.route?.longName}
+                    {routeTypeString} {br.route?.shortName} {br.route?.longName}
                 </dt>
                 <dd>
                     Total departures: {totalDepartures}x, Total arrivals: {totalArrivals}x

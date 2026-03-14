@@ -4,11 +4,21 @@ type DelayStats = {
     avgSeconds: number;
 };
 
+// https://www.trafiklab.se/sv/api/gtfs-datasets/overview/extensions/
+type routeType = "100" | "401" | "700" | "900" | "1000";
+export const routeToString: { [K in routeType]: string } = {
+    "100": "Commuter Train",
+    "401": "Metro",
+    "700": "Bus",
+    "900": "Tram",
+    "1000": "Ferry",
+};
+
 type RouteMeta = {
     agencyId: string;
     shortName: string;
     longName: string;
-    type: string;
+    type: routeType;
     desc: string;
 };
 
