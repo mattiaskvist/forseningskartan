@@ -89,26 +89,39 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
         if (!markersLayer) {
             return;
         }
+        const currentMarkersLayer = markersLayer;
 
         markersLayer.clearLayers();
-        markersBySiteIdRef.current.clear();
+        const markersBySiteId = markersBySiteIdRef.current;
+        markersBySiteId.clear();
         selectedMarkerRef.current = null;
 
         const selectedSiteId = selectedSiteIdRef.current;
 
-        for (const site of sites) {
-            const marker = L.circleMarker([site.lat, site.lon], UNSELECTED_MARKER_STYLE);
+        type siteMarkerEntry = {
+            siteId: number;
+            marker: L.CircleMarker;
+        };
 
+        function createSiteMarkerEntryCB(site: Site): siteMarkerEntry {
+            const marker = L.circleMarker([site.lat, site.lon], UNSELECTED_MARKER_STYLE);
             marker.bindTooltip(site.name);
             marker.on("click", () => {
                 handleSelectSiteCB(site.id);
             });
-            marker.addTo(markersLayer);
-            markersBySiteIdRef.current.set(site.id, marker);
+            return { siteId: site.id, marker };
         }
 
+        function addSiteMarkerEntryCB(entry: siteMarkerEntry) {
+            const { siteId, marker } = entry;
+            marker.addTo(currentMarkersLayer);
+            markersBySiteId.set(siteId, marker);
+        }
+
+        sites.map(createSiteMarkerEntryCB).forEach(addSiteMarkerEntryCB);
+
         if (selectedSiteId !== null) {
-            const selectedMarker = markersBySiteIdRef.current.get(selectedSiteId) ?? null;
+            const selectedMarker = markersBySiteId.get(selectedSiteId) ?? null;
             if (selectedMarker) {
                 setMarkerSelectedStyleCB(selectedMarker, true);
                 selectedMarkerRef.current = selectedMarker;
