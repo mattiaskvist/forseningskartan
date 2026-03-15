@@ -18,6 +18,12 @@ describe("sitesSlice", () => {
 
         expect(state.selectedSiteId).toBe(42);
     });
+
+    it("clears selected site id", () => {
+        const state = sitesSlice.reducer(undefined, setSelectedSiteId(null));
+
+        expect(state.selectedSiteId).toBeNull();
+    });
 });
 
 describe("departuresSlice", () => {
