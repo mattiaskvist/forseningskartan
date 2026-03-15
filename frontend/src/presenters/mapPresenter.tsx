@@ -1,6 +1,6 @@
 import { MapView } from "../views/mapView";
 import { useAppDispatch, useAppSelector } from "../store/store";
-import { getSitesCB, getSelectedSiteCB, getStopPointsCB } from "../store/selectors";
+import { getSitesCB, getSelectedSiteCB } from "../store/selectors";
 import { selectSiteCB } from "../store/selection";
 
 export function MapPresenter() {
@@ -8,10 +8,9 @@ export function MapPresenter() {
 
     const sites = useAppSelector(getSitesCB);
     const selectedSite = useAppSelector(getSelectedSiteCB);
-    const stopPoints = useAppSelector(getStopPointsCB) ?? [];
 
     function handleSelectSiteCB(siteId: number | null) {
-        selectSiteCB({ dispatch, sites, stopPoints, siteId });
+        selectSiteCB({ dispatch, siteId });
     }
 
     return sites ? (

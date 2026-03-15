@@ -61,14 +61,19 @@ func runAggregation(config Config) error {
 	}
 
 	result := agg.finalize()
-	if config.FirestoreProjectID != "" {
+	projectID := strings.TrimSpace(config.FirestoreProjectID)
+	if projectID != "" {
 		archiveDate := strings.TrimSpace(config.Date)
-		if err := writeByRouteToFirestore(result, config.FirestoreProjectID, archiveDate); err != nil {
+		if err := writeByRouteToFirestore(result, projectID, archiveDate); err != nil {
 			return fmt.Errorf("failed to export byRoute to firestore: %w", err)
 		}
 
-		if err := writeByStopToFirestore(result, config.FirestoreProjectID, archiveDate); err != nil {
+		if err := writeByStopToFirestore(result, projectID, archiveDate); err != nil {
 			return fmt.Errorf("failed to export byStop to firestore: %w", err)
+		}
+
+		if err := writeDateIndex(projectID, archiveDate); err != nil {
+			return fmt.Errorf("failed to update date index in firestore: %w", err)
 		}
 	}
 

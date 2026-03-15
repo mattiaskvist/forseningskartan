@@ -1,5 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { sitesSlice, departuresSlice, stopPointsSlice, stopDelaysSlice } from "./reducers";
+import {
+    sitesSlice,
+    departuresSlice,
+    stopPointsSlice,
+    stopDelaysSlice,
+    aggregatedDatesSlice,
+} from "./reducers";
 import { useDispatch, useSelector } from "react-redux";
 
 export const store = configureStore({
@@ -8,6 +14,7 @@ export const store = configureStore({
         departures: departuresSlice.reducer,
         stopPoints: stopPointsSlice.reducer,
         stopDelays: stopDelaysSlice.reducer,
+        aggregatedDates: aggregatedDatesSlice.reducer,
     },
 });
 
