@@ -12,6 +12,7 @@ type StopMapProps = {
 const STOCKHOLM_CENTER: [number, number] = [59.3293, 18.0686];
 const STOCKHOLM_ZOOM = 11;
 const SELECTED_SITE_ZOOM = 14;
+const ZOOM_CONTROL_POSITION: L.ControlPosition = "bottomleft";
 
 const TILE_LAYER_URL = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
 const TILE_LAYER_ATTRIBUTION =
@@ -58,8 +59,14 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
         const map = L.map(mapContainerRef.current, {
             center: STOCKHOLM_CENTER,
             zoom: STOCKHOLM_ZOOM,
-            zoomControl: true,
+            zoomControl: false,
         });
+
+        L.control
+            .zoom({
+                position: ZOOM_CONTROL_POSITION,
+            })
+            .addTo(map);
 
         L.tileLayer(TILE_LAYER_URL, {
             attribution: TILE_LAYER_ATTRIBUTION,
