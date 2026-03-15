@@ -52,12 +52,6 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
     const markersLayerRef = useRef<LayerGroup | null>(null);
     const markersBySiteIdRef = useRef<Map<number, CircleMarker>>(new Map());
     const selectedMarkerRef = useRef<CircleMarker | null>(null);
-    const selectedSiteIdRef = useRef<number | null>(null);
-
-    // Keep selected site id outside the marker rebuild effect to avoid re-creating markers on selection changes.
-    useEffect(() => {
-        selectedSiteIdRef.current = selectedSite?.id ?? null;
-    }, [selectedSite]);
 
     useEffect(() => {
         if (!mapContainerRef.current || mapRef.current) {
@@ -93,7 +87,6 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
             markersLayerRef.current = null;
             markersBySiteId.clear();
             selectedMarkerRef.current = null;
-            selectedSiteIdRef.current = null;
         };
     }, []);
 
@@ -108,8 +101,6 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
         const markersBySiteId = markersBySiteIdRef.current;
         markersBySiteId.clear();
         selectedMarkerRef.current = null;
-
-        const selectedSiteId = selectedSiteIdRef.current;
 
         type siteMarkerEntry = {
             siteId: number;
@@ -132,19 +123,10 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
         }
 
         sites.map(createSiteMarkerEntryCB).forEach(addSiteMarkerEntryCB);
-
-        if (selectedSiteId !== null) {
-            const selectedMarker = markersBySiteId.get(selectedSiteId) ?? null;
-            if (selectedMarker) {
-                setMarkerSelectedStyleCB(selectedMarker, true);
-                selectedMarkerRef.current = selectedMarker;
-            }
-        }
     }, [sites, handleSelectSiteCB]);
 
     useEffect(() => {
-        const map = mapRef.current;
-        if (!map) {
+        if (!mapRef.current) {
             return;
         }
 
@@ -158,7 +140,19 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
                 setMarkerSelectedStyleCB(selectedMarker, true);
             }
             selectedMarkerRef.current = selectedMarker;
+            return;
+        }
 
+        selectedMarkerRef.current = null;
+    }, [selectedSite, sites]);
+
+    useEffect(() => {
+        const map = mapRef.current;
+        if (!map) {
+            return;
+        }
+
+        if (selectedSite) {
             map.flyTo([selectedSite.lat, selectedSite.lon], SELECTED_SITE_ZOOM, {
                 animate: true,
                 duration: 0.4,
@@ -166,7 +160,6 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
             return;
         }
 
-        selectedMarkerRef.current = null;
         map.setView(STOCKHOLM_CENTER, STOCKHOLM_ZOOM);
     }, [selectedSite]);
 
