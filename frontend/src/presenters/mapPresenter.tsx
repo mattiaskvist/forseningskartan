@@ -10,9 +10,12 @@ export function MapPresenter() {
     const sites = useAppSelector(getSitesCB);
     const selectedSite = useAppSelector(getSelectedSiteCB);
 
-    const handleSelectSiteCB = useCallback((siteId: number | null) => {
-        selectSiteCB({ dispatch, siteId });
-    }, [dispatch]);
+    const handleSelectSiteCB = useCallback(
+        (siteId: number | null) => {
+            selectSiteCB({ dispatch, siteId });
+        },
+        [dispatch]
+    );
 
     return sites ? (
         <MapView

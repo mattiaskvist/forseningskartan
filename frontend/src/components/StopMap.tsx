@@ -164,11 +164,5 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
         map.setView(STOCKHOLM_CENTER, STOCKHOLM_ZOOM);
     }, [selectedSite]);
 
-    return (
-        <div
-            ref={mapContainerRef}
-            className="h-full w-full"
-            aria-label="Stockholm stop map"
-        />
-    );
+    return <div ref={mapContainerRef} className="h-full w-full" aria-label="Stockholm stop map" />;
 }
