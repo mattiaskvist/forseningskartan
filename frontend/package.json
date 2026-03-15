@@ -41,7 +41,7 @@
         "@tailwindcss/vite": "^4.2.1",
         "dayjs": "^1.11.20",
         "firebase": "^12.10.0",
-        "leaflet": "^1.9.4",
+        "leaflet": "^2.0.0-alpha.1",
         "react": "latest",
         "react-dom": "latest",
         "react-redux": "latest",

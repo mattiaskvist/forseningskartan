@@ -1,5 +1,13 @@
 import { useEffect, useRef } from "react";
-import L from "leaflet";
+import {
+    CircleMarker,
+    Control,
+    LayerGroup,
+    Map as LeafletMap,
+    TileLayer,
+    type CircleMarkerOptions,
+    type ControlPosition,
+} from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { Site } from "../types/sl";
 
@@ -12,13 +20,13 @@ type StopMapProps = {
 const STOCKHOLM_CENTER: [number, number] = [59.3293, 18.0686];
 const STOCKHOLM_ZOOM = 11;
 const SELECTED_SITE_ZOOM = 14;
-const ZOOM_CONTROL_POSITION: L.ControlPosition = "bottomleft";
+const ZOOM_CONTROL_POSITION: ControlPosition = "bottomleft";
 
 const TILE_LAYER_URL = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
 const TILE_LAYER_ATTRIBUTION =
     '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>';
 
-const UNSELECTED_MARKER_STYLE: L.CircleMarkerOptions = {
+const UNSELECTED_MARKER_STYLE: CircleMarkerOptions = {
     radius: 4,
     color: "#38bdf8",
     fillColor: "#38bdf8",
@@ -26,7 +34,7 @@ const UNSELECTED_MARKER_STYLE: L.CircleMarkerOptions = {
     weight: 1,
 };
 
-const SELECTED_MARKER_STYLE: L.CircleMarkerOptions = {
+const SELECTED_MARKER_STYLE: CircleMarkerOptions = {
     radius: 7,
     color: "#ef4444",
     fillColor: "#ef4444",
@@ -34,16 +42,16 @@ const SELECTED_MARKER_STYLE: L.CircleMarkerOptions = {
     weight: 2,
 };
 
-function setMarkerSelectedStyleCB(marker: L.CircleMarker, isSelected: boolean) {
+function setMarkerSelectedStyleCB(marker: CircleMarker, isSelected: boolean) {
     marker.setStyle(isSelected ? SELECTED_MARKER_STYLE : UNSELECTED_MARKER_STYLE);
 }
 
 export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProps) {
     const mapContainerRef = useRef<HTMLDivElement | null>(null);
-    const mapRef = useRef<L.Map | null>(null);
-    const markersLayerRef = useRef<L.LayerGroup | null>(null);
-    const markersBySiteIdRef = useRef<Map<number, L.CircleMarker>>(new Map());
-    const selectedMarkerRef = useRef<L.CircleMarker | null>(null);
+    const mapRef = useRef<LeafletMap | null>(null);
+    const markersLayerRef = useRef<LayerGroup | null>(null);
+    const markersBySiteIdRef = useRef<Map<number, CircleMarker>>(new Map());
+    const selectedMarkerRef = useRef<CircleMarker | null>(null);
     const selectedSiteIdRef = useRef<number | null>(null);
 
     // Keep selected site id outside the marker rebuild effect to avoid re-creating markers on selection changes.
@@ -56,19 +64,17 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
             return;
         }
 
-        const map = L.map(mapContainerRef.current, {
+        const map = new LeafletMap(mapContainerRef.current, {
             center: STOCKHOLM_CENTER,
             zoom: STOCKHOLM_ZOOM,
             zoomControl: false,
         });
 
-        L.control
-            .zoom({
-                position: ZOOM_CONTROL_POSITION,
-            })
-            .addTo(map);
+        new Control.Zoom({
+            position: ZOOM_CONTROL_POSITION,
+        }).addTo(map);
 
-        L.tileLayer(TILE_LAYER_URL, {
+        new TileLayer(TILE_LAYER_URL, {
             attribution: TILE_LAYER_ATTRIBUTION,
             maxZoom: 19,
         }).addTo(map);
@@ -78,7 +84,7 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
         });
 
         mapRef.current = map;
-        markersLayerRef.current = L.layerGroup().addTo(map);
+        markersLayerRef.current = new LayerGroup().addTo(map);
         const markersBySiteId = markersBySiteIdRef.current;
 
         return () => {
@@ -107,11 +113,11 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
 
         type siteMarkerEntry = {
             siteId: number;
-            marker: L.CircleMarker;
+            marker: CircleMarker;
         };
 
         function createSiteMarkerEntryCB(site: Site): siteMarkerEntry {
-            const marker = L.circleMarker([site.lat, site.lon], UNSELECTED_MARKER_STYLE);
+            const marker = new CircleMarker([site.lat, site.lon], UNSELECTED_MARKER_STYLE);
             marker.bindTooltip(site.name);
             marker.on("click", () => {
                 handleSelectSiteCB(site.id);
