@@ -17,10 +17,33 @@ const TILE_LAYER_URL = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r
 const TILE_LAYER_ATTRIBUTION =
     '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>';
 
+const UNSELECTED_MARKER_STYLE: L.CircleMarkerOptions = {
+    radius: 4,
+    color: "#38bdf8",
+    fillColor: "#38bdf8",
+    fillOpacity: 0.7,
+    weight: 1,
+};
+
+const SELECTED_MARKER_STYLE: L.CircleMarkerOptions = {
+    radius: 7,
+    color: "#ef4444",
+    fillColor: "#ef4444",
+    fillOpacity: 0.95,
+    weight: 2,
+};
+
+function setMarkerSelectedStyleCB(marker: L.CircleMarker, isSelected: boolean) {
+    marker.setStyle(isSelected ? SELECTED_MARKER_STYLE : UNSELECTED_MARKER_STYLE);
+}
+
 export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProps) {
     const mapContainerRef = useRef<HTMLDivElement | null>(null);
     const mapRef = useRef<L.Map | null>(null);
     const markersLayerRef = useRef<L.LayerGroup | null>(null);
+    const markersBySiteIdRef = useRef<Map<number, L.CircleMarker>>(new Map());
+    const selectedMarkerRef = useRef<L.CircleMarker | null>(null);
+    const selectedSiteIdRef = useRef<number | null>(null);
     const handleSelectSiteRef = useRef(handleSelectSiteCB);
 
     // keep handleSelectSiteCB up to date in the ref so
@@ -31,7 +54,12 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
         handleSelectSiteRef.current = handleSelectSiteCB;
     }, [handleSelectSiteCB]);
 
-    // Initialize the map on component mount and clean up on unmount
+    // keep selectedSiteId in a ref so that we can access it in the
+    // marker click handlers
+    useEffect(() => {
+        selectedSiteIdRef.current = selectedSite?.id ?? null;
+    }, [selectedSite]);
+
     useEffect(() => {
         if (!mapContainerRef.current || mapRef.current) {
             return;
@@ -54,42 +82,67 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
 
         mapRef.current = map;
         markersLayerRef.current = L.layerGroup().addTo(map);
+        const markersBySiteId = markersBySiteIdRef.current;
 
         return () => {
             map.remove();
             mapRef.current = null;
             markersLayerRef.current = null;
+            markersBySiteId.clear();
+            selectedMarkerRef.current = null;
+            selectedSiteIdRef.current = null;
         };
     }, []);
 
-    // Update markers and map view when sites or selectedSite changes
     useEffect(() => {
-        const map = mapRef.current;
         const markersLayer = markersLayerRef.current;
-        if (!map || !markersLayer) {
+        if (!markersLayer) {
             return;
         }
 
         markersLayer.clearLayers();
+        markersBySiteIdRef.current.clear();
+        selectedMarkerRef.current = null;
+
+        const selectedSiteId = selectedSiteIdRef.current;
 
         for (const site of sites) {
-            const isSelected = selectedSite?.id === site.id;
-            const marker = L.circleMarker([site.lat, site.lon], {
-                radius: isSelected ? 7 : 4,
-                color: isSelected ? "#ef4444" : "#38bdf8",
-                fillColor: isSelected ? "#ef4444" : "#38bdf8",
-                fillOpacity: isSelected ? 0.95 : 0.7,
-                weight: isSelected ? 2 : 1,
-            });
+            const marker = L.circleMarker([site.lat, site.lon], UNSELECTED_MARKER_STYLE);
 
             marker.bindTooltip(site.name);
             marker.on("click", () => {
                 handleSelectSiteRef.current(site.id);
             });
             marker.addTo(markersLayer);
+            markersBySiteIdRef.current.set(site.id, marker);
+        }
+
+        if (selectedSiteId !== null) {
+            const selectedMarker = markersBySiteIdRef.current.get(selectedSiteId) ?? null;
+            if (selectedMarker) {
+                setMarkerSelectedStyleCB(selectedMarker, true);
+                selectedMarkerRef.current = selectedMarker;
+            }
+        }
+    }, [sites]);
+
+    useEffect(() => {
+        const map = mapRef.current;
+        if (!map) {
+            return;
+        }
+
+        if (selectedMarkerRef.current) {
+            setMarkerSelectedStyleCB(selectedMarkerRef.current, false);
         }
 
         if (selectedSite) {
+            const selectedMarker = markersBySiteIdRef.current.get(selectedSite.id) ?? null;
+            if (selectedMarker) {
+                setMarkerSelectedStyleCB(selectedMarker, true);
+            }
+            selectedMarkerRef.current = selectedMarker;
+
             map.flyTo([selectedSite.lat, selectedSite.lon], SELECTED_SITE_ZOOM, {
                 animate: true,
                 duration: 0.4,
@@ -97,8 +150,9 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
             return;
         }
 
+        selectedMarkerRef.current = null;
         map.setView(STOCKHOLM_CENTER, STOCKHOLM_ZOOM);
-    }, [sites, selectedSite]);
+    }, [selectedSite]);
 
     return (
         <div
