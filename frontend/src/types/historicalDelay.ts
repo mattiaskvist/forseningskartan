@@ -29,11 +29,11 @@ type StopMeta = {
     locationType: string;
 };
 
-type StopDelaySummary = {
+type DelaySummary = {
     key: string;
     route?: RouteMeta;
     stop?: StopMeta;
-    byRoute?: StopDelaySummary[];
+    byRoute?: DelaySummary[];
     tripUpdates: number;
     stopTimeUpdates: number;
     uniqueRoutes: number;
@@ -50,7 +50,7 @@ type StopDelaySummary = {
 type ByStopChunkDocument = {
     date: string;
     stopCount: number;
-    stops: StopDelaySummary[];
+    stops: DelaySummary[];
 };
 
-export type { StopDelaySummary, ByStopChunkDocument };
+export type { DelaySummary, ByStopChunkDocument };

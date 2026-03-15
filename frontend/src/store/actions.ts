@@ -1,6 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { fetchSitesACB, fetchDeparturesACB, fetchStopPointsACB } from "../api/sl";
-import { fetchAggregatedDates, fetchStopDelays } from "../firebase/firestore";
+import { fetchAggregatedDates, fetchRouteDelays, fetchStopDelays } from "../firebase/firestore";
 
 export const getSites = createAsyncThunk("sites/fetch", fetchSitesACB);
 
@@ -16,4 +16,8 @@ export const getStopDelays = createAsyncThunk(
     "stopDelays/fetch",
     ({ stopPointGIDs, date }: { stopPointGIDs: string[]; date: string }) =>
         fetchStopDelays(stopPointGIDs, date)
+);
+
+export const getRouteDelays = createAsyncThunk("routeDelays/fetch", (date: string) =>
+    fetchRouteDelays(date)
 );

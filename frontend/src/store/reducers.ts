@@ -5,9 +5,10 @@ import {
     getStopPoints,
     getStopDelays,
     getAggregatedDates,
+    getRouteDelays,
 } from "./actions";
 import { DepartureResponse, Site, StopPoint } from "../types/sl";
-import { StopDelaySummary } from "../types/historicalDelay";
+import { DelaySummary } from "../types/historicalDelay";
 
 type SitesState = {
     data: Site[] | null;
@@ -29,7 +30,13 @@ type StopPointsState = {
 };
 
 type StopDelaysState = {
-    data: StopDelaySummary[] | null;
+    data: DelaySummary[] | null;
+    isLoading: boolean;
+    error: Error | null;
+};
+
+type RouteDelayState = {
+    data: DelaySummary[] | null;
     isLoading: boolean;
     error: Error | null;
 };
@@ -134,6 +141,29 @@ export const stopDelaysSlice = createSlice({
                 state.isLoading = false;
                 state.error = action.error as Error;
                 console.error("Failed to fetch stop delays:", action.error);
+            });
+    },
+});
+
+export const routeDelaysSlice = createSlice({
+    name: "routeDelays",
+    initialState: { data: null, isLoading: false, error: null } as RouteDelayState,
+    reducers: {},
+    extraReducers: (builder) => {
+        builder
+            .addCase(getRouteDelays.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(getRouteDelays.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.data = action.payload;
+                state.error = null;
+            })
+            .addCase(getRouteDelays.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error as Error;
+                console.error("Failed to fetch route delays:", action.error);
             });
     },
 });

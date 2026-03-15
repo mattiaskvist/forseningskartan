@@ -1,6 +1,6 @@
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { routeToString, StopDelaySummary } from "../types/historicalDelay";
+import { routeToString, DelaySummary } from "../types/historicalDelay";
 import { Site, StopPoint } from "../types/sl";
 import dayjs, { Dayjs } from "dayjs";
 import minMax from "dayjs/plugin/minMax";
@@ -8,7 +8,7 @@ dayjs.extend(minMax);
 
 type StopDelayViewProps = {
     selectedSite: Site;
-    stopDelays: StopDelaySummary[];
+    stopDelays: DelaySummary[];
     stopPoints: StopPoint[];
     availableDates: string[];
     handleSelectDateCB: (date: string) => void;
@@ -38,7 +38,7 @@ export function StopDelayView({
         }
     }
 
-    function renderRouteDelayCB(br: StopDelaySummary) {
+    function renderRouteDelayCB(br: DelaySummary) {
         // NOTE: totalDepartures and totalArrivals are sometimes not the same
         // This happens when a station is a start/end station for a route, and thus has only departures or arrivals
         const totalDepartures =
@@ -74,7 +74,7 @@ export function StopDelayView({
         );
     }
 
-    function renderStopDelayCB(stopDelay: StopDelaySummary) {
+    function renderStopDelayCB(stopDelay: DelaySummary) {
         const stopPoint = stopPoints.find((sp) => sp.gid.toString() === stopDelay.key);
 
         return (
