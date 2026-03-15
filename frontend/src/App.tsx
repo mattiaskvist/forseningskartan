@@ -27,8 +27,8 @@ function App() {
     return (
         <div className="relative h-screen w-screen overflow-hidden">
             <MapPresenter />
-            <aside className="pointer-events-none absolute right-4 top-4 z-[1000] max-h-[calc(100vh-2rem)] w-[min(420px,calc(100vw-2rem))] overflow-y-auto">
-                <div className="pointer-events-auto flex flex-col gap-3">
+            <aside className="pointer-events-auto absolute right-4 top-4 z-1000 w-[min(420px,calc(100vw-2rem))]">
+                <div className="flex max-h-[calc(100vh-2rem)] flex-col gap-3 overflow-y-auto pr-1">
                     <section className="overlay-panel">
                         <h2 className="overlay-panel-title">Departures</h2>
                         <DeparturePresenter />
