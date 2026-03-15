@@ -6,9 +6,6 @@ import { DeparturePresenter } from "./presenters/departurePresenter";
 import { StopDelayPresenter } from "./presenters/stopDelayPresenter";
 import { RouteDelayPresenter } from "./presenters/RouteDelayPresenter";
 
-const OVERLAY_PANEL_CLASS =
-    "rounded-md border border-slate-200/80 bg-white/95 p-3 shadow-lg backdrop-blur-sm";
-
 function App() {
     const dispatch = useAppDispatch();
 
@@ -32,16 +29,16 @@ function App() {
             <MapPresenter />
             <aside className="pointer-events-none absolute right-4 top-4 z-[1000] max-h-[calc(100vh-2rem)] w-[min(420px,calc(100vw-2rem))] overflow-y-auto">
                 <div className="pointer-events-auto flex flex-col gap-3">
-                    <section className={OVERLAY_PANEL_CLASS}>
-                        <h2 className="mb-2 text-sm font-semibold text-slate-800">Departures</h2>
+                    <section className="overlay-panel">
+                        <h2 className="overlay-panel-title">Departures</h2>
                         <DeparturePresenter />
                     </section>
-                    <section className={OVERLAY_PANEL_CLASS}>
-                        <h2 className="mb-2 text-sm font-semibold text-slate-800">Stop delays</h2>
+                    <section className="overlay-panel">
+                        <h2 className="overlay-panel-title">Stop delays</h2>
                         <StopDelayPresenter />
                     </section>
-                    <section className={OVERLAY_PANEL_CLASS}>
-                        <h2 className="mb-2 text-sm font-semibold text-slate-800">Route delays</h2>
+                    <section className="overlay-panel">
+                        <h2 className="overlay-panel-title">Route delays</h2>
                         <RouteDelayPresenter />
                     </section>
                 </div>

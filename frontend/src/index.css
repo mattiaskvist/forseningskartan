@@ -1,2 +1,12 @@
 @import "tailwindcss";
 @source "./**/*.{ts,tsx,js,jsx}";
+
+@layer components {
+    .overlay-panel {
+        @apply rounded-md border border-slate-200/80 bg-white/95 p-3 shadow-lg backdrop-blur-sm;
+    }
+
+    .overlay-panel-title {
+        @apply mb-2 text-sm font-semibold text-slate-800;
+    }
+}
