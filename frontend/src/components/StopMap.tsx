@@ -44,18 +44,8 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
     const markersBySiteIdRef = useRef<Map<number, L.CircleMarker>>(new Map());
     const selectedMarkerRef = useRef<L.CircleMarker | null>(null);
     const selectedSiteIdRef = useRef<number | null>(null);
-    const handleSelectSiteRef = useRef(handleSelectSiteCB);
 
-    // keep handleSelectSiteCB up to date in the ref so
-    // that marker click handlers always have the latest callback.
-    // If we dont do this, the marker click handlers will have a
-    // stale callback and not work after the first render
-    useEffect(() => {
-        handleSelectSiteRef.current = handleSelectSiteCB;
-    }, [handleSelectSiteCB]);
-
-    // keep selectedSiteId in a ref so that we can access it in the
-    // marker click handlers
+    // Keep selected site id outside the marker rebuild effect to avoid re-creating markers on selection changes.
     useEffect(() => {
         selectedSiteIdRef.current = selectedSite?.id ?? null;
     }, [selectedSite]);
@@ -111,7 +101,7 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
 
             marker.bindTooltip(site.name);
             marker.on("click", () => {
-                handleSelectSiteRef.current(site.id);
+                handleSelectSiteCB(site.id);
             });
             marker.addTo(markersLayer);
             markersBySiteIdRef.current.set(site.id, marker);
@@ -124,7 +114,7 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
                 selectedMarkerRef.current = selectedMarker;
             }
         }
-    }, [sites]);
+    }, [sites, handleSelectSiteCB]);
 
     useEffect(() => {
         const map = mapRef.current;
