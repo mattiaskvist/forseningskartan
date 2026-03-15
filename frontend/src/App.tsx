@@ -6,6 +6,9 @@ import { DeparturePresenter } from "./presenters/departurePresenter";
 import { StopDelayPresenter } from "./presenters/stopDelayPresenter";
 import { RouteDelayPresenter } from "./presenters/RouteDelayPresenter";
 
+const OVERLAY_PANEL_CLASS =
+    "rounded-md border border-slate-200/80 bg-white/95 p-3 shadow-lg backdrop-blur-sm";
+
 function App() {
     const dispatch = useAppDispatch();
 
@@ -25,22 +28,25 @@ function App() {
     }, [dispatch]);
 
     return (
-        <>
-            <div className="flex flex-row gap-4 ml-2 mt-2">
-                <div className="border">
-                    <MapPresenter />
+        <div className="relative h-screen w-screen overflow-hidden">
+            <MapPresenter />
+            <aside className="pointer-events-none absolute right-4 top-4 z-[1000] max-h-[calc(100vh-2rem)] w-[min(420px,calc(100vw-2rem))] overflow-y-auto">
+                <div className="pointer-events-auto flex flex-col gap-3">
+                    <section className={OVERLAY_PANEL_CLASS}>
+                        <h2 className="mb-2 text-sm font-semibold text-slate-800">Departures</h2>
+                        <DeparturePresenter />
+                    </section>
+                    <section className={OVERLAY_PANEL_CLASS}>
+                        <h2 className="mb-2 text-sm font-semibold text-slate-800">Stop delays</h2>
+                        <StopDelayPresenter />
+                    </section>
+                    <section className={OVERLAY_PANEL_CLASS}>
+                        <h2 className="mb-2 text-sm font-semibold text-slate-800">Route delays</h2>
+                        <RouteDelayPresenter />
+                    </section>
                 </div>
-                <div className="border">
-                    <DeparturePresenter />
-                </div>
-                <div className="border">
-                    <StopDelayPresenter />
-                </div>
-                <div className="border">
-                    <RouteDelayPresenter />
-                </div>
-            </div>
-        </>
+            </aside>
+        </div>
     );
 }
 

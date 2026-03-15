@@ -160,7 +160,7 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
     return (
         <div
             ref={mapContainerRef}
-            className="h-[500px] min-w-[700px] rounded border"
+            className="h-full w-full"
             aria-label="Stockholm stop map"
         />
     );
