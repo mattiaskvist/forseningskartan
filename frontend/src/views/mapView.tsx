@@ -1,4 +1,5 @@
 import { SearchBar } from "../components/SearchBar";
+import { StopMap } from "../components/StopMap";
 import { Site } from "../types/sl";
 
 type MapViewProps = {
@@ -12,6 +13,11 @@ export function MapView({ sites, selectedSite, handleSelectSiteCB }: MapViewProp
         <div className="flex flex-col gap-4 min-w-[400px]">
             {sites.length} sites. Select site:
             <SearchBar
+                sites={sites}
+                selectedSite={selectedSite}
+                handleSelectSiteCB={handleSelectSiteCB}
+            />
+            <StopMap
                 sites={sites}
                 selectedSite={selectedSite}
                 handleSelectSiteCB={handleSelectSiteCB}
