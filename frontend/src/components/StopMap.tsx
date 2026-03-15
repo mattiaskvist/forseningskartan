@@ -102,27 +102,17 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
         markersBySiteId.clear();
         selectedMarkerRef.current = null;
 
-        type siteMarkerEntry = {
-            siteId: number;
-            marker: CircleMarker;
-        };
-
-        function createSiteMarkerEntryCB(site: Site): siteMarkerEntry {
+        function addSiteMarkerCB(site: Site) {
             const marker = new CircleMarker([site.lat, site.lon], UNSELECTED_MARKER_STYLE);
             marker.bindTooltip(site.name);
             marker.on("click", () => {
                 handleSelectSiteCB(site.id);
             });
-            return { siteId: site.id, marker };
-        }
-
-        function addSiteMarkerEntryCB(entry: siteMarkerEntry) {
-            const { siteId, marker } = entry;
             marker.addTo(currentMarkersLayer);
-            markersBySiteId.set(siteId, marker);
+            markersBySiteId.set(site.id, marker);
         }
 
-        sites.map(createSiteMarkerEntryCB).forEach(addSiteMarkerEntryCB);
+        sites.forEach(addSiteMarkerCB);
     }, [sites, handleSelectSiteCB]);
 
     useEffect(() => {
