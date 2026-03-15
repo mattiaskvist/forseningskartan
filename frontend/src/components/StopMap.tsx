@@ -23,10 +23,15 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
     const markersLayerRef = useRef<L.LayerGroup | null>(null);
     const handleSelectSiteRef = useRef(handleSelectSiteCB);
 
+    // keep handleSelectSiteCB up to date in the ref so
+    // that marker click handlers always have the latest callback.
+    // If we dont do this, the marker click handlers will have a
+    // stale callback and not work after the first render
     useEffect(() => {
         handleSelectSiteRef.current = handleSelectSiteCB;
     }, [handleSelectSiteCB]);
 
+    // Initialize the map on component mount and clean up on unmount
     useEffect(() => {
         if (!mapContainerRef.current || mapRef.current) {
             return;
@@ -57,6 +62,7 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
         };
     }, []);
 
+    // Update markers and map view when sites or selectedSite changes
     useEffect(() => {
         const map = mapRef.current;
         const markersLayer = markersLayerRef.current;
