@@ -31,6 +31,10 @@ function getStopDelaysCB(state: RootState) {
     return state.stopDelays.data;
 }
 
+function getRouteDelaysCB(state: RootState) {
+    return state.routeDelays.data;
+}
+
 function getAggregatedDatesCB(state: RootState) {
     return state.aggregatedDates.data;
 }
@@ -41,5 +45,6 @@ export {
     getStopPointsCB,
     getSelectedSiteCB,
     getStopDelaysCB,
+    getRouteDelaysCB,
     getAggregatedDatesCB,
 };

@@ -1,14 +1,11 @@
-import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { routeToString, StopDelaySummary } from "../types/historicalDelay";
+import { DelaySummary } from "../types/historicalDelay";
 import { Site, StopPoint } from "../types/sl";
-import dayjs, { Dayjs } from "dayjs";
-import minMax from "dayjs/plugin/minMax";
-dayjs.extend(minMax);
+import { RouteDelayStats } from "../components/RouteDelayStats";
+import { AvailableDatesPicker } from "../components/AvailableDatesPicker";
 
 type StopDelayViewProps = {
     selectedSite: Site;
-    stopDelays: StopDelaySummary[];
+    stopDelays: DelaySummary[];
     stopPoints: StopPoint[];
     availableDates: string[];
     handleSelectDateCB: (date: string) => void;
@@ -21,60 +18,7 @@ export function StopDelayView({
     availableDates,
     handleSelectDateCB,
 }: StopDelayViewProps) {
-    function getDayjsDate(date: string): Dayjs {
-        return dayjs(date);
-    }
-    const dayjsDates = availableDates.map(getDayjsDate);
-    const minDate = dayjs.min(dayjsDates) ?? undefined;
-    const maxDate = dayjs.max(dayjsDates) ?? undefined;
-
-    function shouldDisableDateCB(date: Dayjs): boolean {
-        return !availableDates.includes(date.format("YYYY-MM-DD"));
-    }
-
-    function handleDateChangeCB(selectedDate: Dayjs | null) {
-        if (selectedDate) {
-            handleSelectDateCB(selectedDate.format("YYYY-MM-DD"));
-        }
-    }
-
-    function renderRouteDelayCB(br: StopDelaySummary) {
-        // NOTE: totalDepartures and totalArrivals are sometimes not the same
-        // This happens when a station is a start/end station for a route, and thus has only departures or arrivals
-        const totalDepartures =
-            br.departureDelayStats.count + br.departureAheadStats.count + br.departureOnTimeCount;
-        const totalArrivals =
-            br.arrivalDelayStats.count + br.arrivalAheadStats.count + br.arrivalOnTimeCount;
-        const routeTypeString = br.route?.type ? routeToString[br.route.type] : "Route";
-        return (
-            <div key={br.key} className="mb-1">
-                <dt className="font-semibold">
-                    {routeTypeString} {br.route?.shortName} {br.route?.longName}
-                </dt>
-                <dd>
-                    Total departures: {totalDepartures}x, Total arrivals: {totalArrivals}x
-                </dd>
-                <dd>
-                    Avg Departure delay: {Math.round(br.departureDelayStats.avgSeconds)}
-                    s({br.departureDelayStats.count}x), Avg Arrival delay:{" "}
-                    {Math.round(br.arrivalDelayStats.avgSeconds)}
-                    s({br.arrivalDelayStats.count}x)
-                </dd>
-                <dd>
-                    Avg Departue ahead: {Math.round(br.departureAheadStats.avgSeconds)}s (
-                    {br.departureAheadStats.count}x), Avg Arrival ahead:{" "}
-                    {Math.round(br.arrivalAheadStats.avgSeconds)}
-                    s({br.arrivalAheadStats.count}x)
-                </dd>
-                <dd>
-                    Departue on time: {Math.round(br.departureOnTimeCount)}x, Arrival on time:{" "}
-                    {Math.round(br.arrivalOnTimeCount)}x
-                </dd>
-            </div>
-        );
-    }
-
-    function renderStopDelayCB(stopDelay: StopDelaySummary) {
+    function renderStopDelayCB(stopDelay: DelaySummary) {
         const stopPoint = stopPoints.find((sp) => sp.gid.toString() === stopDelay.key);
 
         return (
@@ -89,7 +33,7 @@ export function StopDelayView({
                 )}
 
                 {stopDelay.byRoute?.length ? (
-                    <dl className="ml-4 mt-2">{stopDelay.byRoute.map(renderRouteDelayCB)}</dl>
+                    <dl className="ml-4 mt-2">{stopDelay.byRoute.map(RouteDelayStats)}</dl>
                 ) : (
                     <p className="ml-4 text-sm text-gray-500">No route delay data</p>
                 )}
@@ -102,18 +46,11 @@ export function StopDelayView({
             <span>
                 Selected site: {selectedSite.name} gid: {selectedSite.gid} id: {selectedSite.id}
             </span>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                    disabled={availableDates.length === 0}
-                    format="YYYY-MM-DD"
-                    label="Select delay date"
-                    minDate={minDate}
-                    maxDate={maxDate}
-                    onChange={handleDateChangeCB}
-                    shouldDisableDate={shouldDisableDateCB}
-                />
-            </LocalizationProvider>
-            <span>Stop delays for selected site:</span>
+            <AvailableDatesPicker
+                availableDates={availableDates}
+                onSelectDate={handleSelectDateCB}
+            />
+            <span>Stop delays for selected site and date:</span>
             <ul>{stopDelays.map(renderStopDelayCB)}</ul>
         </div>
     );

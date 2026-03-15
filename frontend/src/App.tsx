@@ -4,6 +4,7 @@ import { getAggregatedDates, getSites, getStopPoints } from "./store/actions";
 import { useAppDispatch } from "./store/store";
 import { DeparturePresenter } from "./presenters/departurePresenter";
 import { StopDelayPresenter } from "./presenters/stopDelayPresenter";
+import { RouteDelayPresenter } from "./presenters/RouteDelayPresenter";
 
 function App() {
     const dispatch = useAppDispatch();
@@ -34,6 +35,9 @@ function App() {
                 </div>
                 <div className="border">
                     <StopDelayPresenter />
+                </div>
+                <div className="border">
+                    <RouteDelayPresenter />
                 </div>
             </div>
         </>

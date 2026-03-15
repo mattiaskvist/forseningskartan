@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, getDoc, DocumentSnapshot } from "firebase/firestore";
-import { StopDelaySummary, ByStopChunkDocument } from "../types/historicalDelay";
+import { DelaySummary, ByStopChunkDocument } from "../types/historicalDelay";
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -30,7 +30,7 @@ function hashToChunk(stopKey: string): number {
 export function fetchStopDelays(
     stopPointGIDs: string[],
     date: string
-): Promise<StopDelaySummary[] | null> {
+): Promise<DelaySummary[] | null> {
     const chunkIds = new Set<string>();
 
     // Get unique chunks that we need to download
@@ -49,8 +49,8 @@ export function fetchStopDelays(
 
     console.log(stopPointGIDs);
 
-    function processDocsACB(docs: DocumentSnapshot[]): StopDelaySummary[] {
-        const results: StopDelaySummary[] = [];
+    function processDocsACB(docs: DocumentSnapshot[]): DelaySummary[] {
+        const results: DelaySummary[] = [];
 
         function processDocCB(docSnapshot: DocumentSnapshot) {
             if (!docSnapshot.exists()) {
@@ -59,7 +59,7 @@ export function fetchStopDelays(
 
             const chunkData = docSnapshot.data() as ByStopChunkDocument;
 
-            function processStopCB(stop: StopDelaySummary) {
+            function processStopCB(stop: DelaySummary) {
                 if (stopPointGIDs.includes(stop.key)) {
                     results.push(stop);
                 }
@@ -79,6 +79,24 @@ export function fetchStopDelays(
     }
 
     return Promise.all(chunkPromises).then(processDocsACB).catch(catchErrorACB);
+}
+
+export function fetchRouteDelays(date: string): Promise<DelaySummary[] | null> {
+    const byRouteDocRef = doc(db, date, "byRoute");
+
+    function processDocACB(docSnapshot: DocumentSnapshot): DelaySummary[] | null {
+        if (!docSnapshot.exists()) {
+            return null;
+        }
+        return docSnapshot.data().byRoute as DelaySummary[];
+    }
+
+    function catchErrorACB(error: unknown) {
+        console.error(error);
+        return null;
+    }
+
+    return getDoc(byRouteDocRef).then(processDocACB).catch(catchErrorACB);
 }
 
 // get dates for which aggregated data is available in firestore
