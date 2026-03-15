@@ -14,7 +14,8 @@ export function RouteDelayStats(br: DelaySummary) {
                 {routeTypeString} {br.route?.shortName} {br.route?.longName}
             </dt>
             <dd>
-                Total departures: {totalDepartures}x, Total arrivals: {totalArrivals}x
+                Total departures: {totalDepartures}x, Total arrivals: {totalArrivals}x, Unique
+                trips: {br.uniqueTrips}
             </dd>
             <dd>
                 Avg Departure delay: {Math.round(br.departureDelayStats.avgSeconds)}
