@@ -1,5 +1,6 @@
 import { Departure } from "../types/sl";
 import { Suspense } from "../components/Suspense";
+import Button from "@mui/material/Button";
 
 type DepartureViewProps = {
     departures: Departure[];
@@ -87,14 +88,14 @@ export function DepartureView({ departures, selectedSiteName, onCloseCB, isLoadi
         <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between gap-2">
                 <h3 className="text-sm font-medium text-slate-800">{selectedSiteName}</h3>
-                <button
-                    type="button"
+                <Button
+                    variant="text"
+                    size="small"
                     onClick={onCloseCB}
-                    className="rounded px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                     aria-label="Close departures view"
                 >
                     Close
-                </button>
+                </Button>
             </div>
             {isLoading ? (
                 <Suspense message="Loading departures..." />
