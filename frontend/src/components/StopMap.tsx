@@ -18,7 +18,7 @@ type StopMapProps = {
 };
 
 const STOCKHOLM_CENTER: [number, number] = [59.3293, 18.0686];
-const STOCKHOLM_ZOOM = 11;
+const STOCKHOLM_ZOOM = 13;
 const SELECTED_SITE_ZOOM = 14;
 const ZOOM_CONTROL_POSITION: ControlPosition = "bottomleft";
 
@@ -52,6 +52,7 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
     const markersLayerRef = useRef<LayerGroup | null>(null);
     const markersBySiteIdRef = useRef<Map<number, CircleMarker>>(new Map());
     const selectedMarkerRef = useRef<CircleMarker | null>(null);
+    const selectedSiteIdRef = useRef<number | null>(null);
 
     useEffect(() => {
         if (!mapContainerRef.current || mapRef.current) {
@@ -87,6 +88,7 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
             markersLayerRef.current = null;
             markersBySiteId.clear();
             selectedMarkerRef.current = null;
+            selectedSiteIdRef.current = null;
         };
     }, []);
 
@@ -106,7 +108,9 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
             const marker = new CircleMarker([site.lat, site.lon], UNSELECTED_MARKER_STYLE);
             marker.bindTooltip(site.name);
             marker.on("click", () => {
-                handleSelectSiteCB(site.id);
+                const selectedSiteId = selectedSiteIdRef.current;
+                const nextSiteId = selectedSiteId === site.id ? null : site.id;
+                handleSelectSiteCB(nextSiteId);
             });
             marker.addTo(currentMarkersLayer);
             markersBySiteId.set(site.id, marker);
@@ -119,6 +123,7 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
         if (!mapRef.current) {
             return;
         }
+        selectedSiteIdRef.current = selectedSite?.id ?? null;
 
         if (selectedMarkerRef.current) {
             setMarkerSelectedStyleCB(selectedMarkerRef.current, false);
@@ -147,10 +152,7 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
                 animate: true,
                 duration: 0.4,
             });
-            return;
         }
-
-        map.setView(STOCKHOLM_CENTER, STOCKHOLM_ZOOM);
     }, [selectedSite]);
 
     return <div ref={mapContainerRef} className="h-full w-full" aria-label="Stockholm stop map" />;
