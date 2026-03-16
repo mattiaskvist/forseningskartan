@@ -1,20 +1,14 @@
-import { RootState, useAppSelector } from "../store/store";
+import { useAppSelector } from "../store/store";
 import { DepartureView } from "../views/departureView";
+import { Suspense } from "../components/Suspense";
+import { getDeparturesCB, getDeparturesLoadingCB } from "../store/selectors";
 
 export function DeparturePresenter() {
-    function getDeparturesCB(state: RootState) {
-        return state.departures.data;
-    }
-
-    function getIsLoadingCB(state: RootState) {
-        return state.departures.isLoading;
-    }
-
     const departureResponse = useAppSelector(getDeparturesCB);
-    const isLoading = useAppSelector(getIsLoadingCB);
+    const isDeparturesLoading = useAppSelector(getDeparturesLoadingCB);
 
-    if (isLoading) {
-        return <div>Loading departures...</div>;
+    if (isDeparturesLoading) {
+        return <Suspense message="Loading departures..." />;
     }
 
     return departureResponse?.departures && departureResponse.departures.length > 0 ? (

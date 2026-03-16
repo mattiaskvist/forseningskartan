@@ -5,12 +5,12 @@ function getSitesCB(state: RootState) {
     return state.sites.data;
 }
 
-function getSelectedSiteIdCB(state: RootState) {
-    return state.sites.selectedSiteId;
+function getSitesLoadingCB(state: RootState) {
+    return state.sites.isLoading;
 }
 
-function getStopPointsCB(state: RootState) {
-    return state.stopPoints.data;
+function getSelectedSiteIdCB(state: RootState) {
+    return state.sites.selectedSiteId;
 }
 
 function getSelectedSiteCB(state: RootState) {
@@ -27,24 +27,59 @@ function getSelectedSiteCB(state: RootState) {
     return state.sites.data.find(isSelectedSiteCB) ?? null;
 }
 
+function getStopPointsCB(state: RootState) {
+    return state.stopPoints.data;
+}
+
+function getStopPointsLoadingCB(state: RootState) {
+    return state.stopPoints.isLoading;
+}
+
 function getStopDelaysCB(state: RootState) {
     return state.stopDelays.data;
+}
+
+function getStopDelaysLoadingCB(state: RootState) {
+    return state.stopDelays.isLoading;
 }
 
 function getRouteDelaysCB(state: RootState) {
     return state.routeDelays.data;
 }
 
+function getRouteDelaysLoadingCB(state: RootState) {
+    return state.routeDelays.isLoading;
+}
+
 function getAggregatedDatesCB(state: RootState) {
     return state.aggregatedDates.data;
 }
 
+function getAggregatedDatesLoadingCB(state: RootState) {
+    return state.aggregatedDates.isLoading;
+}
+
+function getDeparturesCB(state: RootState) {
+    return state.departures.data;
+}
+
+function getDeparturesLoadingCB(state: RootState) {
+    return state.departures.isLoading;
+}
+
 export {
     getSitesCB,
+    getSitesLoadingCB,
     getSelectedSiteIdCB,
-    getStopPointsCB,
     getSelectedSiteCB,
+    getStopPointsCB,
+    getStopPointsLoadingCB,
     getStopDelaysCB,
+    getStopDelaysLoadingCB,
     getRouteDelaysCB,
+    getRouteDelaysLoadingCB,
     getAggregatedDatesCB,
+    getAggregatedDatesLoadingCB,
+    getDeparturesCB,
+    getDeparturesLoadingCB,
 };

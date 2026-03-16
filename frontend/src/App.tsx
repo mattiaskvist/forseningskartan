@@ -1,32 +1,32 @@
 import { useEffect } from "react";
 import { MapPresenter } from "./presenters/mapPresenter";
 import { getAggregatedDates, getSites, getStopPoints } from "./store/actions";
-import { useAppDispatch } from "./store/store";
+import { useAppDispatch, useAppSelector } from "./store/store";
 import { DeparturePresenter } from "./presenters/departurePresenter";
 import { StopDelayPresenter } from "./presenters/stopDelayPresenter";
 import { RouteDelayPresenter } from "./presenters/RouteDelayPresenter";
+import { getSitesLoadingCB, getSitesCB } from "./store/selectors";
+import { Suspense } from "./components/Suspense";
 
 function App() {
     const dispatch = useAppDispatch();
 
-    // Fetch sites on app load
+    // Fetch sites, stop points, and aggregated dates on app load
     useEffect(() => {
         dispatch(getSites());
-    }, [dispatch]);
-
-    // Fetch stop points on app load
-    useEffect(() => {
         dispatch(getStopPoints());
-    }, [dispatch]);
-
-    // Fetch aggregated dates on app load
-    useEffect(() => {
         dispatch(getAggregatedDates());
     }, [dispatch]);
 
+    const sites = useAppSelector(getSitesCB);
+    const isSitesLoading = useAppSelector(getSitesLoadingCB);
+    if (isSitesLoading || !sites) {
+        return <Suspense fullscreen message="Loading transit data and preparing the map..." />;
+    }
+
     return (
         <div className="relative h-screen w-screen overflow-hidden">
-            <MapPresenter />
+            <MapPresenter sites={sites} />
             <aside className="pointer-events-auto absolute right-4 top-4 z-1000 w-[min(420px,calc(100vw-2rem))]">
                 <div className="flex max-h-[calc(100vh-2rem)] flex-col gap-3 overflow-y-auto pr-1">
                     <section className="overlay-panel">
