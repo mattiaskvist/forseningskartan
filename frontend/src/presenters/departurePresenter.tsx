@@ -1,5 +1,6 @@
 import { RootState, useAppSelector } from "../store/store";
 import { DepartureView } from "../views/departureView";
+import { Suspense } from "../components/Suspense";
 
 export function DeparturePresenter() {
     function getDeparturesCB(state: RootState) {
@@ -14,7 +15,7 @@ export function DeparturePresenter() {
     const isLoading = useAppSelector(getIsLoadingCB);
 
     if (isLoading) {
-        return <div>Loading departures...</div>;
+        return <Suspense message="Loading departures..." />;
     }
 
     return departureResponse?.departures && departureResponse.departures.length > 0 ? (

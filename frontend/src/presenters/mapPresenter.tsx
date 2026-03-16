@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { MapView } from "../views/mapView";
+import { Suspense } from "../components/Suspense";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import { getSitesCB, getSelectedSiteCB } from "../store/selectors";
 import { selectSiteCB } from "../store/selection";
@@ -24,6 +25,6 @@ export function MapPresenter() {
             handleSelectSiteCB={handleSelectSiteCB}
         />
     ) : (
-        <div>TODO SUSPENSE...</div>
+        <Suspense fullscreen message="Loading stops and preparing the map..." />
     );
 }
