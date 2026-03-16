@@ -31,12 +31,28 @@ function getStopDelaysCB(state: RootState) {
     return state.stopDelays.data;
 }
 
+function getStopDelaysLoadingCB(state: RootState) {
+    return state.stopDelays.isLoading;
+}
+
 function getRouteDelaysCB(state: RootState) {
     return state.routeDelays.data;
 }
 
+function getRouteDelaysLoadingCB(state: RootState) {
+    return state.routeDelays.isLoading;
+}
+
 function getAggregatedDatesCB(state: RootState) {
     return state.aggregatedDates.data;
+}
+
+function getDeparturesCB(state: RootState) {
+    return state.departures.data;
+}
+
+function getDeparturesLoadingCB(state: RootState) {
+    return state.departures.isLoading;
 }
 
 export {
@@ -45,6 +61,10 @@ export {
     getStopPointsCB,
     getSelectedSiteCB,
     getStopDelaysCB,
+    getStopDelaysLoadingCB,
     getRouteDelaysCB,
+    getRouteDelaysLoadingCB,
     getAggregatedDatesCB,
+    getDeparturesCB,
+    getDeparturesLoadingCB,
 };

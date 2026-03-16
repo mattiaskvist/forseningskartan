@@ -4,10 +4,12 @@ import {
     getAggregatedDatesCB,
     getStopDelaysCB,
     getStopPointsCB,
+    getStopDelaysLoadingCB,
 } from "../store/selectors";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import { getStopDelays } from "../store/actions";
 import { getStopPointGidsForSite } from "../utils/site";
+import { Suspense } from "../components/Suspense";
 
 export function StopDelayPresenter() {
     const dispatch = useAppDispatch();
@@ -22,6 +24,11 @@ export function StopDelayPresenter() {
         }
         const stopPointGIDs = getStopPointGidsForSite(selectedSite, stopPoints);
         dispatch(getStopDelays({ stopPointGIDs, date }));
+    }
+
+    const isLoading = useAppSelector(getStopDelaysLoadingCB);
+    if (isLoading) {
+        return <Suspense message="Loading stop delays..." />;
     }
 
     return (
