@@ -1,19 +1,28 @@
-import { useAppSelector } from "../store/store";
+import { useAppDispatch, useAppSelector } from "../store/store";
 import { DepartureView } from "../views/departureView";
-import { Suspense } from "../components/Suspense";
-import { getDeparturesCB, getDeparturesLoadingCB } from "../store/selectors";
+import { getDeparturesCB, getDeparturesLoadingCB, getSelectedSiteCB } from "../store/selectors";
+import { setSelectedSiteId } from "../store/reducers";
 
 export function DeparturePresenter() {
+    const dispatch = useAppDispatch();
     const departureResponse = useAppSelector(getDeparturesCB);
     const isDeparturesLoading = useAppSelector(getDeparturesLoadingCB);
+    const selectedSite = useAppSelector(getSelectedSiteCB);
 
-    if (isDeparturesLoading) {
-        return <Suspense message="Loading departures..." />;
+    function closeDeparturesViewCB() {
+        dispatch(setSelectedSiteId(null));
     }
 
-    return departureResponse?.departures && departureResponse.departures.length > 0 ? (
-        <DepartureView departures={departureResponse.departures} />
-    ) : (
-        <div>No departures found</div>
+    if (!selectedSite) {
+        return null;
+    }
+
+    return (
+        <DepartureView
+            departures={departureResponse?.departures ?? []}
+            selectedSiteName={selectedSite.name}
+            onCloseCB={closeDeparturesViewCB}
+            isLoading={isDeparturesLoading}
+        />
     );
 }
