@@ -25,22 +25,25 @@ function App() {
     }, [dispatch]);
 
     return (
-        <>
-            <div className="flex flex-row gap-4 ml-2 mt-2">
-                <div className="border">
-                    <MapPresenter />
+        <div className="relative h-screen w-screen overflow-hidden">
+            <MapPresenter />
+            <aside className="pointer-events-auto absolute right-4 top-4 z-1000 w-[min(420px,calc(100vw-2rem))]">
+                <div className="flex max-h-[calc(100vh-2rem)] flex-col gap-3 overflow-y-auto pr-1">
+                    <section className="overlay-panel">
+                        <h2 className="overlay-panel-title">Departures</h2>
+                        <DeparturePresenter />
+                    </section>
+                    <section className="overlay-panel">
+                        <h2 className="overlay-panel-title">Stop delays</h2>
+                        <StopDelayPresenter />
+                    </section>
+                    <section className="overlay-panel">
+                        <h2 className="overlay-panel-title">Route delays</h2>
+                        <RouteDelayPresenter />
+                    </section>
                 </div>
-                <div className="border">
-                    <DeparturePresenter />
-                </div>
-                <div className="border">
-                    <StopDelayPresenter />
-                </div>
-                <div className="border">
-                    <RouteDelayPresenter />
-                </div>
-            </div>
-        </>
+            </aside>
+        </div>
     );
 }
 

@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { MapView } from "../views/mapView";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import { getSitesCB, getSelectedSiteCB } from "../store/selectors";
@@ -9,9 +10,12 @@ export function MapPresenter() {
     const sites = useAppSelector(getSitesCB);
     const selectedSite = useAppSelector(getSelectedSiteCB);
 
-    function handleSelectSiteCB(siteId: number | null) {
-        selectSiteCB({ dispatch, siteId });
-    }
+    const handleSelectSiteCB = useCallback(
+        (siteId: number | null) => {
+            selectSiteCB({ dispatch, siteId });
+        },
+        [dispatch]
+    );
 
     return sites ? (
         <MapView
