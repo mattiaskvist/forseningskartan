@@ -5,7 +5,7 @@ import { useAppDispatch, useAppSelector } from "./store/store";
 import { DeparturePresenter } from "./presenters/departurePresenter";
 import { StopDelayPresenter } from "./presenters/stopDelayPresenter";
 import { RouteDelayPresenter } from "./presenters/RouteDelayPresenter";
-import { getAppLoadingCB, getSitesCB } from "./store/selectors";
+import { getSitesLoadingCB, getSitesCB } from "./store/selectors";
 import { Suspense } from "./components/Suspense";
 
 function App() {
@@ -19,8 +19,8 @@ function App() {
     }, [dispatch]);
 
     const sites = useAppSelector(getSitesCB);
-    const isLoading = useAppSelector(getAppLoadingCB);
-    if (isLoading || !sites) {
+    const isSitesLoading = useAppSelector(getSitesLoadingCB);
+    if (isSitesLoading || !sites) {
         return <Suspense fullscreen message="Loading transit data and preparing the map..." />;
     }
 

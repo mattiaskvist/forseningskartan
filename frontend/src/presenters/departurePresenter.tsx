@@ -5,9 +5,9 @@ import { getDeparturesCB, getDeparturesLoadingCB } from "../store/selectors";
 
 export function DeparturePresenter() {
     const departureResponse = useAppSelector(getDeparturesCB);
-    const isLoading = useAppSelector(getDeparturesLoadingCB);
+    const isDeparturesLoading = useAppSelector(getDeparturesLoadingCB);
 
-    if (isLoading) {
+    if (isDeparturesLoading) {
         return <Suspense message="Loading departures..." />;
     }
 

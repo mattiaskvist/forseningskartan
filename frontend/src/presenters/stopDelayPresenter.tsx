@@ -2,8 +2,10 @@ import { StopDelayView } from "../views/stopDelayView";
 import {
     getSelectedSiteCB,
     getAggregatedDatesCB,
+    getAggregatedDatesLoadingCB,
     getStopDelaysCB,
     getStopPointsCB,
+    getStopPointsLoadingCB,
     getStopDelaysLoadingCB,
 } from "../store/selectors";
 import { useAppDispatch, useAppSelector } from "../store/store";
@@ -17,6 +19,9 @@ export function StopDelayPresenter() {
     const stopDelays = useAppSelector(getStopDelaysCB) ?? [];
     const stopPoints = useAppSelector(getStopPointsCB) ?? [];
     const availableDates = useAppSelector(getAggregatedDatesCB);
+    const isStopDelaysLoading = useAppSelector(getStopDelaysLoadingCB);
+    const isStopPointsLoading = useAppSelector(getStopPointsLoadingCB);
+    const isAggregatedDatesLoading = useAppSelector(getAggregatedDatesLoadingCB);
 
     function handleSelectDateCB(date: string) {
         if (!selectedSite) {
@@ -26,8 +31,7 @@ export function StopDelayPresenter() {
         dispatch(getStopDelays({ stopPointGIDs, date }));
     }
 
-    const isLoading = useAppSelector(getStopDelaysLoadingCB);
-    if (isLoading) {
+    if (isStopDelaysLoading || isStopPointsLoading || isAggregatedDatesLoading) {
         return <Suspense message="Loading stop delays..." />;
     }
 

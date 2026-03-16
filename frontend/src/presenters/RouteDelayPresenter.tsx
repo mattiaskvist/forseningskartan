@@ -1,6 +1,7 @@
 import { RouteDelayView } from "../views/routeDelayView";
 import {
     getAggregatedDatesCB,
+    getAggregatedDatesLoadingCB,
     getRouteDelaysCB,
     getRouteDelaysLoadingCB,
 } from "../store/selectors";
@@ -12,13 +13,14 @@ export function RouteDelayPresenter() {
     const dispatch = useAppDispatch();
     const routeDelays = useAppSelector(getRouteDelaysCB) ?? [];
     const availableDates = useAppSelector(getAggregatedDatesCB);
+    const isRouteDelaysLoading = useAppSelector(getRouteDelaysLoadingCB);
+    const isAggregatedDatesLoading = useAppSelector(getAggregatedDatesLoadingCB);
 
     function handleSelectDateCB(date: string) {
         dispatch(getRouteDelays(date));
     }
 
-    const isLoading = useAppSelector(getRouteDelaysLoadingCB);
-    if (isLoading) {
+    if (isRouteDelaysLoading || isAggregatedDatesLoading) {
         return <Suspense message="Loading route delays..." />;
     }
 
