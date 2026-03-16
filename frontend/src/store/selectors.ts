@@ -1,6 +1,10 @@
 import { Site } from "../types/sl";
 import { RootState } from "./store";
 
+function getAppLoadingCB(state: RootState) {
+    return state.sites.isLoading || state.stopPoints.isLoading || state.aggregatedDates.isLoading;
+}
+
 function getSitesCB(state: RootState) {
     return state.sites.data;
 }
@@ -56,6 +60,7 @@ function getDeparturesLoadingCB(state: RootState) {
 }
 
 export {
+    getAppLoadingCB,
     getSitesCB,
     getSelectedSiteIdCB,
     getStopPointsCB,

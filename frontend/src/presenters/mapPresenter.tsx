@@ -1,14 +1,16 @@
 import { useCallback } from "react";
 import { MapView } from "../views/mapView";
-import { Suspense } from "../components/Suspense";
 import { useAppDispatch, useAppSelector } from "../store/store";
-import { getSitesCB, getSelectedSiteCB } from "../store/selectors";
+import { getSelectedSiteCB } from "../store/selectors";
 import { selectSiteCB } from "../store/selection";
+import { Site } from "../types/sl";
 
-export function MapPresenter() {
+type MapPresenterProps = {
+    sites: Site[];
+};
+
+export function MapPresenter({ sites }: MapPresenterProps) {
     const dispatch = useAppDispatch();
-
-    const sites = useAppSelector(getSitesCB);
     const selectedSite = useAppSelector(getSelectedSiteCB);
 
     const handleSelectSiteCB = useCallback(
@@ -18,13 +20,11 @@ export function MapPresenter() {
         [dispatch]
     );
 
-    return sites ? (
+    return (
         <MapView
             sites={sites}
             selectedSite={selectedSite}
             handleSelectSiteCB={handleSelectSiteCB}
         />
-    ) : (
-        <Suspense fullscreen message="Loading stops and preparing the map..." />
     );
 }
