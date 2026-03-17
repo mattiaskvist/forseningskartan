@@ -12,9 +12,9 @@ import (
 )
 
 // Fixed chunk count so clients can deterministically resolve chunk from stop key.
-// There are around 10 000 unique stop keys, so this results in around 40 stops per chunk on average
-// which should be well within Firestore document limits.
-const firestoreByStopChunkCount = 256
+// Aggregates now include stop -> route -> hour payloads, so we use smaller chunks
+// to keep document sizes comfortably under Firestore limits.
+const firestoreByStopChunkCount = 1024
 
 func writeByRouteToFirestore(result aggregationResult, projectID string, dateFromPath string) error {
 	ctx := context.Background()

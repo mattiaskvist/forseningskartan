@@ -14,26 +14,24 @@ import (
 )
 
 type aggregator struct {
-	rootPath             string
-	staticIndex          *staticIndex
-	totalArrivalDelay    statsAccumulator
-	totalDepartureDelay  statsAccumulator
-	totalArrivalAhead    statsAccumulator
-	totalDepartureAhead  statsAccumulator
-	totalArrivalOnTime   int64
-	totalDepartureOnTime int64
-	countedEvents        map[string]struct{}
-	filesDiscovered      int64
-	filesParsed          int64
-	feedsWithTrips       int64
-	tripUpdates          int64
-	stopTimeUpdates      int64
-	routes               map[string]struct{}
-	trips                map[string]struct{}
-	vehicles             map[string]struct{}
-	byHour               map[string]*bucket
-	byRoute              map[string]*bucket
-	byStop               map[string]*bucket
+	rootPath            string
+	staticIndex         *staticIndex
+	totalArrivalDelay   statsAccumulator
+	totalDepartureDelay statsAccumulator
+	totalArrivalAhead   statsAccumulator
+	totalDepartureAhead statsAccumulator
+	countedEvents       map[string]struct{}
+	filesDiscovered     int64
+	filesParsed         int64
+	feedsWithTrips      int64
+	tripUpdates         int64
+	stopTimeUpdates     int64
+	routes              map[string]struct{}
+	trips               map[string]struct{}
+	vehicles            map[string]struct{}
+	byHour              map[string]*bucket
+	byRoute             map[string]*bucket
+	byStop              map[string]*bucket
 }
 
 func newAggregator(rootPath string, staticIndex *staticIndex) (*aggregator, error) {
@@ -113,18 +111,24 @@ func (a *aggregator) addFile(path string) error {
 		vehicleID := strings.TrimSpace(tripUpdate.GetVehicle().GetId())
 
 		var routeBucket *bucket
+		var routeHourBucket *bucket
 		if routeID != "" {
 			a.routes[routeID] = struct{}{}
 			hourBucket.Routes[routeID] = struct{}{}
 
 			routeBucket = a.bucketFor(a.byRoute, routeID)
+			routeHourBucket = a.bucketFor(routeBucket.ByHour, hourKey)
 			routeBucket.TripUpdates++
+			routeHourBucket.TripUpdates++
 			routeBucket.Routes[routeID] = struct{}{}
+			routeHourBucket.Routes[routeID] = struct{}{}
 			if tripID != "" {
 				routeBucket.Trips[tripID] = struct{}{}
+				routeHourBucket.Trips[tripID] = struct{}{}
 			}
 			if vehicleID != "" {
 				routeBucket.Vehicles[vehicleID] = struct{}{}
+				routeHourBucket.Vehicles[vehicleID] = struct{}{}
 			}
 		}
 
@@ -143,30 +147,43 @@ func (a *aggregator) addFile(path string) error {
 			hourBucket.StopTimeUpdates++
 			if routeBucket != nil {
 				routeBucket.StopTimeUpdates++
+				if routeHourBucket != nil {
+					routeHourBucket.StopTimeUpdates++
+				}
 			}
 
 			stopID := strings.TrimSpace(stopUpdate.GetStopId())
 			var stopBucket *bucket
 			var stopRouteBucket *bucket
+			var stopRouteHourBucket *bucket
 			if stopID != "" {
 				stopBucket = a.bucketFor(a.byStop, stopID)
 				stopBucket.StopTimeUpdates++
 				if routeID != "" {
 					stopBucket.Routes[routeID] = struct{}{}
 					stopRouteBucket = a.bucketFor(stopBucket.ByRoute, routeID)
+					stopRouteHourBucket = a.bucketFor(stopRouteBucket.ByHour, hourKey)
 					stopRouteBucket.StopTimeUpdates++
+					stopRouteHourBucket.StopTimeUpdates++
 					stopRouteBucket.Routes[routeID] = struct{}{}
+					stopRouteHourBucket.Routes[routeID] = struct{}{}
 				}
 				if tripID != "" {
 					stopBucket.Trips[tripID] = struct{}{}
 					if stopRouteBucket != nil {
 						stopRouteBucket.Trips[tripID] = struct{}{}
+						if stopRouteHourBucket != nil {
+							stopRouteHourBucket.Trips[tripID] = struct{}{}
+						}
 					}
 				}
 				if vehicleID != "" {
 					stopBucket.Vehicles[vehicleID] = struct{}{}
 					if stopRouteBucket != nil {
 						stopRouteBucket.Vehicles[vehicleID] = struct{}{}
+						if stopRouteHourBucket != nil {
+							stopRouteHourBucket.Vehicles[vehicleID] = struct{}{}
+						}
 					}
 				}
 			}
@@ -190,34 +207,7 @@ func (a *aggregator) addFile(path string) error {
 				a.countedEvents[eventKey] = struct{}{}
 
 				delay := int64(event.GetDelay())
-				// on-time
-				if delay == 0 {
-					if isArrival {
-						a.totalArrivalOnTime++
-						hourBucket.ArrivalOnTime++
-						if routeBucket != nil {
-							routeBucket.ArrivalOnTime++
-						}
-						if stopBucket != nil {
-							stopBucket.ArrivalOnTime++
-						}
-						if stopRouteBucket != nil {
-							stopRouteBucket.ArrivalOnTime++
-						}
-					} else {
-						a.totalDepartureOnTime++
-						hourBucket.DepartureOnTime++
-						if routeBucket != nil {
-							routeBucket.DepartureOnTime++
-						}
-						if stopBucket != nil {
-							stopBucket.DepartureOnTime++
-						}
-						if stopRouteBucket != nil {
-							stopRouteBucket.DepartureOnTime++
-						}
-					}
-				} else if delay > 0 {
+				if delay > 0 {
 					// delayed
 					if isArrival {
 						a.totalArrivalDelay.Add(delay)
@@ -229,8 +219,14 @@ func (a *aggregator) addFile(path string) error {
 					if routeBucket != nil {
 						if isArrival {
 							routeBucket.ArrivalDelay.Add(delay)
+							if routeHourBucket != nil {
+								routeHourBucket.ArrivalDelay.Add(delay)
+							}
 						} else {
 							routeBucket.DepartureDelay.Add(delay)
+							if routeHourBucket != nil {
+								routeHourBucket.DepartureDelay.Add(delay)
+							}
 						}
 					}
 					if stopBucket != nil {
@@ -243,8 +239,14 @@ func (a *aggregator) addFile(path string) error {
 					if stopRouteBucket != nil {
 						if isArrival {
 							stopRouteBucket.ArrivalDelay.Add(delay)
+							if stopRouteHourBucket != nil {
+								stopRouteHourBucket.ArrivalDelay.Add(delay)
+							}
 						} else {
 							stopRouteBucket.DepartureDelay.Add(delay)
+							if stopRouteHourBucket != nil {
+								stopRouteHourBucket.DepartureDelay.Add(delay)
+							}
 						}
 					}
 				} else if delay < 0 {
@@ -260,8 +262,14 @@ func (a *aggregator) addFile(path string) error {
 					if routeBucket != nil {
 						if isArrival {
 							routeBucket.ArrivalAhead.Add(ahead)
+							if routeHourBucket != nil {
+								routeHourBucket.ArrivalAhead.Add(ahead)
+							}
 						} else {
 							routeBucket.DepartureAhead.Add(ahead)
+							if routeHourBucket != nil {
+								routeHourBucket.DepartureAhead.Add(ahead)
+							}
 						}
 					}
 					if stopBucket != nil {
@@ -274,8 +282,14 @@ func (a *aggregator) addFile(path string) error {
 					if stopRouteBucket != nil {
 						if isArrival {
 							stopRouteBucket.ArrivalAhead.Add(ahead)
+							if stopRouteHourBucket != nil {
+								stopRouteHourBucket.ArrivalAhead.Add(ahead)
+							}
 						} else {
 							stopRouteBucket.DepartureAhead.Add(ahead)
+							if stopRouteHourBucket != nil {
+								stopRouteHourBucket.DepartureAhead.Add(ahead)
+							}
 						}
 					}
 				}
@@ -303,8 +317,6 @@ func (a *aggregator) finalize() aggregationResult {
 		DepartureDelay:      a.totalDepartureDelay.Finalize(),
 		ArrivalAhead:        a.totalArrivalAhead.Finalize(),
 		DepartureAhead:      a.totalDepartureAhead.Finalize(),
-		ArrivalOnTime:       a.totalArrivalOnTime,
-		DepartureOnTime:     a.totalDepartureOnTime,
 		ByHour:              summarizeBuckets(a.byHour, bucketKindHour, a.staticIndex),
 		ByRoute:             summarizeBuckets(a.byRoute, bucketKindRoute, a.staticIndex),
 		ByStop:              summarizeBuckets(a.byStop, bucketKindStop, a.staticIndex),
@@ -337,8 +349,13 @@ func summarizeBuckets(source map[string]*bucket, kind bucketKind, staticIndex *s
 			DepartureDelay:  bucketValue.DepartureDelay.Finalize(),
 			ArrivalAhead:    bucketValue.ArrivalAhead.Finalize(),
 			DepartureAhead:  bucketValue.DepartureAhead.Finalize(),
-			ArrivalOnTime:   bucketValue.ArrivalOnTime,
-			DepartureOnTime: bucketValue.DepartureOnTime,
+		}
+
+		if len(bucketValue.ByHour) > 0 {
+			summaryValue.ByHour = summarizeBuckets(bucketValue.ByHour, bucketKindHour, staticIndex)
+		}
+		if kind == bucketKindStop && len(bucketValue.ByRoute) > 0 {
+			summaryValue.ByRoute = summarizeBuckets(bucketValue.ByRoute, bucketKindRoute, staticIndex)
 		}
 
 		if staticIndex != nil {
@@ -361,9 +378,6 @@ func summarizeBuckets(source map[string]*bucket, kind bucketKind, staticIndex *s
 						Lon:          stopValue.Lon,
 						LocationType: stopValue.LocationType,
 					}
-				}
-				if len(bucketValue.ByRoute) > 0 {
-					summaryValue.ByRoute = summarizeBuckets(bucketValue.ByRoute, bucketKindRoute, staticIndex)
 				}
 			}
 		}

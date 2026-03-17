@@ -10,6 +10,7 @@ type summary struct {
 	Key             string     `firestore:"key" json:"key"`
 	Route           *routeMeta `firestore:"route" json:"route,omitempty"`
 	Stop            *stopMeta  `firestore:"stop" json:"stop,omitempty"`
+	ByHour          []summary  `firestore:"byHour" json:"byHour,omitempty"`
 	ByRoute         []summary  `firestore:"byRoute" json:"byRoute,omitempty"`
 	TripUpdates     int64      `firestore:"tripUpdates" json:"tripUpdates"`
 	StopTimeUpdates int64      `firestore:"stopTimeUpdates" json:"stopTimeUpdates"`
@@ -20,8 +21,6 @@ type summary struct {
 	DepartureDelay  delayStats `firestore:"departureDelayStats" json:"departureDelayStats"`
 	ArrivalAhead    delayStats `firestore:"arrivalAheadStats" json:"arrivalAheadStats"`
 	DepartureAhead  delayStats `firestore:"departureAheadStats" json:"departureAheadStats"`
-	ArrivalOnTime   int64      `firestore:"arrivalOnTimeCount" json:"arrivalOnTimeCount"`
-	DepartureOnTime int64      `firestore:"departureOnTimeCount" json:"departureOnTimeCount"`
 }
 
 type routeMeta struct {
@@ -52,8 +51,6 @@ type aggregationResult struct {
 	DepartureDelay      delayStats `firestore:"departureDelayStats" json:"departureDelayStats"`
 	ArrivalAhead        delayStats `firestore:"arrivalAheadStats" json:"arrivalAheadStats"`
 	DepartureAhead      delayStats `firestore:"departureAheadStats" json:"departureAheadStats"`
-	ArrivalOnTime       int64      `firestore:"arrivalOnTimeCount" json:"arrivalOnTimeCount"`
-	DepartureOnTime     int64      `firestore:"departureOnTimeCount" json:"departureOnTimeCount"`
 	ByHour              []summary  `firestore:"byHour" json:"byHour"`
 	ByRoute             []summary  `firestore:"byRoute" json:"byRoute"`
 	ByStop              []summary  `firestore:"byStop" json:"byStop"`
@@ -98,11 +95,10 @@ type bucket struct {
 	DepartureDelay  statsAccumulator
 	ArrivalAhead    statsAccumulator
 	DepartureAhead  statsAccumulator
-	ArrivalOnTime   int64
-	DepartureOnTime int64
 	Routes          map[string]struct{}
 	Trips           map[string]struct{}
 	Vehicles        map[string]struct{}
+	ByHour          map[string]*bucket
 	ByRoute         map[string]*bucket
 }
 
@@ -111,6 +107,7 @@ func newBucket() *bucket {
 		Routes:   make(map[string]struct{}),
 		Trips:    make(map[string]struct{}),
 		Vehicles: make(map[string]struct{}),
+		ByHour:   make(map[string]*bucket),
 		ByRoute:  make(map[string]*bucket),
 	}
 }
