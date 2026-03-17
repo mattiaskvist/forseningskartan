@@ -30,8 +30,8 @@ export function RouteDelayStats(br: DelaySummary) {
                 s({br.arrivalAheadStats.count}x)
             </dd>
             <dd>
-                Departure on time (derived): {departureOnTime}x, Arrival on time
-                (derived): {arrivalOnTime}x
+                Departure on time (derived): {departureOnTime}x, Arrival on time (derived):{" "}
+                {arrivalOnTime}x
             </dd>
         </div>
     );
