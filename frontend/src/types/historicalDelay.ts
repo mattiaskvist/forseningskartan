@@ -1,6 +1,5 @@
 type DelayStats = {
     count: number;
-    maxSeconds: number;
     avgSeconds: number;
 };
 
@@ -15,18 +14,13 @@ export const routeToString: { [K in routeType]: string } = {
 };
 
 type RouteMeta = {
-    agencyId: string;
     shortName: string;
     longName: string;
     type: routeType;
-    desc: string;
 };
 
 type StopMeta = {
     name: string;
-    lat: string;
-    lon: string;
-    locationType: string;
 };
 
 type DelaySummary = {
@@ -35,11 +29,8 @@ type DelaySummary = {
     stop?: StopMeta;
     byHour?: DelaySummary[];
     byRoute?: DelaySummary[];
-    tripUpdates: number;
     stopTimeUpdates: number;
-    uniqueRoutes: number;
     uniqueTrips: number;
-    uniqueVehicles: number;
     arrivalDelayStats: DelayStats;
     departureDelayStats: DelayStats;
     arrivalAheadStats: DelayStats;
