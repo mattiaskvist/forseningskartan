@@ -1,32 +1,44 @@
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import { DepartureView } from "../views/departureView";
-import { getDeparturesCB, getDeparturesLoadingCB, getSelectedSiteCB, getSelectedSiteIdCB} from "../store/selectors";
+import {
+    getDeparturesCB,
+    getDeparturesLoadingCB,
+    getSelectedSiteCB,
+    getSelectedSiteIdCB,
+} from "../store/selectors";
 import { setSelectedSiteId } from "../store/reducers";
 import { Departure } from "../types/sl";
+
+type SelectedDepartureState = {
+    siteId: number;
+    departure: Departure;
+};
 
 export function DeparturePresenter() {
     const dispatch = useAppDispatch();
     const departureResponse = useAppSelector(getDeparturesCB);
     const isDeparturesLoading = useAppSelector(getDeparturesLoadingCB);
     const selectedSite = useAppSelector(getSelectedSiteCB);
-    const [selectedDepartureKey, setSelectedDepartureKey] = useState<string | null>(null);
     const selectedSiteId = useAppSelector(getSelectedSiteIdCB);
-
-    function getDepartureKeyCB(departure: Departure) {
-        return `${selectedSiteId ?? "no-site"}-${departure.journey.id}-${departure.scheduled}-${departure.stop_point.id}`;
-    }
+    const [selectedDepartureState, setSelectedDepartureState] = useState<SelectedDepartureState | null>(
+        null
+    );
 
     function selectDepartureCB(departure: Departure) {
-        setSelectedDepartureKey(getDepartureKeyCB(departure));
+        if (selectedSiteId === null) {
+            return;
+        }
+
+        setSelectedDepartureState({ siteId: selectedSiteId, departure });
     }
 
     function returnToDepartureListCB() {
-        setSelectedDepartureKey(null);
+        setSelectedDepartureState(null);
     }
 
     function closeDeparturesViewCB() {
-        setSelectedDepartureKey(null);
+        setSelectedDepartureState(null);
         dispatch(setSelectedSiteId(null));
     }
 
@@ -36,10 +48,10 @@ export function DeparturePresenter() {
 
     const departures = departureResponse?.departures ?? [];
     const selectedDeparture =
-        selectedDepartureKey !== null
-            ? (departures.find(
-                  (departure) => getDepartureKeyCB(departure) === selectedDepartureKey
-              ) ?? null)
+        selectedSiteId !== null &&
+        selectedDepartureState !== null &&
+        selectedDepartureState.siteId === selectedSiteId
+            ? selectedDepartureState.departure
             : null;
 
     return (
