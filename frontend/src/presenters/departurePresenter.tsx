@@ -1,36 +1,29 @@
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import { DepartureView } from "../views/departureView";
-import {
-    getDeparturesCB,
-    getDeparturesLoadingCB,
-    getSelectedSiteCB,
-    getSelectedSiteIdCB,
-} from "../store/selectors";
+import { getDeparturesCB, getDeparturesLoadingCB } from "../store/selectors";
 import { setSelectedSiteId } from "../store/reducers";
-import { Departure } from "../types/sl";
+import { Departure, Site } from "../types/sl";
 
 type SelectedDepartureState = {
     siteId: number;
     departure: Departure;
 };
 
-export function DeparturePresenter() {
+type DeparturePresenterProps = {
+    selectedSite: Site;
+};
+
+export function DeparturePresenter({ selectedSite }: DeparturePresenterProps) {
     const dispatch = useAppDispatch();
     const departureResponse = useAppSelector(getDeparturesCB);
     const isDeparturesLoading = useAppSelector(getDeparturesLoadingCB);
-    const selectedSite = useAppSelector(getSelectedSiteCB);
-    const selectedSiteId = useAppSelector(getSelectedSiteIdCB);
     const [selectedDepartureState, setSelectedDepartureState] = useState<SelectedDepartureState | null>(
         null
     );
 
     function selectDepartureCB(departure: Departure) {
-        if (selectedSiteId === null) {
-            return;
-        }
-
-        setSelectedDepartureState({ siteId: selectedSiteId, departure });
+        setSelectedDepartureState({ siteId: selectedSite.id, departure });
     }
 
     function returnToDepartureListCB() {
@@ -42,15 +35,9 @@ export function DeparturePresenter() {
         dispatch(setSelectedSiteId(null));
     }
 
-    if (!selectedSite) {
-        return null;
-    }
-
     const departures = departureResponse?.departures ?? [];
     const selectedDeparture =
-        selectedSiteId !== null &&
-        selectedDepartureState !== null &&
-        selectedDepartureState.siteId === selectedSiteId
+        selectedDepartureState !== null && selectedDepartureState.siteId === selectedSite.id
             ? selectedDepartureState.departure
             : null;
 

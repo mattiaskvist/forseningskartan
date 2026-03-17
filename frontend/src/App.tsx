@@ -5,7 +5,7 @@ import { useAppDispatch, useAppSelector } from "./store/store";
 import { DeparturePresenter } from "./presenters/departurePresenter";
 import { StopDelayPresenter } from "./presenters/stopDelayPresenter";
 import { RouteDelayPresenter } from "./presenters/RouteDelayPresenter";
-import { getSelectedSiteIdCB, getSitesLoadingCB, getSitesCB } from "./store/selectors";
+import { getSelectedSiteCB, getSitesLoadingCB, getSitesCB } from "./store/selectors";
 import { Suspense } from "./components/Suspense";
 
 function App() {
@@ -19,7 +19,7 @@ function App() {
     }, [dispatch]);
 
     const sites = useAppSelector(getSitesCB);
-    const selectedSiteId = useAppSelector(getSelectedSiteIdCB);
+    const selectedSite = useAppSelector(getSelectedSiteCB);
     const isSitesLoading = useAppSelector(getSitesLoadingCB);
     if (isSitesLoading || !sites) {
         return <Suspense fullscreen message="Loading transit data and preparing the map..." />;
@@ -30,10 +30,10 @@ function App() {
             <MapPresenter sites={sites} />
             <aside className="pointer-events-auto absolute right-4 top-4 z-1000 w-[min(420px,calc(100vw-2rem))]">
                 <div className="flex max-h-[calc(100vh-2rem)] flex-col gap-3 overflow-y-auto pr-1">
-                    {selectedSiteId !== null && (
+                    {selectedSite && (
                         <section className="overlay-panel">
                             <h2 className="overlay-panel-title">Departures</h2>
-                            <DeparturePresenter />
+                            <DeparturePresenter selectedSite={selectedSite} />
                         </section>
                     )}
                     <section className="overlay-panel">
