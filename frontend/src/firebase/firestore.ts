@@ -13,6 +13,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const BY_STOP_CHUNK_COUNT = 1024;
 
 // Same hash function as used in gtfsAggregation
 // to determine which chunk a stop belongs to.
@@ -24,7 +25,7 @@ function hashToChunk(stopKey: string): number {
         hash = Math.imul(hash, 0x01000193) >>> 0;
     }
 
-    return hash % 256;
+    return hash % BY_STOP_CHUNK_COUNT;
 }
 
 export function fetchStopDelays(
