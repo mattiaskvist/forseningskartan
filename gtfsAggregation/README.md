@@ -144,6 +144,17 @@ Each `data` document contains compact keys:
 - `d` date string like `"2026-03-01"`.
 - `c` stop count.
 
+### By hour key format
+
+For all `ByHour`/`h` summaries, the summary `k` field is:
+
+- The **start of the hour bucket**.
+- Encoded in **UTC**.
+- Formatted as **RFC3339** (for example `"2026-03-01T13:00:00Z"`), representing the interval `[13:00, 14:00)` UTC.
+
+Internally this is generated as `observedAt.UTC().Truncate(time.Hour).Format(time.RFC3339)`.
+`observedAt` is taken from the GTFS-RT header timestamp when present, otherwise from the archive path (`<yyyy>/<mm>/<dd>/<hh>`) interpreted as UTC.
+
 ### Date index
 
 An additional index file is stored in index/dates with a `dates` field containing a list of all dates for which an aggregated data collection exists. The dates are strings like "2026-03-01".
