@@ -114,20 +114,7 @@ export function fetchStopDelays(
 export function fetchRouteDelays(date: string): Promise<DelaySummary[] | null> {
     const byRouteDocRef = doc(db, date, "byRoute");
 
-    async function processDocACB(docSnapshot: DocumentSnapshot): Promise<DelaySummary[] | null> {
-        if (!docSnapshot.exists()) {
-            return null;
-        }
-
-        const data = docSnapshot.data() as { br?: CompactSummary[] };
-        if (data.br) {
-            return data.br.map(mapSummary);
-        }
-
-        const chunkPromises = Array.from({ length: BY_ROUTE_CHUNK_COUNT }, (_, chunkIdx) =>
-            getDoc(doc(db, date, "byRoute", `chunk_${chunkIdx}`, "data"))
-        );
-        const chunkDocs = await Promise.all(chunkPromises);
+    function processChunkDocsCB(chunkDocs: DocumentSnapshot[]): DelaySummary[] {
         const result: DelaySummary[] = [];
 
         function processChunkCB(chunkDoc: DocumentSnapshot) {
@@ -146,6 +133,24 @@ export function fetchRouteDelays(date: string): Promise<DelaySummary[] | null> {
         chunkDocs.forEach(processChunkCB);
         result.sort((a, b) => a.key.localeCompare(b.key));
         return result;
+    }
+
+    function processDocACB(
+        docSnapshot: DocumentSnapshot
+    ): DelaySummary[] | null | Promise<DelaySummary[] | null> {
+        if (!docSnapshot.exists()) {
+            return null;
+        }
+
+        const data = docSnapshot.data() as { br?: CompactSummary[] };
+        if (data.br) {
+            return data.br.map(mapSummary);
+        }
+
+        const chunkPromises = Array.from({ length: BY_ROUTE_CHUNK_COUNT }, (_, chunkIdx) =>
+            getDoc(doc(db, date, "byRoute", `chunk_${chunkIdx}`, "data"))
+        );
+        return Promise.all(chunkPromises).then(processChunkDocsCB);
     }
 
     function catchErrorACB(error: unknown) {
