@@ -60,17 +60,24 @@ Optionally, the data aggregated **by route** and **by stop** can be stored in fi
 
 ### By Route
 
-`byRoute` is stored in a single document per day:
+`byRoute` is stored as chunked documents per day:
 
 ```text
-<YYYY-MM-DD>/byRoute
+<YYYY-MM-DD>/byRoute                 // metadata document
+<YYYY-MM-DD>/byRoute/chunk_<n>/data  // chunked route rows
 ```
 
-Each byRoute document contains compact keys:
+The metadata document `<YYYY-MM-DD>/byRoute` contains:
 
-- `br` list of route summaries (key is route ID, e.g. 9011...).
 - `d` date string like `"2026-03-01"`.
-- `c` route count.
+- `c` total route count.
+- `cc` fixed chunk count (`16`).
+
+Each chunk document `<YYYY-MM-DD>/byRoute/chunk_<n>/data` contains compact keys:
+
+- `r` list of route summaries (key is route ID, e.g. 9011...).
+- `d` date string like `"2026-03-01"`.
+- `c` route count in this chunk.
 
 ```go
 type summary struct {
@@ -114,10 +121,10 @@ type delayStats struct {
 Stops are assigned to chunks using the following hash function, so frontend lookup is deterministic:
 
 ```go
-func hashToChunk(stopKey string) int {
+func hashToChunk(key string, chunkCount int) int {
 	h := fnv.New32a()
-	_, _ = h.Write([]byte(stopKey))
-	return int(h.Sum32() % uint32(1024))
+	_, _ = h.Write([]byte(key))
+	return int(h.Sum32() % uint32(chunkCount))
 }
 ```
 
