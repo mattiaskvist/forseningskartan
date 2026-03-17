@@ -63,7 +63,7 @@ export function DepartureView({
         return aTime - bTime;
     }
 
-    function formatTimeCB(rawTime: string | undefined) {
+    function formatTime(rawTime: string | undefined) {
         if (!rawTime) {
             return "-";
         }
@@ -90,7 +90,7 @@ export function DepartureView({
         return Math.round((expectedTimestamp - scheduledTimestamp) / 60000);
     }
 
-    function formatDelayCB(delayMinutes: number | null) {
+    function formatDelay(delayMinutes: number | null) {
         if (delayMinutes === null) {
             return "delay unavailable";
         }
@@ -106,7 +106,7 @@ export function DepartureView({
         return `Late by ${delayMinutes} min`;
     }
 
-    function getDelayTextColorClassCB(delayMinutes: number | null) {
+    function getDelayTextColorClass(delayMinutes: number | null) {
         if (delayMinutes === null) {
             return "text-slate-500";
         }
@@ -137,11 +137,11 @@ export function DepartureView({
                     {transportMode} {line} to {destination}
                 </p>
                 <p className="text-sm text-slate-700">
-                    Planned {formatTimeCB(departure.scheduled)} · Predicted{" "}
-                    {formatTimeCB(departure.expected ?? departure.scheduled)}
+                    Planned {formatTime(departure.scheduled)} · Predicted{" "}
+                    {formatTime(departure.expected ?? departure.scheduled)}
                 </p>
-                <p className={`text-sm font-medium ${getDelayTextColorClassCB(delayMinutes)}`}>
-                    {formatDelayCB(delayMinutes)}
+                <p className={`text-sm font-medium ${getDelayTextColorClass(delayMinutes)}`}>
+                    {formatDelay(delayMinutes)}
                 </p>
             </button>
         );
@@ -172,12 +172,12 @@ export function DepartureView({
                 formatOptional(departure.destination ?? departure.direction)
             ),
             renderDetailRow("Direction", formatOptional(departure.direction)),
-            renderDetailRow("Planned departure", formatTimeCB(departure.scheduled)),
+            renderDetailRow("Planned departure", formatTime(departure.scheduled)),
             renderDetailRow(
                 "Predicted departure",
-                formatTimeCB(departure.expected ?? departure.scheduled)
+                formatTime(departure.expected ?? departure.scheduled)
             ),
-            renderDetailRow("Delay", formatDelayCB(getDelayMinutes(departure))),
+            renderDetailRow("Delay", formatDelay(getDelayMinutes(departure))),
             renderDetailRow("Departure state", formatOptional(departure.state)),
             renderDetailRow("Journey ID", formatOptional(departure.journey.id)),
             renderDetailRow("Journey state", formatOptional(departure.journey.state)),
