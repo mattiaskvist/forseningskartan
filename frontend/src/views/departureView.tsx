@@ -96,27 +96,27 @@ export function DepartureView({
         }
 
         if (delayMinutes === 0) {
-            return "on time (0 min)";
+            return "On time";
         }
 
         if (delayMinutes < 0) {
-            return `ahead ${Math.abs(delayMinutes)} min`;
+            return `Ahead by ${Math.abs(delayMinutes)} min`;
         }
 
-        return `late ${delayMinutes} min`;
+        return `Late by ${delayMinutes} min`;
     }
 
     function getDelayTextColorClassCB(delayMinutes: number | null) {
         if (delayMinutes === null) {
             return "text-slate-500";
         }
-        if (delayMinutes < 0) {
+        if (delayMinutes <= 0) {
             return "text-emerald-600";
         }
-        if (delayMinutes > 0) {
-            return "text-rose-600";
+        if (delayMinutes > 0 && delayMinutes <= 3) {
+            return "text-amber-600";
         }
-        return "text-amber-600";
+        return "text-rose-600";
     }
 
     function renderDepartureCB(departure: Departure) {
@@ -141,7 +141,7 @@ export function DepartureView({
                     {formatTimeCB(departure.expected ?? departure.scheduled)}
                 </p>
                 <p className={`text-sm font-medium ${getDelayTextColorClassCB(delayMinutes)}`}>
-                    Delay {formatDelayCB(delayMinutes)}
+                    {formatDelayCB(delayMinutes)}
                 </p>
             </button>
         );
