@@ -181,20 +181,11 @@ export function DepartureView({
             renderDetailRow("Departure state", formatOptional(departure.state)),
             renderDetailRow("Journey ID", formatOptional(departure.journey.id)),
             renderDetailRow("Journey state", formatOptional(departure.journey.state)),
-            renderDetailRow(
-                "Prediction state",
-                formatOptional(departure.journey.prediction_state)
-            ),
-            renderDetailRow(
-                "Passenger level",
-                formatOptional(departure.journey.passenger_level)
-            ),
+            renderDetailRow("Prediction state", formatOptional(departure.journey.prediction_state)),
+            renderDetailRow("Passenger level", formatOptional(departure.journey.passenger_level)),
             renderDetailRow("Stop area", formatOptional(departure.stop_area.name)),
             renderDetailRow("Stop point", formatOptional(departure.stop_point.name)),
-            renderDetailRow(
-                "Stop designation",
-                formatOptional(departure.stop_point.designation)
-            ),
+            renderDetailRow("Stop designation", formatOptional(departure.stop_point.designation)),
         ];
 
         return (
