@@ -113,7 +113,7 @@ export function DepartureView({
         return value !== undefined && value !== "" ? `${value}` : "-";
     }
 
-    function renderDepartureDetailsCB(departure: Departure) {
+    function renderDepartureDetails(departure: Departure) {
         const detailRows = [
             renderDetailRowCB("Transport mode", formatOptionalCB(departure.line.transport_mode)),
             renderDetailRowCB(
@@ -180,7 +180,7 @@ export function DepartureView({
             {isLoading ? (
                 <Suspense message="Loading departures..." />
             ) : selectedDeparture ? (
-                renderDepartureDetailsCB(selectedDeparture)
+                renderDepartureDetails(selectedDeparture)
             ) : upcomingDepartures.length > 0 ? (
                 <div>{upcomingDepartures.map(renderDepartureCB)}</div>
             ) : (

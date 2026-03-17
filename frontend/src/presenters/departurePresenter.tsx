@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import { DepartureView } from "../views/departureView";
-import { getDeparturesCB, getDeparturesLoadingCB, getSelectedSiteCB } from "../store/selectors";
+import { getDeparturesCB, getDeparturesLoadingCB, getSelectedSiteCB, getSelectedSiteIdCB} from "../store/selectors";
 import { setSelectedSiteId } from "../store/reducers";
 import { Departure } from "../types/sl";
 
@@ -11,7 +11,7 @@ export function DeparturePresenter() {
     const isDeparturesLoading = useAppSelector(getDeparturesLoadingCB);
     const selectedSite = useAppSelector(getSelectedSiteCB);
     const [selectedDepartureKey, setSelectedDepartureKey] = useState<string | null>(null);
-    const selectedSiteId = selectedSite?.id ?? null;
+    const selectedSiteId = useAppSelector(getSelectedSiteIdCB);
 
     function getDepartureKeyCB(departure: Departure) {
         return `${selectedSiteId ?? "no-site"}-${departure.journey.id}-${departure.scheduled}-${departure.stop_point.id}`;
