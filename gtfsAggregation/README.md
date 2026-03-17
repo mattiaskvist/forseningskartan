@@ -66,40 +66,40 @@ Optionally, the data aggregated **by route** and **by stop** can be stored in fi
 <YYYY-MM-DD>/byRoute
 ```
 
-Each byRoute document contains:
+Each byRoute document contains compact keys:
 
-- `byRoute` which is a list of summaries where each summary has the fields as shown below. The key is the route ID starting with 9011.
-- A string `date` like "2026-03-01".
-- An integer `routeCount`.
+- `br` list of route summaries (key is route ID, e.g. 9011...).
+- `d` date string like `"2026-03-01"`.
+- `c` route count.
 
 ```go
 type summary struct {
-	Key             string     `json:"key"`
-	Route           *routeMeta `json:"route,omitempty"` // empty for by stop
-	Stop            *stopMeta  `json:"stop,omitempty"` // empty for by route
-	ByHour          []summary  `json:"byHour,omitempty"` // set for route summaries
-	ByRoute         []summary  `json:"byRoute,omitempty"` // empty for by route
-	StopTimeUpdates int64      `json:"stopTimeUpdates"`
-	UniqueTrips     int        `json:"uniqueTrips"`
-	ArrivalDelay    delayStats `json:"arrivalDelayStats"`
-	DepartureDelay  delayStats `json:"departureDelayStats"`
-	ArrivalAhead    delayStats `json:"arrivalAheadStats"`
-	DepartureAhead  delayStats `json:"departureAheadStats"`
+	Key             string     `json:"k"`
+	Route           *routeMeta `json:"r,omitempty"` // empty for by stop
+	Stop            *stopMeta  `json:"s,omitempty"` // empty for by route
+	ByHour          []summary  `json:"h,omitempty"` // set for route summaries
+	ByRoute         []summary  `json:"br,omitempty"` // empty for by route
+	StopTimeUpdates int64      `json:"stu"`
+	UniqueTrips     int        `json:"ut"`
+	ArrivalDelay    delayStats `json:"ad"`
+	DepartureDelay  delayStats `json:"dd"`
+	ArrivalAhead    delayStats `json:"aa"`
+	DepartureAhead  delayStats `json:"da"`
 }
 
 type routeMeta struct {
-	ShortName string `json:"shortName"`
-	LongName  string `json:"longName"`
-	Type      string `json:"type"`
+	ShortName string `json:"sn"`
+	LongName  string `json:"ln"`
+	Type      string `json:"t"`
 }
 
 type stopMeta struct {
-	Name string `json:"name"`
+	Name string `json:"n"`
 }
 
 type delayStats struct {
-	Count      int64   `json:"count"` // occurrences
-	AvgSeconds float64 `json:"avgSeconds"`
+	Count      int64   `json:"c"` // occurrences
+	AvgSeconds float64 `json:"a"`
 }
 ```
 
@@ -121,13 +121,13 @@ func hashToChunk(stopKey string) int {
 }
 ```
 
-Each `data` document contains:
+Each `data` document contains compact keys:
 
-- `stops` which is a list of summaries as above with the `Stop` and `ByRoute` fields set.
+- `s` list of stop summaries as above with `Stop` and `ByRoute` fields set.
 - Route rows in `byStop -> byRoute` include nested `byHour` summaries.
 - Top-level `byRoute` summaries also include nested `ByHour` summaries.
-- A string `date` like "2026-03-01".
-- An integer `stopCount`.
+- `d` date string like `"2026-03-01"`.
+- `c` stop count.
 
 ### Date index
 

@@ -29,9 +29,9 @@ func writeByRouteToFirestore(result aggregationResult, projectID string, dateFro
 	docRef := client.Collection(dateFromPath).Doc("byRoute")
 
 	payload := map[string]any{
-		"date":       dateFromPath,
-		"routeCount": len(result.ByRoute),
-		"byRoute":    result.ByRoute,
+		"d":  dateFromPath,
+		"c":  len(result.ByRoute),
+		"br": result.ByRoute,
 	}
 
 	// Print approximate document size
@@ -92,9 +92,9 @@ func writeByStopToFirestore(result aggregationResult, projectID string, dateFrom
 			Doc("data")
 
 		payload := map[string]any{
-			"date":      dateFromPath,
-			"stopCount": len(chunkStops),
-			"stops":     chunkStops,
+			"d": dateFromPath,
+			"c": len(chunkStops),
+			"s": chunkStops,
 		}
 
 		// Print approximate document size for chunk payload

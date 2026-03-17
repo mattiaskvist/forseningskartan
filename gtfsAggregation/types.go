@@ -3,37 +3,37 @@ package main
 import "math"
 
 type delayStats struct {
-	Count      int64   `firestore:"count" json:"count"`
-	AvgSeconds float64 `firestore:"avgSeconds" json:"avgSeconds"`
+	Count      int64   `firestore:"c" json:"c"`
+	AvgSeconds float64 `firestore:"a" json:"a"`
 }
 
 type summary struct {
-	Key             string     `firestore:"key" json:"key"`
-	Route           *routeMeta `firestore:"route" json:"route,omitempty"`
-	Stop            *stopMeta  `firestore:"stop" json:"stop,omitempty"`
-	ByHour          []summary  `firestore:"byHour" json:"byHour,omitempty"`
-	ByRoute         []summary  `firestore:"byRoute" json:"byRoute,omitempty"`
-	StopTimeUpdates int64      `firestore:"stopTimeUpdates" json:"stopTimeUpdates"`
-	UniqueTrips     int        `firestore:"uniqueTrips" json:"uniqueTrips"`
-	ArrivalDelay    delayStats `firestore:"arrivalDelayStats" json:"arrivalDelayStats"`
-	DepartureDelay  delayStats `firestore:"departureDelayStats" json:"departureDelayStats"`
-	ArrivalAhead    delayStats `firestore:"arrivalAheadStats" json:"arrivalAheadStats"`
-	DepartureAhead  delayStats `firestore:"departureAheadStats" json:"departureAheadStats"`
+	Key             string     `firestore:"k" json:"k"`
+	Route           *routeMeta `firestore:"r" json:"r,omitempty"`
+	Stop            *stopMeta  `firestore:"s" json:"s,omitempty"`
+	ByHour          []summary  `firestore:"h" json:"h,omitempty"`
+	ByRoute         []summary  `firestore:"br" json:"br,omitempty"`
+	StopTimeUpdates int64      `firestore:"stu" json:"stu"`
+	UniqueTrips     int        `firestore:"ut" json:"ut"`
+	ArrivalDelay    delayStats `firestore:"ad" json:"ad"`
+	DepartureDelay  delayStats `firestore:"dd" json:"dd"`
+	ArrivalAhead    delayStats `firestore:"aa" json:"aa"`
+	DepartureAhead  delayStats `firestore:"da" json:"da"`
 }
 
 type routeMeta struct {
-	ShortName string `firestore:"shortName" json:"shortName"`
-	LongName  string `firestore:"longName" json:"longName"`
-	Type      string `firestore:"type" json:"type"`
+	ShortName string `firestore:"sn" json:"sn"`
+	LongName  string `firestore:"ln" json:"ln"`
+	Type      string `firestore:"t" json:"t"`
 }
 
 type stopMeta struct {
-	Name string `firestore:"name" json:"name"`
+	Name string `firestore:"n" json:"n"`
 }
 
 type aggregationResult struct {
-	ByRoute []summary `firestore:"byRoute" json:"byRoute"`
-	ByStop  []summary `firestore:"byStop" json:"byStop"`
+	ByRoute []summary `firestore:"br" json:"br"`
+	ByStop  []summary `firestore:"bs" json:"bs"`
 }
 
 type statsAccumulator struct {

@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, getDoc, DocumentSnapshot } from "firebase/firestore";
-import { DelaySummary, ByStopChunkDocument } from "../types/historicalDelay";
+import { DelaySummary } from "../types/historicalDelay";
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -26,6 +26,44 @@ function hashToChunk(stopKey: string): number {
     }
 
     return hash % BY_STOP_CHUNK_COUNT;
+}
+
+type CompactDelayStats = { c: number; a: number };
+
+type CompactSummary = {
+    k: string;
+    r?: { sn: string; ln: string; t: NonNullable<DelaySummary["route"]>["type"] };
+    s?: { n: string };
+    h?: CompactSummary[];
+    br?: CompactSummary[];
+    stu: number;
+    ut: number;
+    ad: CompactDelayStats;
+    dd: CompactDelayStats;
+    aa: CompactDelayStats;
+    da: CompactDelayStats;
+};
+
+function mapDelayStats(stats: CompactDelayStats): DelaySummary["arrivalDelayStats"] {
+    return { count: stats.c, avgSeconds: stats.a };
+}
+
+function mapSummary(summary: CompactSummary): DelaySummary {
+    return {
+        key: summary.k,
+        route: summary.r
+            ? { shortName: summary.r.sn, longName: summary.r.ln, type: summary.r.t }
+            : undefined,
+        stop: summary.s ? { name: summary.s.n } : undefined,
+        byHour: summary.h?.map(mapSummary),
+        byRoute: summary.br?.map(mapSummary),
+        stopTimeUpdates: summary.stu,
+        uniqueTrips: summary.ut,
+        arrivalDelayStats: mapDelayStats(summary.ad),
+        departureDelayStats: mapDelayStats(summary.dd),
+        arrivalAheadStats: mapDelayStats(summary.aa),
+        departureAheadStats: mapDelayStats(summary.da),
+    };
 }
 
 export function fetchStopDelays(
@@ -58,15 +96,19 @@ export function fetchStopDelays(
                 return;
             }
 
-            const chunkData = docSnapshot.data() as ByStopChunkDocument;
+            const chunkData = docSnapshot.data() as { s?: CompactSummary[] };
+            if (!chunkData.s) {
+                return;
+            }
 
-            function processStopCB(stop: DelaySummary) {
+            function processStopCB(rawStop: CompactSummary) {
+                const stop = mapSummary(rawStop);
                 if (stopPointGIDs.includes(stop.key)) {
                     results.push(stop);
                 }
             }
 
-            chunkData.stops.forEach(processStopCB);
+            chunkData.s.forEach(processStopCB);
         }
 
         docs.forEach(processDocCB);
@@ -89,7 +131,11 @@ export function fetchRouteDelays(date: string): Promise<DelaySummary[] | null> {
         if (!docSnapshot.exists()) {
             return null;
         }
-        return docSnapshot.data().byRoute as DelaySummary[];
+        const data = docSnapshot.data() as { br?: CompactSummary[] };
+        if (!data.br) {
+            return null;
+        }
+        return data.br.map(mapSummary);
     }
 
     function catchErrorACB(error: unknown) {
