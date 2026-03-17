@@ -40,7 +40,7 @@ func writeByRouteToFirestore(result aggregationResult, projectID string, dateFro
 		return nil
 	}
 
-	chunks := make(map[int][]summary, firestoreByRouteChunkCount)
+	chunks := make([][]summary, firestoreByRouteChunkCount)
 	for _, routeSummary := range result.ByRoute {
 		if routeSummary.Key == "" {
 			continue
@@ -52,8 +52,7 @@ func writeByRouteToFirestore(result aggregationResult, projectID string, dateFro
 
 	var totalWrite int
 	fileSizeStats := fileSizeStats{}
-	for chunkIdx := 0; chunkIdx < firestoreByRouteChunkCount; chunkIdx++ {
-		chunkRoutes := chunks[chunkIdx]
+	for chunkIdx, chunkRoutes := range chunks {
 		chunkID := fmt.Sprintf("chunk_%d", chunkIdx)
 
 		// Firestore path: <YYYY-MM-DD>/byRoute/<chunk_id>/data
