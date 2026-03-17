@@ -77,6 +77,7 @@ type summary struct {
 	Key             string     `json:"key"`
 	Route           *routeMeta `json:"route,omitempty"` // empty for by stop
 	Stop            *stopMeta  `json:"stop,omitempty"` // empty for by route
+	ByHour          []summary  `json:"byHour,omitempty"` // set for route summaries
 	ByRoute         []summary  `json:"byRoute,omitempty"` // empty for by route
 	TripUpdates     int64      `json:"tripUpdates"`
 	StopTimeUpdates int64      `json:"stopTimeUpdates"`
@@ -87,8 +88,6 @@ type summary struct {
 	DepartureDelay  delayStats `json:"departureDelayStats"`
 	ArrivalAhead    delayStats `json:"arrivalAheadStats"`
 	DepartureAhead  delayStats `json:"departureAheadStats"`
-	ArrivalOnTime   int64      `json:"arrivalOnTimeCount"`
-	DepartureOnTime int64      `json:"departureOnTimeCount"`
 }
 
 type routeMeta struct {
@@ -127,13 +126,14 @@ Stops are assigned to chunks using the following hash function, so frontend look
 func hashToChunk(stopKey string) int {
 	h := fnv.New32a()
 	_, _ = h.Write([]byte(stopKey))
-	return int(h.Sum32() % uint32(256))
+	return int(h.Sum32() % uint32(1024))
 }
 ```
 
 Each `data` document contains:
 
-- `stops` which is a list of summaries as above with the `Stop` and `ByRoute` fields set. The key is the stop point ID starting with 9022.
+- `stops` which is a list of summaries as above with the `Stop` and `ByRoute` fields set. Route rows in `ByRoute` can include nested `ByHour` summaries.
+- Top-level `byRoute` summaries can also include nested `ByHour` summaries.
 - A string `date` like "2026-03-01".
 - An integer `stopCount`.
 
@@ -147,3 +147,4 @@ An additional index file is stored in index/dates with a `dates` field containin
 - Each stop event (arrival/departure) is counted once globally across all snapshots using a deterministic event key.
 - This prevents future predicted stops and repeated snapshots from inflating totals.
 - Stop summaries can include a nested `byRoute` breakdown with per-route realized stats for that stop.
+- Route summaries can include nested `byHour` breakdowns, both at top-level `byRoute` and at `byStop -> byRoute`.
