@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, getDoc, DocumentSnapshot } from "firebase/firestore";
-import { DelaySummary, ByStopChunkDocument } from "../types/historicalDelay";
+import { DelaySummary, CompactDelayStats, CompactSummary } from "../types/historicalDelay";
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -13,6 +13,8 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const BY_STOP_CHUNK_COUNT = 1024;
+const BY_ROUTE_CHUNK_COUNT = 16;
 
 // Same hash function as used in gtfsAggregation
 // to determine which chunk a stop belongs to.
@@ -24,7 +26,31 @@ function hashToChunk(stopKey: string): number {
         hash = Math.imul(hash, 0x01000193) >>> 0;
     }
 
-    return hash % 256;
+    return hash % BY_STOP_CHUNK_COUNT;
+}
+
+function mapDelayStats(stats: CompactDelayStats): DelaySummary["arrivalDelayStats"] {
+    return { count: stats.c, avgSeconds: stats.a };
+}
+
+function mapSummary(summary: CompactSummary): DelaySummary {
+    return {
+        key: summary.k,
+        route: summary.r
+            ? { shortName: summary.r.sn, longName: summary.r.ln, type: summary.r.t }
+            : undefined,
+        stop: summary.s ? { name: summary.s.n } : undefined,
+        byHour: summary.h?.map(mapSummary),
+        byRoute: summary.br?.map(mapSummary),
+        stopTimeUpdates: summary.stu,
+        arrivalEventCount: summary.ac,
+        departureEventCount: summary.dc,
+        uniqueTrips: summary.ut,
+        arrivalDelayStats: mapDelayStats(summary.ad),
+        departureDelayStats: mapDelayStats(summary.dd),
+        arrivalAheadStats: mapDelayStats(summary.aa),
+        departureAheadStats: mapDelayStats(summary.da),
+    };
 }
 
 export function fetchStopDelays(
@@ -57,15 +83,19 @@ export function fetchStopDelays(
                 return;
             }
 
-            const chunkData = docSnapshot.data() as ByStopChunkDocument;
+            const chunkData = docSnapshot.data() as { s?: CompactSummary[] };
+            if (!chunkData.s) {
+                return;
+            }
 
-            function processStopCB(stop: DelaySummary) {
+            function processStopCB(rawStop: CompactSummary) {
+                const stop = mapSummary(rawStop);
                 if (stopPointGIDs.includes(stop.key)) {
                     results.push(stop);
                 }
             }
 
-            chunkData.stops.forEach(processStopCB);
+            chunkData.s.forEach(processStopCB);
         }
 
         docs.forEach(processDocCB);
@@ -82,13 +112,25 @@ export function fetchStopDelays(
 }
 
 export function fetchRouteDelays(date: string): Promise<DelaySummary[] | null> {
-    const byRouteDocRef = doc(db, date, "byRoute");
+    function processChunkDocsCB(chunkDocs: DocumentSnapshot[]): DelaySummary[] {
+        const result: DelaySummary[] = [];
 
-    function processDocACB(docSnapshot: DocumentSnapshot): DelaySummary[] | null {
-        if (!docSnapshot.exists()) {
-            return null;
+        function processChunkCB(chunkDoc: DocumentSnapshot) {
+            if (!chunkDoc.exists()) {
+                return;
+            }
+
+            const chunkData = chunkDoc.data() as { r?: CompactSummary[] };
+            if (!chunkData.r) {
+                return;
+            }
+
+            result.push(...chunkData.r.map(mapSummary));
         }
-        return docSnapshot.data().byRoute as DelaySummary[];
+
+        chunkDocs.forEach(processChunkCB);
+        result.sort((a, b) => a.key.localeCompare(b.key));
+        return result;
     }
 
     function catchErrorACB(error: unknown) {
@@ -96,7 +138,10 @@ export function fetchRouteDelays(date: string): Promise<DelaySummary[] | null> {
         return null;
     }
 
-    return getDoc(byRouteDocRef).then(processDocACB).catch(catchErrorACB);
+    const chunkPromises = Array.from({ length: BY_ROUTE_CHUNK_COUNT }, (_, chunkIdx) =>
+        getDoc(doc(db, date, "byRoute", `chunk_${chunkIdx}`, "data"))
+    );
+    return Promise.all(chunkPromises).then(processChunkDocsCB).catch(catchErrorACB);
 }
 
 // get dates for which aggregated data is available in firestore

@@ -60,58 +60,63 @@ Optionally, the data aggregated **by route** and **by stop** can be stored in fi
 
 ### By Route
 
-`byRoute` is stored in a single document per day:
+`byRoute` is stored as chunked documents per day:
 
 ```text
-<YYYY-MM-DD>/byRoute
+<YYYY-MM-DD>/byRoute                 // metadata document
+<YYYY-MM-DD>/byRoute/chunk_<n>/data  // chunked route rows
 ```
 
-Each byRoute document contains:
+The metadata document `<YYYY-MM-DD>/byRoute` contains:
 
-- `byRoute` which is a list of summaries where each summary has the fields as shown below. The key is the route ID starting with 9011.
-- A string `date` like "2026-03-01".
-- An integer `routeCount`.
+- `d` date string like `"2026-03-01"`.
+- `c` total route count.
+- `cc` fixed chunk count (`16`).
+
+Each chunk document `<YYYY-MM-DD>/byRoute/chunk_<n>/data` contains compact keys:
+
+- `r` list of route summaries (key is route ID, e.g. 9011...).
+- `d` date string like `"2026-03-01"`.
+- `c` route count in this chunk.
 
 ```go
 type summary struct {
-	Key             string     `json:"key"`
-	Route           *routeMeta `json:"route,omitempty"` // empty for by stop
-	Stop            *stopMeta  `json:"stop,omitempty"` // empty for by route
-	ByRoute         []summary  `json:"byRoute,omitempty"` // empty for by route
-	TripUpdates     int64      `json:"tripUpdates"`
-	StopTimeUpdates int64      `json:"stopTimeUpdates"`
-	UniqueRoutes    int        `json:"uniqueRoutes"`
-	UniqueTrips     int        `json:"uniqueTrips"`
-	UniqueVehicles  int        `json:"uniqueVehicles"`
-	ArrivalDelay    delayStats `json:"arrivalDelayStats"`
-	DepartureDelay  delayStats `json:"departureDelayStats"`
-	ArrivalAhead    delayStats `json:"arrivalAheadStats"`
-	DepartureAhead  delayStats `json:"departureAheadStats"`
-	ArrivalOnTime   int64      `json:"arrivalOnTimeCount"`
-	DepartureOnTime int64      `json:"departureOnTimeCount"`
+	Key             string     `json:"k"`
+	Route           *routeMeta `json:"r,omitempty"` // empty for by stop
+	Stop            *stopMeta  `json:"s,omitempty"` // empty for by route
+	ByHour          []summary  `json:"h,omitempty"` // set for route summaries
+	ByRoute         []summary  `json:"br,omitempty"` // empty for by route
+	StopTimeUpdates int64      `json:"stu"`
+	ArrivalEvents   int64      `json:"ac"`
+	DepartureEvents int64      `json:"dc"`
+	UniqueTrips     int        `json:"ut"`
+	ArrivalDelay    delayStats `json:"ad"`
+	DepartureDelay  delayStats `json:"dd"`
+	ArrivalAhead    delayStats `json:"aa"`
+	DepartureAhead  delayStats `json:"da"`
 }
 
 type routeMeta struct {
-	AgencyID  string `json:"agencyId"`
-	ShortName string `json:"shortName"`
-	LongName  string `json:"longName"`
-	Type      string `json:"type"`
-	Desc      string `json:"desc"`
+	ShortName string `json:"sn"`
+	LongName  string `json:"ln"`
+	Type      string `json:"t"`
 }
 
 type stopMeta struct {
-	Name         string `json:"name"`
-	Lat          string `json:"lat"`
-	Lon          string `json:"lon"`
-	LocationType string `json:"locationType"`
+	Name string `json:"n"`
 }
 
 type delayStats struct {
-	Count      int64   `json:"count"`
-	MaxSeconds int64   `json:"maxSeconds"`
-	AvgSeconds float64 `json:"avgSeconds"`
+	Count      int64   `json:"c"` // occurrences
+	AvgSeconds float64 `json:"a"`
 }
 ```
+
+`a` (`avgSeconds`) is calculated as `sumSeconds / c` within that specific stat bucket.  
+Examples:
+- `dd.a` = average over delayed **departures only** (`dd.c`)
+- `ad.a` = average over delayed **arrivals only** (`ad.c`)
+- `da.a` / `aa.a` = average over ahead events in their respective buckets
 
 ### By Stop
 
@@ -124,18 +129,31 @@ type delayStats struct {
 Stops are assigned to chunks using the following hash function, so frontend lookup is deterministic:
 
 ```go
-func hashToChunk(stopKey string) int {
+func hashToChunk(key string, chunkCount int) int {
 	h := fnv.New32a()
-	_, _ = h.Write([]byte(stopKey))
-	return int(h.Sum32() % uint32(256))
+	_, _ = h.Write([]byte(key))
+	return int(h.Sum32() % uint32(chunkCount))
 }
 ```
 
-Each `data` document contains:
+Each `data` document contains compact keys:
 
-- `stops` which is a list of summaries as above with the `Stop` and `ByRoute` fields set. The key is the stop point ID starting with 9022.
-- A string `date` like "2026-03-01".
-- An integer `stopCount`.
+- `s` list of stop summaries as above with `Stop` and `ByRoute` fields set.
+- Route rows in `byStop -> byRoute` include nested `byHour` summaries.
+- Top-level `byRoute` summaries also include nested `ByHour` summaries.
+- `d` date string like `"2026-03-01"`.
+- `c` stop count.
+
+### By hour key format
+
+For all `ByHour`/`h` summaries, the summary `k` field is:
+
+- The **start of the hour bucket**.
+- Encoded in **UTC**.
+- Formatted as **RFC3339** (for example `"2026-03-01T13:00:00Z"`), representing the interval `[13:00, 14:00)` UTC.
+
+Internally this is generated as `observedAt.UTC().Truncate(time.Hour).Format(time.RFC3339)`.
+`observedAt` is taken from the GTFS-RT header timestamp when present, otherwise from the archive path (`<yyyy>/<mm>/<dd>/<hh>`) interpreted as UTC.
 
 ### Date index
 
@@ -146,4 +164,10 @@ An additional index file is stored in index/dates with a `dates` field containin
 - Delay/ahead stats are counted only for realized stop events, where `event.time <= observedAt` for the feed file.
 - Each stop event (arrival/departure) is counted once globally across all snapshots using a deterministic event key.
 - This prevents future predicted stops and repeated snapshots from inflating totals.
-- Stop summaries can include a nested `byRoute` breakdown with per-route realized stats for that stop.
+- Stop summaries include a nested `byRoute` breakdown with per-route realized stats for that stop.
+- Route summaries include nested `byHour` breakdowns both at top-level `byRoute` and within `byStop -> byRoute`.
+- `ac`/`dc` contain realized arrival/departure event counts and can be used to derive on-time counts:
+  - `departure_on_time = dc - dd.c - da.c`
+  - `arrival_on_time = ac - ad.c - aa.c`
+- Delay/ahead averages are not divided by total departures/arrivals; they are divided by the matching bucket count (`c`).
+- `avgSeconds` values are rounded to one decimal place to reduce payload size.

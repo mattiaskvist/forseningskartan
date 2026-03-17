@@ -1,6 +1,5 @@
 type DelayStats = {
     count: number;
-    maxSeconds: number;
     avgSeconds: number;
 };
 
@@ -15,36 +14,29 @@ export const routeToString: { [K in routeType]: string } = {
 };
 
 type RouteMeta = {
-    agencyId: string;
     shortName: string;
     longName: string;
     type: routeType;
-    desc: string;
 };
 
 type StopMeta = {
     name: string;
-    lat: string;
-    lon: string;
-    locationType: string;
 };
 
 type DelaySummary = {
     key: string;
     route?: RouteMeta;
     stop?: StopMeta;
+    byHour?: DelaySummary[];
     byRoute?: DelaySummary[];
-    tripUpdates: number;
     stopTimeUpdates: number;
-    uniqueRoutes: number;
+    arrivalEventCount: number;
+    departureEventCount: number;
     uniqueTrips: number;
-    uniqueVehicles: number;
     arrivalDelayStats: DelayStats;
     departureDelayStats: DelayStats;
     arrivalAheadStats: DelayStats;
     departureAheadStats: DelayStats;
-    arrivalOnTimeCount: number;
-    departureOnTimeCount: number;
 };
 
 type ByStopChunkDocument = {
@@ -53,4 +45,22 @@ type ByStopChunkDocument = {
     stops: DelaySummary[];
 };
 
-export type { DelaySummary, ByStopChunkDocument };
+type CompactDelayStats = { c: number; a: number };
+
+type CompactSummary = {
+    k: string;
+    r?: { sn: string; ln: string; t: RouteMeta["type"] };
+    s?: { n: string };
+    h?: CompactSummary[];
+    br?: CompactSummary[];
+    stu: number;
+    ac: number;
+    dc: number;
+    ut: number;
+    ad: CompactDelayStats;
+    dd: CompactDelayStats;
+    aa: CompactDelayStats;
+    da: CompactDelayStats;
+};
+
+export type { DelaySummary, ByStopChunkDocument, CompactDelayStats, CompactSummary };
