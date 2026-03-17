@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, getDoc, DocumentSnapshot } from "firebase/firestore";
-import { DelaySummary } from "../types/historicalDelay";
+import { DelaySummary, CompactDelayStats, CompactSummary } from "../types/historicalDelay";
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -28,24 +28,6 @@ function hashToChunk(stopKey: string): number {
 
     return hash % BY_STOP_CHUNK_COUNT;
 }
-
-type CompactDelayStats = { c: number; a: number };
-
-type CompactSummary = {
-    k: string;
-    r?: { sn: string; ln: string; t: NonNullable<DelaySummary["route"]>["type"] };
-    s?: { n: string };
-    h?: CompactSummary[];
-    br?: CompactSummary[];
-    stu: number;
-    ac: number;
-    dc: number;
-    ut: number;
-    ad: CompactDelayStats;
-    dd: CompactDelayStats;
-    aa: CompactDelayStats;
-    da: CompactDelayStats;
-};
 
 function mapDelayStats(stats: CompactDelayStats): DelaySummary["arrivalDelayStats"] {
     return { count: stats.c, avgSeconds: stats.a };
