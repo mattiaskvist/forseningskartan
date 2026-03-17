@@ -5,11 +5,6 @@ import { getDeparturesCB, getDeparturesLoadingCB } from "../store/selectors";
 import { setSelectedSiteId } from "../store/reducers";
 import { Departure, Site } from "../types/sl";
 
-type SelectedDepartureState = {
-    siteId: number;
-    departure: Departure;
-};
-
 type DeparturePresenterProps = {
     selectedSite: Site;
 };
@@ -18,28 +13,22 @@ export function DeparturePresenter({ selectedSite }: DeparturePresenterProps) {
     const dispatch = useAppDispatch();
     const departureResponse = useAppSelector(getDeparturesCB);
     const isDeparturesLoading = useAppSelector(getDeparturesLoadingCB);
-    const [selectedDepartureState, setSelectedDepartureState] = useState<SelectedDepartureState | null>(
-        null
-    );
+    const [selectedDeparture, setSelectedDeparture] = useState<Departure | null>(null);
 
     function selectDepartureCB(departure: Departure) {
-        setSelectedDepartureState({ siteId: selectedSite.id, departure });
+        setSelectedDeparture(departure);
     }
 
     function returnToDepartureListCB() {
-        setSelectedDepartureState(null);
+        setSelectedDeparture(null);
     }
 
     function closeDeparturesViewCB() {
-        setSelectedDepartureState(null);
+        setSelectedDeparture(null);
         dispatch(setSelectedSiteId(null));
     }
 
     const departures = departureResponse?.departures ?? [];
-    const selectedDeparture =
-        selectedDepartureState !== null && selectedDepartureState.siteId === selectedSite.id
-            ? selectedDepartureState.departure
-            : null;
 
     return (
         <DepartureView
