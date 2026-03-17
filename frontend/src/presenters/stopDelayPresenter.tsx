@@ -18,7 +18,7 @@ export function StopDelayPresenter() {
     const dispatch = useAppDispatch();
     const selectedSite = useAppSelector(getSelectedSiteCB);
     const stopDelays = useAppSelector(getStopDelaysCB) ?? [];
-    const stopPoints = useAppSelector(getStopPointsCB) ?? [];
+    const stopPoints = useAppSelector(getStopPointsCB);
     const availableDates = useAppSelector(getAggregatedDatesCB);
     const isStopDelaysLoading = useAppSelector(getStopDelaysLoadingCB);
     const isStopPointsLoading = useAppSelector(getStopPointsLoadingCB);
@@ -30,7 +30,7 @@ export function StopDelayPresenter() {
     }
 
     useEffect(() => {
-        if (!selectedSite || !selectedDate) {
+        if (!selectedSite || !selectedDate || !stopPoints) {
             return;
         }
 
@@ -38,7 +38,7 @@ export function StopDelayPresenter() {
         dispatch(getStopDelays({ stopPointGIDs, date: selectedDate }));
     }, [dispatch, selectedDate, selectedSite, stopPoints]);
 
-    if (isStopDelaysLoading || isStopPointsLoading || isAggregatedDatesLoading) {
+    if (isStopDelaysLoading || isStopPointsLoading || isAggregatedDatesLoading || !stopPoints) {
         return <Suspense message="Loading stop delays..." />;
     }
 
