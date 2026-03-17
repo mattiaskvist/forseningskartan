@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { StopDelayView } from "../views/stopDelayView";
 import {
     getSelectedSiteCB,
@@ -17,21 +18,27 @@ export function StopDelayPresenter() {
     const dispatch = useAppDispatch();
     const selectedSite = useAppSelector(getSelectedSiteCB);
     const stopDelays = useAppSelector(getStopDelaysCB) ?? [];
-    const stopPoints = useAppSelector(getStopPointsCB) ?? [];
+    const stopPoints = useAppSelector(getStopPointsCB);
     const availableDates = useAppSelector(getAggregatedDatesCB);
     const isStopDelaysLoading = useAppSelector(getStopDelaysLoadingCB);
     const isStopPointsLoading = useAppSelector(getStopPointsLoadingCB);
     const isAggregatedDatesLoading = useAppSelector(getAggregatedDatesLoadingCB);
+    const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
     function handleSelectDateCB(date: string) {
-        if (!selectedSite) {
-            return;
-        }
-        const stopPointGIDs = getStopPointGidsForSite(selectedSite, stopPoints);
-        dispatch(getStopDelays({ stopPointGIDs, date }));
+        setSelectedDate(date);
     }
 
-    if (isStopDelaysLoading || isStopPointsLoading || isAggregatedDatesLoading) {
+    useEffect(() => {
+        if (!selectedSite || !selectedDate || !stopPoints) {
+            return;
+        }
+
+        const stopPointGIDs = getStopPointGidsForSite(selectedSite, stopPoints);
+        dispatch(getStopDelays({ stopPointGIDs, date: selectedDate }));
+    }, [dispatch, selectedDate, selectedSite, stopPoints]);
+
+    if (isStopDelaysLoading || isStopPointsLoading || isAggregatedDatesLoading || !stopPoints) {
         return <Suspense message="Loading stop delays..." />;
     }
 
@@ -39,6 +46,7 @@ export function StopDelayPresenter() {
         selectedSite && (
             <StopDelayView
                 selectedSite={selectedSite}
+                selectedDate={selectedDate}
                 stopDelays={stopDelays}
                 stopPoints={stopPoints}
                 availableDates={availableDates}

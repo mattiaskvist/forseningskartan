@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { RouteDelayView } from "../views/routeDelayView";
 import {
     getAggregatedDatesCB,
@@ -15,8 +16,10 @@ export function RouteDelayPresenter() {
     const availableDates = useAppSelector(getAggregatedDatesCB);
     const isRouteDelaysLoading = useAppSelector(getRouteDelaysLoadingCB);
     const isAggregatedDatesLoading = useAppSelector(getAggregatedDatesLoadingCB);
+    const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
     function handleSelectDateCB(date: string) {
+        setSelectedDate(date);
         dispatch(getRouteDelays(date));
     }
 
@@ -27,6 +30,7 @@ export function RouteDelayPresenter() {
     return (
         <RouteDelayView
             routeDelays={routeDelays}
+            selectedDate={selectedDate}
             availableDates={availableDates}
             handleSelectDateCB={handleSelectDateCB}
         />

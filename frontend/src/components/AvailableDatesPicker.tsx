@@ -7,16 +7,22 @@ dayjs.extend(minMax);
 
 type AvailableDatesPickerProps = {
     availableDates: string[];
+    selectedDate: string | null;
     onSelectDate: (date: string) => void;
 };
 
-export function AvailableDatesPicker({ availableDates, onSelectDate }: AvailableDatesPickerProps) {
-    function getDayjsDate(date: string): Dayjs {
+export function AvailableDatesPicker({
+    availableDates,
+    selectedDate,
+    onSelectDate,
+}: AvailableDatesPickerProps) {
+    function getDayjsDateCB(date: string): Dayjs {
         return dayjs(date);
     }
-    const dayjsDates = availableDates.map(getDayjsDate);
+    const dayjsDates = availableDates.map(getDayjsDateCB);
     const minDate = dayjs.min(dayjsDates) ?? undefined;
     const maxDate = dayjs.max(dayjsDates) ?? undefined;
+    const selectedDayjsDate = selectedDate ? getDayjsDateCB(selectedDate) : null;
 
     function shouldDisableDate(date: Dayjs): boolean {
         return !availableDates.includes(date.format("YYYY-MM-DD"));
@@ -38,6 +44,7 @@ export function AvailableDatesPicker({ availableDates, onSelectDate }: Available
                 maxDate={maxDate}
                 onChange={handleDateChange}
                 shouldDisableDate={shouldDisableDate}
+                value={selectedDayjsDate}
             />
         </LocalizationProvider>
     );
