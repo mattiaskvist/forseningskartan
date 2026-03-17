@@ -322,8 +322,8 @@ func (a *aggregator) addFile(path string) error {
 
 func (a *aggregator) finalize() aggregationResult {
 	return aggregationResult{
-		ByRoute: summarizeBuckets(a.byRoute, bucketKindRoute, a.staticIndex, true),
-		ByStop:  summarizeBuckets(a.byStop, bucketKindStop, a.staticIndex, false),
+		ByRoute: summarizeBuckets(a.byRoute, bucketKindRoute, a.staticIndex),
+		ByStop:  summarizeBuckets(a.byStop, bucketKindStop, a.staticIndex),
 	}
 }
 
@@ -335,7 +335,7 @@ const (
 	bucketKindStop
 )
 
-func summarizeBuckets(source map[string]*bucket, kind bucketKind, staticIndex *staticIndex, includeRouteByHour bool) []summary {
+func summarizeBuckets(source map[string]*bucket, kind bucketKind, staticIndex *staticIndex) []summary {
 	keys := slices.Collect(maps.Keys(source))
 	sort.Strings(keys)
 
@@ -354,11 +354,11 @@ func summarizeBuckets(source map[string]*bucket, kind bucketKind, staticIndex *s
 			DepartureAhead:  bucketValue.DepartureAhead.Finalize(),
 		}
 
-		if kind == bucketKindRoute && includeRouteByHour && len(bucketValue.ByHour) > 0 {
-			summaryValue.ByHour = summarizeBuckets(bucketValue.ByHour, bucketKindHour, staticIndex, false)
+		if kind == bucketKindRoute && len(bucketValue.ByHour) > 0 {
+			summaryValue.ByHour = summarizeBuckets(bucketValue.ByHour, bucketKindHour, staticIndex)
 		}
 		if kind == bucketKindStop && len(bucketValue.ByRoute) > 0 {
-			summaryValue.ByRoute = summarizeBuckets(bucketValue.ByRoute, bucketKindRoute, staticIndex, true)
+			summaryValue.ByRoute = summarizeBuckets(bucketValue.ByRoute, bucketKindRoute, staticIndex)
 		}
 
 		if staticIndex != nil {
