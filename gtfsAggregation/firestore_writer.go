@@ -15,6 +15,7 @@ import (
 // Aggregates now include stop -> route -> hour payloads, so we use smaller chunks
 // to keep document sizes comfortably under Firestore limits.
 const firestoreByStopChunkCount = 1024
+const firestoreByRouteChunkCount = 16
 
 func writeByRouteToFirestore(result aggregationResult, projectID string, dateFromPath string) error {
 	ctx := context.Background()
@@ -24,27 +25,65 @@ func writeByRouteToFirestore(result aggregationResult, projectID string, dateFro
 	}
 	defer client.Close() // nolint: errcheck
 
-	// Single write: one document with all byRoute rows for the day.
-	// Firestore path: <YYYY-MM-DD>/byRoute
 	docRef := client.Collection(dateFromPath).Doc("byRoute")
-
-	payload := map[string]any{
+	metaPayload := map[string]any{
 		"d":  dateFromPath,
 		"c":  len(result.ByRoute),
-		"br": result.ByRoute,
+		"cc": firestoreByRouteChunkCount,
+	}
+	if _, err := docRef.Set(ctx, metaPayload); err != nil {
+		return fmt.Errorf("write byRoute metadata document: %w", err)
 	}
 
-	// Print approximate document size
-	b, err := json.Marshal(payload)
-	if err != nil {
-		return fmt.Errorf("marshal payload for size check: %w", err)
+	if len(result.ByRoute) == 0 {
+		fmt.Println("No by route data to export")
+		return nil
 	}
-	fmt.Printf("By route document size: %d bytes (%.2f KB)\n", len(b), float64(len(b))/1024)
 
-	if _, err := docRef.Set(ctx, payload); err != nil {
-		return fmt.Errorf("write byRoute document: %w", err)
+	chunks := make(map[int][]summary, firestoreByRouteChunkCount)
+	for _, routeSummary := range result.ByRoute {
+		if routeSummary.Key == "" {
+			continue
+		}
+
+		chunkIdx := hashToChunk(routeSummary.Key, firestoreByRouteChunkCount)
+		chunks[chunkIdx] = append(chunks[chunkIdx], routeSummary)
 	}
-	fmt.Println("Stored by route in firestore")
+
+	var totalWrite int
+	fileSizeStats := fileSizeStats{}
+	for chunkIdx := 0; chunkIdx < firestoreByRouteChunkCount; chunkIdx++ {
+		chunkRoutes := chunks[chunkIdx]
+		chunkID := fmt.Sprintf("chunk_%d", chunkIdx)
+
+		// Firestore path: <YYYY-MM-DD>/byRoute/<chunk_id>/data
+		chunkDocRef := docRef.Collection(chunkID).Doc("data")
+		payload := map[string]any{
+			"d": dateFromPath,
+			"c": len(chunkRoutes),
+			"r": chunkRoutes,
+		}
+
+		b, err := json.Marshal(payload)
+		if err != nil {
+			return fmt.Errorf("marshal byRoute chunk payload for size check: %w", err)
+		}
+		fileSizeStats.total += len(b)
+		fileSizeStats.count++
+		if fileSizeStats.min == 0 || len(b) < fileSizeStats.min {
+			fileSizeStats.min = len(b)
+		}
+		if len(b) > fileSizeStats.max {
+			fileSizeStats.max = len(b)
+		}
+
+		if _, err := chunkDocRef.Set(ctx, payload); err != nil {
+			return fmt.Errorf("write byRoute chunk document: %w", err)
+		}
+		totalWrite++
+	}
+	fmt.Printf("Stored by route in firestore (%d chunk writes, %d total routes)\n", totalWrite, len(result.ByRoute))
+	fmt.Printf("By route chunk file size stats - Min: %d KB, Max: %d KB, Average: %d KB\n", fileSizeStats.min/1024, fileSizeStats.max/1024, fileSizeStats.total/(fileSizeStats.count*1024))
 
 	return nil
 }
@@ -75,7 +114,7 @@ func writeByStopToFirestore(result aggregationResult, projectID string, dateFrom
 			continue
 		}
 
-		chunkIdx := hashToChunk(stopSummary.Key)
+		chunkIdx := hashToChunk(stopSummary.Key, firestoreByStopChunkCount)
 		chunks[chunkIdx] = append(chunks[chunkIdx], stopSummary)
 	}
 
@@ -122,10 +161,10 @@ func writeByStopToFirestore(result aggregationResult, projectID string, dateFrom
 	return nil
 }
 
-func hashToChunk(stopKey string) int {
+func hashToChunk(key string, chunkCount int) int {
 	h := fnv.New32a()
-	_, _ = h.Write([]byte(stopKey))
-	return int(h.Sum32() % uint32(firestoreByStopChunkCount))
+	_, _ = h.Write([]byte(key))
+	return int(h.Sum32() % uint32(chunkCount))
 }
 
 // reads current date collections from firestore, merges in newDate,

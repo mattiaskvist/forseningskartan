@@ -14,6 +14,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const BY_STOP_CHUNK_COUNT = 1024;
+const BY_ROUTE_CHUNK_COUNT = 16;
 
 // Same hash function as used in gtfsAggregation
 // to determine which chunk a stop belongs to.
@@ -127,15 +128,38 @@ export function fetchStopDelays(
 export function fetchRouteDelays(date: string): Promise<DelaySummary[] | null> {
     const byRouteDocRef = doc(db, date, "byRoute");
 
-    function processDocACB(docSnapshot: DocumentSnapshot): DelaySummary[] | null {
+    async function processDocACB(docSnapshot: DocumentSnapshot): Promise<DelaySummary[] | null> {
         if (!docSnapshot.exists()) {
             return null;
         }
+
         const data = docSnapshot.data() as { br?: CompactSummary[] };
-        if (!data.br) {
-            return null;
+        if (data.br) {
+            return data.br.map(mapSummary);
         }
-        return data.br.map(mapSummary);
+
+        const chunkPromises = Array.from({ length: BY_ROUTE_CHUNK_COUNT }, (_, chunkIdx) =>
+            getDoc(doc(db, date, "byRoute", `chunk_${chunkIdx}`, "data"))
+        );
+        const chunkDocs = await Promise.all(chunkPromises);
+        const result: DelaySummary[] = [];
+
+        function processChunkCB(chunkDoc: DocumentSnapshot) {
+            if (!chunkDoc.exists()) {
+                return;
+            }
+
+            const chunkData = chunkDoc.data() as { r?: CompactSummary[] };
+            if (!chunkData.r) {
+                return;
+            }
+
+            result.push(...chunkData.r.map(mapSummary));
+        }
+
+        chunkDocs.forEach(processChunkCB);
+        result.sort((a, b) => a.key.localeCompare(b.key));
+        return result;
     }
 
     function catchErrorACB(error: unknown) {
