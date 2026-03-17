@@ -112,6 +112,12 @@ type delayStats struct {
 }
 ```
 
+`a` (`avgSeconds`) is calculated as `sumSeconds / c` within that specific stat bucket.  
+Examples:
+- `dd.a` = average over delayed **departures only** (`dd.c`)
+- `ad.a` = average over delayed **arrivals only** (`ad.c`)
+- `da.a` / `aa.a` = average over ahead events in their respective buckets
+
 ### By Stop
 
 `byStop` is stored as hashed chunks of documents per day:
@@ -152,4 +158,5 @@ An additional index file is stored in index/dates with a `dates` field containin
 - `ac`/`dc` contain realized arrival/departure event counts and can be used to derive on-time counts:
   - `departure_on_time = dc - dd.c - da.c`
   - `arrival_on_time = ac - ad.c - aa.c`
+- Delay/ahead averages are not divided by total departures/arrivals; they are divided by the matching bucket count (`c`).
 - `avgSeconds` values are rounded to one decimal place to reduce payload size.
