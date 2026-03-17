@@ -33,6 +33,7 @@ type DelaySummary = {
     key: string;
     route?: RouteMeta;
     stop?: StopMeta;
+    byHour?: DelaySummary[];
     byRoute?: DelaySummary[];
     tripUpdates: number;
     stopTimeUpdates: number;
@@ -43,8 +44,6 @@ type DelaySummary = {
     departureDelayStats: DelayStats;
     arrivalAheadStats: DelayStats;
     departureAheadStats: DelayStats;
-    arrivalOnTimeCount: number;
-    departureOnTimeCount: number;
 };
 
 type ByStopChunkDocument = {
