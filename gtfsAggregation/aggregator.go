@@ -305,21 +305,8 @@ func (a *aggregator) addFile(path string) error {
 
 func (a *aggregator) finalize() aggregationResult {
 	return aggregationResult{
-		FilesDiscovered:     a.filesDiscovered,
-		FilesParsed:         a.filesParsed,
-		FeedsWithTripUpdate: a.feedsWithTrips,
-		TripUpdates:         a.tripUpdates,
-		StopTimeUpdates:     a.stopTimeUpdates,
-		UniqueRoutes:        len(a.routes),
-		UniqueTrips:         len(a.trips),
-		UniqueVehicles:      len(a.vehicles),
-		ArrivalDelay:        a.totalArrivalDelay.Finalize(),
-		DepartureDelay:      a.totalDepartureDelay.Finalize(),
-		ArrivalAhead:        a.totalArrivalAhead.Finalize(),
-		DepartureAhead:      a.totalDepartureAhead.Finalize(),
-		ByHour:              summarizeBuckets(a.byHour, bucketKindHour, a.staticIndex),
-		ByRoute:             summarizeBuckets(a.byRoute, bucketKindRoute, a.staticIndex),
-		ByStop:              summarizeBuckets(a.byStop, bucketKindStop, a.staticIndex),
+		ByRoute: summarizeBuckets(a.byRoute, bucketKindRoute, a.staticIndex, true),
+		ByStop:  summarizeBuckets(a.byStop, bucketKindStop, a.staticIndex, false),
 	}
 }
 
@@ -331,7 +318,7 @@ const (
 	bucketKindStop
 )
 
-func summarizeBuckets(source map[string]*bucket, kind bucketKind, staticIndex *staticIndex) []summary {
+func summarizeBuckets(source map[string]*bucket, kind bucketKind, staticIndex *staticIndex, includeRouteByHour bool) []summary {
 	keys := slices.Collect(maps.Keys(source))
 	sort.Strings(keys)
 
@@ -340,22 +327,19 @@ func summarizeBuckets(source map[string]*bucket, kind bucketKind, staticIndex *s
 		bucketValue := source[key]
 		summaryValue := summary{
 			Key:             key,
-			TripUpdates:     bucketValue.TripUpdates,
 			StopTimeUpdates: bucketValue.StopTimeUpdates,
-			UniqueRoutes:    len(bucketValue.Routes),
 			UniqueTrips:     len(bucketValue.Trips),
-			UniqueVehicles:  len(bucketValue.Vehicles),
 			ArrivalDelay:    bucketValue.ArrivalDelay.Finalize(),
 			DepartureDelay:  bucketValue.DepartureDelay.Finalize(),
 			ArrivalAhead:    bucketValue.ArrivalAhead.Finalize(),
 			DepartureAhead:  bucketValue.DepartureAhead.Finalize(),
 		}
 
-		if len(bucketValue.ByHour) > 0 {
-			summaryValue.ByHour = summarizeBuckets(bucketValue.ByHour, bucketKindHour, staticIndex)
+		if kind == bucketKindRoute && includeRouteByHour && len(bucketValue.ByHour) > 0 {
+			summaryValue.ByHour = summarizeBuckets(bucketValue.ByHour, bucketKindHour, staticIndex, false)
 		}
 		if kind == bucketKindStop && len(bucketValue.ByRoute) > 0 {
-			summaryValue.ByRoute = summarizeBuckets(bucketValue.ByRoute, bucketKindRoute, staticIndex)
+			summaryValue.ByRoute = summarizeBuckets(bucketValue.ByRoute, bucketKindRoute, staticIndex, true)
 		}
 
 		if staticIndex != nil {
@@ -363,20 +347,15 @@ func summarizeBuckets(source map[string]*bucket, kind bucketKind, staticIndex *s
 			case bucketKindRoute:
 				if routeValue, ok := staticIndex.routes[key]; ok {
 					summaryValue.Route = &routeMeta{
-						AgencyID:  routeValue.AgencyID,
 						ShortName: routeValue.ShortName,
 						LongName:  routeValue.LongName,
 						Type:      routeValue.Type,
-						Desc:      routeValue.Desc,
 					}
 				}
 			case bucketKindStop:
 				if stopValue, ok := staticIndex.stops[key]; ok {
 					summaryValue.Stop = &stopMeta{
-						Name:         stopValue.Name,
-						Lat:          stopValue.Lat,
-						Lon:          stopValue.Lon,
-						LocationType: stopValue.LocationType,
+						Name: stopValue.Name,
 					}
 				}
 			}

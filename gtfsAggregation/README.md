@@ -79,11 +79,8 @@ type summary struct {
 	Stop            *stopMeta  `json:"stop,omitempty"` // empty for by route
 	ByHour          []summary  `json:"byHour,omitempty"` // set for route summaries
 	ByRoute         []summary  `json:"byRoute,omitempty"` // empty for by route
-	TripUpdates     int64      `json:"tripUpdates"`
 	StopTimeUpdates int64      `json:"stopTimeUpdates"`
-	UniqueRoutes    int        `json:"uniqueRoutes"`
 	UniqueTrips     int        `json:"uniqueTrips"`
-	UniqueVehicles  int        `json:"uniqueVehicles"`
 	ArrivalDelay    delayStats `json:"arrivalDelayStats"`
 	DepartureDelay  delayStats `json:"departureDelayStats"`
 	ArrivalAhead    delayStats `json:"arrivalAheadStats"`
@@ -91,23 +88,17 @@ type summary struct {
 }
 
 type routeMeta struct {
-	AgencyID  string `json:"agencyId"`
 	ShortName string `json:"shortName"`
 	LongName  string `json:"longName"`
 	Type      string `json:"type"`
-	Desc      string `json:"desc"`
 }
 
 type stopMeta struct {
-	Name         string `json:"name"`
-	Lat          string `json:"lat"`
-	Lon          string `json:"lon"`
-	LocationType string `json:"locationType"`
+	Name string `json:"name"`
 }
 
 type delayStats struct {
-	Count      int64   `json:"count"`
-	MaxSeconds int64   `json:"maxSeconds"`
+	Count      int64   `json:"count"` // occurrences
 	AvgSeconds float64 `json:"avgSeconds"`
 }
 ```
@@ -132,8 +123,9 @@ func hashToChunk(stopKey string) int {
 
 Each `data` document contains:
 
-- `stops` which is a list of summaries as above with the `Stop` and `ByRoute` fields set. Route rows in `ByRoute` can include nested `ByHour` summaries.
-- Top-level `byRoute` summaries can also include nested `ByHour` summaries.
+- `stops` which is a list of summaries as above with the `Stop` and `ByRoute` fields set.
+- Route rows in `byStop -> byRoute` include nested `byHour` summaries.
+- Top-level `byRoute` summaries also include nested `ByHour` summaries.
 - A string `date` like "2026-03-01".
 - An integer `stopCount`.
 
@@ -146,5 +138,6 @@ An additional index file is stored in index/dates with a `dates` field containin
 - Delay/ahead stats are counted only for realized stop events, where `event.time <= observedAt` for the feed file.
 - Each stop event (arrival/departure) is counted once globally across all snapshots using a deterministic event key.
 - This prevents future predicted stops and repeated snapshots from inflating totals.
-- Stop summaries can include a nested `byRoute` breakdown with per-route realized stats for that stop.
-- Route summaries can include nested `byHour` breakdowns, both at top-level `byRoute` and at `byStop -> byRoute`.
+- Stop summaries include a nested `byRoute` breakdown with per-route realized stats for that stop.
+- Route summaries include nested `byHour` breakdowns both at top-level `byRoute` and within `byStop -> byRoute`.
+- `avgSeconds` values are rounded to one decimal place to reduce payload size.
