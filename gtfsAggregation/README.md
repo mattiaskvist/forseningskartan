@@ -87,6 +87,8 @@ type summary struct {
 	ByHour          []summary  `json:"h,omitempty"` // set for route summaries
 	ByRoute         []summary  `json:"br,omitempty"` // empty for by route
 	StopTimeUpdates int64      `json:"stu"`
+	ArrivalEvents   int64      `json:"ac"`
+	DepartureEvents int64      `json:"dc"`
 	UniqueTrips     int        `json:"ut"`
 	ArrivalDelay    delayStats `json:"ad"`
 	DepartureDelay  delayStats `json:"dd"`
@@ -147,4 +149,7 @@ An additional index file is stored in index/dates with a `dates` field containin
 - This prevents future predicted stops and repeated snapshots from inflating totals.
 - Stop summaries include a nested `byRoute` breakdown with per-route realized stats for that stop.
 - Route summaries include nested `byHour` breakdowns both at top-level `byRoute` and within `byStop -> byRoute`.
+- `ac`/`dc` contain realized arrival/departure event counts and can be used to derive on-time counts:
+  - `departure_on_time = dc - dd.c - da.c`
+  - `arrival_on_time = ac - ad.c - aa.c`
 - `avgSeconds` values are rounded to one decimal place to reduce payload size.

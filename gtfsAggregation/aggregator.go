@@ -206,6 +206,23 @@ func (a *aggregator) addFile(path string) error {
 				}
 				a.countedEvents[eventKey] = struct{}{}
 
+				incrementEventCount := func(bucketValue *bucket) {
+					if bucketValue == nil {
+						return
+					}
+					if isArrival {
+						bucketValue.ArrivalEvents++
+					} else {
+						bucketValue.DepartureEvents++
+					}
+				}
+				incrementEventCount(hourBucket)
+				incrementEventCount(routeBucket)
+				incrementEventCount(routeHourBucket)
+				incrementEventCount(stopBucket)
+				incrementEventCount(stopRouteBucket)
+				incrementEventCount(stopRouteHourBucket)
+
 				delay := int64(event.GetDelay())
 				if delay > 0 {
 					// delayed
@@ -328,6 +345,8 @@ func summarizeBuckets(source map[string]*bucket, kind bucketKind, staticIndex *s
 		summaryValue := summary{
 			Key:             key,
 			StopTimeUpdates: bucketValue.StopTimeUpdates,
+			ArrivalEvents:   bucketValue.ArrivalEvents,
+			DepartureEvents: bucketValue.DepartureEvents,
 			UniqueTrips:     len(bucketValue.Trips),
 			ArrivalDelay:    bucketValue.ArrivalDelay.Finalize(),
 			DepartureDelay:  bucketValue.DepartureDelay.Finalize(),

@@ -38,6 +38,8 @@ type CompactSummary = {
     h?: CompactSummary[];
     br?: CompactSummary[];
     stu: number;
+    ac: number;
+    dc: number;
     ut: number;
     ad: CompactDelayStats;
     dd: CompactDelayStats;
@@ -59,6 +61,8 @@ function mapSummary(summary: CompactSummary): DelaySummary {
         byHour: summary.h?.map(mapSummary),
         byRoute: summary.br?.map(mapSummary),
         stopTimeUpdates: summary.stu,
+        arrivalEventCount: summary.ac,
+        departureEventCount: summary.dc,
         uniqueTrips: summary.ut,
         arrivalDelayStats: mapDelayStats(summary.ad),
         departureDelayStats: mapDelayStats(summary.dd),

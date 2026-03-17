@@ -14,6 +14,8 @@ type summary struct {
 	ByHour          []summary  `firestore:"h" json:"h,omitempty"`
 	ByRoute         []summary  `firestore:"br" json:"br,omitempty"`
 	StopTimeUpdates int64      `firestore:"stu" json:"stu"`
+	ArrivalEvents   int64      `firestore:"ac" json:"ac"`
+	DepartureEvents int64      `firestore:"dc" json:"dc"`
 	UniqueTrips     int        `firestore:"ut" json:"ut"`
 	ArrivalDelay    delayStats `firestore:"ad" json:"ad"`
 	DepartureDelay  delayStats `firestore:"dd" json:"dd"`
@@ -70,6 +72,8 @@ func (s statsAccumulator) Finalize() delayStats {
 type bucket struct {
 	TripUpdates     int64
 	StopTimeUpdates int64
+	ArrivalEvents   int64
+	DepartureEvents int64
 	ArrivalDelay    statsAccumulator
 	DepartureDelay  statsAccumulator
 	ArrivalAhead    statsAccumulator
