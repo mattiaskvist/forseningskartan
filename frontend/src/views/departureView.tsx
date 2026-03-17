@@ -116,19 +116,37 @@ export function DepartureView({
     function renderDepartureDetailsCB(departure: Departure) {
         const detailRows = [
             renderDetailRowCB("Transport mode", formatOptionalCB(departure.line.transport_mode)),
-            renderDetailRowCB("Line", formatOptionalCB(departure.line.designation ?? departure.line.id)),
-            renderDetailRowCB("Destination", formatOptionalCB(departure.destination ?? departure.direction)),
+            renderDetailRowCB(
+                "Line",
+                formatOptionalCB(departure.line.designation ?? departure.line.id)
+            ),
+            renderDetailRowCB(
+                "Destination",
+                formatOptionalCB(departure.destination ?? departure.direction)
+            ),
             renderDetailRowCB("Direction", formatOptionalCB(departure.direction)),
             renderDetailRowCB("Planned departure", formatTimeCB(departure.scheduled)),
-            renderDetailRowCB("Predicted departure", formatTimeCB(departure.expected ?? departure.scheduled)),
+            renderDetailRowCB(
+                "Predicted departure",
+                formatTimeCB(departure.expected ?? departure.scheduled)
+            ),
             renderDetailRowCB("Departure state", formatOptionalCB(departure.state)),
             renderDetailRowCB("Journey ID", formatOptionalCB(departure.journey.id)),
             renderDetailRowCB("Journey state", formatOptionalCB(departure.journey.state)),
-            renderDetailRowCB("Prediction state", formatOptionalCB(departure.journey.prediction_state)),
-            renderDetailRowCB("Passenger level", formatOptionalCB(departure.journey.passenger_level)),
+            renderDetailRowCB(
+                "Prediction state",
+                formatOptionalCB(departure.journey.prediction_state)
+            ),
+            renderDetailRowCB(
+                "Passenger level",
+                formatOptionalCB(departure.journey.passenger_level)
+            ),
             renderDetailRowCB("Stop area", formatOptionalCB(departure.stop_area.name)),
             renderDetailRowCB("Stop point", formatOptionalCB(departure.stop_point.name)),
-            renderDetailRowCB("Stop designation", formatOptionalCB(departure.stop_point.designation)),
+            renderDetailRowCB(
+                "Stop designation",
+                formatOptionalCB(departure.stop_point.designation)
+            ),
         ];
 
         return (

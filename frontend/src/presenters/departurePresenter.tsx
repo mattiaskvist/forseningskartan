@@ -37,7 +37,9 @@ export function DeparturePresenter() {
     const departures = departureResponse?.departures ?? [];
     const selectedDeparture =
         selectedDepartureKey !== null
-            ? departures.find((departure) => getDepartureKeyCB(departure) === selectedDepartureKey) ?? null
+            ? (departures.find(
+                  (departure) => getDepartureKeyCB(departure) === selectedDepartureKey
+              ) ?? null)
             : null;
 
     return (
