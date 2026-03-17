@@ -38,7 +38,6 @@ export function StopDelayPresenter() {
         dispatch(getStopDelays({ stopPointGIDs, date: selectedDate }));
     }, [dispatch, selectedDate, selectedSite, stopPoints]);
 
-
     if (isStopDelaysLoading || isStopPointsLoading || isAggregatedDatesLoading) {
         return <Suspense message="Loading stop delays..." />;
     }
