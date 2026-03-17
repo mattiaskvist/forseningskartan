@@ -41,20 +41,9 @@ type aggregationResult struct {
 type statsAccumulator struct {
 	Count int64
 	Sum   int64
-	Max   int64
-	set   bool
 }
 
 func (s *statsAccumulator) Add(value int64) {
-	if !s.set {
-		s.Max = value
-		s.set = true
-	} else {
-		if value > s.Max {
-			s.Max = value
-		}
-	}
-
 	s.Count++
 	s.Sum += value
 }
