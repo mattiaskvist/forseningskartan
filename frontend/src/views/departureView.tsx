@@ -76,11 +76,55 @@ export function DepartureView({
         return date.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" });
     }
 
+    function getDelayMinutes(departure: Departure) {
+        if (!departure.expected) {
+            return 0;
+        }
+
+        const expectedTimestamp = Date.parse(departure.expected);
+        const scheduledTimestamp = Date.parse(departure.scheduled);
+        if (Number.isNaN(expectedTimestamp) || Number.isNaN(scheduledTimestamp)) {
+            return null;
+        }
+
+        return Math.round((expectedTimestamp - scheduledTimestamp) / 60000);
+    }
+
+    function formatDelayCB(delayMinutes: number | null) {
+        if (delayMinutes === null) {
+            return "delay unavailable";
+        }
+
+        if (delayMinutes === 0) {
+            return "on time (0 min)";
+        }
+
+        if (delayMinutes < 0) {
+            return `ahead ${Math.abs(delayMinutes)} min`;
+        }
+
+        return `late ${delayMinutes} min`;
+    }
+
+    function getDelayTextColorClassCB(delayMinutes: number | null) {
+        if (delayMinutes === null) {
+            return "text-slate-500";
+        }
+        if (delayMinutes < 0) {
+            return "text-emerald-600";
+        }
+        if (delayMinutes > 0) {
+            return "text-rose-600";
+        }
+        return "text-amber-600";
+    }
+
     function renderDepartureCB(departure: Departure) {
         const destination = departure.destination ?? departure.direction;
         const transportMode = departure.line.transport_mode ?? "-";
         const line = departure.line.designation ?? `${departure.line.id}`;
         const departureKey = `${departure.journey.id}-${departure.scheduled}-${departure.stop_point.id}`;
+        const delayMinutes = getDelayMinutes(departure);
 
         return (
             <button
@@ -96,11 +140,14 @@ export function DepartureView({
                     Planned {formatTimeCB(departure.scheduled)} · Predicted{" "}
                     {formatTimeCB(departure.expected ?? departure.scheduled)}
                 </p>
+                <p className={`text-sm font-medium ${getDelayTextColorClassCB(delayMinutes)}`}>
+                    Delay {formatDelayCB(delayMinutes)}
+                </p>
             </button>
         );
     }
 
-    function renderDetailRowCB(label: string, value: string) {
+    function renderDetailRow(label: string, value: string) {
         return (
             <div key={label} className="py-1">
                 <p className="text-xs text-slate-500">{label}</p>
@@ -109,43 +156,44 @@ export function DepartureView({
         );
     }
 
-    function formatOptionalCB(value: string | number | undefined) {
+    function formatOptional(value: string | number | undefined) {
         return value !== undefined && value !== "" ? `${value}` : "-";
     }
 
     function renderDepartureDetails(departure: Departure) {
         const detailRows = [
-            renderDetailRowCB("Transport mode", formatOptionalCB(departure.line.transport_mode)),
-            renderDetailRowCB(
+            renderDetailRow("Transport mode", formatOptional(departure.line.transport_mode)),
+            renderDetailRow(
                 "Line",
-                formatOptionalCB(departure.line.designation ?? departure.line.id)
+                formatOptional(departure.line.designation ?? departure.line.id)
             ),
-            renderDetailRowCB(
+            renderDetailRow(
                 "Destination",
-                formatOptionalCB(departure.destination ?? departure.direction)
+                formatOptional(departure.destination ?? departure.direction)
             ),
-            renderDetailRowCB("Direction", formatOptionalCB(departure.direction)),
-            renderDetailRowCB("Planned departure", formatTimeCB(departure.scheduled)),
-            renderDetailRowCB(
+            renderDetailRow("Direction", formatOptional(departure.direction)),
+            renderDetailRow("Planned departure", formatTimeCB(departure.scheduled)),
+            renderDetailRow(
                 "Predicted departure",
                 formatTimeCB(departure.expected ?? departure.scheduled)
             ),
-            renderDetailRowCB("Departure state", formatOptionalCB(departure.state)),
-            renderDetailRowCB("Journey ID", formatOptionalCB(departure.journey.id)),
-            renderDetailRowCB("Journey state", formatOptionalCB(departure.journey.state)),
-            renderDetailRowCB(
+            renderDetailRow("Delay", formatDelayCB(getDelayMinutes(departure))),
+            renderDetailRow("Departure state", formatOptional(departure.state)),
+            renderDetailRow("Journey ID", formatOptional(departure.journey.id)),
+            renderDetailRow("Journey state", formatOptional(departure.journey.state)),
+            renderDetailRow(
                 "Prediction state",
-                formatOptionalCB(departure.journey.prediction_state)
+                formatOptional(departure.journey.prediction_state)
             ),
-            renderDetailRowCB(
+            renderDetailRow(
                 "Passenger level",
-                formatOptionalCB(departure.journey.passenger_level)
+                formatOptional(departure.journey.passenger_level)
             ),
-            renderDetailRowCB("Stop area", formatOptionalCB(departure.stop_area.name)),
-            renderDetailRowCB("Stop point", formatOptionalCB(departure.stop_point.name)),
-            renderDetailRowCB(
+            renderDetailRow("Stop area", formatOptional(departure.stop_area.name)),
+            renderDetailRow("Stop point", formatOptional(departure.stop_point.name)),
+            renderDetailRow(
                 "Stop designation",
-                formatOptionalCB(departure.stop_point.designation)
+                formatOptional(departure.stop_point.designation)
             ),
         ];
 
