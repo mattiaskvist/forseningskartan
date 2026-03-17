@@ -5,6 +5,7 @@ import { AvailableDatesPicker } from "../components/AvailableDatesPicker";
 
 type StopDelayViewProps = {
     selectedSite: Site;
+    selectedDate: string | null;
     stopDelays: DelaySummary[];
     stopPoints: StopPoint[];
     availableDates: string[];
@@ -13,6 +14,7 @@ type StopDelayViewProps = {
 
 export function StopDelayView({
     selectedSite,
+    selectedDate,
     stopDelays,
     stopPoints,
     availableDates,
@@ -48,6 +50,7 @@ export function StopDelayView({
             </span>
             <AvailableDatesPicker
                 availableDates={availableDates}
+                selectedDate={selectedDate}
                 onSelectDate={handleSelectDateCB}
             />
             <span>Stop delays for selected site and date:</span>
