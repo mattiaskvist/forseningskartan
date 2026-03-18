@@ -13,7 +13,6 @@ type summary struct {
 	Stop            *stopMeta  `firestore:"s" json:"s,omitempty"`
 	ByHour          []summary  `firestore:"h" json:"h,omitempty"`
 	ByRoute         []summary  `firestore:"br" json:"br,omitempty"`
-	StopTimeUpdates int64      `firestore:"stu" json:"stu"`
 	ArrivalEvents   int64      `firestore:"ac" json:"ac"`
 	DepartureEvents int64      `firestore:"dc" json:"dc"`
 	UniqueTrips     int        `firestore:"ut" json:"ut"`

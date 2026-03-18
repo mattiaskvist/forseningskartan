@@ -42,7 +42,6 @@ function mapSummary(summary: CompactSummary): DelaySummary {
         stop: summary.s ? { name: summary.s.n } : undefined,
         byHour: summary.h?.map(mapSummary),
         byRoute: summary.br?.map(mapSummary),
-        stopTimeUpdates: summary.stu,
         arrivalEventCount: summary.ac,
         departureEventCount: summary.dc,
         uniqueTrips: summary.ut,
