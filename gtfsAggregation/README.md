@@ -86,7 +86,6 @@ type summary struct {
 	Stop            *stopMeta  `json:"s,omitempty"` // empty for by route
 	ByHour          []summary  `json:"h,omitempty"` // set for route summaries
 	ByRoute         []summary  `json:"br,omitempty"` // empty for by route
-	StopTimeUpdates int64      `json:"stu"`
 	ArrivalEvents   int64      `json:"ac"`
 	DepartureEvents int64      `json:"dc"`
 	UniqueTrips     int        `json:"ut"`
@@ -114,6 +113,7 @@ type delayStats struct {
 
 `a` (`avgSeconds`) is calculated as `sumSeconds / c` within that specific stat bucket.  
 Examples:
+
 - `dd.a` = average over delayed **departures only** (`dd.c`)
 - `ad.a` = average over delayed **arrivals only** (`ad.c`)
 - `da.a` / `aa.a` = average over ahead events in their respective buckets
@@ -152,8 +152,9 @@ For all `ByHour`/`h` summaries, the summary `k` field is:
 - Encoded in **UTC**.
 - Formatted as **RFC3339** (for example `"2026-03-01T13:00:00Z"`), representing the interval `[13:00, 14:00)` UTC.
 
-Internally this is generated as `observedAt.UTC().Truncate(time.Hour).Format(time.RFC3339)`.
-`observedAt` is taken from the GTFS-RT header timestamp when present, otherwise from the archive path (`<yyyy>/<mm>/<dd>/<hh>`) interpreted as UTC.
+Internally this is generated as `time.Unix(event.time, 0).UTC().Truncate(time.Hour).Format(time.RFC3339)`.
+`event.time` refers to the realized arrival/departure stop event timestamp from `TripUpdate.StopTimeUpdate`.
+`observedAt` is still used only to determine whether an event is realized (`event.time <= observedAt`). `observedAt` is taken from the GTFS-RT header timestamp when present, otherwise from the archive path (`<yyyy>/<mm>/<dd>/<hh>`) interpreted as UTC.
 
 ### Date index
 

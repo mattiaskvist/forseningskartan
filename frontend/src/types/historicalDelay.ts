@@ -29,7 +29,6 @@ type DelaySummary = {
     stop?: StopMeta;
     byHour?: DelaySummary[];
     byRoute?: DelaySummary[];
-    stopTimeUpdates: number;
     arrivalEventCount: number;
     departureEventCount: number;
     uniqueTrips: number;

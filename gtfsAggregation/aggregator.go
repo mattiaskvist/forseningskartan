@@ -24,8 +24,6 @@ type aggregator struct {
 	filesDiscovered     int64
 	filesParsed         int64
 	feedsWithTrips      int64
-	tripUpdates         int64
-	stopTimeUpdates     int64
 	routes              map[string]struct{}
 	trips               map[string]struct{}
 	vehicles            map[string]struct{}
@@ -82,9 +80,6 @@ func (a *aggregator) addFile(path string) error {
 		return fmt.Errorf("could not resolve observed at time: %w", err)
 	}
 
-	hourKey := observedAt.UTC().Truncate(time.Hour).Format(time.RFC3339)
-	hourBucket := a.bucketFor(a.byHour, hourKey)
-
 	feedHasTripUpdate := false
 	for _, entity := range feed.GetEntity() {
 		tripUpdate := entity.GetTripUpdate()
@@ -97,9 +92,6 @@ func (a *aggregator) addFile(path string) error {
 			a.feedsWithTrips++
 		}
 
-		a.tripUpdates++
-		hourBucket.TripUpdates++
-
 		tripID := strings.TrimSpace(tripUpdate.GetTrip().GetTripId())
 		routeID := strings.TrimSpace(tripUpdate.GetTrip().GetRouteId())
 		// if route_id is missing, attempt to look it up from the static index using trip_id
@@ -111,79 +103,55 @@ func (a *aggregator) addFile(path string) error {
 		vehicleID := strings.TrimSpace(tripUpdate.GetVehicle().GetId())
 
 		var routeBucket *bucket
-		var routeHourBucket *bucket
 		if routeID != "" {
 			a.routes[routeID] = struct{}{}
-			hourBucket.Routes[routeID] = struct{}{}
 
 			routeBucket = a.bucketFor(a.byRoute, routeID)
-			routeHourBucket = a.bucketFor(routeBucket.ByHour, hourKey)
 			routeBucket.TripUpdates++
-			routeHourBucket.TripUpdates++
 			routeBucket.Routes[routeID] = struct{}{}
-			routeHourBucket.Routes[routeID] = struct{}{}
 			if tripID != "" {
 				routeBucket.Trips[tripID] = struct{}{}
-				routeHourBucket.Trips[tripID] = struct{}{}
 			}
 			if vehicleID != "" {
 				routeBucket.Vehicles[vehicleID] = struct{}{}
-				routeHourBucket.Vehicles[vehicleID] = struct{}{}
 			}
 		}
 
 		if tripID != "" {
 			a.trips[tripID] = struct{}{}
-			hourBucket.Trips[tripID] = struct{}{}
 		}
 
 		if vehicleID != "" {
 			a.vehicles[vehicleID] = struct{}{}
-			hourBucket.Vehicles[vehicleID] = struct{}{}
 		}
 
 		for _, stopUpdate := range tripUpdate.GetStopTimeUpdate() {
-			a.stopTimeUpdates++
-			hourBucket.StopTimeUpdates++
 			if routeBucket != nil {
 				routeBucket.StopTimeUpdates++
-				if routeHourBucket != nil {
-					routeHourBucket.StopTimeUpdates++
-				}
 			}
 
 			stopID := strings.TrimSpace(stopUpdate.GetStopId())
 			var stopBucket *bucket
 			var stopRouteBucket *bucket
-			var stopRouteHourBucket *bucket
 			if stopID != "" {
 				stopBucket = a.bucketFor(a.byStop, stopID)
 				stopBucket.StopTimeUpdates++
 				if routeID != "" {
 					stopBucket.Routes[routeID] = struct{}{}
 					stopRouteBucket = a.bucketFor(stopBucket.ByRoute, routeID)
-					stopRouteHourBucket = a.bucketFor(stopRouteBucket.ByHour, hourKey)
 					stopRouteBucket.StopTimeUpdates++
-					stopRouteHourBucket.StopTimeUpdates++
 					stopRouteBucket.Routes[routeID] = struct{}{}
-					stopRouteHourBucket.Routes[routeID] = struct{}{}
 				}
 				if tripID != "" {
 					stopBucket.Trips[tripID] = struct{}{}
 					if stopRouteBucket != nil {
 						stopRouteBucket.Trips[tripID] = struct{}{}
-						if stopRouteHourBucket != nil {
-							stopRouteHourBucket.Trips[tripID] = struct{}{}
-						}
 					}
 				}
 				if vehicleID != "" {
 					stopBucket.Vehicles[vehicleID] = struct{}{}
 					if stopRouteBucket != nil {
 						stopRouteBucket.Vehicles[vehicleID] = struct{}{}
-						if stopRouteHourBucket != nil {
-							stopRouteHourBucket.Vehicles[vehicleID] = struct{}{}
-						}
 					}
 				}
 			}
@@ -194,6 +162,20 @@ func (a *aggregator) addFile(path string) error {
 				}
 
 				eventTime := event.GetTime()
+				eventUTC := time.Unix(eventTime, 0).UTC()
+				eventHourKey := eventUTC.Truncate(time.Hour).Format(time.RFC3339)
+				eventHourBucket := a.bucketFor(a.byHour, eventHourKey)
+
+				var routeEventHourBucket *bucket
+				if routeBucket != nil {
+					routeEventHourBucket = a.bucketFor(routeBucket.ByHour, eventHourKey)
+				}
+
+				var stopRouteEventHourBucket *bucket
+				if stopRouteBucket != nil {
+					stopRouteEventHourBucket = a.bucketFor(stopRouteBucket.ByHour, eventHourKey)
+				}
+
 				if eventTime > observedAt.Unix() {
 					// skip future "predictive" updates
 					return
@@ -216,33 +198,33 @@ func (a *aggregator) addFile(path string) error {
 						bucketValue.DepartureEvents++
 					}
 				}
-				incrementEventCount(hourBucket)
+				incrementEventCount(eventHourBucket)
 				incrementEventCount(routeBucket)
-				incrementEventCount(routeHourBucket)
+				incrementEventCount(routeEventHourBucket)
 				incrementEventCount(stopBucket)
 				incrementEventCount(stopRouteBucket)
-				incrementEventCount(stopRouteHourBucket)
+				incrementEventCount(stopRouteEventHourBucket)
 
 				delay := int64(event.GetDelay())
 				if delay > 0 {
 					// delayed
 					if isArrival {
 						a.totalArrivalDelay.Add(delay)
-						hourBucket.ArrivalDelay.Add(delay)
+						eventHourBucket.ArrivalDelay.Add(delay)
 					} else {
 						a.totalDepartureDelay.Add(delay)
-						hourBucket.DepartureDelay.Add(delay)
+						eventHourBucket.DepartureDelay.Add(delay)
 					}
 					if routeBucket != nil {
 						if isArrival {
 							routeBucket.ArrivalDelay.Add(delay)
-							if routeHourBucket != nil {
-								routeHourBucket.ArrivalDelay.Add(delay)
+							if routeEventHourBucket != nil {
+								routeEventHourBucket.ArrivalDelay.Add(delay)
 							}
 						} else {
 							routeBucket.DepartureDelay.Add(delay)
-							if routeHourBucket != nil {
-								routeHourBucket.DepartureDelay.Add(delay)
+							if routeEventHourBucket != nil {
+								routeEventHourBucket.DepartureDelay.Add(delay)
 							}
 						}
 					}
@@ -256,13 +238,13 @@ func (a *aggregator) addFile(path string) error {
 					if stopRouteBucket != nil {
 						if isArrival {
 							stopRouteBucket.ArrivalDelay.Add(delay)
-							if stopRouteHourBucket != nil {
-								stopRouteHourBucket.ArrivalDelay.Add(delay)
+							if stopRouteEventHourBucket != nil {
+								stopRouteEventHourBucket.ArrivalDelay.Add(delay)
 							}
 						} else {
 							stopRouteBucket.DepartureDelay.Add(delay)
-							if stopRouteHourBucket != nil {
-								stopRouteHourBucket.DepartureDelay.Add(delay)
+							if stopRouteEventHourBucket != nil {
+								stopRouteEventHourBucket.DepartureDelay.Add(delay)
 							}
 						}
 					}
@@ -271,21 +253,21 @@ func (a *aggregator) addFile(path string) error {
 					ahead := -delay
 					if isArrival {
 						a.totalArrivalAhead.Add(ahead)
-						hourBucket.ArrivalAhead.Add(ahead)
+						eventHourBucket.ArrivalAhead.Add(ahead)
 					} else {
 						a.totalDepartureAhead.Add(ahead)
-						hourBucket.DepartureAhead.Add(ahead)
+						eventHourBucket.DepartureAhead.Add(ahead)
 					}
 					if routeBucket != nil {
 						if isArrival {
 							routeBucket.ArrivalAhead.Add(ahead)
-							if routeHourBucket != nil {
-								routeHourBucket.ArrivalAhead.Add(ahead)
+							if routeEventHourBucket != nil {
+								routeEventHourBucket.ArrivalAhead.Add(ahead)
 							}
 						} else {
 							routeBucket.DepartureAhead.Add(ahead)
-							if routeHourBucket != nil {
-								routeHourBucket.DepartureAhead.Add(ahead)
+							if routeEventHourBucket != nil {
+								routeEventHourBucket.DepartureAhead.Add(ahead)
 							}
 						}
 					}
@@ -299,13 +281,13 @@ func (a *aggregator) addFile(path string) error {
 					if stopRouteBucket != nil {
 						if isArrival {
 							stopRouteBucket.ArrivalAhead.Add(ahead)
-							if stopRouteHourBucket != nil {
-								stopRouteHourBucket.ArrivalAhead.Add(ahead)
+							if stopRouteEventHourBucket != nil {
+								stopRouteEventHourBucket.ArrivalAhead.Add(ahead)
 							}
 						} else {
 							stopRouteBucket.DepartureAhead.Add(ahead)
-							if stopRouteHourBucket != nil {
-								stopRouteHourBucket.DepartureAhead.Add(ahead)
+							if stopRouteEventHourBucket != nil {
+								stopRouteEventHourBucket.DepartureAhead.Add(ahead)
 							}
 						}
 					}
@@ -344,7 +326,6 @@ func summarizeBuckets(source map[string]*bucket, kind bucketKind, staticIndex *s
 		bucketValue := source[key]
 		summaryValue := summary{
 			Key:             key,
-			StopTimeUpdates: bucketValue.StopTimeUpdates,
 			ArrivalEvents:   bucketValue.ArrivalEvents,
 			DepartureEvents: bucketValue.DepartureEvents,
 			UniqueTrips:     len(bucketValue.Trips),
