@@ -60,10 +60,9 @@ jobs:
   deploy:
     name: Deploy to GCP
     needs: build
-    if: github.event_name == 'push'
-    # if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    # environment: prod
+    environment: prod # Protect deployments to main branch with approval requirements
     permissions:
       contents: read
       id-token: write # Strictly required for secure Google Cloud authentication
