@@ -91,7 +91,8 @@ jobs:
           stack-name: dev
           work-dir: ./gtfsAggregation/infra
           config-map: |
-            dockerImage: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+            dockerImage:
+              value: ${{ env.IMAGE_NAME }}:${{ github.sha }}
         env:
           PULUMI_BACKEND_URL: ${{ env.PULUMI_BACKEND_URL }}
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_PASSPHRASE }}
