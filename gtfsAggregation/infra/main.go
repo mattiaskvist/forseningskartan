@@ -58,7 +58,7 @@ func main() {
 							Resources: &cloudrunv2.JobTemplateTemplateContainerResourcesArgs{
 								Limits: pulumi.StringMap{
 									"cpu":    pulumi.String("1"),
-									"memory": pulumi.String("1Gi"),
+									"memory": pulumi.String("2Gi"),
 								},
 							},
 							Envs: cloudrunv2.JobTemplateTemplateContainerEnvArray{
