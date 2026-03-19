@@ -35,7 +35,7 @@ func main() {
 		if err != nil {
 			return err
 		}
-		
+
 		// Grant the Service Account permission to read from Secret Manager
 		_, err = projects.NewIAMMember(ctx, "secret-accessor", &projects.IAMMemberArgs{
 			Project: pulumi.String(projectID),
@@ -104,8 +104,8 @@ func main() {
 		// 4. The Cloud Scheduler Trigger
 		_, err = cloudscheduler.NewJob(ctx, "daily-trigger", &cloudscheduler.JobArgs{
 			Region:   pulumi.String(location),
-			Schedule: pulumi.String("0 9 * * *"), // Runs at 9:00 AM daily
-			TimeZone: pulumi.String("UTC"),
+			Schedule: pulumi.String("0 6,7,8,9 * * *"),  // Runs at minute 0 past hours 6, 7, 8, and 9 every day
+			TimeZone: pulumi.String("Europe/Stockholm"), // Ensures it uses Swedish local time
 			HttpTarget: &cloudscheduler.JobHttpTargetArgs{
 				HttpMethod: pulumi.String("POST"),
 				Uri:        pulumi.Sprintf("https://run.googleapis.com/v2/projects/%s/locations/%s/jobs/%s:run", goCronJob.Project, goCronJob.Location, goCronJob.Name),
