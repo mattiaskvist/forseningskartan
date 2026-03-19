@@ -1,4 +1,5 @@
 # GTFS Aggregation Infrastructure (Pulumi GCP Go)
+
 This Pulumi project provisions the cloud infrastructure for the GTFS Aggregation service on Google Cloud Platform (GCP). It deploys a containerized Go application as a serverless scheduled task using Cloud Run Jobs and Cloud Scheduler.
 
 The infrastructure is written in Go and emphasizes security by utilizing dedicated Service Accounts with the principle of least privilege, Google Cloud Secret Manager for API keys, and Workload Identity Federation for CI/CD.
