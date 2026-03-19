@@ -55,6 +55,12 @@ func main() {
 					Containers: cloudrunv2.JobTemplateTemplateContainerArray{
 						&cloudrunv2.JobTemplateTemplateContainerArgs{
 							Image: pulumi.String(dockerImage),
+							Resources: &cloudrunv2.JobTemplateTemplateContainerResourcesArgs{
+								Limits: pulumi.StringMap{
+									"cpu":    pulumi.String("1"),
+									"memory": pulumi.String("1Gi"),
+								},
+							},
 							Envs: cloudrunv2.JobTemplateTemplateContainerEnvArray{
 								&cloudrunv2.JobTemplateTemplateContainerEnvArgs{
 									Name:  pulumi.String("FIRESTORE_PROJECT"),
