@@ -63,7 +63,7 @@ jobs:
     if: github.event_name == 'push'
     # if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    environment: prod
+    # environment: prod
     permissions:
       contents: read
       id-token: write # Strictly required for secure Google Cloud authentication
