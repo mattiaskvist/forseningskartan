@@ -4,9 +4,11 @@ on:
   push:
     paths:
       - "gtfsAggregation/**"
+      - ".github/workflows/gtfsAggregation.yml"
   pull_request:
     paths:
       - "gtfsAggregation/**"
+      - ".github/workflows/gtfsAggregation.yml"
 
 env:
   PROJECT_ID: forseningskartan
