@@ -20,7 +20,7 @@ function renderDetailRow(label: string, value: string) {
     );
 }
 
-export function getLineRouteSummary(
+function getLineRouteSummary(
     routeSummaries: DelaySummary[],
     lineId: number,
     lineDesignation?: string,
