@@ -5,7 +5,7 @@ import utc from "dayjs/plugin/utc";
 import { Departure, TransportationMode, transportationModeToRouteType } from "../types/sl";
 import { formatDelay, formatTime, getDelayMinutes } from "../utils/time";
 import { DepartureHistoricalDelays } from "./DepartureHistoricalDelays";
-import { DatePreset, EventType, StatType } from "../types/departureDelay";
+import { DatePreset, EventType } from "../types/departureDelay";
 import { DelaySummary } from "../types/historicalDelay";
 import { aggregateRouteSummaries } from "../utils/delayAggregation";
 
@@ -71,7 +71,6 @@ export function DepartureDetails({
     onCustomDateChangeCB,
 }: DepartureDetailsProps) {
     const [selectedEventType, setSelectedEventType] = useState<EventType>("departure");
-    const [selectedStatType, setSelectedStatType] = useState<StatType>("delay");
 
     const selectedDepartureDate = dayjs(departure.expected ?? departure.scheduled).utc();
     // use departure hour, fall back to current hour
@@ -98,7 +97,7 @@ export function DepartureDetails({
         renderDetailRow("Delay", formatDelay(getDelayMinutes(departure))),
         renderDetailRow(
             "Stop",
-            `${departure.stop_area.name}, ${departure.stop_point.designation ?? ""}`
+            `${departure.stop_area.name} ${departure.stop_point.designation ?? ""}`
         ),
     ];
 
@@ -122,11 +121,9 @@ export function DepartureDetails({
                 selectedDatePreset={selectedDatePreset}
                 selectedCustomDate={selectedCustomDate}
                 selectedEventType={selectedEventType}
-                selectedStatType={selectedStatType}
                 onDatePresetChangeCB={onDatePresetChangeCB}
                 onCustomDateChangeCB={onCustomDateChangeCB}
                 onEventTypeChangeCB={setSelectedEventType}
-                onStatTypeChangeCB={setSelectedStatType}
                 isLoadingData={isStopDelaysLoading}
                 routeSummary={routeSummary}
             />
