@@ -14,7 +14,7 @@ func deleteDateCollections(projectID string, dates map[string]struct{}) error {
 	if err != nil {
 		return fmt.Errorf("create firestore client: %w", err)
 	}
-	defer client.Close()
+	defer client.Close() // nolint: errcheck
 
 	bw := client.BulkWriter(ctx)
 	defer bw.End()
