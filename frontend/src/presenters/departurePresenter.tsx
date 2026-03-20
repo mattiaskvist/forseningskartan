@@ -148,6 +148,7 @@ export function DeparturePresenter({ selectedSite, stopPoints }: DeparturePresen
             onBackToListCB={returnToDepartureListCB}
             isLoading={isDeparturesLoading}
             availableDates={availableDates}
+            selectedDelayDates={selectedDelayDates}
             selectedStopDelays={selectedStopDelays}
             isStopDelaysLoading={isStopDelaysLoading}
             selectedDatePreset={selectedDatePreset}

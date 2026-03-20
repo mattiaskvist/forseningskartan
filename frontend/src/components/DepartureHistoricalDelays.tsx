@@ -6,6 +6,8 @@ import { Suspense } from "./Suspense";
 
 type DepartureHistoricalDelaysProps = {
     availableDates: string[];
+    selectedDelayDates: string[];
+    selectedDepartureHourUTC: number;
     selectedDatePreset: DatePreset;
     selectedCustomDate: string | null;
     selectedEventType: EventType;
@@ -18,6 +20,8 @@ type DepartureHistoricalDelaysProps = {
 
 export function DepartureHistoricalDelays({
     availableDates,
+    selectedDelayDates,
+    selectedDepartureHourUTC,
     selectedDatePreset,
     selectedCustomDate,
     selectedEventType,
@@ -41,7 +45,9 @@ export function DepartureHistoricalDelays({
             />
 
             <div className="rounded border border-slate-200 p-2">
-                <p className="text-xs text-slate-500">{getPresetDescription(selectedDatePreset)}</p>
+                <p className="text-xs text-slate-500">
+                    {getPresetDescription(selectedDelayDates, selectedDepartureHourUTC)}
+                </p>
                 {isLoadingData ? (
                     <Suspense message="Loading historical delay stats..." />
                 ) : (

@@ -51,6 +51,7 @@ type DepartureDetailsProps = {
     departure: Departure;
     onBackToListCB: () => void;
     availableDates: string[];
+    selectedDelayDates: string[];
     selectedStopDelays: DelaySummary[];
     isStopDelaysLoading: boolean;
     selectedDatePreset: DatePreset;
@@ -63,6 +64,7 @@ export function DepartureDetails({
     departure,
     onBackToListCB,
     availableDates,
+    selectedDelayDates,
     selectedStopDelays,
     isStopDelaysLoading,
     selectedDatePreset,
@@ -118,6 +120,8 @@ export function DepartureDetails({
             </div>
             <DepartureHistoricalDelays
                 availableDates={availableDates}
+                selectedDelayDates={selectedDelayDates}
+                selectedDepartureHourUTC={selectedDepartureHourUTC}
                 selectedDatePreset={selectedDatePreset}
                 selectedCustomDate={selectedCustomDate}
                 selectedEventType={selectedEventType}

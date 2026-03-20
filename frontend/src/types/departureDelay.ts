@@ -1,16 +1,34 @@
-export type DatePreset = "sameDayLastWeek" | "last5Weekdays" | "lastWeekend" | "customDate";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 
-export function getPresetDescription(selectedDatePreset: DatePreset): string {
-    switch (selectedDatePreset) {
-        case "sameDayLastWeek":
-            return "Stats for the same day from last week at the hour of departure.";
-        case "last5Weekdays":
-            return "Stats from the latest 5 weekdays before this departure at the hour of departure.";
-        case "lastWeekend":
-            return "Stats from the most recent weekend before this departure at the hour of departure.";
-        case "customDate":
-            return "Stats for selected date at the hour of departure.";
+dayjs.extend(utc);
+
+function formatHourRangeLocal(hourUTC: number): string {
+    // create a UTC time at the given hour
+    const start = dayjs.utc().hour(hourUTC).minute(0).second(0);
+
+    // convert to local time
+    const localStart = start.local();
+    const localEnd = localStart.add(59, "minute");
+
+    return `${localStart.format("HH:mm")}-${localEnd.format("HH:mm")}`;
+}
+
+function getDateRangeText(selectedDates: string[]): string {
+    const sortedDates = [...selectedDates].sort();
+    const fromDate = sortedDates[0];
+    const toDate = sortedDates[sortedDates.length - 1];
+
+    if (fromDate === toDate) {
+        return fromDate;
     }
+    return `${fromDate} - ${toDate}`;
+}
+
+export function getPresetDescription(selectedDates: string[], selectedHourUTC: number): string {
+    const dateRange = getDateRangeText(selectedDates);
+    const hourRange = formatHourRangeLocal(selectedHourUTC);
+    return `Stats for ${dateRange}, ${hourRange}`;
 }
 
 export const DATE_PRESET_LABELS: { preset: DatePreset; label: string }[] = [
@@ -20,5 +38,6 @@ export const DATE_PRESET_LABELS: { preset: DatePreset; label: string }[] = [
     { preset: "customDate", label: "Custom date" },
 ];
 
+export type DatePreset = "sameDayLastWeek" | "last5Weekdays" | "lastWeekend" | "customDate";
 export type EventType = "departure" | "arrival";
 export type StatType = "delay" | "ahead";
