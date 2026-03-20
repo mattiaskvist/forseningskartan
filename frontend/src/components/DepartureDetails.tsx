@@ -20,10 +20,6 @@ function renderDetailRow(label: string, value: string) {
     );
 }
 
-function formatOptional(value: string | number | undefined) {
-    return value !== undefined && value !== "" ? `${value}` : "-";
-}
-
 export function getLineRouteSummary(
     routeSummaries: DelaySummary[],
     lineId: number,
@@ -94,33 +90,26 @@ export function DepartureDetails({
     );
 
     const detailRows = [
-        renderDetailRow("Transport mode", formatOptional(departure.line.transport_mode)),
-        renderDetailRow("Line", formatOptional(departure.line.designation ?? departure.line.id)),
-        renderDetailRow(
-            "Destination",
-            formatOptional(departure.destination ?? departure.direction)
-        ),
-        renderDetailRow("Direction", formatOptional(departure.direction)),
         renderDetailRow("Planned departure", formatTime(departure.scheduled)),
         renderDetailRow(
-            "Predicted departure",
+            "Expected departure",
             formatTime(departure.expected ?? departure.scheduled)
         ),
         renderDetailRow("Delay", formatDelay(getDelayMinutes(departure))),
-        renderDetailRow("Departure state", formatOptional(departure.state)),
-        renderDetailRow("Journey ID", formatOptional(departure.journey.id)),
-        renderDetailRow("Journey state", formatOptional(departure.journey.state)),
-        renderDetailRow("Prediction state", formatOptional(departure.journey.prediction_state)),
-        renderDetailRow("Passenger level", formatOptional(departure.journey.passenger_level)),
-        renderDetailRow("Stop area", formatOptional(departure.stop_area.name)),
-        renderDetailRow("Stop point", formatOptional(departure.stop_point.name)),
-        renderDetailRow("Stop designation", formatOptional(departure.stop_point.designation)),
+        renderDetailRow(
+            "Stop",
+            `${departure.stop_area.name}, ${departure.stop_point.designation ?? ""}`
+        ),
     ];
 
     return (
         <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-                <h4 className="text-sm font-semibold text-slate-900">Journey details</h4>
+                <p className="text-m font-semibold text-slate-900">
+                    {departure.line.transport_mode}{" "}
+                    {departure.line.designation ?? departure.line.id} -{" "}
+                    {departure.destination ?? departure.direction}
+                </p>
                 <Button variant="text" size="small" onClick={onBackToListCB}>
                     Back
                 </Button>
