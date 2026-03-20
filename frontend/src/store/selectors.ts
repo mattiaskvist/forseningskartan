@@ -1,4 +1,6 @@
+import { DelaySummary } from "../types/historicalDelay";
 import { Site } from "../types/sl";
+import { StopDelayCacheEntry } from "../types/stopDelay";
 import { RootState } from "./store";
 
 function getSitesCB(state: RootState) {
@@ -36,11 +38,15 @@ function getStopPointsLoadingCB(state: RootState) {
 }
 
 function getStopDelaysCB(state: RootState) {
-    return state.stopDelays.data;
+    return state.stopDelays.cache;
 }
 
 function getStopDelaysLoadingCB(state: RootState) {
-    return state.stopDelays.isLoading;
+    const cacheEntries = Object.values(state.stopDelays.cache);
+    function isLoadingCB(entry: StopDelayCacheEntry<DelaySummary> | undefined): boolean {
+        return entry?.status === "loading";
+    }
+    return cacheEntries.some(isLoadingCB);
 }
 
 function getRouteDelaysCB(state: RootState) {

@@ -9,6 +9,11 @@ import {
 } from "./actions";
 import { DepartureResponse, Site, StopPoint } from "../types/sl";
 import { DelaySummary } from "../types/historicalDelay";
+import {
+    StopDelayCacheEntry,
+    StopDelayRequestKey,
+    getStopDelayRequestKey,
+} from "../types/stopDelay";
 
 type SitesState = {
     data: Site[] | null;
@@ -30,9 +35,8 @@ type StopPointsState = {
 };
 
 type StopDelaysState = {
-    data: DelaySummary[] | null;
-    isLoading: boolean;
-    error: Error | null;
+    // use partial since keys can be unset
+    cache: Partial<Record<StopDelayRequestKey, StopDelayCacheEntry<DelaySummary>>>;
 };
 
 type RouteDelayState = {
@@ -124,22 +128,53 @@ export const stopPointsSlice = createSlice({
 
 export const stopDelaysSlice = createSlice({
     name: "stopDelays",
-    initialState: { data: null, isLoading: false, error: null } as StopDelaysState,
+    initialState: {
+        cache: {},
+    } as StopDelaysState,
     reducers: {},
     extraReducers: (builder) => {
         builder
-            .addCase(getStopDelays.pending, (state) => {
-                state.isLoading = true;
-                state.error = null;
+            .addCase(getStopDelays.pending, (state, action) => {
+                const { stopPointGIDs, date } = action.meta.arg;
+
+                stopPointGIDs.forEach((stopPointGID) => {
+                    const key = getStopDelayRequestKey(stopPointGID, date);
+                    state.cache[key] = {
+                        data: state.cache[key]?.data ?? null,
+                        status: "loading",
+                        error: null,
+                    };
+                });
             })
             .addCase(getStopDelays.fulfilled, (state, action) => {
-                state.isLoading = false;
-                state.data = action.payload;
-                state.error = null;
+                const { stopPointGIDs, date } = action.meta.arg;
+
+                stopPointGIDs.forEach((stopPointGID) => {
+                    const key = getStopDelayRequestKey(stopPointGID, date);
+                    function isStopPointSummaryCB(summary: DelaySummary): boolean {
+                        return summary.key === stopPointGID;
+                    }
+                    const summary = action.payload?.find(isStopPointSummaryCB) ?? null;
+                    state.cache[key] = {
+                        data: summary,
+                        status: "succeeded",
+                        error: null,
+                    };
+                });
             })
             .addCase(getStopDelays.rejected, (state, action) => {
-                state.isLoading = false;
-                state.error = action.error as Error;
+                const { stopPointGIDs, date } = action.meta.arg;
+                const errorMessage = action.error.message ?? "Unknown error fetching stop delays";
+
+                stopPointGIDs.forEach((stopPointGID) => {
+                    const key = getStopDelayRequestKey(stopPointGID, date);
+                    state.cache[key] = {
+                        data: state.cache[key]?.data ?? null,
+                        status: "failed",
+                        error: errorMessage,
+                    };
+                });
+
                 console.error("Failed to fetch stop delays:", action.error);
             });
     },
