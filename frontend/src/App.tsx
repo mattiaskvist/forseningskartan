@@ -3,9 +3,14 @@ import { MapPresenter } from "./presenters/mapPresenter";
 import { getAggregatedDates, getSites, getStopPoints } from "./store/actions";
 import { useAppDispatch, useAppSelector } from "./store/store";
 import { DeparturePresenter } from "./presenters/departurePresenter";
-import { StopDelayPresenter } from "./presenters/stopDelayPresenter";
 import { RouteDelayPresenter } from "./presenters/RouteDelayPresenter";
-import { getSelectedSiteCB, getSitesLoadingCB, getSitesCB } from "./store/selectors";
+import {
+    getSelectedSiteCB,
+    getSitesLoadingCB,
+    getSitesCB,
+    getStopPointsCB,
+    getStopPointsLoadingCB,
+} from "./store/selectors";
 import { Suspense } from "./components/Suspense";
 
 function App() {
@@ -21,7 +26,9 @@ function App() {
     const sites = useAppSelector(getSitesCB);
     const selectedSite = useAppSelector(getSelectedSiteCB);
     const isSitesLoading = useAppSelector(getSitesLoadingCB);
-    if (isSitesLoading || !sites) {
+    const stopPoints = useAppSelector(getStopPointsCB);
+    const isStopPointsLoading = useAppSelector(getStopPointsLoadingCB);
+    if (isSitesLoading || !sites || isStopPointsLoading || !stopPoints) {
         return <Suspense fullscreen message="Loading transit data and preparing the map..." />;
     }
 
@@ -33,13 +40,12 @@ function App() {
                     {selectedSite && (
                         <section className="overlay-panel">
                             <h2 className="overlay-panel-title">Departures</h2>
-                            <DeparturePresenter selectedSite={selectedSite} />
+                            <DeparturePresenter
+                                selectedSite={selectedSite}
+                                stopPoints={stopPoints}
+                            />
                         </section>
                     )}
-                    <section className="overlay-panel">
-                        <h2 className="overlay-panel-title">Stop delays</h2>
-                        <StopDelayPresenter />
-                    </section>
                     <section className="overlay-panel">
                         <h2 className="overlay-panel-title">Route delays</h2>
                         <RouteDelayPresenter />

@@ -1,8 +1,10 @@
 import { Departure } from "../types/sl";
+import { DelaySummary } from "../types/historicalDelay";
 import { Suspense } from "../components/Suspense";
 import Button from "@mui/material/Button";
 import { DepartureDetails } from "../components/DepartureDetails";
 import { DepartureList } from "../components/DepartureList";
+import { DatePreset } from "../types/departureDelay";
 
 type DepartureViewProps = {
     departures: Departure[];
@@ -12,6 +14,13 @@ type DepartureViewProps = {
     onSelectDepartureCB: (departure: Departure) => void;
     onBackToListCB: () => void;
     isLoading: boolean;
+    availableDates: string[];
+    selectedStopDelays: DelaySummary[];
+    isStopDelaysLoading: boolean;
+    selectedDatePreset: DatePreset;
+    selectedCustomDate: string | null;
+    onDatePresetChangeCB: (preset: DatePreset) => void;
+    onCustomDateChangeCB: (date: string) => void;
 };
 
 export function DepartureView({
@@ -22,6 +31,13 @@ export function DepartureView({
     onSelectDepartureCB,
     onBackToListCB,
     isLoading,
+    availableDates,
+    selectedStopDelays,
+    isStopDelaysLoading,
+    selectedDatePreset,
+    selectedCustomDate,
+    onDatePresetChangeCB,
+    onCustomDateChangeCB,
 }: DepartureViewProps) {
     const nonUpcomingStates = new Set([
         "DEPARTED",
@@ -81,7 +97,17 @@ export function DepartureView({
             {isLoading ? (
                 <Suspense message="Loading departures..." />
             ) : selectedDeparture ? (
-                <DepartureDetails departure={selectedDeparture} onBackToListCB={onBackToListCB} />
+                <DepartureDetails
+                    departure={selectedDeparture}
+                    onBackToListCB={onBackToListCB}
+                    availableDates={availableDates}
+                    selectedStopDelays={selectedStopDelays}
+                    isStopDelaysLoading={isStopDelaysLoading}
+                    selectedDatePreset={selectedDatePreset}
+                    selectedCustomDate={selectedCustomDate}
+                    onDatePresetChangeCB={onDatePresetChangeCB}
+                    onCustomDateChangeCB={onCustomDateChangeCB}
+                />
             ) : upcomingDepartures.length > 0 ? (
                 <DepartureList
                     departures={upcomingDepartures}

@@ -1,4 +1,8 @@
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 import { DelayStats, DelaySummary, RouteMeta } from "../types/historicalDelay";
+
+dayjs.extend(utc);
 
 type StatsAccumulator = {
     count: number;
@@ -29,12 +33,12 @@ function addStats(target: StatsAccumulator, stats: DelayStats) {
 }
 
 function isSelectedUTCHourCB(timestamp: string, selectedHourUTC: number): boolean {
-    const date = new Date(timestamp);
-    if (Number.isNaN(date.getTime())) {
+    const date = dayjs(timestamp).utc();
+    if (!date.isValid()) {
         return false;
     }
 
-    return date.getUTCHours() === selectedHourUTC;
+    return date.hour() === selectedHourUTC;
 }
 
 type RouteAccumulator = {

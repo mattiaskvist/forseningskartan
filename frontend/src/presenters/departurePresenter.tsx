@@ -14,9 +14,9 @@ import { Departure, Site, StopPoint } from "../types/sl";
 import { getStopDelayRequestKey } from "../types/stopDelay";
 import { DelaySummary } from "../types/historicalDelay";
 import { getStopPointGidsForSite } from "../utils/site";
-import { getDatesForPreset, sortDatesDescendingCB } from "../utils/departureHistoricalDelay";
 import { aggregateStopSummariesCB } from "../utils/delayAggregation";
 import { DatePreset } from "../types/departureDelay";
+import { sortDatesDescendingCB, getDatesForPreset } from "../utils/time";
 
 type DeparturePresenterProps = {
     selectedSite: Site;
