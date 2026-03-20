@@ -115,12 +115,6 @@ export function DeparturePresenter({ selectedSite, stopPoints }: DeparturePresen
         setSelectedCustomDate(null);
     }, []);
 
-    // reset departure selection when selected site changes
-    // can change though close button, map or search bar
-    useEffect(() => {
-        resetDepartureSelectionCB();
-    }, [selectedSite.id, resetDepartureSelectionCB]);
-
     function selectDepartureCB(departure: Departure) {
         setSelectedDeparture(departure);
         setSelectedDatePreset("sameDayLastWeek");

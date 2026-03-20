@@ -71,10 +71,10 @@ export function getDatesForPreset(
     const previousDates = sortedDates.filter((date) =>
         isBeforeReferenceDateCB(date, referenceDate)
     );
+    const lastWeekDate = dayjs(referenceDate).subtract(7, "day").format("YYYY-MM-DD");
 
     switch (selectedDatePreset) {
         case "sameDayLastWeek":
-            const lastWeekDate = dayjs(referenceDate).subtract(7, "day").format("YYYY-MM-DD");
             return availableDates.includes(lastWeekDate) ? [lastWeekDate] : [];
         case "last5Weekdays":
             return previousDates.filter((date) => !isWeekendCB(date)).slice(0, 5);
