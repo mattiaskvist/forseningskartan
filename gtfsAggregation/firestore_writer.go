@@ -166,15 +166,17 @@ func hashToChunk(key string, chunkCount int) int {
 	return int(h.Sum32() % uint32(chunkCount))
 }
 
-// reads current date collections from firestore, merges in newDate,
+// reads current date collections from firestore, merges in newDate if provided,
 // and stores the sorted list to index/dates document.
-func writeDateIndex(projectID string, newDate string) error {
+func writeDateIndex(projectID string, newDate *string) error {
 	existingDates, err := listFirestoreDateCollections(projectID)
 	if err != nil {
 		return fmt.Errorf("list firestore date collections: %w", err)
 	}
 
-	existingDates[newDate] = struct{}{}
+	if newDate != nil {
+		existingDates[*newDate] = struct{}{}
+	}
 
 	dates := slices.Collect(maps.Keys(existingDates))
 	slices.Sort(dates)

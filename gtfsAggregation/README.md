@@ -45,7 +45,7 @@ go run . -output "out.json" -api-key "<koda_api_key>" -date "2026-03-01"
 go run . -output "out.json" -api-key "<koda_api_key>" -date "2026-03-01" -firestore-project "forseningskartan"
 ```
 
-3. Aggregate the data for the last N days (not including todays date) that don't have a top-level Firestore collections like `2026-03-01`. Recent days is 30 by default:
+3. Aggregate the data for the last N days (not including todays date) that don't have a top-level Firestore collections like `2026-03-01`. The script also removes data that is older than the specified number of days. Recent days is 30 by default:
 
 ```bash
 go run . -api-key "<koda_api_key>" -firestore-project "forseningskartan" -recent-days 30

@@ -13,6 +13,15 @@ import (
 
 const firestoreDateLayout = "2006-01-02"
 
+func resolveDatesToDelete(config Config) (map[string]struct{}, error) {
+	existingDates, err := listFirestoreDateCollections(config.FirestoreProjectID)
+	if err != nil {
+		return nil, fmt.Errorf("list firestore date collections: %w", err)
+	}
+
+	return findOldDates(existingDates, config.RecentDays), nil
+}
+
 func resolveDatesToProcess(config Config) ([]string, error) {
 	existingDates, err := listFirestoreDateCollections(config.FirestoreProjectID)
 	if err != nil {
@@ -66,4 +75,27 @@ func findMissingRecentDates(existingDates map[string]struct{}, recentDays int) [
 
 	slices.Sort(missingDates)
 	return missingDates
+}
+
+func findOldDates(existingDates map[string]struct{}, recentDays int) map[string]struct{} {
+	if recentDays <= 0 {
+		return nil
+	}
+
+	currentDay := time.Now().UTC().Truncate(24 * time.Hour)
+	cutoff := currentDay.AddDate(0, 0, -recentDays)
+
+	oldDates := make(map[string]struct{}, len(existingDates))
+	for dateStr := range existingDates {
+		date, err := time.Parse(firestoreDateLayout, dateStr)
+		if err != nil {
+			continue
+		}
+
+		if date.Before(cutoff) {
+			oldDates[dateStr] = struct{}{}
+		}
+	}
+
+	return oldDates
 }

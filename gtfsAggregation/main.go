@@ -68,17 +68,34 @@ func runAggregations(config Config) error {
 	}
 
 	// Mode 3
-	dates, err := resolveDatesToProcess(config)
+	// Delete old collections
+	datesToDelete, err := resolveDatesToDelete(config)
 	if err != nil {
-		return err
+		return fmt.Errorf("resolve dates to delete: %w", err)
 	}
-	if len(dates) == 0 {
+	fmt.Printf("Found %d old date(s) to delete\n", len(datesToDelete))
+	err = deleteDateCollections(config.FirestoreProjectID, datesToDelete)
+	if err != nil {
+		return fmt.Errorf("delete old date collections: %w", err)
+	}
+	// Update date index after deletion
+	err = writeDateIndex(config.FirestoreProjectID, nil)
+	if err != nil {
+		return fmt.Errorf("write date index: %w", err)
+	}
+
+	// Process missing dates
+	datesToProcess, err := resolveDatesToProcess(config)
+	if err != nil {
+		return fmt.Errorf("resolve dates to process: %w", err)
+	}
+	if len(datesToProcess) == 0 {
 		fmt.Printf("No missing dates found in the last %d days\n", config.RecentDays)
 		return nil
 	}
-	fmt.Printf("Found %d missing date(s) to process\n", len(dates))
+	fmt.Printf("Found %d missing date(s) to process\n", len(datesToProcess))
 
-	for _, date := range dates {
+	for _, date := range datesToProcess {
 		dayConfig := config
 		dayConfig.Date = date
 
