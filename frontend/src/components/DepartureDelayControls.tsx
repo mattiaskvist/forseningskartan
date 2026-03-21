@@ -58,7 +58,7 @@ export function DepartureDelayControls({
                     size="small"
                     value={selectedDatePreset}
                 >
-                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 1 }}>
+                    <Box className="flex flex-wrap gap-0.5 mt-1">
                         {DATE_PRESET_LABELS.map(getPresetButtonCB)}
                     </Box>
                 </ToggleButtonGroup>
@@ -84,7 +84,7 @@ export function DepartureDelayControls({
                         size="small"
                         value={selectedEventType}
                     >
-                        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}>
+                        <Box className="flex flex-wrap gap-1 mt-1">
                             <ToggleButton value="departure">Departure</ToggleButton>
                             <ToggleButton value="arrival">Arrival</ToggleButton>
                         </Box>
