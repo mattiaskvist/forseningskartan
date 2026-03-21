@@ -1,5 +1,6 @@
 import { Departure } from "../types/sl";
 import { formatDelay, formatTime, getDelayMinutes } from "../utils/time";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
 function getDelayTextColorClass(delayMinutes: number | null) {
     if (delayMinutes === null) {
@@ -31,19 +32,22 @@ export function DepartureList({ departures, onSelectDepartureCB }: DepartureList
             <button
                 key={departureKey}
                 type="button"
-                className="w-full border-b border-slate-200 py-2 text-left last:border-b-0 hover:bg-slate-50"
+                className="w-full border-b border-slate-200 py-2 text-left last:border-b-0 hover:bg-slate-50 flex items-center justify-between"
                 onClick={() => onSelectDepartureCB(departure)}
             >
-                <p className="text-sm font-semibold text-slate-900">
-                    {transportMode} {line} to {destination}
-                </p>
-                <p className="text-sm text-slate-700">
-                    Planned {formatTime(departure.scheduled)} · Predicted{" "}
-                    {formatTime(departure.expected ?? departure.scheduled)}
-                </p>
-                <p className={`text-sm font-medium ${getDelayTextColorClass(delayMinutes)}`}>
-                    {formatDelay(delayMinutes)}
-                </p>
+                <div>
+                    <p className="text-sm font-semibold text-slate-900">
+                        {transportMode} {line} to {destination}
+                    </p>
+                    <p className="text-sm text-slate-700">
+                        Planned {formatTime(departure.scheduled)} · Predicted{" "}
+                        {formatTime(departure.expected ?? departure.scheduled)}
+                    </p>
+                    <p className={`text-sm font-medium ${getDelayTextColorClass(delayMinutes)}`}>
+                        {formatDelay(delayMinutes)}
+                    </p>
+                </div>
+                <ArrowForwardIosIcon className="mr-2" />
             </button>
         );
     }
