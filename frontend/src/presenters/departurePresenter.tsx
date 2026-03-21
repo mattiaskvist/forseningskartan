@@ -19,7 +19,6 @@ import {
 } from "../store/reducers";
 import { Departure, Site } from "../types/sl";
 import { DatePreset } from "../types/departureDelay";
-import { fetchSelectedDepartureStopDelays } from "../store/actions";
 
 type DeparturePresenterProps = {
     selectedSite: Site;
@@ -45,7 +44,6 @@ export function DeparturePresenter({ selectedSite }: DeparturePresenterProps) {
 
     function selectDepartureCB(departure: Departure) {
         dispatch(setSelectedDeparture(departure));
-        dispatch(fetchSelectedDepartureStopDelays());
     }
 
     function returnToDepartureListCB() {
@@ -54,12 +52,10 @@ export function DeparturePresenter({ selectedSite }: DeparturePresenterProps) {
 
     function setSelectedDatePresetCB(preset: DatePreset) {
         dispatch(setSelectedDatePreset(preset));
-        dispatch(fetchSelectedDepartureStopDelays());
     }
 
     function setSelectedCustomDateCB(date: string) {
         dispatch(setSelectedCustomDate(date));
-        dispatch(fetchSelectedDepartureStopDelays());
     }
 
     const departures = departureResponse?.departures ?? [];

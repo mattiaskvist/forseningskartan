@@ -1,4 +1,10 @@
-import { Action, ThunkAction, configureStore } from "@reduxjs/toolkit";
+import {
+    Action,
+    ThunkAction,
+    configureStore,
+    createListenerMiddleware,
+    isAnyOf,
+} from "@reduxjs/toolkit";
 import {
     sitesSlice,
     departuresSlice,
@@ -9,6 +15,10 @@ import {
     departureUISlice,
 } from "./reducers";
 import { useDispatch, useSelector } from "react-redux";
+import { fetchSelectedDepartureStopDelays } from "./actions";
+import { setSelectedDeparture, setSelectedDatePreset, setSelectedCustomDate } from "./reducers";
+
+const listenerMiddleware = createListenerMiddleware();
 
 export const store = configureStore({
     reducer: {
@@ -19,6 +29,19 @@ export const store = configureStore({
         routeDelays: routeDelaysSlice.reducer,
         aggregatedDates: aggregatedDatesSlice.reducer,
         departureUI: departureUISlice.reducer,
+    },
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware().prepend(listenerMiddleware.middleware),
+});
+
+listenerMiddleware.startListening({
+    matcher: isAnyOf(setSelectedDeparture, setSelectedDatePreset, setSelectedCustomDate),
+    effect: (_, listenerApi) => {
+        // avoid rapid updates triggering multiple fetches, only the latest matters
+        listenerApi.cancelActiveListeners();
+
+        const dispatch = listenerApi.dispatch as AppDispatch;
+        dispatch(fetchSelectedDepartureStopDelays());
     },
 });
 
