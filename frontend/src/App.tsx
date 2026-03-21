@@ -40,11 +40,7 @@ function App() {
                     {selectedSite && (
                         <section className="overlay-panel">
                             <h2 className="overlay-panel-title">Departures</h2>
-                            <DeparturePresenter
-                                key={selectedSite.id} // reset internal state when selected site changes
-                                selectedSite={selectedSite}
-                                stopPoints={stopPoints}
-                            />
+                            <DeparturePresenter selectedSite={selectedSite} />
                         </section>
                     )}
                     <section className="overlay-panel">

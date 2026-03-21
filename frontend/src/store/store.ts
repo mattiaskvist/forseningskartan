@@ -1,4 +1,4 @@
-import { configureStore } from "@reduxjs/toolkit";
+import { Action, ThunkAction, configureStore } from "@reduxjs/toolkit";
 import {
     sitesSlice,
     departuresSlice,
@@ -6,6 +6,7 @@ import {
     stopDelaysSlice,
     aggregatedDatesSlice,
     routeDelaysSlice,
+    departureUISlice,
 } from "./reducers";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -17,11 +18,13 @@ export const store = configureStore({
         stopDelays: stopDelaysSlice.reducer,
         routeDelays: routeDelaysSlice.reducer,
         aggregatedDates: aggregatedDatesSlice.reducer,
+        departureUI: departureUISlice.reducer,
     },
 });
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
+export type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, Action>;
 
 // Use throughout your app instead of plain `useDispatch` and `useSelector`
 export const useAppDispatch = useDispatch.withTypes<AppDispatch>();

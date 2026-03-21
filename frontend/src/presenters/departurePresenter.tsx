@@ -1,133 +1,65 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import { DepartureView } from "../views/departureView";
 import {
     getDeparturesCB,
     getDeparturesLoadingCB,
     getAggregatedDatesCB,
-    getStopDelaysCB,
     getStopDelaysLoadingCB,
+    getSelectedCustomDateCB,
+    getSelectedDatePresetCB,
+    getSelectedDelayDatesCB,
+    getSelectedDepartureCB,
+    getSelectedStopDelaysCB,
 } from "../store/selectors";
-import { setSelectedSiteId } from "../store/reducers";
-import { getStopDelays } from "../store/actions";
-import { Departure, Site, StopPoint } from "../types/sl";
-import { getStopDelayRequestKey } from "../types/stopDelay";
-import { DelaySummary } from "../types/historicalDelay";
-import { getStopPointGidsForSite } from "../utils/site";
-import { aggregateStopSummariesCB } from "../utils/delayAggregation";
+import {
+    setSelectedCustomDate,
+    setSelectedDatePreset,
+    setSelectedDeparture,
+    setSelectedSiteId,
+} from "../store/reducers";
+import { Departure, Site } from "../types/sl";
 import { DatePreset } from "../types/departureDelay";
-import { sortDatesDescendingCB, getDatesForPreset } from "../utils/time";
+import { fetchSelectedDepartureStopDelays } from "../store/actions";
 
 type DeparturePresenterProps = {
     selectedSite: Site;
-    stopPoints: StopPoint[];
 };
 
-export function DeparturePresenter({ selectedSite, stopPoints }: DeparturePresenterProps) {
+export function DeparturePresenter({ selectedSite }: DeparturePresenterProps) {
     const dispatch = useAppDispatch();
     const departureResponse = useAppSelector(getDeparturesCB);
     const isDeparturesLoading = useAppSelector(getDeparturesLoadingCB);
 
     const availableDates = useAppSelector(getAggregatedDatesCB);
-
-    const [selectedDeparture, setSelectedDeparture] = useState<Departure | null>(null);
-    const [selectedDatePreset, setSelectedDatePreset] = useState<DatePreset>("sameDayLastWeek");
-    const [selectedCustomDate, setSelectedCustomDate] = useState<string | null>(null);
-
-    const stopDelaysCache = useAppSelector(getStopDelaysCB);
+    const selectedDeparture = useAppSelector(getSelectedDepartureCB);
+    const selectedDatePreset = useAppSelector(getSelectedDatePresetCB);
+    const selectedCustomDate = useAppSelector(getSelectedCustomDateCB);
+    const selectedDelayDates = useAppSelector(getSelectedDelayDatesCB);
+    const selectedStopDelays = useAppSelector(getSelectedStopDelaysCB);
     const isStopDelaysLoading = useAppSelector(getStopDelaysLoadingCB);
-    const selectedStopPointGIDs = useMemo(
-        () => getStopPointGidsForSite(selectedSite, stopPoints),
-        [selectedSite, stopPoints]
-    );
 
-    const selectedDelayDates = useMemo(() => {
-        if (!selectedDeparture) {
-            return [];
-        }
-
-        const latestDate = [...availableDates].sort(sortDatesDescendingCB)[0];
-        const effectiveCustomDate = selectedCustomDate ?? latestDate ?? null;
-
-        return getDatesForPreset(selectedDatePreset, effectiveCustomDate, availableDates);
-    }, [selectedDeparture, selectedDatePreset, selectedCustomDate, availableDates]);
-
-    // fetch data for selected departure and dates if not in cache
-    useEffect(() => {
-        function getDelaysForDateCB(date: string) {
-            function isStopDelayMissingCB(stopPointGID: string): boolean {
-                const requestKey = getStopDelayRequestKey(stopPointGID, date);
-                const cacheEntry = stopDelaysCache[requestKey];
-
-                if (!cacheEntry) {
-                    return true;
-                }
-                if (cacheEntry.status === "loading" || cacheEntry.status === "succeeded") {
-                    return false;
-                }
-                return true;
-            }
-
-            const missingStopPointGIDs = selectedStopPointGIDs.filter(isStopDelayMissingCB);
-            dispatch(getStopDelays({ stopPointGIDs: missingStopPointGIDs, date }));
-        }
-
-        selectedDelayDates.forEach(getDelaysForDateCB);
-    }, [dispatch, selectedStopPointGIDs, selectedDelayDates, stopDelaysCache]);
-
-    // aggregate stop summaries for selected dates
-    const selectedStopDelays: DelaySummary[] = useMemo(() => {
-        const result: DelaySummary[] = [];
-
-        function addStopSummaryForDateCB(date: string) {
-            const summariesForDate: DelaySummary[] = [];
-
-            selectedStopPointGIDs.forEach((stopPointGID) => {
-                const requestKey = getStopDelayRequestKey(stopPointGID, date);
-                const cacheEntry = stopDelaysCache[requestKey];
-
-                if (cacheEntry?.status === "succeeded" && cacheEntry.data) {
-                    summariesForDate.push(cacheEntry.data);
-                }
-            });
-
-            const summary = aggregateStopSummariesCB(summariesForDate);
-            if (summary) {
-                result.push(summary);
-            }
-        }
-
-        selectedDelayDates.forEach(addStopSummaryForDateCB);
-        return result;
-    }, [selectedStopPointGIDs, selectedDelayDates, stopDelaysCache]);
-
-    const setSelectedDatePresetCB = useCallback((preset: DatePreset) => {
-        setSelectedDatePreset(preset);
-    }, []);
-
-    const setSelectedCustomDateCB = useCallback((date: string) => {
-        setSelectedCustomDate(date);
-    }, []);
-
-    const resetDepartureSelectionCB = useCallback(() => {
-        setSelectedDeparture(null);
-        setSelectedDatePreset("sameDayLastWeek");
-        setSelectedCustomDate(null);
-    }, []);
+    function closeDeparturesViewCB() {
+        dispatch(setSelectedDeparture(null));
+        dispatch(setSelectedSiteId(null));
+    }
 
     function selectDepartureCB(departure: Departure) {
-        setSelectedDeparture(departure);
-        setSelectedDatePreset("sameDayLastWeek");
-        setSelectedCustomDate(null);
+        dispatch(setSelectedDeparture(departure));
+        dispatch(fetchSelectedDepartureStopDelays());
     }
 
     function returnToDepartureListCB() {
-        resetDepartureSelectionCB();
+        dispatch(setSelectedDeparture(null));
     }
 
-    function closeDeparturesViewCB() {
-        resetDepartureSelectionCB();
-        dispatch(setSelectedSiteId(null));
+    function setSelectedDatePresetCB(preset: DatePreset) {
+        dispatch(setSelectedDatePreset(preset));
+        dispatch(fetchSelectedDepartureStopDelays());
+    }
+
+    function setSelectedCustomDateCB(date: string) {
+        dispatch(setSelectedCustomDate(date));
+        dispatch(fetchSelectedDepartureStopDelays());
     }
 
     const departures = departureResponse?.departures ?? [];

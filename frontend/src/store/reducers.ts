@@ -7,8 +7,9 @@ import {
     getAggregatedDates,
     getRouteDelays,
 } from "./actions";
-import { DepartureResponse, Site, StopPoint } from "../types/sl";
+import { Departure, DepartureResponse, Site, StopPoint } from "../types/sl";
 import { DelaySummary } from "../types/historicalDelay";
+import { DatePreset } from "../types/departureDelay";
 import {
     StopDelayCacheEntry,
     StopDelayRequestKey,
@@ -49,6 +50,12 @@ type AggregatedDatesState = {
     data: string[];
     isLoading: boolean;
     error: Error | null;
+};
+
+type DepartureUIState = {
+    selectedDeparture: Departure | null;
+    selectedDatePreset: DatePreset;
+    selectedCustomDate: string | null;
 };
 
 export const sitesSlice = createSlice({
@@ -229,3 +236,28 @@ export const aggregatedDatesSlice = createSlice({
             });
     },
 });
+
+export const departureUISlice = createSlice({
+    name: "departureUI",
+    initialState: {
+        selectedDeparture: null,
+        selectedDatePreset: "sameDayLastWeek",
+        selectedCustomDate: null,
+    } as DepartureUIState,
+    reducers: {
+        setSelectedDeparture: (state, action: { payload: Departure | null }) => {
+            state.selectedDeparture = action.payload;
+            state.selectedDatePreset = "sameDayLastWeek";
+            state.selectedCustomDate = null;
+        },
+        setSelectedDatePreset: (state, action: { payload: DatePreset }) => {
+            state.selectedDatePreset = action.payload;
+        },
+        setSelectedCustomDate: (state, action: { payload: string | null }) => {
+            state.selectedCustomDate = action.payload;
+        },
+    },
+});
+
+export const { setSelectedDeparture, setSelectedDatePreset, setSelectedCustomDate } =
+    departureUISlice.actions;

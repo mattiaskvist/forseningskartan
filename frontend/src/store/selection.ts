@@ -1,5 +1,5 @@
 import { getDepartures } from "./actions";
-import { setSelectedSiteId } from "./reducers";
+import { setSelectedDeparture, setSelectedSiteId } from "./reducers";
 import { AppDispatch } from "./store";
 
 type SelectSiteParams = {
@@ -8,6 +8,7 @@ type SelectSiteParams = {
 };
 
 export function selectSiteCB({ dispatch, siteId }: SelectSiteParams) {
+    dispatch(setSelectedDeparture(null));
     dispatch(setSelectedSiteId(siteId));
     if (siteId === null) {
         return;
