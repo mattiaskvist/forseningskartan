@@ -57,6 +57,9 @@ export function fetchStopDelays(
     date: string
 ): Promise<DelaySummary[] | null> {
     const chunkIds = new Set<string>();
+    if (stopPointGIDs.length === 0) {
+        return Promise.resolve([]);
+    }
 
     // Get unique chunks that we need to download
     for (const stopId of stopPointGIDs) {
@@ -72,7 +75,7 @@ export function fetchStopDelays(
     }
     const chunkPromises = Array.from(chunkIds).map(createChunkPromiseCB);
 
-    console.log(stopPointGIDs);
+    console.log("Downloading stop delays for:", stopPointGIDs, "date:", date);
 
     function processDocsACB(docs: DocumentSnapshot[]): DelaySummary[] {
         const results: DelaySummary[] = [];

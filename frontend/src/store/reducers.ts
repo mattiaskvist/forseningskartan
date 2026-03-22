@@ -7,8 +7,14 @@ import {
     getAggregatedDates,
     getRouteDelays,
 } from "./actions";
-import { DepartureResponse, Site, StopPoint } from "../types/sl";
+import { Departure, DepartureResponse, Site, StopPoint } from "../types/sl";
 import { DelaySummary } from "../types/historicalDelay";
+import { DatePreset } from "../types/departureDelay";
+import {
+    StopDelayCacheEntry,
+    StopDelayRequestKey,
+    getStopDelayRequestKey,
+} from "../types/stopDelay";
 
 type SitesState = {
     data: Site[] | null;
@@ -30,9 +36,8 @@ type StopPointsState = {
 };
 
 type StopDelaysState = {
-    data: DelaySummary[] | null;
-    isLoading: boolean;
-    error: Error | null;
+    // use partial since keys can be unset
+    cache: Partial<Record<StopDelayRequestKey, StopDelayCacheEntry<DelaySummary>>>;
 };
 
 type RouteDelayState = {
@@ -45,6 +50,12 @@ type AggregatedDatesState = {
     data: string[];
     isLoading: boolean;
     error: Error | null;
+};
+
+type DepartureUIState = {
+    selectedDeparture: Departure | null;
+    selectedDatePreset: DatePreset;
+    selectedCustomDate: string | null;
 };
 
 export const sitesSlice = createSlice({
@@ -124,22 +135,53 @@ export const stopPointsSlice = createSlice({
 
 export const stopDelaysSlice = createSlice({
     name: "stopDelays",
-    initialState: { data: null, isLoading: false, error: null } as StopDelaysState,
+    initialState: {
+        cache: {},
+    } as StopDelaysState,
     reducers: {},
     extraReducers: (builder) => {
         builder
-            .addCase(getStopDelays.pending, (state) => {
-                state.isLoading = true;
-                state.error = null;
+            .addCase(getStopDelays.pending, (state, action) => {
+                const { stopPointGIDs, date } = action.meta.arg;
+
+                stopPointGIDs.forEach((stopPointGID) => {
+                    const key = getStopDelayRequestKey(stopPointGID, date);
+                    state.cache[key] = {
+                        data: state.cache[key]?.data ?? null,
+                        status: "loading",
+                        error: null,
+                    };
+                });
             })
             .addCase(getStopDelays.fulfilled, (state, action) => {
-                state.isLoading = false;
-                state.data = action.payload;
-                state.error = null;
+                const { stopPointGIDs, date } = action.meta.arg;
+
+                stopPointGIDs.forEach((stopPointGID) => {
+                    const key = getStopDelayRequestKey(stopPointGID, date);
+                    function isStopPointSummaryCB(summary: DelaySummary): boolean {
+                        return summary.key === stopPointGID;
+                    }
+                    const summary = action.payload?.find(isStopPointSummaryCB) ?? null;
+                    state.cache[key] = {
+                        data: summary,
+                        status: "succeeded",
+                        error: null,
+                    };
+                });
             })
             .addCase(getStopDelays.rejected, (state, action) => {
-                state.isLoading = false;
-                state.error = action.error as Error;
+                const { stopPointGIDs, date } = action.meta.arg;
+                const errorMessage = action.error.message ?? "Unknown error fetching stop delays";
+
+                stopPointGIDs.forEach((stopPointGID) => {
+                    const key = getStopDelayRequestKey(stopPointGID, date);
+                    state.cache[key] = {
+                        data: state.cache[key]?.data ?? null,
+                        status: "failed",
+                        error: errorMessage,
+                    };
+                });
+
                 console.error("Failed to fetch stop delays:", action.error);
             });
     },
@@ -194,3 +236,28 @@ export const aggregatedDatesSlice = createSlice({
             });
     },
 });
+
+export const departureUISlice = createSlice({
+    name: "departureUI",
+    initialState: {
+        selectedDeparture: null,
+        selectedDatePreset: "sameDayLastWeek",
+        selectedCustomDate: null,
+    } as DepartureUIState,
+    reducers: {
+        setSelectedDeparture: (state, action: { payload: Departure | null }) => {
+            state.selectedDeparture = action.payload;
+            state.selectedDatePreset = "sameDayLastWeek";
+            state.selectedCustomDate = null;
+        },
+        setSelectedDatePreset: (state, action: { payload: DatePreset }) => {
+            state.selectedDatePreset = action.payload;
+        },
+        setSelectedCustomDate: (state, action: { payload: string | null }) => {
+            state.selectedCustomDate = action.payload;
+        },
+    },
+});
+
+export const { setSelectedDeparture, setSelectedDatePreset, setSelectedCustomDate } =
+    departureUISlice.actions;

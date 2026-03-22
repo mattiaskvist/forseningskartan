@@ -4,19 +4,20 @@ type DelayStats = {
 };
 
 // https://www.trafiklab.se/sv/api/gtfs-datasets/overview/extensions/
-type routeType = "100" | "401" | "700" | "900" | "1000";
-export const routeToString: { [K in routeType]: string } = {
+type RouteType = "100" | "401" | "700" | "900" | "1000" | "1501";
+export const routeToString: { [K in RouteType]: string } = {
     "100": "Commuter Train",
     "401": "Metro",
     "700": "Bus",
     "900": "Tram",
     "1000": "Ferry",
+    "1501": "Taxi",
 };
 
 type RouteMeta = {
     shortName: string;
     longName: string;
-    type: routeType;
+    type: RouteType;
 };
 
 type StopMeta = {
@@ -62,4 +63,12 @@ type CompactSummary = {
     da: CompactDelayStats;
 };
 
-export type { DelaySummary, ByStopChunkDocument, CompactDelayStats, CompactSummary };
+export type {
+    DelaySummary,
+    DelayStats,
+    RouteMeta,
+    RouteType,
+    ByStopChunkDocument,
+    CompactDelayStats,
+    CompactSummary,
+};

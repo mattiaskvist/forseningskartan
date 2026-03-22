@@ -1,5 +1,7 @@
 // https://www.trafiklab.se/sv/api/our-apis/sl/transport/#openapi-specification
 
+import { RouteType } from "./historicalDelay";
+
 type Site = {
     id: number;
     gid: number;
@@ -88,10 +90,22 @@ type Departure = {
     line: {
         id: number;
         designation?: string;
-        transport_mode?: "BUS" | "TRAM" | "METRO" | "TRAIN" | "FERRY" | "SHIP" | "TAXI";
+        transport_mode?: TransportationMode;
         group_of_lines?: string;
     };
     deviations?: DepartureDeviation[];
+};
+
+type TransportationMode = "BUS" | "TRAM" | "METRO" | "TRAIN" | "FERRY" | "SHIP" | "TAXI";
+
+export const transportationModeToRouteType: { [K in TransportationMode]: RouteType } = {
+    BUS: "700",
+    TRAM: "900",
+    METRO: "401",
+    TRAIN: "100",
+    FERRY: "1000",
+    SHIP: "1000",
+    TAXI: "1501",
 };
 
 type StopDeviation = {
@@ -128,4 +142,4 @@ type StopPoint = {
     stop_area: StopArea;
 };
 
-export type { Site, DepartureResponse, Departure, StopPoint };
+export type { Site, DepartureResponse, Departure, StopPoint, TransportationMode };
