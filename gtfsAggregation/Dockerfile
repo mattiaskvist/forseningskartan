@@ -29,14 +29,9 @@ COPY --from=builder /app/aggregator .
 # Create data directory for output
 RUN mkdir -p /data
 
-# Create entrypoint script to handle date substitution
-RUN echo '#!/bin/sh' > /entrypoint.sh && \
-    echo 'FIRESTORE_ARGS=""' >> /entrypoint.sh && \
-    echo 'if [ -n "$FIRESTORE_PROJECT" ]; then' >> /entrypoint.sh && \
-    echo '  FIRESTORE_ARGS="-firestore-project $FIRESTORE_PROJECT"' >> /entrypoint.sh && \
-    echo 'fi' >> /entrypoint.sh && \
-    echo 'exec /app/aggregator -recent-days 14 -api-key "$API_KEY" $FIRESTORE_ARGS' >> /entrypoint.sh && \
-    chmod +x /entrypoint.sh
+# Copy entrypoint script and make it executable
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 # Environment variables injected at runtime from GCP Secret Manager
 ENV API_KEY=""
