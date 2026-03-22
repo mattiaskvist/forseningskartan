@@ -29,146 +29,81 @@ https://api.koda.trafiklab.se/KoDa/api/v2/gtfs-static/{operator}?date={date}&key
 https://api.koda.trafiklab.se/KoDa/api/v2/gtfs-static/sl?date=2026-03-01&key={api_key}
 ```
 
+## Setup
+
+### Step 1: set up a local database
+
+Install [PostgreSQL](https://www.postgresql.org/download/) and run the following:
+
+```bash
+sudo -u postgres psql
+CREATE USER user WITH PASSWORD 'password';
+CREATE DATABASE forseningskartan;
+GRANT ALL PRIVILEGES ON DATABASE forseningskartan TO user;
+\q
+```
+
+### Step 2: create the Postgres schema
+
+Run the schema file before running ingestion:
+
+```bash
+psql "postgres://<user>:<password>@<host>:5432/<database>" -f postgres_schema.sql
+```
+
 ## Running the script
 
-There are three ways of running the script:
+There are two ways of running the script:
 
-1. Aggregate the data for a specified date and save it to `out.json`:
-
-```bash
-go run . -output "out.json" -api-key "<koda_api_key>" -date "2026-03-01"
-```
-
-2. Aggregate the data for a specified date and save it to `out.json` and to firestore:
+1. Aggregate the data for a specified date:
 
 ```bash
-go run . -output "out.json" -api-key "<koda_api_key>" -date "2026-03-01" -firestore-project "forseningskartan"
+go run . -api-key "<koda_api_key>" -date "2026-03-01" -postgres-dsn "postgres://<user>:<password>@<host>:5432/<database>"
 ```
 
-3. Aggregate the data for the last N days (not including todays date) that don't have a top-level Firestore collections like `2026-03-01`. The script also removes data that is older than the specified number of days. Recent days is 30 by default:
+2. Aggregate the data for the last N days (not including todays date) that don't exist in the database. Recent days is 30 by default:
 
 ```bash
-go run . -api-key "<koda_api_key>" -firestore-project "forseningskartan" -recent-days 30
+go run . -api-key "<koda_api_key>" -postgres-dsn "postgres://<user>:<password>@<host>:5432/<database>" -recent-days 30
 ```
 
-## Firestore export
+## Using the data
 
-Optionally, the data aggregated **by route** and **by stop** can be stored in firebase by providing a firestore project id. Exporting to firestore locally requires the following:
+It currently takes around 100MB to store the data for a single day. What gets stored:
 
-1. Install the Google Cloud CLI https://docs.cloud.google.com/sdk/docs/install-sdk
-2. Run `gcloud auth application-default login`
+- per-route daily aggregate rows
+- per-route hourly aggregate rows
+- per-stop daily aggregate rows
+- per-stop-per-route daily aggregate rows
+- per-stop-per-route hourly aggregate rows
+- one processed-date row in `aggregated_service_dates`
+- route metadata in `routes` (`short_name`, `long_name`, `route_type`)
+- stop metadata in `stops` (`name`)
 
-### By Route
+Example query to get delays for bus route 6 from Torsplan during a specific hour:
 
-`byRoute` is stored as chunked documents per day:
-
-```text
-<YYYY-MM-DD>/byRoute                 // metadata document
-<YYYY-MM-DD>/byRoute/chunk_<n>/data  // chunked route rows
+```sql
+SELECT
+	a.service_date,
+	s.name AS stop_name,
+	r.short_name AS route_short_name,
+	r.long_name AS route_long_name,
+	a.hour_start_utc,
+	a.departure_delay_avg_seconds,
+	a.departure_delay_count,
+	a.arrival_ahead_avg_seconds,
+	a.arrival_ahead_count
+FROM aggregate_stop_route_hourly a
+JOIN stops s ON s.stop_id = a.stop_id
+JOIN routes r ON r.route_id = a.route_id
+WHERE a.service_date = DATE '2026-03-17'
+	AND s.stop_id = '9022001010359004'
+	AND r.short_name = '6'
+	AND r.route_type = '700'
+	AND a.hour_start_utc = TIMESTAMPTZ '2026-03-17T20:00:00Z';
 ```
 
-The metadata document `<YYYY-MM-DD>/byRoute` contains:
+## Notes
 
-- `d` date string like `"2026-03-01"`.
-- `c` total route count.
-- `cc` fixed chunk count (`16`).
-
-Each chunk document `<YYYY-MM-DD>/byRoute/chunk_<n>/data` contains compact keys:
-
-- `r` list of route summaries (key is route ID, e.g. 9011...).
-- `d` date string like `"2026-03-01"`.
-- `c` route count in this chunk.
-
-```go
-type summary struct {
-	Key             string     `json:"k"`
-	Route           *routeMeta `json:"r,omitempty"` // empty for by stop
-	Stop            *stopMeta  `json:"s,omitempty"` // empty for by route
-	ByHour          []summary  `json:"h,omitempty"` // set for route summaries
-	ByRoute         []summary  `json:"br,omitempty"` // empty for by route
-	ArrivalEvents   int64      `json:"ac"`
-	DepartureEvents int64      `json:"dc"`
-	UniqueTrips     int        `json:"ut"`
-	ArrivalDelay    delayStats `json:"ad"`
-	DepartureDelay  delayStats `json:"dd"`
-	ArrivalAhead    delayStats `json:"aa"`
-	DepartureAhead  delayStats `json:"da"`
-}
-
-type routeMeta struct {
-	ShortName string `json:"sn"`
-	LongName  string `json:"ln"`
-	Type      string `json:"t"`
-}
-
-type stopMeta struct {
-	Name string `json:"n"`
-}
-
-type delayStats struct {
-	Count      int64   `json:"c"` // occurrences
-	AvgSeconds float64 `json:"a"`
-}
-```
-
-`a` (`avgSeconds`) is calculated as `sumSeconds / c` within that specific stat bucket.  
-Examples:
-
-- `dd.a` = average over delayed **departures only** (`dd.c`)
-- `ad.a` = average over delayed **arrivals only** (`ad.c`)
-- `da.a` / `aa.a` = average over ahead events in their respective buckets
-
-### By Stop
-
-`byStop` is stored as hashed chunks of documents per day:
-
-```text
-<YYYY-MM-DD>/byStop/chunk_<hash>/data
-```
-
-Stops are assigned to chunks using the following hash function, so frontend lookup is deterministic:
-
-```go
-func hashToChunk(key string, chunkCount int) int {
-	h := fnv.New32a()
-	_, _ = h.Write([]byte(key))
-	return int(h.Sum32() % uint32(chunkCount))
-}
-```
-
-Each `data` document contains compact keys:
-
-- `s` list of stop summaries as above with `Stop` and `ByRoute` fields set.
-- Route rows in `byStop -> byRoute` include nested `byHour` summaries.
-- Top-level `byRoute` summaries also include nested `ByHour` summaries.
-- `d` date string like `"2026-03-01"`.
-- `c` stop count.
-
-### By hour key format
-
-For all `ByHour`/`h` summaries, the summary `k` field is:
-
-- The **start of the hour bucket**.
-- Encoded in **UTC**.
-- Formatted as **RFC3339** (for example `"2026-03-01T13:00:00Z"`), representing the interval `[13:00, 14:00)` UTC.
-
-Internally this is generated as `time.Unix(event.time, 0).UTC().Truncate(time.Hour).Format(time.RFC3339)`.
-`event.time` refers to the realized arrival/departure stop event timestamp from `TripUpdate.StopTimeUpdate`.
-`observedAt` is still used only to determine whether an event is realized (`event.time <= observedAt`). `observedAt` is taken from the GTFS-RT header timestamp when present, otherwise from the archive path (`<yyyy>/<mm>/<dd>/<hh>`) interpreted as UTC.
-
-### Date index
-
-An additional index file is stored in index/dates with a `dates` field containing a list of all dates for which an aggregated data collection exists. The dates are strings like "2026-03-01".
-
-## Realized events
-
-- Delay/ahead stats are counted only for realized stop events, where `event.time <= observedAt` for the feed file.
-- Each stop event (arrival/departure) is counted once globally across all snapshots using a deterministic event key.
-- This prevents future predicted stops and repeated snapshots from inflating totals.
-- Stop summaries include a nested `byRoute` breakdown with per-route realized stats for that stop.
-- Route summaries include nested `byHour` breakdowns both at top-level `byRoute` and within `byStop -> byRoute`.
-- `ac`/`dc` contain realized arrival/departure event counts and can be used to derive on-time counts:
-  - `departure_on_time = dc - dd.c - da.c`
-  - `arrival_on_time = ac - ad.c - aa.c`
-- Delay/ahead averages are not divided by total departures/arrivals; they are divided by the matching bucket count (`c`).
-- `avgSeconds` values are rounded to one decimal place to reduce payload size.
+- The script downloads and extracts GTFS-RT and GTFS-static archives to a temp directory and cleans up automatically.
+- `routes.txt`, `stops.txt`, and `trips.txt` are used to enrich route/stop/trip metadata when available.
