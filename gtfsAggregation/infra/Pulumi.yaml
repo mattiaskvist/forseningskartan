@@ -1,0 +1,7 @@
+name: aggregation-infra
+description: A minimal Google Cloud Go Pulumi program
+runtime: go
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: gcp-go

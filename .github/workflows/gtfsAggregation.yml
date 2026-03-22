@@ -1,35 +1,100 @@
 name: GTFS Aggregation
 
 on:
-    push:
-        paths:
-            - "gtfsAggregation/**"
-    pull_request:
-        paths:
-            - "gtfsAggregation/**"
+  push:
+    paths:
+      - "gtfsAggregation/**"
+      - ".github/workflows/gtfsAggregation.yml"
+  pull_request:
+    paths:
+      - "gtfsAggregation/**"
+      - ".github/workflows/gtfsAggregation.yml"
+
+env:
+  PROJECT_ID: forseningskartan
+  REGION: europe-west1
+  IMAGE_NAME: europe-west1-docker.pkg.dev/forseningskartan/cron-repo/aggregation-cron
+  PULUMI_BACKEND_URL: gs://forseningskartan-pulumi-state
 
 jobs:
-    lint:
-        name: Lint
-        runs-on: ubuntu-latest
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
 
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v6
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.26"
 
-            - name: Setup Go
-              uses: actions/setup-go@v6
-              with:
-                  go-version: "1.26"
+      - name: Install dependencies
+        run: cd gtfsAggregation && go mod download
 
-            - name: Install dependencies
-              run: cd gtfsAggregation && go mod download
+      - name: Go vet
+        run: cd gtfsAggregation && go vet ./...
 
-            - name: Go vet
-              run: cd gtfsAggregation && go vet ./...
+      - name: Lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: latest
+          working-directory: gtfsAggregation
 
-            - name: Lint
-              uses: golangci/golangci-lint-action@v9
-              with:
-                  version: latest
-                  working-directory: gtfsAggregation
+  build:
+    name: Build Go App
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.26"
+
+      - name: Build
+        run: cd gtfsAggregation && go build -v ./...
+
+  deploy:
+    name: Deploy to GCP
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: prod # Protect deployments to main branch with approval requirements
+    permissions:
+      contents: read
+      id-token: write # Strictly required for secure Google Cloud authentication
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
+
+      - name: Configure Docker Authentication
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Build and Push Docker Image
+        run: |
+          cd gtfsAggregation
+          docker build -t ${{ env.IMAGE_NAME }}:${{ github.sha }} .
+          docker push ${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Deploy Infrastructure with Pulumi
+        uses: pulumi/actions@v5
+        with:
+          command: up
+          stack-name: dev
+          work-dir: ./gtfsAggregation/infra
+          config-map: |
+            dockerImage:
+              value: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+        env:
+          PULUMI_BACKEND_URL: ${{ env.PULUMI_BACKEND_URL }}
+          PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_PASSPHRASE }}
