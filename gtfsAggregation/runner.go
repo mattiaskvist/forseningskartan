@@ -72,7 +72,7 @@ func runAggregation(config Config) error {
 			return fmt.Errorf("failed to export byStop to firestore: %w", err)
 		}
 
-		if err := writeDateIndex(projectID, archiveDate); err != nil {
+		if err := writeDateIndex(projectID, &archiveDate); err != nil {
 			return fmt.Errorf("failed to update date index in firestore: %w", err)
 		}
 	}
