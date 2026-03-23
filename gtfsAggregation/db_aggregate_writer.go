@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"math"
 	"strings"
 	"time"
 
@@ -11,7 +12,9 @@ import (
 )
 
 type dbAggregateWriter struct {
-	db *sql.DB
+	db           *sql.DB
+	routeIDCache map[string]int32
+	stopIDCache  map[string]int32
 }
 
 func newDBAggregateWriter(ctx context.Context, dsn string) (*dbAggregateWriter, error) {
@@ -25,7 +28,11 @@ func newDBAggregateWriter(ctx context.Context, dsn string) (*dbAggregateWriter, 
 		return nil, fmt.Errorf("ping postgres: %w", err)
 	}
 
-	return &dbAggregateWriter{db: db}, nil
+	return &dbAggregateWriter{
+		db:           db,
+		routeIDCache: make(map[string]int32),
+		stopIDCache:  make(map[string]int32),
+	}, nil
 }
 
 func (w *dbAggregateWriter) close() {
@@ -43,10 +50,10 @@ func (w *dbAggregateWriter) writeAggregation(ctx context.Context, serviceDate st
 		return err
 	}
 
-	if err := writeByRouteRowsToDB(ctx, tx, serviceDate, result.ByRoute); err != nil {
+	if err := w.writeByRouteRowsToDB(ctx, tx, serviceDate, result.ByRoute); err != nil {
 		return err
 	}
-	if err := writeByStopRowsToDB(ctx, tx, serviceDate, result.ByStop); err != nil {
+	if err := w.writeByStopRowsToDB(ctx, tx, serviceDate, result.ByStop); err != nil {
 		return err
 	}
 	if err := writeDateIndexToDB(ctx, tx, serviceDate); err != nil {
@@ -62,10 +69,10 @@ func (w *dbAggregateWriter) writeAggregation(ctx context.Context, serviceDate st
 func clearDateAggregationRows(ctx context.Context, tx *sql.Tx, serviceDate string) error {
 	deleteQueries := []string{
 		`DELETE FROM aggregate_route_daily WHERE service_date = $1::date`,
-		`DELETE FROM aggregate_route_hourly WHERE service_date = $1::date`,
+		`DELETE FROM aggregate_route_hourly WHERE hour_start_utc >= $1::date AND hour_start_utc < ($1::date + INTERVAL '1 day')`,
 		`DELETE FROM aggregate_stop_daily WHERE service_date = $1::date`,
 		`DELETE FROM aggregate_stop_route_daily WHERE service_date = $1::date`,
-		`DELETE FROM aggregate_stop_route_hourly WHERE service_date = $1::date`,
+		`DELETE FROM aggregate_stop_route_hourly WHERE hour_start_utc >= $1::date AND hour_start_utc < ($1::date + INTERVAL '1 day')`,
 	}
 
 	for _, query := range deleteQueries {
@@ -76,17 +83,19 @@ func clearDateAggregationRows(ctx context.Context, tx *sql.Tx, serviceDate strin
 	return nil
 }
 
-func writeByRouteRowsToDB(ctx context.Context, tx *sql.Tx, serviceDate string, byRoute []summary) error {
+func (w *dbAggregateWriter) writeByRouteRowsToDB(ctx context.Context, tx *sql.Tx, serviceDate string, byRoute []summary) error {
 	for _, routeSummary := range byRoute {
 		routeID := strings.TrimSpace(routeSummary.Key)
 		if routeID == "" {
 			continue
 		}
-		if err := upsertRouteMeta(ctx, tx, routeID, routeSummary.Route); err != nil {
+
+		routeKey, err := w.upsertRouteMeta(ctx, tx, routeID, routeSummary.Route)
+		if err != nil {
 			return err
 		}
 
-		if err := upsertRouteDaily(ctx, tx, serviceDate, routeID, routeSummary); err != nil {
+		if err := upsertRouteDaily(ctx, tx, serviceDate, routeKey, routeID, routeSummary); err != nil {
 			return err
 		}
 
@@ -96,7 +105,7 @@ func writeByRouteRowsToDB(ctx context.Context, tx *sql.Tx, serviceDate string, b
 				return fmt.Errorf("parse route hour key %q for route %s: %w", hourSummary.Key, routeID, err)
 			}
 
-			if err := upsertRouteHourly(ctx, tx, serviceDate, routeID, hourStartUTC, hourSummary); err != nil {
+			if err := upsertRouteHourly(ctx, tx, routeKey, routeID, hourStartUTC, hourSummary); err != nil {
 				return err
 			}
 		}
@@ -105,17 +114,19 @@ func writeByRouteRowsToDB(ctx context.Context, tx *sql.Tx, serviceDate string, b
 	return nil
 }
 
-func writeByStopRowsToDB(ctx context.Context, tx *sql.Tx, serviceDate string, byStop []summary) error {
+func (w *dbAggregateWriter) writeByStopRowsToDB(ctx context.Context, tx *sql.Tx, serviceDate string, byStop []summary) error {
 	for _, stopSummary := range byStop {
 		stopID := strings.TrimSpace(stopSummary.Key)
 		if stopID == "" {
 			continue
 		}
-		if err := upsertStopMeta(ctx, tx, stopID, stopSummary.Stop); err != nil {
+
+		stopKey, err := w.upsertStopMeta(ctx, tx, stopID, stopSummary.Stop)
+		if err != nil {
 			return err
 		}
 
-		if err := upsertStopDaily(ctx, tx, serviceDate, stopID, stopSummary); err != nil {
+		if err := upsertStopDaily(ctx, tx, serviceDate, stopKey, stopID, stopSummary); err != nil {
 			return err
 		}
 
@@ -124,11 +135,13 @@ func writeByStopRowsToDB(ctx context.Context, tx *sql.Tx, serviceDate string, by
 			if routeID == "" {
 				continue
 			}
-			if err := upsertRouteMeta(ctx, tx, routeID, stopRouteSummary.Route); err != nil {
+
+			routeKey, err := w.upsertRouteMeta(ctx, tx, routeID, stopRouteSummary.Route)
+			if err != nil {
 				return err
 			}
 
-			if err := upsertStopRouteDaily(ctx, tx, serviceDate, stopID, routeID, stopRouteSummary); err != nil {
+			if err := upsertStopRouteDaily(ctx, tx, serviceDate, stopKey, routeKey, stopID, routeID, stopRouteSummary); err != nil {
 				return err
 			}
 
@@ -138,7 +151,7 @@ func writeByStopRowsToDB(ctx context.Context, tx *sql.Tx, serviceDate string, by
 					return fmt.Errorf("parse stop-route hour key %q for stop %s route %s: %w", hourSummary.Key, stopID, routeID, err)
 				}
 
-				if err := upsertStopRouteHourly(ctx, tx, serviceDate, stopID, routeID, hourStartUTC, hourSummary); err != nil {
+				if err := upsertStopRouteHourly(ctx, tx, stopKey, routeKey, stopID, routeID, hourStartUTC, hourSummary); err != nil {
 					return err
 				}
 			}
@@ -148,9 +161,13 @@ func writeByStopRowsToDB(ctx context.Context, tx *sql.Tx, serviceDate string, by
 	return nil
 }
 
-func upsertRouteMeta(ctx context.Context, tx *sql.Tx, routeID string, route *routeMeta) error {
+func (w *dbAggregateWriter) upsertRouteMeta(ctx context.Context, tx *sql.Tx, routeID string, route *routeMeta) (int32, error) {
 	if strings.TrimSpace(routeID) == "" {
-		return nil
+		return 0, nil
+	}
+
+	if cachedID, ok := w.routeIDCache[routeID]; ok {
+		return cachedID, nil
 	}
 
 	var shortName string
@@ -162,7 +179,8 @@ func upsertRouteMeta(ctx context.Context, tx *sql.Tx, routeID string, route *rou
 		routeType = strings.TrimSpace(route.Type)
 	}
 
-	_, err := tx.ExecContext(ctx, `
+	var routeKey int32
+	err := tx.QueryRowContext(ctx, `
 		INSERT INTO routes (
 			route_id,
 			short_name,
@@ -183,17 +201,23 @@ func upsertRouteMeta(ctx context.Context, tx *sql.Tx, routeID string, route *rou
 			long_name = COALESCE(NULLIF(EXCLUDED.long_name, ''), routes.long_name),
 			route_type = COALESCE(NULLIF(EXCLUDED.route_type, ''), routes.route_type),
 			updated_at = NOW()
-	`, routeID, shortName, longName, routeType)
+		RETURNING id
+	`, routeID, shortName, longName, routeType).Scan(&routeKey)
 	if err != nil {
-		return fmt.Errorf("upsert route metadata for route %s: %w", routeID, err)
+		return 0, fmt.Errorf("upsert route metadata for route %s: %w", routeID, err)
 	}
 
-	return nil
+	w.routeIDCache[routeID] = routeKey
+	return routeKey, nil
 }
 
-func upsertStopMeta(ctx context.Context, tx *sql.Tx, stopID string, stop *stopMeta) error {
+func (w *dbAggregateWriter) upsertStopMeta(ctx context.Context, tx *sql.Tx, stopID string, stop *stopMeta) (int32, error) {
 	if strings.TrimSpace(stopID) == "" {
-		return nil
+		return 0, nil
+	}
+
+	if cachedID, ok := w.stopIDCache[stopID]; ok {
+		return cachedID, nil
 	}
 
 	var stopName string
@@ -201,7 +225,8 @@ func upsertStopMeta(ctx context.Context, tx *sql.Tx, stopID string, stop *stopMe
 		stopName = strings.TrimSpace(stop.Name)
 	}
 
-	_, err := tx.ExecContext(ctx, `
+	var stopKey int32
+	err := tx.QueryRowContext(ctx, `
 		INSERT INTO stops (
 			stop_id,
 			name,
@@ -216,16 +241,102 @@ func upsertStopMeta(ctx context.Context, tx *sql.Tx, stopID string, stop *stopMe
 		DO UPDATE SET
 			name = COALESCE(NULLIF(EXCLUDED.name, ''), stops.name),
 			updated_at = NOW()
-	`, stopID, stopName)
+		RETURNING id
+	`, stopID, stopName).Scan(&stopKey)
 	if err != nil {
-		return fmt.Errorf("upsert stop metadata for stop %s: %w", stopID, err)
+		return 0, fmt.Errorf("upsert stop metadata for stop %s: %w", stopID, err)
 	}
 
-	return nil
+	w.stopIDCache[stopID] = stopKey
+	return stopKey, nil
 }
 
-func upsertRouteDaily(ctx context.Context, tx *sql.Tx, serviceDate string, routeID string, summaryValue summary) error {
-	_, err := tx.ExecContext(ctx, `
+type compactMetrics struct {
+	arrivalEvents            int32
+	departureEvents          int32
+	uniqueTrips              int32
+	arrivalDelayCount        int32
+	arrivalDelayAvgSeconds   float32
+	departureDelayCount      int32
+	departureDelayAvgSeconds float32
+	arrivalAheadCount        int32
+	arrivalAheadAvgSeconds   float32
+	departureAheadCount      int32
+	departureAheadAvgSeconds float32
+}
+
+func toCompactMetrics(summaryValue summary) (compactMetrics, error) {
+	arrivalEvents, err := toInt32FromInt64(summaryValue.ArrivalEvents, "arrival_events")
+	if err != nil {
+		return compactMetrics{}, err
+	}
+
+	departureEvents, err := toInt32FromInt64(summaryValue.DepartureEvents, "departure_events")
+	if err != nil {
+		return compactMetrics{}, err
+	}
+
+	uniqueTrips, err := toInt32FromInt(summaryValue.UniqueTrips, "unique_trips")
+	if err != nil {
+		return compactMetrics{}, err
+	}
+
+	arrivalDelayCount, err := toInt32FromInt64(summaryValue.ArrivalDelay.Count, "arrival_delay_count")
+	if err != nil {
+		return compactMetrics{}, err
+	}
+
+	departureDelayCount, err := toInt32FromInt64(summaryValue.DepartureDelay.Count, "departure_delay_count")
+	if err != nil {
+		return compactMetrics{}, err
+	}
+
+	arrivalAheadCount, err := toInt32FromInt64(summaryValue.ArrivalAhead.Count, "arrival_ahead_count")
+	if err != nil {
+		return compactMetrics{}, err
+	}
+
+	departureAheadCount, err := toInt32FromInt64(summaryValue.DepartureAhead.Count, "departure_ahead_count")
+	if err != nil {
+		return compactMetrics{}, err
+	}
+
+	return compactMetrics{
+		arrivalEvents:            arrivalEvents,
+		departureEvents:          departureEvents,
+		uniqueTrips:              uniqueTrips,
+		arrivalDelayCount:        arrivalDelayCount,
+		arrivalDelayAvgSeconds:   float32(summaryValue.ArrivalDelay.AvgSeconds),
+		departureDelayCount:      departureDelayCount,
+		departureDelayAvgSeconds: float32(summaryValue.DepartureDelay.AvgSeconds),
+		arrivalAheadCount:        arrivalAheadCount,
+		arrivalAheadAvgSeconds:   float32(summaryValue.ArrivalAhead.AvgSeconds),
+		departureAheadCount:      departureAheadCount,
+		departureAheadAvgSeconds: float32(summaryValue.DepartureAhead.AvgSeconds),
+	}, nil
+}
+
+func toInt32FromInt64(value int64, field string) (int32, error) {
+	if value > math.MaxInt32 || value < math.MinInt32 {
+		return 0, fmt.Errorf("%s out of integer range: %d", field, value)
+	}
+	return int32(value), nil
+}
+
+func toInt32FromInt(value int, field string) (int32, error) {
+	if int64(value) > math.MaxInt32 || int64(value) < math.MinInt32 {
+		return 0, fmt.Errorf("%s out of integer range: %d", field, value)
+	}
+	return int32(value), nil
+}
+
+func upsertRouteDaily(ctx context.Context, tx *sql.Tx, serviceDate string, routeKey int32, routeID string, summaryValue summary) error {
+	metrics, err := toCompactMetrics(summaryValue)
+	if err != nil {
+		return fmt.Errorf("prepare aggregate_route_daily values for route %s: %w", routeID, err)
+	}
+
+	_, err = tx.ExecContext(ctx, `
 		INSERT INTO aggregate_route_daily (
 			service_date,
 			route_id,
@@ -239,10 +350,9 @@ func upsertRouteDaily(ctx context.Context, tx *sql.Tx, serviceDate string, route
 			arrival_ahead_count,
 			arrival_ahead_avg_seconds,
 			departure_ahead_count,
-			departure_ahead_avg_seconds,
-			updated_at
+			departure_ahead_avg_seconds
 		)
-		VALUES ($1::date, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW())
+		VALUES ($1::date, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
 		ON CONFLICT (service_date, route_id)
 		DO UPDATE SET
 			arrival_events = EXCLUDED.arrival_events,
@@ -255,22 +365,21 @@ func upsertRouteDaily(ctx context.Context, tx *sql.Tx, serviceDate string, route
 			arrival_ahead_count = EXCLUDED.arrival_ahead_count,
 			arrival_ahead_avg_seconds = EXCLUDED.arrival_ahead_avg_seconds,
 			departure_ahead_count = EXCLUDED.departure_ahead_count,
-			departure_ahead_avg_seconds = EXCLUDED.departure_ahead_avg_seconds,
-			updated_at = NOW()
+			departure_ahead_avg_seconds = EXCLUDED.departure_ahead_avg_seconds
 	`,
 		serviceDate,
-		routeID,
-		summaryValue.ArrivalEvents,
-		summaryValue.DepartureEvents,
-		summaryValue.UniqueTrips,
-		summaryValue.ArrivalDelay.Count,
-		summaryValue.ArrivalDelay.AvgSeconds,
-		summaryValue.DepartureDelay.Count,
-		summaryValue.DepartureDelay.AvgSeconds,
-		summaryValue.ArrivalAhead.Count,
-		summaryValue.ArrivalAhead.AvgSeconds,
-		summaryValue.DepartureAhead.Count,
-		summaryValue.DepartureAhead.AvgSeconds,
+		routeKey,
+		metrics.arrivalEvents,
+		metrics.departureEvents,
+		metrics.uniqueTrips,
+		metrics.arrivalDelayCount,
+		metrics.arrivalDelayAvgSeconds,
+		metrics.departureDelayCount,
+		metrics.departureDelayAvgSeconds,
+		metrics.arrivalAheadCount,
+		metrics.arrivalAheadAvgSeconds,
+		metrics.departureAheadCount,
+		metrics.departureAheadAvgSeconds,
 	)
 	if err != nil {
 		return fmt.Errorf("upsert aggregate_route_daily for route %s: %w", routeID, err)
@@ -278,10 +387,14 @@ func upsertRouteDaily(ctx context.Context, tx *sql.Tx, serviceDate string, route
 	return nil
 }
 
-func upsertRouteHourly(ctx context.Context, tx *sql.Tx, serviceDate string, routeID string, hourStartUTC time.Time, summaryValue summary) error {
-	_, err := tx.ExecContext(ctx, `
+func upsertRouteHourly(ctx context.Context, tx *sql.Tx, routeKey int32, routeID string, hourStartUTC time.Time, summaryValue summary) error {
+	metrics, err := toCompactMetrics(summaryValue)
+	if err != nil {
+		return fmt.Errorf("prepare aggregate_route_hourly values for route %s: %w", routeID, err)
+	}
+
+	_, err = tx.ExecContext(ctx, `
 		INSERT INTO aggregate_route_hourly (
-			service_date,
 			route_id,
 			hour_start_utc,
 			arrival_events,
@@ -294,11 +407,10 @@ func upsertRouteHourly(ctx context.Context, tx *sql.Tx, serviceDate string, rout
 			arrival_ahead_count,
 			arrival_ahead_avg_seconds,
 			departure_ahead_count,
-			departure_ahead_avg_seconds,
-			updated_at
+			departure_ahead_avg_seconds
 		)
-		VALUES ($1::date, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW())
-		ON CONFLICT (service_date, route_id, hour_start_utc)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+		ON CONFLICT (route_id, hour_start_utc)
 		DO UPDATE SET
 			arrival_events = EXCLUDED.arrival_events,
 			departure_events = EXCLUDED.departure_events,
@@ -310,23 +422,21 @@ func upsertRouteHourly(ctx context.Context, tx *sql.Tx, serviceDate string, rout
 			arrival_ahead_count = EXCLUDED.arrival_ahead_count,
 			arrival_ahead_avg_seconds = EXCLUDED.arrival_ahead_avg_seconds,
 			departure_ahead_count = EXCLUDED.departure_ahead_count,
-			departure_ahead_avg_seconds = EXCLUDED.departure_ahead_avg_seconds,
-			updated_at = NOW()
+			departure_ahead_avg_seconds = EXCLUDED.departure_ahead_avg_seconds
 	`,
-		serviceDate,
-		routeID,
+		routeKey,
 		hourStartUTC,
-		summaryValue.ArrivalEvents,
-		summaryValue.DepartureEvents,
-		summaryValue.UniqueTrips,
-		summaryValue.ArrivalDelay.Count,
-		summaryValue.ArrivalDelay.AvgSeconds,
-		summaryValue.DepartureDelay.Count,
-		summaryValue.DepartureDelay.AvgSeconds,
-		summaryValue.ArrivalAhead.Count,
-		summaryValue.ArrivalAhead.AvgSeconds,
-		summaryValue.DepartureAhead.Count,
-		summaryValue.DepartureAhead.AvgSeconds,
+		metrics.arrivalEvents,
+		metrics.departureEvents,
+		metrics.uniqueTrips,
+		metrics.arrivalDelayCount,
+		metrics.arrivalDelayAvgSeconds,
+		metrics.departureDelayCount,
+		metrics.departureDelayAvgSeconds,
+		metrics.arrivalAheadCount,
+		metrics.arrivalAheadAvgSeconds,
+		metrics.departureAheadCount,
+		metrics.departureAheadAvgSeconds,
 	)
 	if err != nil {
 		return fmt.Errorf("upsert aggregate_route_hourly for route %s hour %s: %w", routeID, hourStartUTC.Format(time.RFC3339), err)
@@ -334,8 +444,13 @@ func upsertRouteHourly(ctx context.Context, tx *sql.Tx, serviceDate string, rout
 	return nil
 }
 
-func upsertStopDaily(ctx context.Context, tx *sql.Tx, serviceDate string, stopID string, summaryValue summary) error {
-	_, err := tx.ExecContext(ctx, `
+func upsertStopDaily(ctx context.Context, tx *sql.Tx, serviceDate string, stopKey int32, stopID string, summaryValue summary) error {
+	metrics, err := toCompactMetrics(summaryValue)
+	if err != nil {
+		return fmt.Errorf("prepare aggregate_stop_daily values for stop %s: %w", stopID, err)
+	}
+
+	_, err = tx.ExecContext(ctx, `
 		INSERT INTO aggregate_stop_daily (
 			service_date,
 			stop_id,
@@ -349,10 +464,9 @@ func upsertStopDaily(ctx context.Context, tx *sql.Tx, serviceDate string, stopID
 			arrival_ahead_count,
 			arrival_ahead_avg_seconds,
 			departure_ahead_count,
-			departure_ahead_avg_seconds,
-			updated_at
+			departure_ahead_avg_seconds
 		)
-		VALUES ($1::date, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW())
+		VALUES ($1::date, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
 		ON CONFLICT (service_date, stop_id)
 		DO UPDATE SET
 			arrival_events = EXCLUDED.arrival_events,
@@ -365,22 +479,21 @@ func upsertStopDaily(ctx context.Context, tx *sql.Tx, serviceDate string, stopID
 			arrival_ahead_count = EXCLUDED.arrival_ahead_count,
 			arrival_ahead_avg_seconds = EXCLUDED.arrival_ahead_avg_seconds,
 			departure_ahead_count = EXCLUDED.departure_ahead_count,
-			departure_ahead_avg_seconds = EXCLUDED.departure_ahead_avg_seconds,
-			updated_at = NOW()
+			departure_ahead_avg_seconds = EXCLUDED.departure_ahead_avg_seconds
 	`,
 		serviceDate,
-		stopID,
-		summaryValue.ArrivalEvents,
-		summaryValue.DepartureEvents,
-		summaryValue.UniqueTrips,
-		summaryValue.ArrivalDelay.Count,
-		summaryValue.ArrivalDelay.AvgSeconds,
-		summaryValue.DepartureDelay.Count,
-		summaryValue.DepartureDelay.AvgSeconds,
-		summaryValue.ArrivalAhead.Count,
-		summaryValue.ArrivalAhead.AvgSeconds,
-		summaryValue.DepartureAhead.Count,
-		summaryValue.DepartureAhead.AvgSeconds,
+		stopKey,
+		metrics.arrivalEvents,
+		metrics.departureEvents,
+		metrics.uniqueTrips,
+		metrics.arrivalDelayCount,
+		metrics.arrivalDelayAvgSeconds,
+		metrics.departureDelayCount,
+		metrics.departureDelayAvgSeconds,
+		metrics.arrivalAheadCount,
+		metrics.arrivalAheadAvgSeconds,
+		metrics.departureAheadCount,
+		metrics.departureAheadAvgSeconds,
 	)
 	if err != nil {
 		return fmt.Errorf("upsert aggregate_stop_daily for stop %s: %w", stopID, err)
@@ -388,8 +501,13 @@ func upsertStopDaily(ctx context.Context, tx *sql.Tx, serviceDate string, stopID
 	return nil
 }
 
-func upsertStopRouteDaily(ctx context.Context, tx *sql.Tx, serviceDate string, stopID string, routeID string, summaryValue summary) error {
-	_, err := tx.ExecContext(ctx, `
+func upsertStopRouteDaily(ctx context.Context, tx *sql.Tx, serviceDate string, stopKey int32, routeKey int32, stopID string, routeID string, summaryValue summary) error {
+	metrics, err := toCompactMetrics(summaryValue)
+	if err != nil {
+		return fmt.Errorf("prepare aggregate_stop_route_daily values for stop %s route %s: %w", stopID, routeID, err)
+	}
+
+	_, err = tx.ExecContext(ctx, `
 		INSERT INTO aggregate_stop_route_daily (
 			service_date,
 			stop_id,
@@ -404,10 +522,9 @@ func upsertStopRouteDaily(ctx context.Context, tx *sql.Tx, serviceDate string, s
 			arrival_ahead_count,
 			arrival_ahead_avg_seconds,
 			departure_ahead_count,
-			departure_ahead_avg_seconds,
-			updated_at
+			departure_ahead_avg_seconds
 		)
-		VALUES ($1::date, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW())
+		VALUES ($1::date, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
 		ON CONFLICT (service_date, stop_id, route_id)
 		DO UPDATE SET
 			arrival_events = EXCLUDED.arrival_events,
@@ -420,23 +537,22 @@ func upsertStopRouteDaily(ctx context.Context, tx *sql.Tx, serviceDate string, s
 			arrival_ahead_count = EXCLUDED.arrival_ahead_count,
 			arrival_ahead_avg_seconds = EXCLUDED.arrival_ahead_avg_seconds,
 			departure_ahead_count = EXCLUDED.departure_ahead_count,
-			departure_ahead_avg_seconds = EXCLUDED.departure_ahead_avg_seconds,
-			updated_at = NOW()
+			departure_ahead_avg_seconds = EXCLUDED.departure_ahead_avg_seconds
 	`,
 		serviceDate,
-		stopID,
-		routeID,
-		summaryValue.ArrivalEvents,
-		summaryValue.DepartureEvents,
-		summaryValue.UniqueTrips,
-		summaryValue.ArrivalDelay.Count,
-		summaryValue.ArrivalDelay.AvgSeconds,
-		summaryValue.DepartureDelay.Count,
-		summaryValue.DepartureDelay.AvgSeconds,
-		summaryValue.ArrivalAhead.Count,
-		summaryValue.ArrivalAhead.AvgSeconds,
-		summaryValue.DepartureAhead.Count,
-		summaryValue.DepartureAhead.AvgSeconds,
+		stopKey,
+		routeKey,
+		metrics.arrivalEvents,
+		metrics.departureEvents,
+		metrics.uniqueTrips,
+		metrics.arrivalDelayCount,
+		metrics.arrivalDelayAvgSeconds,
+		metrics.departureDelayCount,
+		metrics.departureDelayAvgSeconds,
+		metrics.arrivalAheadCount,
+		metrics.arrivalAheadAvgSeconds,
+		metrics.departureAheadCount,
+		metrics.departureAheadAvgSeconds,
 	)
 	if err != nil {
 		return fmt.Errorf("upsert aggregate_stop_route_daily for stop %s route %s: %w", stopID, routeID, err)
@@ -444,10 +560,14 @@ func upsertStopRouteDaily(ctx context.Context, tx *sql.Tx, serviceDate string, s
 	return nil
 }
 
-func upsertStopRouteHourly(ctx context.Context, tx *sql.Tx, serviceDate string, stopID string, routeID string, hourStartUTC time.Time, summaryValue summary) error {
-	_, err := tx.ExecContext(ctx, `
+func upsertStopRouteHourly(ctx context.Context, tx *sql.Tx, stopKey int32, routeKey int32, stopID string, routeID string, hourStartUTC time.Time, summaryValue summary) error {
+	metrics, err := toCompactMetrics(summaryValue)
+	if err != nil {
+		return fmt.Errorf("prepare aggregate_stop_route_hourly values for stop %s route %s: %w", stopID, routeID, err)
+	}
+
+	_, err = tx.ExecContext(ctx, `
 		INSERT INTO aggregate_stop_route_hourly (
-			service_date,
 			stop_id,
 			route_id,
 			hour_start_utc,
@@ -461,11 +581,10 @@ func upsertStopRouteHourly(ctx context.Context, tx *sql.Tx, serviceDate string, 
 			arrival_ahead_count,
 			arrival_ahead_avg_seconds,
 			departure_ahead_count,
-			departure_ahead_avg_seconds,
-			updated_at
+			departure_ahead_avg_seconds
 		)
-		VALUES ($1::date, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW())
-		ON CONFLICT (service_date, stop_id, route_id, hour_start_utc)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+		ON CONFLICT (stop_id, route_id, hour_start_utc)
 		DO UPDATE SET
 			arrival_events = EXCLUDED.arrival_events,
 			departure_events = EXCLUDED.departure_events,
@@ -477,24 +596,22 @@ func upsertStopRouteHourly(ctx context.Context, tx *sql.Tx, serviceDate string, 
 			arrival_ahead_count = EXCLUDED.arrival_ahead_count,
 			arrival_ahead_avg_seconds = EXCLUDED.arrival_ahead_avg_seconds,
 			departure_ahead_count = EXCLUDED.departure_ahead_count,
-			departure_ahead_avg_seconds = EXCLUDED.departure_ahead_avg_seconds,
-			updated_at = NOW()
+			departure_ahead_avg_seconds = EXCLUDED.departure_ahead_avg_seconds
 	`,
-		serviceDate,
-		stopID,
-		routeID,
+		stopKey,
+		routeKey,
 		hourStartUTC,
-		summaryValue.ArrivalEvents,
-		summaryValue.DepartureEvents,
-		summaryValue.UniqueTrips,
-		summaryValue.ArrivalDelay.Count,
-		summaryValue.ArrivalDelay.AvgSeconds,
-		summaryValue.DepartureDelay.Count,
-		summaryValue.DepartureDelay.AvgSeconds,
-		summaryValue.ArrivalAhead.Count,
-		summaryValue.ArrivalAhead.AvgSeconds,
-		summaryValue.DepartureAhead.Count,
-		summaryValue.DepartureAhead.AvgSeconds,
+		metrics.arrivalEvents,
+		metrics.departureEvents,
+		metrics.uniqueTrips,
+		metrics.arrivalDelayCount,
+		metrics.arrivalDelayAvgSeconds,
+		metrics.departureDelayCount,
+		metrics.departureDelayAvgSeconds,
+		metrics.arrivalAheadCount,
+		metrics.arrivalAheadAvgSeconds,
+		metrics.departureAheadCount,
+		metrics.departureAheadAvgSeconds,
 	)
 	if err != nil {
 		return fmt.Errorf("upsert aggregate_stop_route_hourly for stop %s route %s hour %s: %w", stopID, routeID, hourStartUTC.Format(time.RFC3339), err)

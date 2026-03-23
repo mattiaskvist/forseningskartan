@@ -69,7 +69,7 @@ go run . -api-key "<koda_api_key>" -postgres-dsn "postgres://<user>:<password>@<
 
 ## Using the data
 
-It currently takes around 100MB to store the data for a single day. What gets stored:
+It currently takes around 50MB to store the data for a single day. What gets stored:
 
 - per-route daily aggregate rows
 - per-route hourly aggregate rows
@@ -84,7 +84,7 @@ Example query to get delays for bus route 6 from Torsplan during a specific hour
 
 ```sql
 SELECT
-	a.service_date,
+	(a.hour_start_utc AT TIME ZONE 'UTC')::date AS service_date,
 	s.name AS stop_name,
 	r.short_name AS route_short_name,
 	r.long_name AS route_long_name,
@@ -94,9 +94,10 @@ SELECT
 	a.arrival_ahead_avg_seconds,
 	a.arrival_ahead_count
 FROM aggregate_stop_route_hourly a
-JOIN stops s ON s.stop_id = a.stop_id
-JOIN routes r ON r.route_id = a.route_id
-WHERE a.service_date = DATE '2026-03-17'
+JOIN stops s ON s.id = a.stop_id
+JOIN routes r ON r.id = a.route_id
+WHERE a.hour_start_utc >= TIMESTAMPTZ '2026-03-17T00:00:00Z'
+	AND a.hour_start_utc < TIMESTAMPTZ '2026-03-18T00:00:00Z'
 	AND s.stop_id = '9022001010359004'
 	AND r.short_name = '6'
 	AND r.route_type = '700'
@@ -107,3 +108,15 @@ WHERE a.service_date = DATE '2026-03-17'
 
 - The script downloads and extracts GTFS-RT and GTFS-static archives to a temp directory and cleans up automatically.
 - `routes.txt`, `stops.txt`, and `trips.txt` are used to enrich route/stop/trip metadata when available.
+
+Check storage use of each table:
+
+```sql
+SELECT
+  relname AS table_name,
+  pg_size_pretty(pg_relation_size(relid)) AS data_size,
+  pg_size_pretty(pg_indexes_size(relid)) AS index_size,
+  pg_size_pretty(pg_total_relation_size(relid)) AS total_size
+FROM pg_catalog.pg_statio_user_tables
+ORDER BY pg_total_relation_size(relid) DESC;
+```
