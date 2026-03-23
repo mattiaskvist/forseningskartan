@@ -37,9 +37,6 @@ func parseArgs() (config Config, err error) {
 	if config.PostgresDSN == "" {
 		return config, fmt.Errorf("missing required -postgres-dsn argument")
 	}
-	if config.RecentDays <= 0 {
-		return config, fmt.Errorf("invalid -recent-days %d, expected a positive number", config.RecentDays)
-	}
 
 	hasDate := config.Date != ""
 	// Mode 1: specific date
@@ -53,6 +50,9 @@ func parseArgs() (config Config, err error) {
 
 	// Mode 2: recent days
 	if config.RecentDays != -1 && !hasDate {
+		if config.RecentDays <= 0 {
+			return config, fmt.Errorf("invalid -recent-days %d, expected a positive number", config.RecentDays)
+		}
 		return config, nil
 	}
 
