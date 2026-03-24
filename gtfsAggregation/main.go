@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
 	"slices"
 	"strings"
@@ -111,9 +112,26 @@ func main() {
 		os.Exit(1)
 	}
 
+	initMetrics()
+
+	// Start metrics server in background
+	go startMetricsServer()
+	time.Sleep(500 * time.Millisecond) // Give server time to start
+
 	err = runAggregations(config)
 	if err != nil {
+		RecordError(err)
 		fmt.Printf("%v\n", err)
 		os.Exit(1)
+	}
+
+	// Keep server alive briefly for Prometheus to scrape metrics
+	time.Sleep(2 * time.Second)
+}
+
+func startMetricsServer() {
+	http.HandleFunc("/metrics", metricsHandler)
+	if err := http.ListenAndServe(":2112", nil); err != nil {
+		fmt.Printf("Error starting metrics server: %v\n", err)
 	}
 }

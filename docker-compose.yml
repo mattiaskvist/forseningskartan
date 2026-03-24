@@ -27,6 +27,8 @@ services:
     environment:
       API_KEY: ${API_KEY}
       POSTGRES_DSN: ${POSTGRES_DSN:-postgres://postgres:postgres@db:5432/forseningskartan?sslmode=disable}
+    ports:
+      - "2112:2112"
     restart: "no"
 
 volumes:

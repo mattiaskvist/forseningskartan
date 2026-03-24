@@ -120,3 +120,32 @@ SELECT
 FROM pg_catalog.pg_statio_user_tables
 ORDER BY pg_total_relation_size(relid) DESC;
 ```
+
+## Prometheus metrics and Grafana monitoring
+
+The aggregator exposes Prometheus metrics on `http://localhost:2112/metrics` during execution. Metrics include:
+
+- `gtfs_aggregation_running`: 1 while a run is active, 0 otherwise
+- `gtfs_aggregation_files_processed{service_date="YYYY-MM-DD"}`: Files processed in the latest run for a service date
+- `gtfs_aggregation_routes_found{service_date="YYYY-MM-DD"}`: Routes found in the latest run
+- `gtfs_aggregation_stops_found{service_date="YYYY-MM-DD"}`: Stops found in the latest run
+- `gtfs_aggregation_duration_seconds{service_date="YYYY-MM-DD"}`: Run duration in seconds
+- `gtfs_aggregation_errors_total`: Total number of aggregation errors (counter)
+
+Runtime/process metrics are also exported via `client_golang` collectors, including:
+
+- `process_cpu_seconds_total`
+- `process_resident_memory_bytes`
+- `process_virtual_memory_bytes`
+- `go_goroutines`
+- `go_memstats_alloc_bytes`
+- `go_gc_duration_seconds`
+
+### Setup
+
+1. Add the GTFS aggregator job to the Prometheus scrape config:
+   - See [prometheus-job-config.yml](prometheus-job-config.yml) for the config snippet
+   - Update Prometheus `prometheus.yml` to include this job
+   - Restart Prometheus
+
+2. Create a Grafana dashboard using the metrics above.

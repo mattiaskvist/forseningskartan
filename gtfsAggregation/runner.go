@@ -9,6 +9,7 @@ import (
 )
 
 func runAggregation(config Config) error {
+	StartAggregation() // Initialize metrics
 	fmt.Printf("---------- Starting aggregation for date %s ----------\n", config.Date)
 
 	files, err := getInputFiles(config)
@@ -59,6 +60,7 @@ func runAggregation(config Config) error {
 			return fmt.Errorf("could not aggregate file %v: %w", path, err)
 		}
 		filesParsed++
+		RecordFileProcessed(config.Date, filesParsed)
 
 		if filesParsed%500 == 0 {
 			fmt.Printf("Processed %d files\n", filesParsed)
@@ -80,6 +82,9 @@ func runAggregation(config Config) error {
 		len(result.ByRoute),
 		len(result.ByStop),
 	)
+
+	// Record final metrics
+	RecordAggregationComplete(config.Date, filesParsed, int64(len(result.ByRoute)), int64(len(result.ByStop)))
 
 	fmt.Printf("---------- Finished aggregation for date %s ----------\n", config.Date)
 	return nil

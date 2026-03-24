@@ -1,0 +1,10 @@
+# Add this job to the existing Prometheus configuration
+# Location: typically /etc/prometheus/prometheus.yml
+# Restart Prometheus after adding this section
+
+scrape_configs:
+  - job_name: "gtfs-aggregator"
+    static_configs:
+      - targets: ["localhost:2112"]
+    scrape_interval: 30s
+    scrape_timeout: 10s
