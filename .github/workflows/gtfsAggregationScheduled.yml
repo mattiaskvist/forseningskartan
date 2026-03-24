@@ -1,0 +1,39 @@
+name: Scheduled GTFS Aggregation
+
+on:
+  schedule:
+    - cron: "0 6,7,8 * * *"
+      timezone: "Europe/Stockholm"
+
+concurrency:
+  group: gtfs-aggregation
+  cancel-in-progress: true
+
+jobs:
+  scheduled-aggregation:
+    name: Scheduled Aggregation
+    if: github.event_name == 'schedule' && github.ref == 'refs/heads/main'
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Ensure database is running
+        run: docker compose up -d db
+
+      - name: Wait for database readiness
+        run: |
+          for i in $(seq 1 30); do
+            if docker compose exec -T db pg_isready -U postgres -d forseningskartan; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Database did not become ready in time"
+          exit 1
+
+      - name: Run aggregation
+        env:
+          API_KEY: ${{ secrets.GTFS_API_KEY }}
+          POSTGRES_DSN: postgres://postgres:postgres@db:5432/forseningskartan?sslmode=disable
+        run: docker compose run --rm aggregator

@@ -4,17 +4,13 @@ on:
   push:
     paths:
       - "gtfsAggregation/**"
+      - "docker-compose.yml"
       - ".github/workflows/gtfsAggregation.yml"
   pull_request:
     paths:
       - "gtfsAggregation/**"
+      - "docker-compose.yml"
       - ".github/workflows/gtfsAggregation.yml"
-
-env:
-  PROJECT_ID: forseningskartan
-  REGION: europe-west1
-  IMAGE_NAME: europe-west1-docker.pkg.dev/forseningskartan/cron-repo/aggregation-cron
-  PULUMI_BACKEND_URL: gs://forseningskartan-pulumi-state
 
 jobs:
   lint:
@@ -58,43 +54,20 @@ jobs:
         run: cd gtfsAggregation && go build -v ./...
 
   deploy:
-    name: Deploy to GCP
+    name: Deploy to self-hosted server
     needs: build
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     environment: prod # Protect deployments to main branch with approval requirements
-    permissions:
-      contents: read
-      id-token: write # Strictly required for secure Google Cloud authentication
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
 
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
-
-      - name: Configure Docker Authentication
-        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
-
-      - name: Build and Push Docker Image
+      - name: Build aggregator image and start database
         run: |
-          cd gtfsAggregation
-          docker build -t ${{ env.IMAGE_NAME }}:${{ github.sha }} .
-          docker push ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          docker compose build aggregator
+          docker compose up -d db
 
-      - name: Deploy Infrastructure with Pulumi
-        uses: pulumi/actions@v5
-        with:
-          command: up
-          stack-name: dev
-          work-dir: ./gtfsAggregation/infra
-          config-map: |
-            dockerImage:
-              value: ${{ env.IMAGE_NAME }}:${{ github.sha }}
-        env:
-          PULUMI_BACKEND_URL: ${{ env.PULUMI_BACKEND_URL }}
-          PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_PASSPHRASE }}
+      - name: Cleanup old Docker data
+        if: always() # This ensures it runs even if the build fails
+        run: docker system prune -f
