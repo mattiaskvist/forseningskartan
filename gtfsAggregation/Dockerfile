@@ -33,8 +33,8 @@ RUN mkdir -p /data
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-# Environment variables injected at runtime from GCP Secret Manager
+# Environment variables injected at runtime by docker compose / CI
 ENV API_KEY=""
-ENV FIRESTORE_PROJECT=""
+ENV POSTGRES_DSN=""
 
 ENTRYPOINT ["/entrypoint.sh"]
