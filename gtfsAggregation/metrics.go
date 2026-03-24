@@ -11,6 +11,7 @@ import (
 )
 
 var (
+	reg                *prometheus.Registry
 	aggregationRunning = prometheus.NewGauge(prometheus.GaugeOpts{
 		Namespace: "gtfs",
 		Subsystem: "aggregation",
@@ -51,9 +52,10 @@ var (
 )
 
 func initMetrics() {
-	prometheus.MustRegister(collectors.NewGoCollector())
-	prometheus.MustRegister(collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}))
-	prometheus.MustRegister(
+	reg = prometheus.NewRegistry()
+	reg.MustRegister(
+		collectors.NewGoCollector(),
+		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
 		aggregationRunning,
 		filesProcessed,
 		routesFound,
@@ -64,7 +66,7 @@ func initMetrics() {
 }
 
 func metricsHandler(w http.ResponseWriter, r *http.Request) {
-	promhttp.Handler().ServeHTTP(w, r)
+	promhttp.HandlerFor(reg, promhttp.HandlerOpts{}).ServeHTTP(w, r)
 }
 
 func StartAggregation() {
