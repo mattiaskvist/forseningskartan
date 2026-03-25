@@ -31,7 +31,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("open postgres connection: %v", err)
 	}
-	defer db.Close()
+	defer db.Close() // nolint: errcheck
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
