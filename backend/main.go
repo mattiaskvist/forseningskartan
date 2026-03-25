@@ -14,7 +14,7 @@ import (
 
 func main() {
 	postgresDSNFlag := flag.String("postgres-dsn", "", "Postgres DSN, for example postgres://user:pass@host:5432/dbname?sslmode=disable")
-	portFlag := flag.String("port", "8080", "HTTP server port")
+	portFlag := flag.String("port", "8081", "HTTP server port")
 	flag.Parse()
 
 	postgresDSN := strings.TrimSpace(*postgresDSNFlag)
@@ -24,7 +24,7 @@ func main() {
 
 	port := strings.TrimSpace(*portFlag)
 	if port == "" {
-		port = "8080"
+		port = "8081"
 	}
 
 	db, err := sql.Open("pgx", postgresDSN)

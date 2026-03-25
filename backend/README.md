@@ -14,10 +14,10 @@ docker compose up -d db
 
 ```bash
 cd backend
-go run . -postgres-dsn "postgres://postgres:postgres@localhost:5432/forseningskartan?sslmode=disable" -port 8080
+go run . -postgres-dsn "postgres://postgres:postgres@localhost:5432/forseningskartan?sslmode=disable" -port 8081
 ```
 
-The API runs on `http://localhost:8080` by default.
+The API runs on `http://localhost:8081` by default.
 
 ## Endpoint
 

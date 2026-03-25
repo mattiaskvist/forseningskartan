@@ -11,5 +11,5 @@ FROM gcr.io/distroless/static-debian12:nonroot
 WORKDIR /
 COPY --from=builder /app/backend-api /backend-api
 
-EXPOSE 8080
+EXPOSE 8081
 ENTRYPOINT ["/backend-api"]
