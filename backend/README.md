@@ -2,6 +2,8 @@
 
 Go API for querying historical delay data from PostgreSQL database.
 
+All requests to the API require an API key that is specified as a flag when starting the API.
+
 ## Run locally
 
 1. Start Postgres with Docker Compose from repository root:
@@ -14,7 +16,7 @@ docker compose up -d db
 
 ```bash
 cd backend
-go run . -postgres-dsn "postgres://postgres:postgres@localhost:5432/forseningskartan?sslmode=disable" -port 8081
+go run . -postgres-dsn "postgres://postgres:postgres@localhost:5432/forseningskartan?sslmode=disable" -port 8081 -api-key "<api-key>"
 ```
 
 The API runs on `http://localhost:8081` by default.

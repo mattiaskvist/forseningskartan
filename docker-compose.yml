@@ -43,6 +43,8 @@ services:
       - "${POSTGRES_DSN:-postgres://postgres:postgres@db:5432/forseningskartan?sslmode=disable}"
       - "-port"
       - "${API_PORT:-8081}"
+      - "-api-key"
+      - "${API_KEY}"
     ports:
       - "${API_PORT:-8081}:${API_PORT:-8081}"
     restart: unless-stopped
