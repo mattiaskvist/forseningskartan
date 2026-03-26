@@ -21,4 +21,4 @@ jobs:
       - name: Build aggregator image and start database
         run: |
           docker compose build aggregator
-          docker compose up -d db
+          docker compose up -d db aggregator
