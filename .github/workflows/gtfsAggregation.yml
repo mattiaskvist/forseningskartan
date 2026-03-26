@@ -50,10 +50,24 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v6
 
-      - name: Build aggregator image and start database
+      - name: Build aggregator image and start services
+        env:
+          API_KEY: ${{ secrets.GTFS_API_KEY }}
+          POSTGRES_DSN: postgres://postgres:postgres@db:5432/forseningskartan?sslmode=disable
         run: |
           docker compose build aggregator
-          docker compose up -d db
+          docker compose up -d db scheduler api
+
+      - name: Wait for database readiness
+        run: |
+          for i in $(seq 1 30); do
+            if docker compose exec -T db pg_isready -U postgres -d forseningskartan; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Database did not become ready in time"
+          exit 1
 
       - name: Cleanup old Docker data
         if: always() # This ensures it runs even if the build fails
