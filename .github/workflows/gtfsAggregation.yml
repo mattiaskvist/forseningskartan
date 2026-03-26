@@ -57,8 +57,8 @@ jobs:
           API_KEY: ${{ secrets.GTFS_API_KEY }}
           POSTGRES_DSN: postgres://postgres:postgres@db:5432/forseningskartan?sslmode=disable
         run: |
-          docker compose build aggregator
-          docker compose up -d db scheduler api
+          docker compose build aggregator scheduler
+          docker compose up -d db scheduler
 
       - name: Wait for database readiness
         run: |
