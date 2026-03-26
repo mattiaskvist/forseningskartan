@@ -31,17 +31,6 @@ services:
       - "2112:2112"
     restart: "no"
 
-  scheduler:
-    image: mcuadros/ofelia:latest
-    depends_on:
-      db:
-        condition: service_healthy
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./ofelia_jobs.ini:/etc/ofelia/jobs.ini:ro
-    command: daemon --docker --config /etc/ofelia/jobs.ini
-    restart: unless-stopped
-
   api:
     build:
       context: ./backend

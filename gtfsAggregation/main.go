@@ -4,18 +4,24 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"slices"
 	"strings"
+	"syscall"
 	"time"
+
+	"github.com/robfig/cron/v3"
 )
 
 type Config struct {
-	APIKey      string
-	Date        string
-	PostgresDSN string
-	RecentDays  int
+	APIKey       string
+	Date         string
+	PostgresDSN  string
+	RecentDays   int
+	CronSchedule string
 }
 
 const dateLayout = "2006-01-02"
@@ -25,12 +31,14 @@ func parseArgs() (config Config, err error) {
 	dateFlag := flag.String("date", "", "Date to download/process in YYYY-MM-DD format (single-date mode)")
 	postgresDSNFlag := flag.String("postgres-dsn", "", "Postgres DSN, for example postgres://user:pass@host:5432/dbname")
 	recentDaysFlag := flag.Int("recent-days", -1, "Inspect the last N days in Firestore and process missing dates")
+	cronScheduleFlag := flag.String("cron-schedule", "", "Cron schedule for running recent-days aggregation")
 	flag.Parse()
 
 	config.APIKey = strings.TrimSpace(*apiKeyFlag)
 	config.Date = strings.TrimSpace(*dateFlag)
 	config.PostgresDSN = strings.TrimSpace(*postgresDSNFlag)
 	config.RecentDays = *recentDaysFlag
+	config.CronSchedule = strings.TrimSpace(*cronScheduleFlag)
 
 	if config.APIKey == "" {
 		return config, fmt.Errorf("missing required -api-key argument")
@@ -54,6 +62,12 @@ func parseArgs() (config Config, err error) {
 		if config.RecentDays <= 0 {
 			return config, fmt.Errorf("invalid -recent-days %d, expected a positive number", config.RecentDays)
 		}
+		// validate cron schedule if provided
+		if config.CronSchedule != "" {
+			if _, err := cron.ParseStandard(config.CronSchedule); err != nil {
+				return config, fmt.Errorf("invalid -cron-schedule %q: %w", config.CronSchedule, err)
+			}
+		}
 		return config, nil
 	}
 
@@ -62,7 +76,46 @@ func parseArgs() (config Config, err error) {
 
 func runAggregations(config Config) error {
 	if config.RecentDays > 0 {
-		return runRecentMissingAggregations(config)
+		if config.CronSchedule == "" {
+			return runRecentMissingAggregations(config)
+		}
+		c := cron.New()
+		schedule := config.CronSchedule
+		_, err := c.AddFunc(schedule, func() {
+			fmt.Println("Starting scheduled aggregation...")
+			err := runRecentMissingAggregations(config)
+			if err != nil {
+				RecordError(err)
+				fmt.Printf("Cronjob error: %v\n", err)
+			}
+		})
+		if err != nil {
+			log.Fatalf("Invalid cron schedule: %v", err)
+		}
+
+		c.Start()
+		fmt.Printf("Cron scheduler started with schedule: %s\n", schedule)
+
+		// Immediate run on startup
+		go func() {
+			fmt.Println("Running initial startup aggregation...")
+			err := runRecentMissingAggregations(config)
+			if err != nil {
+				RecordError(err)
+				fmt.Printf("Startup job error: %v\n", err)
+			}
+		}()
+
+		// Wait for SIGINT/SIGTERM to shut down gracefully
+		sigChan := make(chan os.Signal, 1)
+		signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+		sig := <-sigChan
+		fmt.Printf("\nReceived signal %v, shutting down...\n", sig)
+
+		// Stops the scheduler and waits for running jobs to finish
+		ctx := c.Stop()
+		<-ctx.Done()
 	}
 
 	return runAggregation(config)

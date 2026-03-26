@@ -7,6 +7,7 @@ require (
 	github.com/bodgit/sevenzip v1.6.1
 	github.com/jackc/pgx/v5 v5.9.1
 	github.com/prometheus/client_golang v1.23.2
+	github.com/robfig/cron/v3 v3.0.1
 	google.golang.org/protobuf v1.36.11
 )
 

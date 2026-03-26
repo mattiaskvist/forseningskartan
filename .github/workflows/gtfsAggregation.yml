@@ -5,13 +5,11 @@ on:
     paths:
       - "gtfsAggregation/**"
       - "docker-compose.yml"
-      - "ofelia_jobs.ini"
       - ".github/workflows/gtfsAggregation.yml"
   pull_request:
     paths:
       - "gtfsAggregation/**"
       - "docker-compose.yml"
-      - "ofelia_jobs.ini"
       - ".github/workflows/gtfsAggregation.yml"
 
 jobs:
@@ -57,9 +55,8 @@ jobs:
           API_KEY: ${{ secrets.GTFS_API_KEY }}
           POSTGRES_DSN: postgres://postgres:postgres@db:5432/forseningskartan?sslmode=disable
         run: |
-          docker compose build aggregator scheduler
-          docker compose up -d db scheduler
-          docker compose up -d --force-recreate scheduler
+          docker compose build aggregator
+          docker compose up -d db aggregator
 
       - name: Wait for database readiness
         run: |

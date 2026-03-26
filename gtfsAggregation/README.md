@@ -53,7 +53,7 @@ psql "postgres://<user>:<password>@<host>:5432/<database>" -f postgres_schema.sq
 
 ## Running the script
 
-There are two ways of running the script:
+There are three ways of running the script:
 
 1. Aggregate the data for a specified date:
 
@@ -65,6 +65,12 @@ go run . -api-key "<koda_api_key>" -date "2026-03-01" -postgres-dsn "postgres://
 
 ```bash
 go run . -api-key "<koda_api_key>" -postgres-dsn "postgres://<user>:<password>@<host>:5432/<database>" -recent-days 30
+```
+
+3. Same as 2. but runs as a cronjob with a provided schedule:
+
+```bash
+go run . -api-key "<koda_api_key>" -postgres-dsn "postgres://<user>:<password>@<host>:5432/<database>" -recent-days 30 -cron-schedule "0 6,7,8 * * *"
 ```
 
 ## Using the data
