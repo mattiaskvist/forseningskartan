@@ -1,12 +1,7 @@
 import { createSelector } from "@reduxjs/toolkit";
 import { DatePreset } from "../types/departureDelay";
-import { DelaySummary } from "../types/historicalDelay";
 import { Site } from "../types/sl";
-import { StopDelayCacheEntry } from "../types/stopDelay";
-import { getStopDelayRequestKey } from "../types/stopDelay";
-import { aggregateStopSummariesCB } from "../utils/delayAggregation";
 import { getDatesForPreset, sortDatesDescendingCB } from "../utils/time";
-import { getStopPointGidsForSite } from "../utils/site";
 import { RootState } from "./store";
 
 type SelectedDelayDatesInput = {
@@ -66,16 +61,12 @@ function getStopPointsLoadingCB(state: RootState) {
     return state.stopPoints.isLoading;
 }
 
-function getStopDelaysCB(state: RootState) {
-    return state.stopDelays.cache;
+function getDepartureHistoricalDelaySummaryCB(state: RootState) {
+    return state.departureHistoricalDelay.summary;
 }
 
-function getStopDelaysLoadingCB(state: RootState) {
-    const cacheEntries = Object.values(state.stopDelays.cache);
-    function isLoadingCB(entry: StopDelayCacheEntry<DelaySummary> | undefined): boolean {
-        return entry?.status === "loading";
-    }
-    return cacheEntries.some(isLoadingCB);
+function getDepartureHistoricalDelayLoadingCB(state: RootState) {
+    return state.departureHistoricalDelay.isLoading;
 }
 
 function getRouteDelaysCB(state: RootState) {
@@ -116,16 +107,6 @@ function getSelectedCustomDateCB(state: RootState) {
 
 // use createSelector for computationally expensive selectors
 // to memoize results and avoid unnecessary recalculations
-const getSelectedStopPointGIDsCB = createSelector(
-    [getSelectedSiteCB, getStopPointsCB],
-    (selectedSite, stopPoints) => {
-        if (!selectedSite || !stopPoints) {
-            return [];
-        }
-        return getStopPointGidsForSite(selectedSite, stopPoints);
-    }
-);
-
 const getSelectedDelayDatesCB = createSelector(
     [
         getSelectedDepartureCB,
@@ -143,34 +124,6 @@ const getSelectedDelayDatesCB = createSelector(
     }
 );
 
-const getSelectedStopDelaysCB = createSelector(
-    [getSelectedStopPointGIDsCB, getSelectedDelayDatesCB, getStopDelaysCB],
-    (selectedStopPointGIDs, selectedDelayDates, stopDelaysCache) => {
-        const result: DelaySummary[] = [];
-
-        function addStopSummaryForDateCB(date: string) {
-            const summariesForDate: DelaySummary[] = [];
-
-            selectedStopPointGIDs.forEach((stopPointGID) => {
-                const requestKey = getStopDelayRequestKey(stopPointGID, date);
-                const cacheEntry = stopDelaysCache[requestKey];
-
-                if (cacheEntry?.status === "succeeded" && cacheEntry.data) {
-                    summariesForDate.push(cacheEntry.data);
-                }
-            });
-
-            const summary = aggregateStopSummariesCB(summariesForDate);
-            if (summary) {
-                result.push(summary);
-            }
-        }
-
-        selectedDelayDates.forEach(addStopSummaryForDateCB);
-        return result;
-    }
-);
-
 export {
     getSitesCB,
     getSitesLoadingCB,
@@ -178,8 +131,8 @@ export {
     getSelectedSiteCB,
     getStopPointsCB,
     getStopPointsLoadingCB,
-    getStopDelaysCB,
-    getStopDelaysLoadingCB,
+    getDepartureHistoricalDelayLoadingCB,
+    getDepartureHistoricalDelaySummaryCB,
     getRouteDelaysCB,
     getRouteDelaysLoadingCB,
     getAggregatedDatesCB,
@@ -191,5 +144,4 @@ export {
     getSelectedCustomDateCB,
     getSelectedDelayDates,
     getSelectedDelayDatesCB,
-    getSelectedStopDelaysCB,
 };

@@ -4,12 +4,12 @@ import {
     getDeparturesCB,
     getDeparturesLoadingCB,
     getAggregatedDatesCB,
-    getStopDelaysLoadingCB,
+    getDepartureHistoricalDelayLoadingCB,
+    getDepartureHistoricalDelaySummaryCB,
     getSelectedCustomDateCB,
     getSelectedDatePresetCB,
     getSelectedDelayDatesCB,
     getSelectedDepartureCB,
-    getSelectedStopDelaysCB,
 } from "../store/selectors";
 import {
     setSelectedCustomDate,
@@ -34,8 +34,8 @@ export function DeparturePresenter({ selectedSite }: DeparturePresenterProps) {
     const selectedDatePreset = useAppSelector(getSelectedDatePresetCB);
     const selectedCustomDate = useAppSelector(getSelectedCustomDateCB);
     const selectedDelayDates = useAppSelector(getSelectedDelayDatesCB);
-    const selectedStopDelays = useAppSelector(getSelectedStopDelaysCB);
-    const isStopDelaysLoading = useAppSelector(getStopDelaysLoadingCB);
+    const selectedDepartureDelaySummary = useAppSelector(getDepartureHistoricalDelaySummaryCB);
+    const isDepartureHistoricalDelayLoading = useAppSelector(getDepartureHistoricalDelayLoadingCB);
 
     function closeDeparturesViewCB() {
         dispatch(setSelectedDeparture(null));
@@ -71,8 +71,8 @@ export function DeparturePresenter({ selectedSite }: DeparturePresenterProps) {
             isLoading={isDeparturesLoading}
             availableDates={availableDates}
             selectedDelayDates={selectedDelayDates}
-            selectedStopDelays={selectedStopDelays}
-            isStopDelaysLoading={isStopDelaysLoading}
+            selectedDepartureDelaySummary={selectedDepartureDelaySummary}
+            isDepartureHistoricalDelayLoading={isDepartureHistoricalDelayLoading}
             selectedDatePreset={selectedDatePreset}
             selectedCustomDate={selectedCustomDate}
             onDatePresetChangeCB={setSelectedDatePresetCB}

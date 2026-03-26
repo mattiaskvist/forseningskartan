@@ -1,6 +1,6 @@
 import { DelaySummary } from "../types/historicalDelay";
 
-type DepartureHistoricalDelayParams = {
+export type DepartureHistoricalDelayParams = {
     stopPointGIDs: string[];
     dates: string[];
     hourUTC: number;
