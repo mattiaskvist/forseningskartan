@@ -38,11 +38,8 @@ services:
         condition: service_healthy
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    command: daemon --docker
-    environment:
-      OFELIA_JOB_RUN_AGGREGATOR_IMAGE: forseningskartan-aggregator
-      OFELIA_JOB_RUN_AGGREGATOR_SCHEDULE: "0 6,7,8 * * *"
-      OFELIA_JOB_RUN_AGGREGATOR_ENVIRONMENT: "API_KEY=${API_KEY},POSTGRES_DSN=postgres://postgres:postgres@db:5432/forseningskartan?sslmode=disable"
+      - ./ofelia_jobs.ini:/etc/ofelia/jobs.ini:ro
+    command: daemon --docker --config /etc/ofelia/jobs.ini
     restart: unless-stopped
 
   api:
