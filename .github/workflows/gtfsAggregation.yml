@@ -5,11 +5,13 @@ on:
     paths:
       - "gtfsAggregation/**"
       - "docker-compose.yml"
+      - "ofelia_jobs.ini"
       - ".github/workflows/gtfsAggregation.yml"
   pull_request:
     paths:
       - "gtfsAggregation/**"
       - "docker-compose.yml"
+      - "ofelia_jobs.ini"
       - ".github/workflows/gtfsAggregation.yml"
 
 jobs:
