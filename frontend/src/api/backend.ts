@@ -9,6 +9,7 @@ export type DepartureHistoricalDelayParams = {
 };
 
 const backendBaseURL = import.meta.env.VITE_BACKEND_API_URL ?? "http://localhost:8081";
+const backendAPIKey = import.meta.env.VITE_BACKEND_API_KEY ?? "";
 
 function appendListParam(urlSearchParams: URLSearchParams, key: string, values: string[]) {
     function appendValueCB(value: string) {
@@ -52,5 +53,9 @@ export function fetchDepartureHistoricalDelaySummary({
     }
 
     const fullURL = `${backendBaseURL}/api/departure-historical-delay?${params.toString()}`;
-    return fetch(fullURL).then(handleResponseACB);
+    return fetch(fullURL, {
+        headers: {
+            "X-API-Key": backendAPIKey,
+        },
+    }).then(handleResponseACB);
 }
