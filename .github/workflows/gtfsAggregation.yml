@@ -59,6 +59,7 @@ jobs:
         run: |
           docker compose build aggregator scheduler
           docker compose up -d db scheduler
+          docker compose up -d --force-recreate scheduler
 
       - name: Wait for database readiness
         run: |
