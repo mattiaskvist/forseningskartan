@@ -43,9 +43,9 @@ jobs:
   deploy:
     name: Deploy to self-hosted server
     needs: lint-and-build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/f/gtfs-database'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: self-hosted
-    # environment: prod # Protect deployments to main branch with approval requirements
+    environment: prod # Protect deployments to main branch with approval requirements
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
