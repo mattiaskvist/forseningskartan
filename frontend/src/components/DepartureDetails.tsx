@@ -2,12 +2,11 @@ import { useState } from "react";
 import { Button } from "@mui/material";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import { Departure, TransportationMode, transportationModeToRouteType } from "../types/sl";
+import { Departure } from "../types/sl";
 import { formatDelay, formatTime, getDelayMinutes } from "../utils/time";
 import { DepartureHistoricalDelays } from "./DepartureHistoricalDelays";
 import { DatePreset, EventType } from "../types/departureDelay";
 import { DelaySummary } from "../types/historicalDelay";
-import { aggregateRouteSummaries } from "../utils/delayAggregation";
 
 dayjs.extend(utc);
 
@@ -20,40 +19,13 @@ function renderDetailRow(label: string, value: string) {
     );
 }
 
-function getLineRouteSummary(
-    routeSummaries: DelaySummary[],
-    lineId: number,
-    lineDesignation?: string,
-    transportationMode?: TransportationMode
-): DelaySummary | undefined {
-    const candidates = [lineDesignation, lineId.toString()];
-
-    if (candidates.length === 0 || !transportationMode) {
-        return undefined;
-    }
-    const currentTransportationMode = transportationMode;
-
-    function isRouteSummaryForLineCB(summary: DelaySummary): boolean {
-        if (!summary.route?.shortName) {
-            return false;
-        }
-
-        return (
-            candidates.includes(summary.route.shortName) &&
-            summary.route.type === transportationModeToRouteType[currentTransportationMode]
-        );
-    }
-
-    return routeSummaries.find(isRouteSummaryForLineCB);
-}
-
 type DepartureDetailsProps = {
     departure: Departure;
     onBackToListCB: () => void;
     availableDates: string[];
     selectedDelayDates: string[];
-    selectedStopDelays: DelaySummary[];
-    isStopDelaysLoading: boolean;
+    selectedDepartureDelaySummary: DelaySummary | null;
+    isDepartureHistoricalDelayLoading: boolean;
     selectedDatePreset: DatePreset;
     selectedCustomDate: string | null;
     onDatePresetChangeCB: (preset: DatePreset) => void;
@@ -65,8 +37,8 @@ export function DepartureDetails({
     onBackToListCB,
     availableDates,
     selectedDelayDates,
-    selectedStopDelays,
-    isStopDelaysLoading,
+    selectedDepartureDelaySummary,
+    isDepartureHistoricalDelayLoading,
     selectedDatePreset,
     selectedCustomDate,
     onDatePresetChangeCB,
@@ -79,16 +51,6 @@ export function DepartureDetails({
     const selectedDepartureHourUTC = selectedDepartureDate.isValid()
         ? selectedDepartureDate.hour()
         : dayjs().utc().hour();
-
-    // aggregate route summaries for selected hour
-    const routeSummaries = aggregateRouteSummaries(selectedStopDelays, selectedDepartureHourUTC);
-    // find summary for selected departures line
-    const routeSummary = getLineRouteSummary(
-        routeSummaries,
-        departure.line.id,
-        departure.line.designation,
-        departure.line.transport_mode
-    );
 
     const detailRows = [
         renderDetailRow("Planned departure", formatTime(departure.scheduled)),
@@ -128,8 +90,8 @@ export function DepartureDetails({
                 onDatePresetChangeCB={onDatePresetChangeCB}
                 onCustomDateChangeCB={onCustomDateChangeCB}
                 onEventTypeChangeCB={setSelectedEventType}
-                isLoadingData={isStopDelaysLoading}
-                routeSummary={routeSummary}
+                isLoadingData={isDepartureHistoricalDelayLoading}
+                routeSummary={selectedDepartureDelaySummary}
             />
         </div>
     );

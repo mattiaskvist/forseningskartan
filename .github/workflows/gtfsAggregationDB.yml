@@ -1,0 +1,24 @@
+name: GTFS Aggregation Database
+
+on:
+  push:
+    paths:
+      - "gtfsAggregation/postgres_schema.sql"
+
+jobs:
+  rebuild:
+    name: Rebuild database
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: self-hosted
+    environment: prod # Protect deployments to main branch with approval requirements
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Rebuild database
+        run: docker compose down -v
+
+      - name: Build aggregator image and start database
+        run: |
+          docker compose build aggregator
+          docker compose up -d db aggregator

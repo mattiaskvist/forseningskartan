@@ -16,8 +16,8 @@ type DepartureViewProps = {
     isLoading: boolean;
     availableDates: string[];
     selectedDelayDates: string[];
-    selectedStopDelays: DelaySummary[];
-    isStopDelaysLoading: boolean;
+    selectedDepartureDelaySummary: DelaySummary | null;
+    isDepartureHistoricalDelayLoading: boolean;
     selectedDatePreset: DatePreset;
     selectedCustomDate: string | null;
     onDatePresetChangeCB: (preset: DatePreset) => void;
@@ -34,8 +34,8 @@ export function DepartureView({
     isLoading,
     availableDates,
     selectedDelayDates,
-    selectedStopDelays,
-    isStopDelaysLoading,
+    selectedDepartureDelaySummary,
+    isDepartureHistoricalDelayLoading,
     selectedDatePreset,
     selectedCustomDate,
     onDatePresetChangeCB,
@@ -104,8 +104,8 @@ export function DepartureView({
                     onBackToListCB={onBackToListCB}
                     availableDates={availableDates}
                     selectedDelayDates={selectedDelayDates}
-                    selectedStopDelays={selectedStopDelays}
-                    isStopDelaysLoading={isStopDelaysLoading}
+                    selectedDepartureDelaySummary={selectedDepartureDelaySummary}
+                    isDepartureHistoricalDelayLoading={isDepartureHistoricalDelayLoading}
                     selectedDatePreset={selectedDatePreset}
                     selectedCustomDate={selectedCustomDate}
                     onDatePresetChangeCB={onDatePresetChangeCB}

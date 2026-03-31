@@ -26,7 +26,7 @@ function getOnTimeCount(summary: DelaySummary, eventType: EventType) {
 }
 
 type DepartureDelayStatsProps = {
-    routeSummary: DelaySummary | undefined;
+    routeSummary: DelaySummary | null;
     selectedEventType: EventType;
 };
 

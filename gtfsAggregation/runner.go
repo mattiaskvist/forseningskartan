@@ -1,15 +1,15 @@
 package main
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
 	"io/fs"
-	"os"
 	"path/filepath"
 	"strings"
 )
 
 func runAggregation(config Config) error {
+	StartAggregation() // Initialize metrics
 	fmt.Printf("---------- Starting aggregation for date %s ----------\n", config.Date)
 
 	files, err := getInputFiles(config)
@@ -33,6 +33,15 @@ func runAggregation(config Config) error {
 		return fmt.Errorf("could not create aggregator: %w", err)
 	}
 
+	ctx := context.Background()
+	writer, err := newDBAggregateWriter(ctx, config.PostgresDSN)
+	if err != nil {
+		return fmt.Errorf("could not create db aggregate writer: %w", err)
+	}
+	defer writer.close()
+
+	var filesParsed int64
+
 	err = filepath.WalkDir(absRoot, func(path string, entry fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return fmt.Errorf("could not walk dir %v: %w", path, walkErr)
@@ -48,11 +57,13 @@ func runAggregation(config Config) error {
 
 		// found a pb file, process it
 		if err := agg.addFile(path); err != nil {
-			return fmt.Errorf("could not add file %v: %w", path, err)
+			return fmt.Errorf("could not aggregate file %v: %w", path, err)
 		}
+		filesParsed++
+		RecordFileProcessed(config.Date, filesParsed)
 
-		if agg.filesParsed%500 == 0 {
-			fmt.Printf("Processed %d files\n", agg.filesParsed)
+		if filesParsed%500 == 0 {
+			fmt.Printf("Processed %d files\n", filesParsed)
 		}
 		return nil
 	})
@@ -61,33 +72,19 @@ func runAggregation(config Config) error {
 	}
 
 	result := agg.finalize()
-	projectID := strings.TrimSpace(config.FirestoreProjectID)
-	if projectID != "" {
-		archiveDate := strings.TrimSpace(config.Date)
-		if err := writeByRouteToFirestore(result, projectID, archiveDate); err != nil {
-			return fmt.Errorf("failed to export byRoute to firestore: %w", err)
-		}
-
-		if err := writeByStopToFirestore(result, projectID, archiveDate); err != nil {
-			return fmt.Errorf("failed to export byStop to firestore: %w", err)
-		}
-
-		if err := writeDateIndex(projectID, &archiveDate); err != nil {
-			return fmt.Errorf("failed to update date index in firestore: %w", err)
-		}
+	if err := writer.writeAggregation(ctx, config.Date, result); err != nil {
+		return fmt.Errorf("store aggregated result in postgres: %w", err)
 	}
 
-	output, err := json.Marshal(result)
-	if err != nil {
-		return fmt.Errorf("failed to marshal result: %w", err)
-	}
+	fmt.Printf(
+		"Stored aggregated data in Postgres (%d files, %d routes, %d stops)\n",
+		filesParsed,
+		len(result.ByRoute),
+		len(result.ByStop),
+	)
 
-	if strings.TrimSpace(config.OutputPath) != "" {
-		if err := os.WriteFile(config.OutputPath, append(output, '\n'), 0644); err != nil {
-			return fmt.Errorf("failed to write output: %w", err)
-		}
-		fmt.Printf("Wrote output to %s\n", config.OutputPath)
-	}
+	// Record final metrics
+	RecordAggregationComplete(config.Date, filesParsed, int64(len(result.ByRoute)), int64(len(result.ByStop)))
 
 	fmt.Printf("---------- Finished aggregation for date %s ----------\n", config.Date)
 	return nil

@@ -15,7 +15,7 @@ type DepartureHistoricalDelaysProps = {
     onCustomDateChangeCB: (date: string) => void;
     onEventTypeChangeCB: (eventType: EventType) => void;
     isLoadingData: boolean;
-    routeSummary: DelaySummary | undefined;
+    routeSummary: DelaySummary | null;
 };
 
 export function DepartureHistoricalDelays({

@@ -1,10 +1,14 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { fetchSitesACB, fetchDeparturesACB, fetchStopPointsACB } from "../api/sl";
-import { fetchAggregatedDates, fetchRouteDelays, fetchStopDelays } from "../firebase/firestore";
+import { fetchAggregatedDates, fetchRouteDelays } from "../firebase/firestore";
+import {
+    DepartureHistoricalDelayParams,
+    fetchDepartureHistoricalDelaySummary,
+} from "../api/backend";
 import { AppThunk } from "./store";
 import { getSelectedDelayDates } from "./selectors";
 import { getStopPointGidsForSite } from "../utils/site";
-import { getStopDelayRequestKey } from "../types/stopDelay";
+import { transportationModeToRouteType } from "../types/sl";
 
 export const getSites = createAsyncThunk("sites/fetch", fetchSitesACB);
 
@@ -16,29 +20,42 @@ export const getStopPoints = createAsyncThunk("stopPoints/fetch", () => fetchSto
 
 export const getAggregatedDates = createAsyncThunk("aggregatedDates/fetch", fetchAggregatedDates);
 
-export const getStopDelays = createAsyncThunk(
-    "stopDelays/fetch",
-    ({ stopPointGIDs, date }: { stopPointGIDs: string[]; date: string }) =>
-        fetchStopDelays(stopPointGIDs, date)
+export const getDepartureHistoricalDelaySummary = createAsyncThunk(
+    "departureHistoricalDelay/fetch",
+    ({
+        stopPointGIDs,
+        dates,
+        hourUTC,
+        routeShortName,
+        routeType,
+    }: DepartureHistoricalDelayParams) =>
+        fetchDepartureHistoricalDelaySummary({
+            stopPointGIDs,
+            dates,
+            hourUTC,
+            routeShortName,
+            routeType,
+        })
 );
 
 export const getRouteDelays = createAsyncThunk("routeDelays/fetch", (date: string) =>
     fetchRouteDelays(date)
 );
 
-// fetch data for selected departure and dates if not in cache
+// fetch historical delay summary for selected departure
 export function fetchSelectedDepartureStopDelays(): AppThunk {
     return (dispatch, getState) => {
         const state = getState();
         const selectedSiteId = state.sites.selectedSiteId;
         const selectedSite = state.sites.data?.find((site) => site.id === selectedSiteId) ?? null;
+        const selectedDeparture = state.departureUI.selectedDeparture;
         const stopPoints = state.stopPoints.data ?? [];
-        if (!selectedSite || stopPoints.length === 0) {
+        if (!selectedSite || !selectedDeparture || stopPoints.length === 0) {
             return;
         }
 
         const selectedDates = getSelectedDelayDates({
-            selectedDeparture: state.departureUI.selectedDeparture,
+            selectedDeparture,
             selectedDatePreset: state.departureUI.selectedDatePreset,
             selectedCustomDate: state.departureUI.selectedCustomDate,
             availableDates: state.aggregatedDates.data,
@@ -48,23 +65,29 @@ export function fetchSelectedDepartureStopDelays(): AppThunk {
         }
 
         const stopPointGIDs = getStopPointGidsForSite(selectedSite, stopPoints);
+        const routeShortName =
+            selectedDeparture.line.designation ?? selectedDeparture.line.id.toString();
+        const routeType = selectedDeparture.line.transport_mode
+            ? transportationModeToRouteType[selectedDeparture.line.transport_mode]
+            : undefined;
+        const departureTimestamp = Date.parse(
+            selectedDeparture.expected ?? selectedDeparture.scheduled
+        );
 
-        function getDelaysForDateCB(date: string) {
-            const missingStopPointGIDs = stopPointGIDs.filter((stopPointGID) => {
-                const requestKey = getStopDelayRequestKey(stopPointGID, date);
-                const cacheEntry = state.stopDelays.cache[requestKey];
-
-                if (!cacheEntry) {
-                    return true;
-                }
-                return cacheEntry.status === "failed";
-            });
-
-            if (missingStopPointGIDs.length > 0) {
-                dispatch(getStopDelays({ stopPointGIDs: missingStopPointGIDs, date }));
-            }
+        if (Number.isNaN(departureTimestamp)) {
+            return;
         }
 
-        selectedDates.forEach(getDelaysForDateCB);
+        const hourUTC = new Date(departureTimestamp).getUTCHours();
+
+        dispatch(
+            getDepartureHistoricalDelaySummary({
+                stopPointGIDs,
+                dates: selectedDates,
+                hourUTC,
+                routeShortName,
+                routeType,
+            })
+        );
     };
 }

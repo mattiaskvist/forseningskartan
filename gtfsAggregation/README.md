@@ -29,146 +29,129 @@ https://api.koda.trafiklab.se/KoDa/api/v2/gtfs-static/{operator}?date={date}&key
 https://api.koda.trafiklab.se/KoDa/api/v2/gtfs-static/sl?date=2026-03-01&key={api_key}
 ```
 
+## Setup
+
+### Step 1: set up a local database
+
+Install [PostgreSQL](https://www.postgresql.org/download/) and run the following:
+
+```bash
+sudo -u postgres psql
+CREATE USER user WITH PASSWORD 'password';
+CREATE DATABASE forseningskartan;
+GRANT ALL PRIVILEGES ON DATABASE forseningskartan TO user;
+\q
+```
+
+### Step 2: create the Postgres schema
+
+Run the schema file before running ingestion:
+
+```bash
+psql "postgres://<user>:<password>@<host>:5432/<database>" -f postgres_schema.sql
+```
+
 ## Running the script
 
 There are three ways of running the script:
 
-1. Aggregate the data for a specified date and save it to `out.json`:
+1. Aggregate the data for a specified date:
 
 ```bash
-go run . -output "out.json" -api-key "<koda_api_key>" -date "2026-03-01"
+go run . -api-key "<koda_api_key>" -date "2026-03-01" -postgres-dsn "postgres://<user>:<password>@<host>:5432/<database>"
 ```
 
-2. Aggregate the data for a specified date and save it to `out.json` and to firestore:
+2. Aggregate the data for the last N days (not including todays date) that don't exist in the database. Recent days is 30 by default:
 
 ```bash
-go run . -output "out.json" -api-key "<koda_api_key>" -date "2026-03-01" -firestore-project "forseningskartan"
+go run . -api-key "<koda_api_key>" -postgres-dsn "postgres://<user>:<password>@<host>:5432/<database>" -recent-days 30
 ```
 
-3. Aggregate the data for the last N days (not including todays date) that don't have a top-level Firestore collections like `2026-03-01`. The script also removes data that is older than the specified number of days. Recent days is 30 by default:
+3. Same as 2. but runs as a cronjob with a provided schedule:
 
 ```bash
-go run . -api-key "<koda_api_key>" -firestore-project "forseningskartan" -recent-days 30
+go run . -api-key "<koda_api_key>" -postgres-dsn "postgres://<user>:<password>@<host>:5432/<database>" -recent-days 30 -cron-schedule "0 6,7,8 * * *"
 ```
 
-## Firestore export
+## Using the data
 
-Optionally, the data aggregated **by route** and **by stop** can be stored in firebase by providing a firestore project id. Exporting to firestore locally requires the following:
+It currently takes around 50MB to store the data for a single day. What gets stored:
 
-1. Install the Google Cloud CLI https://docs.cloud.google.com/sdk/docs/install-sdk
-2. Run `gcloud auth application-default login`
+- per-route daily aggregate rows
+- per-route hourly aggregate rows
+- per-stop daily aggregate rows
+- per-stop-per-route daily aggregate rows
+- per-stop-per-route hourly aggregate rows
+- one processed-date row in `aggregated_service_dates`
+- route metadata in `routes` (`short_name`, `long_name`, `route_type`)
+- stop metadata in `stops` (`name`)
 
-### By Route
+Example query to get delays for bus route 6 from Torsplan during a specific hour:
 
-`byRoute` is stored as chunked documents per day:
-
-```text
-<YYYY-MM-DD>/byRoute                 // metadata document
-<YYYY-MM-DD>/byRoute/chunk_<n>/data  // chunked route rows
+```sql
+SELECT
+	(a.hour_start_utc AT TIME ZONE 'UTC')::date AS service_date,
+	s.name AS stop_name,
+	r.short_name AS route_short_name,
+	r.long_name AS route_long_name,
+	a.hour_start_utc,
+	a.departure_delay_avg_seconds,
+	a.departure_delay_count,
+	a.arrival_ahead_avg_seconds,
+	a.arrival_ahead_count
+FROM aggregate_stop_route_hourly a
+JOIN stops s ON s.id = a.stop_id
+JOIN routes r ON r.id = a.route_id
+WHERE a.hour_start_utc >= TIMESTAMPTZ '2026-03-17T00:00:00Z'
+	AND a.hour_start_utc < TIMESTAMPTZ '2026-03-18T00:00:00Z'
+	AND s.stop_id = '9022001010359004'
+	AND r.short_name = '6'
+	AND r.route_type = '700'
+	AND a.hour_start_utc = TIMESTAMPTZ '2026-03-17T20:00:00Z';
 ```
 
-The metadata document `<YYYY-MM-DD>/byRoute` contains:
+## Notes
 
-- `d` date string like `"2026-03-01"`.
-- `c` total route count.
-- `cc` fixed chunk count (`16`).
+- The script downloads and extracts GTFS-RT and GTFS-static archives to a temp directory and cleans up automatically.
+- `routes.txt`, `stops.txt`, and `trips.txt` are used to enrich route/stop/trip metadata when available.
 
-Each chunk document `<YYYY-MM-DD>/byRoute/chunk_<n>/data` contains compact keys:
+Check storage use of each table:
 
-- `r` list of route summaries (key is route ID, e.g. 9011...).
-- `d` date string like `"2026-03-01"`.
-- `c` route count in this chunk.
-
-```go
-type summary struct {
-	Key             string     `json:"k"`
-	Route           *routeMeta `json:"r,omitempty"` // empty for by stop
-	Stop            *stopMeta  `json:"s,omitempty"` // empty for by route
-	ByHour          []summary  `json:"h,omitempty"` // set for route summaries
-	ByRoute         []summary  `json:"br,omitempty"` // empty for by route
-	ArrivalEvents   int64      `json:"ac"`
-	DepartureEvents int64      `json:"dc"`
-	UniqueTrips     int        `json:"ut"`
-	ArrivalDelay    delayStats `json:"ad"`
-	DepartureDelay  delayStats `json:"dd"`
-	ArrivalAhead    delayStats `json:"aa"`
-	DepartureAhead  delayStats `json:"da"`
-}
-
-type routeMeta struct {
-	ShortName string `json:"sn"`
-	LongName  string `json:"ln"`
-	Type      string `json:"t"`
-}
-
-type stopMeta struct {
-	Name string `json:"n"`
-}
-
-type delayStats struct {
-	Count      int64   `json:"c"` // occurrences
-	AvgSeconds float64 `json:"a"`
-}
+```sql
+SELECT
+  relname AS table_name,
+  pg_size_pretty(pg_relation_size(relid)) AS data_size,
+  pg_size_pretty(pg_indexes_size(relid)) AS index_size,
+  pg_size_pretty(pg_total_relation_size(relid)) AS total_size
+FROM pg_catalog.pg_statio_user_tables
+ORDER BY pg_total_relation_size(relid) DESC;
 ```
 
-`a` (`avgSeconds`) is calculated as `sumSeconds / c` within that specific stat bucket.  
-Examples:
+## Prometheus metrics and Grafana monitoring
 
-- `dd.a` = average over delayed **departures only** (`dd.c`)
-- `ad.a` = average over delayed **arrivals only** (`ad.c`)
-- `da.a` / `aa.a` = average over ahead events in their respective buckets
+The aggregator exposes Prometheus metrics on `http://localhost:2112/metrics` during execution. Metrics include:
 
-### By Stop
+- `gtfs_aggregation_running`: 1 while a run is active, 0 otherwise
+- `gtfs_aggregation_files_processed{service_date="YYYY-MM-DD"}`: Files processed in the latest run for a service date
+- `gtfs_aggregation_routes_found{service_date="YYYY-MM-DD"}`: Routes found in the latest run
+- `gtfs_aggregation_stops_found{service_date="YYYY-MM-DD"}`: Stops found in the latest run
+- `gtfs_aggregation_duration_seconds{service_date="YYYY-MM-DD"}`: Run duration in seconds
+- `gtfs_aggregation_errors_total`: Total number of aggregation errors (counter)
 
-`byStop` is stored as hashed chunks of documents per day:
+Runtime/process metrics are also exported via `client_golang` collectors, including:
 
-```text
-<YYYY-MM-DD>/byStop/chunk_<hash>/data
-```
+- `process_cpu_seconds_total`
+- `process_resident_memory_bytes`
+- `process_virtual_memory_bytes`
+- `go_goroutines`
+- `go_memstats_alloc_bytes`
+- `go_gc_duration_seconds`
 
-Stops are assigned to chunks using the following hash function, so frontend lookup is deterministic:
+### Setup
 
-```go
-func hashToChunk(key string, chunkCount int) int {
-	h := fnv.New32a()
-	_, _ = h.Write([]byte(key))
-	return int(h.Sum32() % uint32(chunkCount))
-}
-```
+1. Add the GTFS aggregator job to the Prometheus scrape config:
+   - See [prometheus-job-config.yml](prometheus-job-config.yml) for the config snippet
+   - Update Prometheus `prometheus.yml` to include this job
+   - Restart Prometheus
 
-Each `data` document contains compact keys:
-
-- `s` list of stop summaries as above with `Stop` and `ByRoute` fields set.
-- Route rows in `byStop -> byRoute` include nested `byHour` summaries.
-- Top-level `byRoute` summaries also include nested `ByHour` summaries.
-- `d` date string like `"2026-03-01"`.
-- `c` stop count.
-
-### By hour key format
-
-For all `ByHour`/`h` summaries, the summary `k` field is:
-
-- The **start of the hour bucket**.
-- Encoded in **UTC**.
-- Formatted as **RFC3339** (for example `"2026-03-01T13:00:00Z"`), representing the interval `[13:00, 14:00)` UTC.
-
-Internally this is generated as `time.Unix(event.time, 0).UTC().Truncate(time.Hour).Format(time.RFC3339)`.
-`event.time` refers to the realized arrival/departure stop event timestamp from `TripUpdate.StopTimeUpdate`.
-`observedAt` is still used only to determine whether an event is realized (`event.time <= observedAt`). `observedAt` is taken from the GTFS-RT header timestamp when present, otherwise from the archive path (`<yyyy>/<mm>/<dd>/<hh>`) interpreted as UTC.
-
-### Date index
-
-An additional index file is stored in index/dates with a `dates` field containing a list of all dates for which an aggregated data collection exists. The dates are strings like "2026-03-01".
-
-## Realized events
-
-- Delay/ahead stats are counted only for realized stop events, where `event.time <= observedAt` for the feed file.
-- Each stop event (arrival/departure) is counted once globally across all snapshots using a deterministic event key.
-- This prevents future predicted stops and repeated snapshots from inflating totals.
-- Stop summaries include a nested `byRoute` breakdown with per-route realized stats for that stop.
-- Route summaries include nested `byHour` breakdowns both at top-level `byRoute` and within `byStop -> byRoute`.
-- `ac`/`dc` contain realized arrival/departure event counts and can be used to derive on-time counts:
-  - `departure_on_time = dc - dd.c - da.c`
-  - `arrival_on_time = ac - ad.c - aa.c`
-- Delay/ahead averages are not divided by total departures/arrivals; they are divided by the matching bucket count (`c`).
-- `avgSeconds` values are rounded to one decimal place to reduce payload size.
+2. Create a Grafana dashboard using the metrics above.

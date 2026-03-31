@@ -13,21 +13,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const BY_STOP_CHUNK_COUNT = 1024;
 const BY_ROUTE_CHUNK_COUNT = 16;
-
-// Same hash function as used in gtfsAggregation
-// to determine which chunk a stop belongs to.
-function hashToChunk(stopKey: string): number {
-    let hash = 0x811c9dc5;
-
-    for (let index = 0; index < stopKey.length; index += 1) {
-        hash ^= stopKey.charCodeAt(index);
-        hash = Math.imul(hash, 0x01000193) >>> 0;
-    }
-
-    return hash % BY_STOP_CHUNK_COUNT;
-}
 
 function mapDelayStats(stats: CompactDelayStats): DelaySummary["arrivalDelayStats"] {
     return { count: stats.c, avgSeconds: stats.a };
@@ -50,67 +36,6 @@ function mapSummary(summary: CompactSummary): DelaySummary {
         arrivalAheadStats: mapDelayStats(summary.aa),
         departureAheadStats: mapDelayStats(summary.da),
     };
-}
-
-export function fetchStopDelays(
-    stopPointGIDs: string[],
-    date: string
-): Promise<DelaySummary[] | null> {
-    const chunkIds = new Set<string>();
-    if (stopPointGIDs.length === 0) {
-        return Promise.resolve([]);
-    }
-
-    // Get unique chunks that we need to download
-    for (const stopId of stopPointGIDs) {
-        const chunkId = `chunk_${hashToChunk(stopId)}`;
-        chunkIds.add(chunkId);
-    }
-
-    // Create promise for each chunk download
-    function createChunkPromiseCB(chunkId: string): Promise<DocumentSnapshot> {
-        const byStopDocRef = doc(db, date, "byStop", chunkId, "data");
-        console.log(`Fetching stop delay chunk: ${chunkId}`);
-        return getDoc(byStopDocRef);
-    }
-    const chunkPromises = Array.from(chunkIds).map(createChunkPromiseCB);
-
-    console.log("Downloading stop delays for:", stopPointGIDs, "date:", date);
-
-    function processDocsACB(docs: DocumentSnapshot[]): DelaySummary[] {
-        const results: DelaySummary[] = [];
-
-        function processDocCB(docSnapshot: DocumentSnapshot) {
-            if (!docSnapshot.exists()) {
-                return;
-            }
-
-            const chunkData = docSnapshot.data() as { s?: CompactSummary[] };
-            if (!chunkData.s) {
-                return;
-            }
-
-            function processStopCB(rawStop: CompactSummary) {
-                const stop = mapSummary(rawStop);
-                if (stopPointGIDs.includes(stop.key)) {
-                    results.push(stop);
-                }
-            }
-
-            chunkData.s.forEach(processStopCB);
-        }
-
-        docs.forEach(processDocCB);
-
-        return results;
-    }
-
-    function catchErrorACB(error: unknown) {
-        console.error(error);
-        return null;
-    }
-
-    return Promise.all(chunkPromises).then(processDocsACB).catch(catchErrorACB);
 }
 
 export function fetchRouteDelays(date: string): Promise<DelaySummary[] | null> {

@@ -1,0 +1,53 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: forseningskartan
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - gtfs_postgres_data:/var/lib/postgresql/data
+      - ./gtfsAggregation/postgres_schema.sql:/docker-entrypoint-initdb.d/001_schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d forseningskartan"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  aggregator:
+    build:
+      context: ./gtfsAggregation
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      API_KEY: ${API_KEY}
+      POSTGRES_DSN: ${POSTGRES_DSN:-postgres://postgres:postgres@db:5432/forseningskartan?sslmode=disable}
+    ports:
+      - "2112:2112"
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    command:
+      - "-postgres-dsn"
+      - "${POSTGRES_DSN:-postgres://postgres:postgres@db:5432/forseningskartan?sslmode=disable}"
+      - "-port"
+      - "${API_PORT:-8081}"
+      - "-api-key"
+      - "${API_KEY}"
+    ports:
+      - "${API_PORT:-8081}:${API_PORT:-8081}"
+    restart: unless-stopped
+
+volumes:
+  gtfs_postgres_data:

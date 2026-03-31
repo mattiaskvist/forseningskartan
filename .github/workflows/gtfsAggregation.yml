@@ -4,21 +4,17 @@ on:
   push:
     paths:
       - "gtfsAggregation/**"
+      - "docker-compose.yml"
       - ".github/workflows/gtfsAggregation.yml"
   pull_request:
     paths:
       - "gtfsAggregation/**"
+      - "docker-compose.yml"
       - ".github/workflows/gtfsAggregation.yml"
 
-env:
-  PROJECT_ID: forseningskartan
-  REGION: europe-west1
-  IMAGE_NAME: europe-west1-docker.pkg.dev/forseningskartan/cron-repo/aggregation-cron
-  PULUMI_BACKEND_URL: gs://forseningskartan-pulumi-state
-
 jobs:
-  lint:
-    name: Lint
+  lint-and-build:
+    name: Lint and Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -41,60 +37,38 @@ jobs:
           version: latest
           working-directory: gtfsAggregation
 
-  build:
-    name: Build Go App
-    needs: lint
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup Go
-        uses: actions/setup-go@v6
-        with:
-          go-version: "1.26"
-
       - name: Build
         run: cd gtfsAggregation && go build -v ./...
 
   deploy:
-    name: Deploy to GCP
-    needs: build
+    name: Deploy to self-hosted server
+    needs: lint-and-build
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     environment: prod # Protect deployments to main branch with approval requirements
-    permissions:
-      contents: read
-      id-token: write # Strictly required for secure Google Cloud authentication
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
 
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
-
-      - name: Configure Docker Authentication
-        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
-
-      - name: Build and Push Docker Image
-        run: |
-          cd gtfsAggregation
-          docker build -t ${{ env.IMAGE_NAME }}:${{ github.sha }} .
-          docker push ${{ env.IMAGE_NAME }}:${{ github.sha }}
-
-      - name: Deploy Infrastructure with Pulumi
-        uses: pulumi/actions@v5
-        with:
-          command: up
-          stack-name: dev
-          work-dir: ./gtfsAggregation/infra
-          config-map: |
-            dockerImage:
-              value: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+      - name: Build aggregator image and start services
         env:
-          PULUMI_BACKEND_URL: ${{ env.PULUMI_BACKEND_URL }}
-          PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_PASSPHRASE }}
+          API_KEY: ${{ secrets.GTFS_API_KEY }}
+          POSTGRES_DSN: postgres://postgres:postgres@db:5432/forseningskartan?sslmode=disable
+        run: |
+          docker compose build aggregator
+          docker compose up -d db aggregator
+
+      - name: Wait for database readiness
+        run: |
+          for i in $(seq 1 30); do
+            if docker compose exec -T db pg_isready -U postgres -d forseningskartan; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Database did not become ready in time"
+          exit 1
+
+      - name: Cleanup old Docker data
+        if: always() # This ensures it runs even if the build fails
+        run: docker system prune -f
