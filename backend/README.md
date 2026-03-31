@@ -21,7 +21,19 @@ go run . -postgres-dsn "postgres://postgres:postgres@localhost:5432/forseningska
 
 The API runs on `http://localhost:8081` by default.
 
-## Endpoint
+## Metrics
+
+Prometheus metrics are exposed on `http://127.0.0.1:2113/metrics`. Metrics include:
+
+- `forseningskartan_backend_http_requests_total` – HTTP requests count (`method`, `path`, `status`)
+- `forseningskartan_backend_http_request_duration_seconds` – HTTP request duration histogram (`method`, `path`, `status`)
+- `forseningskartan_backend_auth_failures_total` – Failed API key authorizations
+- `forseningskartan_backend_db_query_results_total` – DB query results count (`query`, `result`)
+- `forseningskartan_backend_db_query_duration_seconds` – DB query duration histogram (`query`, `result`)
+
+Runtime/process metrics are also exported via `client_golang` collectors, alongside PostgreSQL connection pool statistics provided by the `NewDBStatsCollector`.
+
+## Endpoints
 
 `GET /api/departure-historical-delay`
 

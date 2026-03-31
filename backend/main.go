@@ -33,11 +33,16 @@ func main() {
 		port = "8081"
 	}
 
+	initMetrics()
+
 	db, err := sql.Open("pgx", postgresDSN)
 	if err != nil {
 		log.Fatalf("open postgres connection: %v", err)
 	}
 	defer db.Close() // nolint: errcheck
+
+	registerDBMetrics(db)
+	go startMetricsServer()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -46,10 +51,13 @@ func main() {
 	}
 
 	srv := &server{db: db}
-	mux := http.NewServeMux()
-	mux.HandleFunc("/api/departure-historical-delay", srv.handleDepartureHistoricalDelay)
+	apiMux := http.NewServeMux()
+	apiMux.HandleFunc("/api/departure-historical-delay", srv.handleDepartureHistoricalDelay)
 
-	handler := withCORS(requireAPIKey(mux, apiKey))
+	rootMux := http.NewServeMux()
+	rootMux.Handle("/api/", requireAPIKey(apiMux, apiKey))
+
+	handler := withCORS(instrumentHTTP(rootMux))
 	log.Printf("backend api listening on :%s", port)
 	if err := http.ListenAndServe(":"+port, handler); err != nil {
 		log.Fatalf("server failed: %v", err)
@@ -77,6 +85,7 @@ func requireAPIKey(next http.Handler, apiKey string) http.Handler {
 		}
 		key := r.Header.Get("X-API-Key")
 		if key != apiKey {
+			recordAuthFailure()
 			http.Error(w, "unauthorized", http.StatusUnauthorized)
 			return
 		}

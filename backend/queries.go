@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"time"
 )
 
 type delayStats struct {
@@ -44,6 +45,9 @@ func (s *server) queryDepartureHistoricalDelay(
 	routeShortName string,
 	routeType string,
 ) (*delaySummary, error) {
+	const queryName = "departure_historical_delay"
+	start := time.Now()
+
 	query := `
 		SELECT
 			r.short_name,
@@ -109,9 +113,11 @@ func (s *server) queryDepartureHistoricalDelay(
 		&departureAheadSecondsTotal,
 	)
 	if err == sql.ErrNoRows {
+		recordDBQueryResult(queryName, QueryResultNoRows, time.Since(start))
 		return nil, nil
 	}
 	if err != nil {
+		recordDBQueryResult(queryName, QueryResultError, time.Since(start))
 		return nil, err
 	}
 
@@ -143,5 +149,6 @@ func (s *server) queryDepartureHistoricalDelay(
 		},
 	}
 
+	recordDBQueryResult(queryName, QueryResultSuccess, time.Since(start))
 	return summary, nil
 }
