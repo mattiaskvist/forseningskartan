@@ -21,7 +21,7 @@ export function AccountPresenter() {
         try {
             await logoutUser();
             navigate("/");
-        } catch (error) {
+        } catch {
             alert("Failed to log out");
         }
     }
@@ -30,13 +30,16 @@ export function AccountPresenter() {
         try {
             await deleteUserAccount();
             navigate("/");
-        } catch (error: any) {
-            if (error.code === 'auth/requires-recent-login') {
+        } catch (error: unknown) {
+            const hasErrorCode = error !== null && typeof error === "object" && "code" in error;
+            if (hasErrorCode && error.code === "auth/requires-recent-login") {
                 alert("Please log in again before deleting your account.");
                 try { 
                     await logoutUser(); 
                     navigate("/login"); 
-                } catch (e) {}
+                } catch {
+                    console.error("Failed to redirect to login.");
+                }
             } else {
                 alert("Failed to delete account. Please try again later.");
             }
