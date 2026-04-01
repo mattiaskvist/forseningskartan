@@ -14,7 +14,15 @@ const firebaseConfig = {
 
 export const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
-export const auth = getAuth(app);
+
+// In test environments without a valid API key, getAuth will throw.
+let authInstance;
+try {
+    authInstance = getAuth(app);
+} catch (e) {
+    console.warn("Failed to initialize Firebase Auth (likely missing API key):", e);
+}
+export const auth = authInstance as ReturnType<typeof getAuth>;
 const BY_ROUTE_CHUNK_COUNT = 16;
 
 function mapDelayStats(stats: CompactDelayStats): DelaySummary["arrivalDelayStats"] {
