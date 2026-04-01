@@ -2,6 +2,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import MapIcon from "@mui/icons-material/Map";
 import TimelineIcon from "@mui/icons-material/Timeline";
+import InfoIcon from "@mui/icons-material/Info";
 import IconButton from "@mui/material/IconButton";
 
 type NavItem = {
@@ -13,6 +14,7 @@ type NavItem = {
 const NAV_ITEMS: NavItem[] = [
     { label: "Map", path: "/", icon: <MapIcon fontSize="small" /> },
     { label: "Route Delays", path: "/route-delays", icon: <TimelineIcon fontSize="small" /> },
+    { label: "About", path: "/about", icon: <InfoIcon fontSize="small" /> },
 ];
 
 type SidebarViewProps = {
