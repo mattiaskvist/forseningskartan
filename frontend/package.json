@@ -49,5 +49,10 @@
         "react-redux": "latest",
         "react-router-dom": "latest",
         "tailwindcss": "^4.2.1"
+    },
+    "overrides": {
+        "firebaseui": {
+            "firebase": "$firebase"
+        }
     }
 }
