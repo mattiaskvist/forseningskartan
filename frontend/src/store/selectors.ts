@@ -27,6 +27,14 @@ function getSelectedDelayDates({
     return getDatesForPreset(selectedDatePreset, effectiveCustomDate, availableDates);
 }
 
+function getAuthUserCB(state: RootState) {
+    return state.auth.user;
+}
+
+function getAuthLoadingCB(state: RootState) {
+    return state.auth.loading;
+}
+
 function getSitesCB(state: RootState) {
     return state.sites.data;
 }
@@ -125,6 +133,8 @@ const getSelectedDelayDatesCB = createSelector(
 );
 
 export {
+    getAuthUserCB,
+    getAuthLoadingCB,
     getSitesCB,
     getSitesLoadingCB,
     getSelectedSiteIdCB,

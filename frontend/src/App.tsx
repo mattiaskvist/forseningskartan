@@ -6,6 +6,9 @@ import { useAppDispatch, useAppSelector } from "./store/store";
 import { DeparturePresenter } from "./presenters/departurePresenter";
 import { RouteDelayPresenter } from "./presenters/RouteDelayPresenter";
 import { SidebarPresenter } from "./presenters/sidebarPresenter";
+import { AccountPresenter } from "./presenters/accountPresenter";
+import { LoginPresenter } from "./presenters/loginPresenter";
+import { initializeAuthListener } from "./firebase/authActions";
 import {
     getSelectedSiteCB,
     getSitesLoadingCB,
@@ -23,6 +26,8 @@ function App() {
         dispatch(getSites());
         dispatch(getStopPoints());
         dispatch(getAggregatedDates());
+        const unsubscribe = initializeAuthListener();
+        return () => unsubscribe();
     }, [dispatch]);
 
     const sites = useAppSelector(getSitesCB);
@@ -79,6 +84,14 @@ function App() {
                             </section>
                         </div>
                     }
+                />
+                <Route
+                    path="/login"
+                    element={<LoginPresenter />}
+                />
+                <Route
+                    path="/account"
+                    element={<AccountPresenter />}
                 />
             </Routes>
         </div>

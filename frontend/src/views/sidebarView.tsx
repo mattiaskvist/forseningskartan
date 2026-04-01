@@ -3,7 +3,10 @@ import CloseIcon from "@mui/icons-material/Close";
 import MapIcon from "@mui/icons-material/Map";
 import TimelineIcon from "@mui/icons-material/Timeline";
 import InfoIcon from "@mui/icons-material/Info";
+import PersonIcon from "@mui/icons-material/Person";
+import LoginIcon from "@mui/icons-material/Login";
 import IconButton from "@mui/material/IconButton";
+import { AuthUserState } from "../store/authSlice";
 
 type NavItem = {
     label: string;
@@ -20,11 +23,12 @@ const NAV_ITEMS: NavItem[] = [
 type SidebarViewProps = {
     isOpen: boolean;
     currentPath: string;
+    user: AuthUserState | null;
     onToggleCB: () => void;
     onNavigateCB: (path: string) => void;
 };
 
-export function SidebarView({ isOpen, currentPath, onToggleCB, onNavigateCB }: SidebarViewProps) {
+export function SidebarView({ isOpen, currentPath, user, onToggleCB, onNavigateCB }: SidebarViewProps) {
     function isActiveCB(path: string): boolean {
         if (path === "/") {
             return currentPath === "/" || currentPath === "";
@@ -50,7 +54,27 @@ export function SidebarView({ isOpen, currentPath, onToggleCB, onNavigateCB }: S
                     <h2 className="sidebar-title">Förseningskartan</h2>
                 </div>
 
-                <ul className="sidebar-nav-list">{NAV_ITEMS.map(renderNavItemCB)}</ul>
+                <ul className="sidebar-nav-list">
+                    {NAV_ITEMS.map(renderNavItemCB)}
+                    <li className="mt-8 border-t border-slate-200/20 pt-2" />
+                    {user ? (
+                        renderNavItemCB({
+                            label: user.displayName || user.email || "Account",
+                            path: "/account",
+                            icon: user.photoURL ? (
+                                <img src={user.photoURL} alt="avatar" className="w-5 h-5 rounded-full object-cover" />
+                            ) : (
+                                <PersonIcon fontSize="small" />
+                            )
+                        })
+                    ) : (
+                        renderNavItemCB({
+                            label: "Log In",
+                            path: "/login",
+                            icon: <LoginIcon fontSize="small" />
+                        })
+                    )}
+                </ul>
             </nav>
         </>
     );

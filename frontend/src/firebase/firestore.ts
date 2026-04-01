@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, getDoc, DocumentSnapshot } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 import { DelaySummary, CompactDelayStats, CompactSummary } from "../types/historicalDelay";
 
 const firebaseConfig = {
@@ -11,8 +12,9 @@ const firebaseConfig = {
     appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+export const app = initializeApp(firebaseConfig);
+export const db = getFirestore(app);
+export const auth = getAuth(app);
 const BY_ROUTE_CHUNK_COUNT = 16;
 
 function mapDelayStats(stats: CompactDelayStats): DelaySummary["arrivalDelayStats"] {

@@ -42,6 +42,7 @@
         "@tailwindcss/vite": "^4.2.1",
         "dayjs": "^1.11.20",
         "firebase": "^12.10.0",
+        "firebaseui": "^6.1.0",
         "leaflet": "^2.0.0-alpha.1",
         "react": "latest",
         "react-dom": "latest",
