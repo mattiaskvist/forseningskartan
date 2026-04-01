@@ -59,3 +59,43 @@ export function fetchDepartureHistoricalDelaySummary({
         },
     }).then(handleResponseACB);
 }
+
+export function fetchAvailableDates(): Promise<string[]> {
+    console.log("Fetching available dates");
+    function handleResponseACB(response: Response) {
+        if (!response.ok) {
+            throw new Error(`Failed to fetch available dates: ${response.status}`);
+        }
+        return response.json();
+    }
+
+    const fullURL = `${backendBaseURL}/api/available-dates`;
+    return fetch(fullURL, {
+        headers: {
+            "X-API-Key": backendAPIKey,
+        },
+    }).then(handleResponseACB).catch((err) => {
+        console.error(err);
+        return [];
+    });
+}
+
+export function fetchDailyRouteDelays(date: string): Promise<DelaySummary[] | null> {
+    console.log("Fetching daily route delays for:", date);
+    function handleResponseACB(response: Response) {
+        if (!response.ok) {
+            throw new Error(`Failed to fetch daily route delays: ${response.status}`);
+        }
+        return response.json();
+    }
+
+    const fullURL = `${backendBaseURL}/api/route-delays?date=${encodeURIComponent(date)}`;
+    return fetch(fullURL, {
+        headers: {
+            "X-API-Key": backendAPIKey,
+        },
+    }).then(handleResponseACB).catch((err) => {
+        console.error(err);
+        return null;
+    });
+}

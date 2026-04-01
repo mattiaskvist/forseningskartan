@@ -1,9 +1,10 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { fetchSitesACB, fetchDeparturesACB, fetchStopPointsACB } from "../api/sl";
-import { fetchAggregatedDates, fetchRouteDelays } from "../firebase/firestore";
 import {
     DepartureHistoricalDelayParams,
     fetchDepartureHistoricalDelaySummary,
+    fetchAvailableDates,
+    fetchDailyRouteDelays,
 } from "../api/backend";
 import { AppThunk } from "./store";
 import { getSelectedDelayDates } from "./selectors";
@@ -18,7 +19,7 @@ export const getDepartures = createAsyncThunk("departures/fetch", (siteId: numbe
 
 export const getStopPoints = createAsyncThunk("stopPoints/fetch", () => fetchStopPointsACB());
 
-export const getAggregatedDates = createAsyncThunk("aggregatedDates/fetch", fetchAggregatedDates);
+export const getAggregatedDates = createAsyncThunk("aggregatedDates/fetch", fetchAvailableDates);
 
 export const getDepartureHistoricalDelaySummary = createAsyncThunk(
     "departureHistoricalDelay/fetch",
@@ -39,7 +40,7 @@ export const getDepartureHistoricalDelaySummary = createAsyncThunk(
 );
 
 export const getRouteDelays = createAsyncThunk("routeDelays/fetch", (date: string) =>
-    fetchRouteDelays(date)
+    fetchDailyRouteDelays(date)
 );
 
 // fetch historical delay summary for selected departure
