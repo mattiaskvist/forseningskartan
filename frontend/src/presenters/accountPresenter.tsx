@@ -34,9 +34,9 @@ export function AccountPresenter() {
             const hasErrorCode = error !== null && typeof error === "object" && "code" in error;
             if (hasErrorCode && error.code === "auth/requires-recent-login") {
                 alert("Please log in again before deleting your account.");
-                try { 
-                    await logoutUser(); 
-                    navigate("/login"); 
+                try {
+                    await logoutUser();
+                    navigate("/login");
                 } catch {
                     console.error("Failed to redirect to login.");
                 }
@@ -50,11 +50,5 @@ export function AccountPresenter() {
         return <Suspense fullscreen message="Loading account details..." />;
     }
 
-    return (
-        <AccountView 
-            user={user} 
-            onLogoutCB={handleLogoutCB} 
-            onDeleteCB={handleDeleteCB} 
-        />
-    );
+    return <AccountView user={user} onLogoutCB={handleLogoutCB} onDeleteCB={handleDeleteCB} />;
 }

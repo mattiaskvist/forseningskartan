@@ -85,14 +85,8 @@ function App() {
                         </div>
                     }
                 />
-                <Route
-                    path="/login"
-                    element={<LoginPresenter />}
-                />
-                <Route
-                    path="/account"
-                    element={<AccountPresenter />}
-                />
+                <Route path="/login" element={<LoginPresenter />} />
+                <Route path="/account" element={<AccountPresenter />} />
             </Routes>
         </div>
     );

@@ -26,21 +26,19 @@ export function LoginPresenter() {
 
         // Initialize FirebaseUI, reusing existing if available
         if (!uiRef.current) {
-            uiRef.current = firebaseui.auth.AuthUI.getInstance() || new firebaseui.auth.AuthUI(auth);
+            uiRef.current =
+                firebaseui.auth.AuthUI.getInstance() || new firebaseui.auth.AuthUI(auth);
         }
-        
+
         const uiConfig = {
-            signInFlow: 'popup',
-            signInOptions: [
-                GoogleAuthProvider.PROVIDER_ID,
-                EmailAuthProvider.PROVIDER_ID
-            ],
+            signInFlow: "popup",
+            signInOptions: [GoogleAuthProvider.PROVIDER_ID, EmailAuthProvider.PROVIDER_ID],
             callbacks: {
                 signInSuccessWithAuthResult: () => {
                     navigate("/");
                     return false; // Prevent FirebaseUI's default redirect
-                }
-            }
+                },
+            },
         };
 
         // Delay to ensure the container is rendered

@@ -28,7 +28,13 @@ type SidebarViewProps = {
     onNavigateCB: (path: string) => void;
 };
 
-export function SidebarView({ isOpen, currentPath, user, onToggleCB, onNavigateCB }: SidebarViewProps) {
+export function SidebarView({
+    isOpen,
+    currentPath,
+    user,
+    onToggleCB,
+    onNavigateCB,
+}: SidebarViewProps) {
     function isActiveCB(path: string): boolean {
         if (path === "/") {
             return currentPath === "/" || currentPath === "";
@@ -57,23 +63,25 @@ export function SidebarView({ isOpen, currentPath, user, onToggleCB, onNavigateC
                 <ul className="sidebar-nav-list">
                     {NAV_ITEMS.map(renderNavItemCB)}
                     <li className="mt-8 border-t border-slate-200/20 pt-2" />
-                    {user ? (
-                        renderNavItemCB({
-                            label: user.displayName || user.email || "Account",
-                            path: "/account",
-                            icon: user.photoURL ? (
-                                <img src={user.photoURL} alt="avatar" className="w-5 h-5 rounded-full object-cover" />
-                            ) : (
-                                <PersonIcon fontSize="small" />
-                            )
-                        })
-                    ) : (
-                        renderNavItemCB({
-                            label: "Log In",
-                            path: "/login",
-                            icon: <LoginIcon fontSize="small" />
-                        })
-                    )}
+                    {user
+                        ? renderNavItemCB({
+                              label: user.displayName || user.email || "Account",
+                              path: "/account",
+                              icon: user.photoURL ? (
+                                  <img
+                                      src={user.photoURL}
+                                      alt="avatar"
+                                      className="w-5 h-5 rounded-full object-cover"
+                                  />
+                              ) : (
+                                  <PersonIcon fontSize="small" />
+                              ),
+                          })
+                        : renderNavItemCB({
+                              label: "Log In",
+                              path: "/login",
+                              icon: <LoginIcon fontSize="small" />,
+                          })}
                 </ul>
             </nav>
         </>
