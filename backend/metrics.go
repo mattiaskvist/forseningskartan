@@ -74,7 +74,7 @@ func metricsHandler(w http.ResponseWriter, r *http.Request) {
 
 func startMetricsServer() {
 	http.HandleFunc("/metrics", metricsHandler)
-	if err := http.ListenAndServe("127.0.0.1:2113", nil); err != nil {
+	if err := http.ListenAndServe(":2113", nil); err != nil {
 		log.Printf("metrics server failed: %v", err)
 	}
 }
