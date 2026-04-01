@@ -50,9 +50,7 @@ export function SidebarView({ isOpen, currentPath, onToggleCB, onNavigateCB }: S
                     <h2 className="sidebar-title">Förseningskartan</h2>
                 </div>
 
-                <ul className="sidebar-nav-list">
-                    {NAV_ITEMS.map(renderNavItemCB)}
-                </ul>
+                <ul className="sidebar-nav-list">{NAV_ITEMS.map(renderNavItemCB)}</ul>
             </nav>
         </>
     );
