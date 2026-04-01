@@ -62,3 +62,57 @@ func (s *server) handleDepartureHistoricalDelay(w http.ResponseWriter, r *http.R
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(summary)
 }
+
+func (s *server) handleAvailableDates(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	defer cancel()
+
+	dates, err := s.queryAvailableDates(ctx)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("query failed: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if dates == nil {
+		dates = []string{} // return empty list instead of null
+	}
+	_ = json.NewEncoder(w).Encode(dates)
+}
+
+func (s *server) handleRouteDelays(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	date := strings.TrimSpace(r.URL.Query().Get("date"))
+	if date == "" {
+		http.Error(w, "missing date parameter", http.StatusBadRequest)
+		return
+	}
+	if _, err := time.Parse("2006-01-02", date); err != nil {
+		http.Error(w, "invalid date format (expected YYYY-MM-DD)", http.StatusBadRequest)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	defer cancel()
+
+	summaries, err := s.queryRouteDelays(ctx, date)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("query failed: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if summaries == nil {
+		summaries = []*delaySummary{} // return empty list instead of null
+	}
+	_ = json.NewEncoder(w).Encode(summaries)
+}

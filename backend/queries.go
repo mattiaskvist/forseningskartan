@@ -152,3 +152,135 @@ func (s *server) queryDepartureHistoricalDelay(
 	recordDBQueryResult(queryName, QueryResultSuccess, time.Since(start))
 	return summary, nil
 }
+
+func (s *server) queryAvailableDates(ctx context.Context) ([]string, error) {
+	const queryName = "available_dates"
+	start := time.Now()
+
+	query := `SELECT service_date FROM aggregated_service_dates ORDER BY service_date DESC`
+
+	rows, err := s.db.QueryContext(ctx, query)
+	if err != nil {
+		recordDBQueryResult(queryName, QueryResultError, time.Since(start))
+		return nil, err
+	}
+	defer rows.Close()
+
+	var dates []string
+	for rows.Next() {
+		var date time.Time
+		if err := rows.Scan(&date); err != nil {
+			recordDBQueryResult(queryName, QueryResultError, time.Since(start))
+			return nil, err
+		}
+		dates = append(dates, date.Format("2006-01-02"))
+	}
+	if err := rows.Err(); err != nil {
+		recordDBQueryResult(queryName, QueryResultError, time.Since(start))
+		return nil, err
+	}
+
+	recordDBQueryResult(queryName, QueryResultSuccess, time.Since(start))
+	return dates, nil
+}
+
+func (s *server) queryRouteDelays(ctx context.Context, date string) ([]*delaySummary, error) {
+	const queryName = "route_delays"
+	start := time.Now()
+
+	query := `
+		SELECT
+			r.short_name,
+			COALESCE(r.long_name, ''),
+			COALESCE(r.route_type, ''),
+			a.arrival_events,
+			a.departure_events,
+			a.unique_trips,
+			a.arrival_delay_count,
+			a.arrival_delay_avg_seconds,
+			a.departure_delay_count,
+			a.departure_delay_avg_seconds,
+			a.arrival_ahead_count,
+			a.arrival_ahead_avg_seconds,
+			a.departure_ahead_count,
+			a.departure_ahead_avg_seconds
+		FROM aggregate_route_daily a
+		JOIN routes r ON r.id = a.route_id
+		WHERE a.service_date = $1::date
+		ORDER BY r.short_name
+	`
+
+	rows, err := s.db.QueryContext(ctx, query, date)
+	if err != nil {
+		recordDBQueryResult(queryName, QueryResultError, time.Since(start))
+		return nil, err
+	}
+	defer rows.Close()
+
+	var summaries []*delaySummary
+	for rows.Next() {
+		var (
+			shortName                  string
+			longName                   string
+			typeValue                  string
+			arrivalEvents              int64
+			departureEvents            int64
+			uniqueTrips                int64
+			arrivalDelayCount          int64
+			arrivalDelayAvgSeconds     float64
+			departureDelayCount        int64
+			departureDelayAvgSeconds   float64
+			arrivalAheadCount          int64
+			arrivalAheadAvgSeconds     float64
+			departureAheadCount        int64
+			departureAheadAvgSeconds   float64
+		)
+
+		if err := rows.Scan(
+			&shortName, &longName, &typeValue,
+			&arrivalEvents, &departureEvents, &uniqueTrips,
+			&arrivalDelayCount, &arrivalDelayAvgSeconds,
+			&departureDelayCount, &departureDelayAvgSeconds,
+			&arrivalAheadCount, &arrivalAheadAvgSeconds,
+			&departureAheadCount, &departureAheadAvgSeconds,
+		); err != nil {
+			recordDBQueryResult(queryName, QueryResultError, time.Since(start))
+			return nil, err
+		}
+
+		summaries = append(summaries, &delaySummary{
+			Key: shortName,
+			Route: &routeMeta{
+				ShortName: shortName,
+				LongName:  longName,
+				Type:      typeValue,
+			},
+			ArrivalEventCount:   arrivalEvents,
+			DepartureEventCount: departureEvents,
+			UniqueTrips:         uniqueTrips,
+			ArrivalDelayStats: delayStats{
+				Count:      arrivalDelayCount,
+				AvgSeconds: arrivalDelayAvgSeconds,
+			},
+			DepartureDelayStats: delayStats{
+				Count:      departureDelayCount,
+				AvgSeconds: departureDelayAvgSeconds,
+			},
+			ArrivalAheadStats: delayStats{
+				Count:      arrivalAheadCount,
+				AvgSeconds: arrivalAheadAvgSeconds,
+			},
+			DepartureAheadStats: delayStats{
+				Count:      departureAheadCount,
+				AvgSeconds: departureAheadAvgSeconds,
+			},
+		})
+	}
+	if err := rows.Err(); err != nil {
+		recordDBQueryResult(queryName, QueryResultError, time.Since(start))
+		return nil, err
+	}
+
+	recordDBQueryResult(queryName, QueryResultSuccess, time.Since(start))
+	return summaries, nil
+}

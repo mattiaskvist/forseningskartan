@@ -53,6 +53,8 @@ func main() {
 	srv := &server{db: db}
 	apiMux := http.NewServeMux()
 	apiMux.HandleFunc("/api/departure-historical-delay", srv.handleDepartureHistoricalDelay)
+	apiMux.HandleFunc("/api/available-dates", srv.handleAvailableDates)
+	apiMux.HandleFunc("/api/route-delays", srv.handleRouteDelays)
 
 	rootMux := http.NewServeMux()
 	rootMux.Handle("/api/", requireAPIKey(apiMux, apiKey))
