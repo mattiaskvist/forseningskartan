@@ -74,10 +74,12 @@ export function fetchAvailableDates(): Promise<string[]> {
         headers: {
             "X-API-Key": backendAPIKey,
         },
-    }).then(handleResponseACB).catch((err) => {
-        console.error(err);
-        return [];
-    });
+    })
+        .then(handleResponseACB)
+        .catch((err) => {
+            console.error(err);
+            return [];
+        });
 }
 
 export function fetchDailyRouteDelays(date: string): Promise<DelaySummary[] | null> {
@@ -94,8 +96,10 @@ export function fetchDailyRouteDelays(date: string): Promise<DelaySummary[] | nu
         headers: {
             "X-API-Key": backendAPIKey,
         },
-    }).then(handleResponseACB).catch((err) => {
-        console.error(err);
-        return null;
-    });
+    })
+        .then(handleResponseACB)
+        .catch((err) => {
+            console.error(err);
+            return null;
+        });
 }
