@@ -79,7 +79,8 @@ func runAggregations(config Config) error {
 		if config.CronSchedule == "" {
 			return runRecentMissingAggregations(config)
 		}
-		c := cron.New()
+		loc, _ := time.LoadLocation("Europe/Stockholm")
+		c := cron.New(cron.WithLocation(loc))
 		schedule := config.CronSchedule
 		_, err := c.AddFunc(schedule, func() {
 			fmt.Println("Starting scheduled aggregation...")
