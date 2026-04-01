@@ -23,7 +23,7 @@ The API runs on `http://localhost:8081` by default.
 
 ## Metrics
 
-Prometheus metrics are exposed on `http://127.0.0.1:2113/metrics`. Metrics include:
+Prometheus metrics are exposed on `http://localhost:2113/metrics`. Metrics include:
 
 - `forseningskartan_backend_http_requests_total` – HTTP requests count (`method`, `path`, `status`)
 - `forseningskartan_backend_http_request_duration_seconds` – HTTP request duration histogram (`method`, `path`, `status`)
