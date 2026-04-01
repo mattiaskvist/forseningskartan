@@ -164,7 +164,7 @@ func (s *server) queryAvailableDates(ctx context.Context) ([]string, error) {
 		recordDBQueryResult(queryName, QueryResultError, time.Since(start))
 		return nil, err
 	}
-	defer rows.Close()
+	defer rows.Close() // nolint: errcheck
 
 	var dates []string
 	for rows.Next() {
@@ -215,7 +215,7 @@ func (s *server) queryRouteDelays(ctx context.Context, date string) ([]*delaySum
 		recordDBQueryResult(queryName, QueryResultError, time.Since(start))
 		return nil, err
 	}
-	defer rows.Close()
+	defer rows.Close() // nolint: errcheck
 
 	var summaries []*delaySummary
 	for rows.Next() {
