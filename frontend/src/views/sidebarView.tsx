@@ -10,12 +10,33 @@ type SidebarViewProps = {
     onNavigateCB: (path: string) => void;
 };
 
+
 export function SidebarView({ isOpen, currentPath, onToggleCB, onNavigateCB }: SidebarViewProps) {
     function isActiveCB(path: string): boolean {
         if (path === "/") {
             return currentPath === "/" || currentPath === "";
         }
         return currentPath.startsWith(path);
+    }
+
+    function renderNavItemCB(item: RouteConfig) {
+        const active = isActiveCB(item.path);
+
+        function handleClickCB() {
+            onNavigateCB(item.path);
+        }
+
+        return (
+            <li key={item.path}>
+                <button
+                    className={`sidebar-nav-item ${active ? "sidebar-nav-item-active" : ""}`}
+                    onClick={handleClickCB}
+                >
+                    {item.icon}
+                    <span>{item.label}</span>
+                </button>
+            </li>
+        );
     }
 
     return (
@@ -40,24 +61,4 @@ export function SidebarView({ isOpen, currentPath, onToggleCB, onNavigateCB }: S
             </nav>
         </>
     );
-
-    function renderNavItemCB(item: RouteConfig) {
-        const active = isActiveCB(item.path);
-
-        function handleClickCB() {
-            onNavigateCB(item.path);
-        }
-
-        return (
-            <li key={item.path}>
-                <button
-                    className={`sidebar-nav-item ${active ? "sidebar-nav-item-active" : ""}`}
-                    onClick={handleClickCB}
-                >
-                    {item.icon}
-                    <span>{item.label}</span>
-                </button>
-            </li>
-        );
-    }
 }
