@@ -1,8 +1,9 @@
+import type { DelaySummary } from "./historicalDelay";
 export type StopDelayRequestStatus = "loading" | "succeeded" | "failed";
 
 export type StopDelayRequestKey = `${string}:${string}`; // `${stopPointGID}:${date}`
 
-export type StopDelayCacheEntry<DelaySummary> = {
+export type StopDelayCacheEntry = {
     data: DelaySummary | null;
     status: StopDelayRequestStatus;
     error: string | null;
