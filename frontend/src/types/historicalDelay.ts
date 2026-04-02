@@ -39,36 +39,4 @@ type DelaySummary = {
     departureAheadStats: DelayStats;
 };
 
-type ByStopChunkDocument = {
-    date: string;
-    stopCount: number;
-    stops: DelaySummary[];
-};
-
-type CompactDelayStats = { c: number; a: number };
-
-type CompactSummary = {
-    k: string;
-    r?: { sn: string; ln: string; t: RouteMeta["type"] };
-    s?: { n: string };
-    h?: CompactSummary[];
-    br?: CompactSummary[];
-    stu: number;
-    ac: number;
-    dc: number;
-    ut: number;
-    ad: CompactDelayStats;
-    dd: CompactDelayStats;
-    aa: CompactDelayStats;
-    da: CompactDelayStats;
-};
-
-export type {
-    DelaySummary,
-    DelayStats,
-    RouteMeta,
-    RouteType,
-    ByStopChunkDocument,
-    CompactDelayStats,
-    CompactSummary,
-};
+export type { DelaySummary, DelayStats, RouteMeta, RouteType };
