@@ -91,20 +91,22 @@ func (s *server) handleRouteDelays(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	date := strings.TrimSpace(r.URL.Query().Get("date"))
-	if date == "" {
-		http.Error(w, "missing date parameter", http.StatusBadRequest)
+	dates := r.URL.Query()["dates"]
+	if len(dates) == 0 {
+		http.Error(w, "missing dates parameter", http.StatusBadRequest)
 		return
 	}
-	if _, err := time.Parse("2006-01-02", date); err != nil {
-		http.Error(w, "invalid date format (expected YYYY-MM-DD)", http.StatusBadRequest)
-		return
+	for _, date := range dates {
+		if _, err := time.Parse("2006-01-02", date); err != nil {
+			http.Error(w, "invalid date format (expected YYYY-MM-DD)", http.StatusBadRequest)
+			return
+		}
 	}
 
 	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	defer cancel()
 
-	summaries, err := s.queryRouteDelays(ctx, date)
+	summaries, err := s.queryRouteDelays(ctx, dates)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("query failed: %v", err), http.StatusInternalServerError)
 		return

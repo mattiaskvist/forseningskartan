@@ -39,8 +39,8 @@ export const getDepartureHistoricalDelaySummary = createAsyncThunk(
         })
 );
 
-export const getRouteDelays = createAsyncThunk("routeDelays/fetch", (date: string) =>
-    fetchDailyRouteDelays(date)
+export const getRouteDelays = createAsyncThunk("routeDelays/fetch", (dates: string[]) =>
+    fetchDailyRouteDelays(dates)
 );
 
 // fetch historical delay summary for selected departure

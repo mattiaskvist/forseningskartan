@@ -82,8 +82,11 @@ export function fetchAvailableDates(): Promise<string[]> {
         });
 }
 
-export function fetchDailyRouteDelays(date: string): Promise<DelaySummary[] | null> {
-    console.log("Fetching daily route delays for:", date);
+export function fetchDailyRouteDelays(dates: string[]): Promise<DelaySummary[] | null> {
+    if (dates.length === 0) {
+        return Promise.resolve(null);
+    }
+    console.log("Fetching daily route delays for:", dates);
     function handleResponseACB(response: Response) {
         if (!response.ok) {
             throw new Error(`Failed to fetch daily route delays: ${response.status}`);
@@ -91,7 +94,10 @@ export function fetchDailyRouteDelays(date: string): Promise<DelaySummary[] | nu
         return response.json();
     }
 
-    const fullURL = `${backendBaseURL}/api/route-delays?date=${encodeURIComponent(date)}`;
+    const params = new URLSearchParams();
+    appendListParam(params, "dates", dates);
+
+    const fullURL = `${backendBaseURL}/api/route-delays?${params.toString()}`;
     return fetch(fullURL, {
         headers: {
             "X-API-Key": backendAPIKey,

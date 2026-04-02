@@ -184,7 +184,7 @@ func (s *server) queryAvailableDates(ctx context.Context) ([]string, error) {
 	return dates, nil
 }
 
-func (s *server) queryRouteDelays(ctx context.Context, date string) ([]*delaySummary, error) {
+func (s *server) queryRouteDelays(ctx context.Context, dates []string) ([]*delaySummary, error) {
 	const queryName = "route_delays"
 	start := time.Now()
 
@@ -193,24 +193,25 @@ func (s *server) queryRouteDelays(ctx context.Context, date string) ([]*delaySum
 			r.short_name,
 			COALESCE(r.long_name, ''),
 			COALESCE(r.route_type, ''),
-			a.arrival_events,
-			a.departure_events,
-			a.unique_trips,
-			a.arrival_delay_count,
-			a.arrival_delay_avg_seconds,
-			a.departure_delay_count,
-			a.departure_delay_avg_seconds,
-			a.arrival_ahead_count,
-			a.arrival_ahead_avg_seconds,
-			a.departure_ahead_count,
-			a.departure_ahead_avg_seconds
+			SUM(a.arrival_events) AS arrival_events,
+			SUM(a.departure_events) AS departure_events,
+			SUM(a.unique_trips) AS unique_trips,
+			SUM(a.arrival_delay_count) AS arrival_delay_count,
+			SUM(a.arrival_delay_count * a.arrival_delay_avg_seconds) AS arrival_delay_seconds_total,
+			SUM(a.departure_delay_count) AS departure_delay_count,
+			SUM(a.departure_delay_count * a.departure_delay_avg_seconds) AS departure_delay_seconds_total,
+			SUM(a.arrival_ahead_count) AS arrival_ahead_count,
+			SUM(a.arrival_ahead_count * a.arrival_ahead_avg_seconds) AS arrival_ahead_seconds_total,
+			SUM(a.departure_ahead_count) AS departure_ahead_count,
+			SUM(a.departure_ahead_count * a.departure_ahead_avg_seconds) AS departure_ahead_seconds_total
 		FROM aggregate_route_daily a
 		JOIN routes r ON r.id = a.route_id
-		WHERE a.service_date = $1::date
+		WHERE a.service_date = ANY($1::date[])
+		GROUP BY r.short_name, r.long_name, r.route_type
 		ORDER BY r.short_name
 	`
 
-	rows, err := s.db.QueryContext(ctx, query, date)
+	rows, err := s.db.QueryContext(ctx, query, dates)
 	if err != nil {
 		recordDBQueryResult(queryName, QueryResultError, time.Since(start))
 		return nil, err
@@ -227,22 +228,22 @@ func (s *server) queryRouteDelays(ctx context.Context, date string) ([]*delaySum
 			departureEvents            int64
 			uniqueTrips                int64
 			arrivalDelayCount          int64
-			arrivalDelayAvgSeconds     float64
+			arrivalDelaySecondsTotal   float64
 			departureDelayCount        int64
-			departureDelayAvgSeconds   float64
+			departureDelaySecondsTotal float64
 			arrivalAheadCount          int64
-			arrivalAheadAvgSeconds     float64
+			arrivalAheadSecondsTotal   float64
 			departureAheadCount        int64
-			departureAheadAvgSeconds   float64
+			departureAheadSecondsTotal float64
 		)
 
 		if err := rows.Scan(
 			&shortName, &longName, &typeValue,
 			&arrivalEvents, &departureEvents, &uniqueTrips,
-			&arrivalDelayCount, &arrivalDelayAvgSeconds,
-			&departureDelayCount, &departureDelayAvgSeconds,
-			&arrivalAheadCount, &arrivalAheadAvgSeconds,
-			&departureAheadCount, &departureAheadAvgSeconds,
+			&arrivalDelayCount, &arrivalDelaySecondsTotal,
+			&departureDelayCount, &departureDelaySecondsTotal,
+			&arrivalAheadCount, &arrivalAheadSecondsTotal,
+			&departureAheadCount, &departureAheadSecondsTotal,
 		); err != nil {
 			recordDBQueryResult(queryName, QueryResultError, time.Since(start))
 			return nil, err
@@ -260,19 +261,19 @@ func (s *server) queryRouteDelays(ctx context.Context, date string) ([]*delaySum
 			UniqueTrips:         uniqueTrips,
 			ArrivalDelayStats: delayStats{
 				Count:      arrivalDelayCount,
-				AvgSeconds: arrivalDelayAvgSeconds,
+				AvgSeconds: avgOrZero(arrivalDelaySecondsTotal, arrivalDelayCount),
 			},
 			DepartureDelayStats: delayStats{
 				Count:      departureDelayCount,
-				AvgSeconds: departureDelayAvgSeconds,
+				AvgSeconds: avgOrZero(departureDelaySecondsTotal, departureDelayCount),
 			},
 			ArrivalAheadStats: delayStats{
 				Count:      arrivalAheadCount,
-				AvgSeconds: arrivalAheadAvgSeconds,
+				AvgSeconds: avgOrZero(arrivalAheadSecondsTotal, arrivalAheadCount),
 			},
 			DepartureAheadStats: delayStats{
 				Count:      departureAheadCount,
-				AvgSeconds: departureAheadAvgSeconds,
+				AvgSeconds: avgOrZero(departureAheadSecondsTotal, departureAheadCount),
 			},
 		})
 	}
