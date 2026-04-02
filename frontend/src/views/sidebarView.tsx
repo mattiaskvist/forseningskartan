@@ -1,21 +1,7 @@
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
-import MapIcon from "@mui/icons-material/Map";
-import TimelineIcon from "@mui/icons-material/Timeline";
-import InfoIcon from "@mui/icons-material/Info";
 import IconButton from "@mui/material/IconButton";
-
-type NavItem = {
-    label: string;
-    path: string;
-    icon: React.ReactNode;
-};
-
-const NAV_ITEMS: NavItem[] = [
-    { label: "Map", path: "/", icon: <MapIcon fontSize="small" /> },
-    { label: "Route Delays", path: "/route-delays", icon: <TimelineIcon fontSize="small" /> },
-    { label: "About", path: "/about", icon: <InfoIcon fontSize="small" /> },
-];
+import { ROUTES, type RouteConfig } from "../routes";
 
 type SidebarViewProps = {
     isOpen: boolean;
@@ -50,12 +36,12 @@ export function SidebarView({ isOpen, currentPath, onToggleCB, onNavigateCB }: S
                     <h2 className="sidebar-title">Förseningskartan</h2>
                 </div>
 
-                <ul className="sidebar-nav-list">{NAV_ITEMS.map(renderNavItemCB)}</ul>
+                <ul className="sidebar-nav-list">{ROUTES.map(renderNavItemCB)}</ul>
             </nav>
         </>
     );
 
-    function renderNavItemCB(item: NavItem) {
+    function renderNavItemCB(item: RouteConfig) {
         const active = isActiveCB(item.path);
 
         function handleClickCB() {
