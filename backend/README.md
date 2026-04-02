@@ -92,3 +92,79 @@ Response:
 ```
 
 When no matching data exists, the endpoint returns `null`.
+
+---
+
+`GET /api/available-dates`
+
+Returns all service dates for which aggregated delay data exists, sorted in descending order (newest first). No query parameters are required.
+
+Example request:
+
+```bash
+curl -G "http://localhost:8081/api/available-dates" \
+ -H "X-API-Key: <api-key>"
+```
+
+Response:
+
+```json
+["2026-03-21", "2026-03-20", "2026-03-19"]
+```
+
+When no dates are available, the endpoint returns an empty array `[]`.
+
+---
+
+`GET /api/route-delays`
+
+Returns aggregated delay statistics per route across one or more service dates. Data is grouped by route and sorted by route short name.
+
+Query parameters:
+
+- `dates`: repeated parameter in `YYYY-MM-DD` (at least one required)
+
+Example request:
+
+```bash
+curl -G "http://localhost:8081/api/route-delays" \
+ -H "X-API-Key: <api-key>" \
+ --data-urlencode "dates=2026-03-20" \
+ --data-urlencode "dates=2026-03-21"
+```
+
+Response:
+
+```json
+[
+  {
+    "key": "6",
+    "route": {
+      "shortName": "6",
+      "longName": "",
+      "type": "700"
+    },
+    "arrivalEventCount": 120,
+    "departureEventCount": 118,
+    "uniqueTrips": 40,
+    "arrivalDelayStats": {
+      "count": 95,
+      "avgSeconds": 64.5
+    },
+    "departureDelayStats": {
+      "count": 100,
+      "avgSeconds": 58.2
+    },
+    "arrivalAheadStats": {
+      "count": 25,
+      "avgSeconds": 12.0
+    },
+    "departureAheadStats": {
+      "count": 18,
+      "avgSeconds": 8.3
+    }
+  }
+]
+```
+
+When no matching data exists, the endpoint returns an empty array `[]`.
