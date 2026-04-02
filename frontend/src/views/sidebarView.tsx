@@ -10,7 +10,6 @@ type SidebarViewProps = {
     onNavigateCB: (path: string) => void;
 };
 
-
 export function SidebarView({ isOpen, currentPath, onToggleCB, onNavigateCB }: SidebarViewProps) {
     function isActiveCB(path: string): boolean {
         if (path === "/") {

@@ -62,6 +62,11 @@ function AboutPage() {
 
 export const ROUTES: RouteConfig[] = [
     { label: "Map", path: "/", icon: <MapIcon fontSize="small" />, element: <MapPage /> },
-    { label: "Route Delays", path: "/route-delays", icon: <TimelineIcon fontSize="small" />, element: <RouteDelayPage /> },
+    {
+        label: "Route Delays",
+        path: "/route-delays",
+        icon: <TimelineIcon fontSize="small" />,
+        element: <RouteDelayPage />,
+    },
     { label: "About", path: "/about", icon: <InfoIcon fontSize="small" />, element: <AboutPage /> },
 ];
