@@ -39,9 +39,4 @@ type DelaySummary = {
     departureAheadStats: DelayStats;
 };
 
-export type {
-    DelaySummary,
-    DelayStats,
-    RouteMeta,
-    RouteType,
-};
+export type { DelaySummary, DelayStats, RouteMeta, RouteType };
