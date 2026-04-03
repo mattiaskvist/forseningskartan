@@ -2,7 +2,7 @@
 
 Go API for querying historical delay data from PostgreSQL database.
 
-All requests to the API require an API key that is specified as a flag when starting the API. The API key should be set in the `X-API-Key` header.
+All requests to the API either require an API key or come from an allowed origin. The api key is specified as a flag when starting the API. The API key should be set in the `X-API-Key` header.
 
 ## Run locally
 
