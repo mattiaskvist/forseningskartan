@@ -1,6 +1,6 @@
 import { Site, DepartureResponse, StopPoint } from "../types/sl";
 
-const BASE_URL = "/sl";
+const BASE_URL = "https://transport.integration.sl.se/v1";
 
 function handleResponseACB(response: Response) {
     if (!response.ok) {
