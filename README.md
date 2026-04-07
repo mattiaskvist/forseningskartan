@@ -27,13 +27,13 @@ The following work is still planned:
 - User accounts and personalization:
   - Users can favorite stops in departure view, stored in Firestore
   - Show favorite stops in sidebar
-- Journey planning and richer trip views (stretch goal):
+- Historical delay data improvements:
+  - Per-route delay stats refinements
+  - Show where delays happen on the map (_strech goal_)
+- Journey planning and richer trip views (_stretch goal_):
   - Journey planner
   - Live vehicle position and route drawing
   - Integrate historical delay stats into journey planner
-- Historical delay data improvements:
-  - Per-route delay stats refinements
-  - Show where delays happen on the map (strech goal)
 
 For an up-to-date list of planned work, please visit [the project board and roadmap](https://github.com/users/mattiaskvist/projects/5).
 
