@@ -11,6 +11,15 @@ export type DepartureHistoricalDelayParams = {
 const backendBaseURL = import.meta.env.VITE_BACKEND_API_URL ?? "http://localhost:8081";
 const backendAPIKey = import.meta.env.VITE_BACKEND_API_KEY ?? "";
 
+function getBackendAuthHeaders(): HeadersInit {
+    if (backendAPIKey === "") {
+        return {};
+    }
+    return {
+        "X-API-Key": backendAPIKey,
+    };
+}
+
 function appendListParam(urlSearchParams: URLSearchParams, key: string, values: string[]) {
     function appendValueCB(value: string) {
         urlSearchParams.append(key, value);
@@ -54,9 +63,7 @@ export function fetchDepartureHistoricalDelaySummary({
 
     const fullURL = `${backendBaseURL}/api/departure-historical-delay?${params.toString()}`;
     return fetch(fullURL, {
-        headers: {
-            "X-API-Key": backendAPIKey,
-        },
+        headers: getBackendAuthHeaders(),
     }).then(handleResponseACB);
 }
 
@@ -71,9 +78,7 @@ export function fetchAvailableDates(): Promise<string[]> {
 
     const fullURL = `${backendBaseURL}/api/available-dates`;
     return fetch(fullURL, {
-        headers: {
-            "X-API-Key": backendAPIKey,
-        },
+        headers: getBackendAuthHeaders(),
     })
         .then(handleResponseACB)
         .catch((err) => {
@@ -99,9 +104,7 @@ export function fetchDailyRouteDelays(dates: string[]): Promise<DelaySummary[] |
 
     const fullURL = `${backendBaseURL}/api/route-delays?${params.toString()}`;
     return fetch(fullURL, {
-        headers: {
-            "X-API-Key": backendAPIKey,
-        },
+        headers: getBackendAuthHeaders(),
     })
         .then(handleResponseACB)
         .catch((err) => {

@@ -12,6 +12,11 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
+var allowedOrigins = map[string]struct{}{
+	"https://forseningskartan.web.app":         {},
+	"https://forseningskartan.firebaseapp.com": {},
+}
+
 func main() {
 	postgresDSNFlag := flag.String("postgres-dsn", "", "Postgres DSN, for example postgres://user:pass@host:5432/dbname?sslmode=disable")
 	portFlag := flag.String("port", "8081", "HTTP server port")
@@ -57,18 +62,22 @@ func main() {
 	apiMux.HandleFunc("/api/route-delays", srv.handleRouteDelays)
 
 	rootMux := http.NewServeMux()
-	rootMux.Handle("/api/", requireAPIKey(apiMux, apiKey))
+	rootMux.Handle("/api/", requireAPIKeyOrAllowedOrigin(apiMux, apiKey, allowedOrigins))
 
-	handler := withCORS(instrumentHTTP(rootMux))
+	handler := withCORS(instrumentHTTP(rootMux), allowedOrigins)
 	log.Printf("backend api listening on :%s", port)
 	if err := http.ListenAndServe(":"+port, handler); err != nil {
 		log.Fatalf("server failed: %v", err)
 	}
 }
 
-func withCORS(next http.Handler) http.Handler {
+func withCORS(next http.Handler, allowedOrigins map[string]struct{}) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		origin := strings.TrimSpace(r.Header.Get("Origin"))
+		if _, ok := allowedOrigins[origin]; ok {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Set("Vary", "Origin")
+		}
 		w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-API-Key")
 		if r.Method == http.MethodOptions {
@@ -79,18 +88,21 @@ func withCORS(next http.Handler) http.Handler {
 	})
 }
 
-func requireAPIKey(next http.Handler, apiKey string) http.Handler {
+func requireAPIKeyOrAllowedOrigin(next http.Handler, apiKey string, allowedOrigins map[string]struct{}) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			next.ServeHTTP(w, r) // allow preflight
-			return
-		}
 		key := r.Header.Get("X-API-Key")
-		if key != apiKey {
-			recordAuthFailure()
-			http.Error(w, "unauthorized", http.StatusUnauthorized)
+		if key == apiKey {
+			next.ServeHTTP(w, r)
 			return
 		}
-		next.ServeHTTP(w, r)
+
+		origin := strings.TrimSpace(r.Header.Get("Origin"))
+		if _, ok := allowedOrigins[origin]; ok {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		recordAuthFailure()
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
 	})
 }
