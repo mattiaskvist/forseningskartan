@@ -4,7 +4,7 @@ name: Deploy Frontend to Firebase Hosting on merge
 on:
   push:
     branches:
-      - p/deploy-frontend
+      - main
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
