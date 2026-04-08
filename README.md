@@ -44,7 +44,7 @@ Directory overview:
 ```text
 .
 ├── .github/                     # CI/CD workflows for frontend, backend, deployment, and aggregation jobs
-├── backend/                     # Go API service exposing historical delay endpoints from aggregated PostgreSQL data
+├── backend/                     # Go API service exposing historical delay endpoints from aggregated data stored in a PostgreSQL database
 ├── frontend/                    # Vite + React + TypeScript frontend
 │   ├── src/                     # Main frontend application source code
 │   │   ├── api/                 # API clients (backend and SL transport)
