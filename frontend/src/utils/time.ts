@@ -76,6 +76,8 @@ export function getDatesForPreset(
     switch (selectedDatePreset) {
         case "sameDayLastWeek":
             return availableDates.includes(lastWeekDate) ? [lastWeekDate] : [];
+        case "last7Days":
+            return previousDates.slice(0, 7);
         case "last5Weekdays":
             return previousDates.filter((date) => !isWeekendCB(date)).slice(0, 5);
         case "lastWeekend":

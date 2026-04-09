@@ -33,11 +33,17 @@ export function getPresetDescription(selectedDates: string[], selectedHourUTC: n
 
 export const DATE_PRESET_LABELS: { preset: DatePreset; label: string }[] = [
     { preset: "sameDayLastWeek", label: "Same day last week" },
-    { preset: "last5Weekdays", label: "Average last 5 weekdays" },
-    { preset: "lastWeekend", label: "Average last weekend" },
+    { preset: "last7Days", label: "Last 7 days" },
+    { preset: "last5Weekdays", label: "Last 5 weekdays" },
+    { preset: "lastWeekend", label: "Last weekend" },
     { preset: "customDate", label: "Custom date" },
 ];
 
-export type DatePreset = "sameDayLastWeek" | "last5Weekdays" | "lastWeekend" | "customDate";
+export type DatePreset =
+    | "sameDayLastWeek"
+    | "last7Days"
+    | "last5Weekdays"
+    | "lastWeekend"
+    | "customDate";
 export type EventType = "departure" | "arrival";
 export type StatType = "delay" | "ahead";
