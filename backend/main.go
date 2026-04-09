@@ -64,20 +64,16 @@ func main() {
 	rootMux := http.NewServeMux()
 	rootMux.Handle("/api/", requireAPIKeyOrAllowedOrigin(apiMux, apiKey, allowedOrigins))
 
-	handler := withCORS(instrumentHTTP(rootMux), allowedOrigins)
+	handler := withCORS(instrumentHTTP(rootMux))
 	log.Printf("backend api listening on :%s", port)
 	if err := http.ListenAndServe(":"+port, handler); err != nil {
 		log.Fatalf("server failed: %v", err)
 	}
 }
 
-func withCORS(next http.Handler, allowedOrigins map[string]struct{}) http.Handler {
+func withCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		origin := strings.TrimSpace(r.Header.Get("Origin"))
-		if _, ok := allowedOrigins[origin]; ok {
-			w.Header().Set("Access-Control-Allow-Origin", origin)
-			w.Header().Set("Vary", "Origin")
-		}
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-API-Key")
 		if r.Method == http.MethodOptions {
