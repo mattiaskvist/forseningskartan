@@ -79,7 +79,8 @@ func runAggregations(config Config) error {
 		if config.CronSchedule == "" {
 			return runRecentMissingAggregations(config)
 		}
-		c := cron.New()
+		loc, _ := time.LoadLocation("Europe/Stockholm")
+		c := cron.New(cron.WithLocation(loc))
 		schedule := config.CronSchedule
 		_, err := c.AddFunc(schedule, func() {
 			fmt.Println("Starting scheduled aggregation...")
@@ -184,7 +185,7 @@ func main() {
 
 func startMetricsServer() {
 	http.HandleFunc("/metrics", metricsHandler)
-	if err := http.ListenAndServe("127.0.0.1:2112", nil); err != nil {
+	if err := http.ListenAndServe(":2112", nil); err != nil {
 		fmt.Printf("Error starting metrics server: %v\n", err)
 	}
 }

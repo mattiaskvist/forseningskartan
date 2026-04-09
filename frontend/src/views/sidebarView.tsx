@@ -1,24 +1,12 @@
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
-import MapIcon from "@mui/icons-material/Map";
-import TimelineIcon from "@mui/icons-material/Timeline";
-import InfoIcon from "@mui/icons-material/Info";
 import PersonIcon from "@mui/icons-material/Person";
 import LoginIcon from "@mui/icons-material/Login";
 import IconButton from "@mui/material/IconButton";
 import { AuthUserState } from "../store/authSlice";
+import { ROUTES, type RouteConfig } from "../routes";
 
-type NavItem = {
-    label: string;
-    path: string;
-    icon: React.ReactNode;
-};
-
-const NAV_ITEMS: NavItem[] = [
-    { label: "Map", path: "/", icon: <MapIcon fontSize="small" /> },
-    { label: "Route Delays", path: "/route-delays", icon: <TimelineIcon fontSize="small" /> },
-    { label: "About", path: "/about", icon: <InfoIcon fontSize="small" /> },
-];
+type SidebarNavItem = Pick<RouteConfig, "label" | "path" | "icon">;
 
 type SidebarViewProps = {
     isOpen: boolean;
@@ -42,6 +30,26 @@ export function SidebarView({
         return currentPath.startsWith(path);
     }
 
+    function renderNavItemCB(item: SidebarNavItem) {
+        const active = isActiveCB(item.path);
+
+        function handleClickCB() {
+            onNavigateCB(item.path);
+        }
+
+        return (
+            <li key={item.path}>
+                <button
+                    className={`sidebar-nav-item ${active ? "sidebar-nav-item-active" : ""}`}
+                    onClick={handleClickCB}
+                >
+                    {item.icon}
+                    <span>{item.label}</span>
+                </button>
+            </li>
+        );
+    }
+
     return (
         <>
             {/* Toggle button — always visible */}
@@ -61,7 +69,7 @@ export function SidebarView({
                 </div>
 
                 <ul className="sidebar-nav-list">
-                    {NAV_ITEMS.map(renderNavItemCB)}
+                    {ROUTES.map(renderNavItemCB)}
                     <li className="mt-8 border-t border-slate-200/20 pt-2" />
                     {user
                         ? renderNavItemCB({
@@ -71,7 +79,7 @@ export function SidebarView({
                                   <img
                                       src={user.photoURL}
                                       alt="avatar"
-                                      className="w-5 h-5 rounded-full object-cover"
+                                      className="h-5 w-5 rounded-full object-cover"
                                   />
                               ) : (
                                   <PersonIcon fontSize="small" />
@@ -86,24 +94,4 @@ export function SidebarView({
             </nav>
         </>
     );
-
-    function renderNavItemCB(item: NavItem) {
-        const active = isActiveCB(item.path);
-
-        function handleClickCB() {
-            onNavigateCB(item.path);
-        }
-
-        return (
-            <li key={item.path}>
-                <button
-                    className={`sidebar-nav-item ${active ? "sidebar-nav-item-active" : ""}`}
-                    onClick={handleClickCB}
-                >
-                    {item.icon}
-                    <span>{item.label}</span>
-                </button>
-            </li>
-        );
-    }
 }

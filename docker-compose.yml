@@ -47,6 +47,7 @@ services:
       - "${API_KEY}"
     ports:
       - "${API_PORT:-8081}:${API_PORT:-8081}"
+      - "2113:2113"
     restart: unless-stopped
 
 volumes:

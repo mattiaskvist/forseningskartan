@@ -20,8 +20,8 @@ FROM alpine:latest
 
 WORKDIR /app
 
-# Install ca-certificates and sh for running scripts
-RUN apk --no-cache add ca-certificates
+# Install ca-certificates, sh, and timezone data for running scripts
+RUN apk --no-cache add ca-certificates tzdata
 
 # Copy binary from builder
 COPY --from=builder /app/aggregator .

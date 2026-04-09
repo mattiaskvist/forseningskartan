@@ -20,7 +20,7 @@ export function RouteDelayPresenter() {
 
     function handleSelectDateCB(date: string) {
         setSelectedDate(date);
-        dispatch(getRouteDelays(date));
+        dispatch(getRouteDelays([date]));
     }
 
     if (isRouteDelaysLoading || isAggregatedDatesLoading) {

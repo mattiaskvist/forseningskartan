@@ -12,6 +12,11 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
+var allowedOrigins = map[string]struct{}{
+	"https://forseningskartan.web.app":         {},
+	"https://forseningskartan.firebaseapp.com": {},
+}
+
 func main() {
 	postgresDSNFlag := flag.String("postgres-dsn", "", "Postgres DSN, for example postgres://user:pass@host:5432/dbname?sslmode=disable")
 	portFlag := flag.String("port", "8081", "HTTP server port")
@@ -53,9 +58,11 @@ func main() {
 	srv := &server{db: db}
 	apiMux := http.NewServeMux()
 	apiMux.HandleFunc("/api/departure-historical-delay", srv.handleDepartureHistoricalDelay)
+	apiMux.HandleFunc("/api/available-dates", srv.handleAvailableDates)
+	apiMux.HandleFunc("/api/route-delays", srv.handleRouteDelays)
 
 	rootMux := http.NewServeMux()
-	rootMux.Handle("/api/", requireAPIKey(apiMux, apiKey))
+	rootMux.Handle("/api/", requireAPIKeyOrAllowedOrigin(apiMux, apiKey, allowedOrigins))
 
 	handler := withCORS(instrumentHTTP(rootMux))
 	log.Printf("backend api listening on :%s", port)
@@ -77,18 +84,21 @@ func withCORS(next http.Handler) http.Handler {
 	})
 }
 
-func requireAPIKey(next http.Handler, apiKey string) http.Handler {
+func requireAPIKeyOrAllowedOrigin(next http.Handler, apiKey string, allowedOrigins map[string]struct{}) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			next.ServeHTTP(w, r) // allow preflight
-			return
-		}
 		key := r.Header.Get("X-API-Key")
-		if key != apiKey {
-			recordAuthFailure()
-			http.Error(w, "unauthorized", http.StatusUnauthorized)
+		if key == apiKey {
+			next.ServeHTTP(w, r)
 			return
 		}
-		next.ServeHTTP(w, r)
+
+		origin := strings.TrimSpace(r.Header.Get("Origin"))
+		if _, ok := allowedOrigins[origin]; ok {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		recordAuthFailure()
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
 	})
 }
