@@ -36,7 +36,7 @@ export function getPresetDescription(selectedDates: string[], selectedHourUTC?: 
     return `Selected dates: ${dateRange}${hourRange ? `, ${hourRange}` : ""}`;
 }
 
-export const DATE_PRESET_LABELS: { preset: DatePreset; label: string }[] = [
+export const DatePresetLabels: { preset: DatePreset; label: string }[] = [
     { preset: "sameDayLastWeek", label: "Same day last week" },
     { preset: "last7Days", label: "Last 7 days" },
     { preset: "last5Weekdays", label: "Last 5 weekdays" },
