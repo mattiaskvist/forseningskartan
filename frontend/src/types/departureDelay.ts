@@ -25,10 +25,15 @@ function getDateRangeText(selectedDates: string[]): string {
     return `${fromDate} - ${toDate}`;
 }
 
-export function getPresetDescription(selectedDates: string[], selectedHourUTC: number): string {
+export function getPresetDescription(selectedDates: string[], selectedHourUTC?: number): string {
+    if (selectedDates.length === 0) {
+        return "No available dates for this preset";
+    }
+
     const dateRange = getDateRangeText(selectedDates);
-    const hourRange = formatHourRangeLocal(selectedHourUTC);
-    return `Stats for ${dateRange}, ${hourRange}`;
+    const hourRange = selectedHourUTC ? formatHourRangeLocal(selectedHourUTC) : "";
+
+    return `Selected dates: ${dateRange}${hourRange ? `, ${hourRange}` : ""}`;
 }
 
 export const DATE_PRESET_LABELS: { preset: DatePreset; label: string }[] = [
