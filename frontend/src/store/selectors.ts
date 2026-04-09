@@ -64,7 +64,7 @@ function getDepartureHistoricalDelayLoadingCB(state: RootState) {
 }
 
 function getRouteDelaysCB(state: RootState) {
-    return state.routeDelays.data;
+    return state.routeDelays.data ?? [];
 }
 
 function getRouteDelaysLoadingCB(state: RootState) {

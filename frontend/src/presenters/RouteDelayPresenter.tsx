@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { RouteDelayView } from "../views/routeDelayView";
 import {
     getAggregatedDatesCB,
@@ -40,7 +40,7 @@ function getRouteModeKey(summary: DelaySummary): string {
 
 export function RouteDelayPresenter() {
     const dispatch = useAppDispatch();
-    const routeDelays = useAppSelector(getRouteDelaysCB) ?? [];
+    const routeDelays = useAppSelector(getRouteDelaysCB);
     const availableDates = useAppSelector(getAggregatedDatesCB);
     const selectedDates = useAppSelector(getSelectedRouteDelayDatesCB);
     const isRouteDelaysLoading = useAppSelector(getRouteDelaysLoadingCB);
@@ -57,11 +57,15 @@ export function RouteDelayPresenter() {
     const [routesPerPage, setRoutesPerPage] = useState<PageSizeOption>(25);
     const [currentPage, setCurrentPage] = useState(1);
 
-    function matchesTransportationFilterCB(summary: DelaySummary): boolean {
-        return (
-            getRouteModeKey(summary) === transportationModeToRouteType[selectedTransportationMode]
-        );
-    }
+    const matchesTransportationFilterCB = useCallback(
+        (summary: DelaySummary): boolean => {
+            return (
+                getRouteModeKey(summary) ===
+                transportationModeToRouteType[selectedTransportationMode]
+            );
+        },
+        [selectedTransportationMode]
+    );
 
     const filteredAndSortedRoutes = useMemo(() => {
         const normalizedSearch = searchQuery.trim().toLowerCase();
