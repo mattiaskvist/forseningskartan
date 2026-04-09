@@ -65,7 +65,6 @@ export function fetchSelectedDepartureStopDelays(): AppThunk {
         }
 
         const selectedDates = getSelectedDelayDates({
-            selectedDeparture,
             selectedDatePreset: state.departureUI.selectedDatePreset,
             selectedCustomDate: state.departureUI.selectedCustomDate,
             availableDates: state.aggregatedDates.data,
@@ -99,6 +98,23 @@ export function fetchSelectedDepartureStopDelays(): AppThunk {
                 routeType,
             })
         );
+    };
+}
+
+export function fetchSelectedRouteDelays(): AppThunk {
+    return (dispatch, getState) => {
+        const state = getState();
+        const selectedDates = getSelectedDelayDates({
+            selectedDatePreset: state.routeDelayUI.selectedDatePreset,
+            selectedCustomDate: state.routeDelayUI.selectedCustomDate,
+            availableDates: state.aggregatedDates.data,
+        });
+
+        if (selectedDates.length === 0) {
+            return;
+        }
+
+        dispatch(getRouteDelays(selectedDates));
     };
 }
 

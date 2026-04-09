@@ -5,22 +5,16 @@ import { getDatesForPreset, sortDatesDescendingCB } from "../utils/time";
 import { RootState } from "./store";
 
 type SelectedDelayDatesInput = {
-    selectedDeparture: unknown | null;
     selectedDatePreset: DatePreset;
     selectedCustomDate: string | null;
     availableDates: string[];
 };
 
 function getSelectedDelayDates({
-    selectedDeparture,
     selectedDatePreset,
     selectedCustomDate,
     availableDates,
 }: SelectedDelayDatesInput): string[] {
-    if (!selectedDeparture) {
-        return [];
-    }
-
     const latestDate = [...availableDates].sort(sortDatesDescendingCB)[0];
     const effectiveCustomDate = selectedCustomDate ?? latestDate ?? null;
 
@@ -108,15 +102,9 @@ function getSelectedCustomDateCB(state: RootState) {
 // use createSelector for computationally expensive selectors
 // to memoize results and avoid unnecessary recalculations
 const getSelectedDelayDatesCB = createSelector(
-    [
-        getSelectedDepartureCB,
-        getSelectedDatePresetCB,
-        getSelectedCustomDateCB,
-        getAggregatedDatesCB,
-    ],
-    (selectedDeparture, selectedDatePreset, selectedCustomDate, availableDates) => {
+    [getSelectedDatePresetCB, getSelectedCustomDateCB, getAggregatedDatesCB],
+    (selectedDatePreset, selectedCustomDate, availableDates) => {
         return getSelectedDelayDates({
-            selectedDeparture,
             selectedDatePreset,
             selectedCustomDate,
             availableDates,
