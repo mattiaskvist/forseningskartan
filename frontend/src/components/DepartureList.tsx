@@ -116,7 +116,12 @@ export function DepartureList({ departures, onSelectDepartureCB }: DepartureList
     return (
         <div className="flex flex-col gap-3">
             {uniqueModes.length > 0 ? (
-                <ToggleButtonGroup size="small" value={selectedModes} onChange={handleModeChangeCB}>
+                <ToggleButtonGroup
+                    color="primary"
+                    size="small"
+                    value={selectedModes}
+                    onChange={handleModeChangeCB}
+                >
                     {uniqueModes.map(renderModeButtonCB)}
                 </ToggleButtonGroup>
             ) : null}
