@@ -99,10 +99,49 @@ function getSelectedCustomDateCB(state: RootState) {
     return state.departureUI.selectedCustomDate;
 }
 
+function getRouteDelaySelectedDatePresetCB(state: RootState) {
+    return state.routeDelayUI.selectedDatePreset;
+}
+
+function getRouteDelaySelectedCustomDateCB(state: RootState) {
+    return state.routeDelayUI.selectedCustomDate;
+}
+
+function getRouteDelaySelectedEventTypeCB(state: RootState) {
+    return state.routeDelayUI.selectedEventType;
+}
+
+function getRouteDelaySelectedTransportationModeCB(state: RootState) {
+    return state.routeDelayUI.selectedTransportationMode;
+}
+
+function getRouteDelaySelectedRouteKeyCB(state: RootState) {
+    return state.routeDelayUI.selectedRouteKey;
+}
+
+function getRouteDelayTrendPointsCB(state: RootState) {
+    return state.routeDelayTrend.data;
+}
+
+function getRouteDelayTrendLoadingCB(state: RootState) {
+    return state.routeDelayTrend.isLoading;
+}
+
 // use createSelector for computationally expensive selectors
 // to memoize results and avoid unnecessary recalculations
 const getSelectedDelayDatesCB = createSelector(
     [getSelectedDatePresetCB, getSelectedCustomDateCB, getAggregatedDatesCB],
+    (selectedDatePreset, selectedCustomDate, availableDates) => {
+        return getSelectedDelayDates({
+            selectedDatePreset,
+            selectedCustomDate,
+            availableDates,
+        });
+    }
+);
+
+const getSelectedRouteDelayDatesCB = createSelector(
+    [getRouteDelaySelectedDatePresetCB, getRouteDelaySelectedCustomDateCB, getAggregatedDatesCB],
     (selectedDatePreset, selectedCustomDate, availableDates) => {
         return getSelectedDelayDates({
             selectedDatePreset,
@@ -130,6 +169,14 @@ export {
     getSelectedDepartureCB,
     getSelectedDatePresetCB,
     getSelectedCustomDateCB,
+    getRouteDelaySelectedDatePresetCB,
+    getRouteDelaySelectedCustomDateCB,
+    getRouteDelaySelectedEventTypeCB,
+    getRouteDelaySelectedTransportationModeCB,
+    getRouteDelaySelectedRouteKeyCB,
+    getRouteDelayTrendPointsCB,
+    getRouteDelayTrendLoadingCB,
     getSelectedDelayDates,
     getSelectedDelayDatesCB,
+    getSelectedRouteDelayDatesCB,
 };
