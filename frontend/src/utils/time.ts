@@ -57,6 +57,19 @@ export function getAvgDelayMinutes(summary: DelaySummary, selectedEventType: Eve
     return Number((avgDelaySeconds / 60).toFixed(1));
 }
 
+export function getDelayTextColorClass(delayMinutes: number | null) {
+    if (delayMinutes === null) {
+        return "text-slate-500";
+    }
+    if (delayMinutes <= 0) {
+        return "text-emerald-600";
+    }
+    if (delayMinutes > 0 && delayMinutes <= 3) {
+        return "text-amber-600";
+    }
+    return "text-rose-600";
+}
+
 // in dayjs 0 is Sunday and 6 Saturday
 const WEEKEND_WEEKDAYS = new Set([0, 6]);
 
