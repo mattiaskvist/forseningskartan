@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
 import { Departure } from "../types/sl";
-import { DatePreset } from "../types/departureDelay";
+import { DatePreset, EventType } from "../types/departureDelay";
+import { DelaySummary } from "../types/historicalDelay";
 
 export function formatTime(rawTime: string | undefined): string {
     if (!rawTime) {
@@ -45,14 +46,25 @@ export function getDelayMinutes(departure: Departure): number | null {
     return Math.round((expectedTimestamp - scheduledTimestamp) / 60000);
 }
 
+export function getAvgDelaySeconds(summary: DelaySummary, selectedEventType: EventType): number {
+    return selectedEventType === "departure"
+        ? summary.departureDelayStats.avgSeconds
+        : summary.arrivalDelayStats.avgSeconds;
+}
+
+export function getAvgDelayMinutes(summary: DelaySummary, selectedEventType: EventType): number {
+    const avgDelaySeconds = getAvgDelaySeconds(summary, selectedEventType);
+    return Number((avgDelaySeconds / 60).toFixed(1));
+}
+
 // in dayjs 0 is Sunday and 6 Saturday
 const WEEKEND_WEEKDAYS = new Set([0, 6]);
 
-export function isBeforeReferenceDateCB(date: string, referenceDate: string): boolean {
+function isBeforeReferenceDateCB(date: string, referenceDate: string): boolean {
     return dayjs(date).isBefore(dayjs(referenceDate), "day");
 }
 
-export function isWeekendCB(date: string): boolean {
+function isWeekendCB(date: string): boolean {
     const weekday = dayjs(date).day();
     return WEEKEND_WEEKDAYS.has(weekday);
 }
