@@ -51,7 +51,7 @@ export function DepartureDelayStats({ routeSummary, selectedEventType }: Departu
                 </span>
                 , on average by{" "}
                 <span className="font-medium text-slate-700">
-                    {pluralize(Math.round(delayedStats.avgSeconds / 60), "minute")}
+                    {pluralize(Number((delayedStats.avgSeconds / 60).toFixed(1)), "minute")}
                 </span>
             </p>
             <p className="text-sm text-slate-700">
@@ -60,7 +60,7 @@ export function DepartureDelayStats({ routeSummary, selectedEventType }: Departu
                 </span>
                 , on average by{" "}
                 <span className="font-medium text-slate-700">
-                    {pluralize(Math.round(aheadStats.avgSeconds / 60), "minute")}
+                    {pluralize(Number((aheadStats.avgSeconds / 60).toFixed(1)), "minute")}
                 </span>
             </p>
         </div>
