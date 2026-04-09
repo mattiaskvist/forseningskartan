@@ -23,8 +23,11 @@ function App() {
         dispatch(getSites());
         dispatch(getStopPoints());
         dispatch(getAggregatedDates());
-        const unsubscribe = initializeAuthListener();
-        return () => unsubscribe();
+
+        // return the unsubscribe function to stop the firebase connection
+        // if this component ever unmounts to prevent memory leaks.
+        const unsubscribeCB = initializeAuthListener(dispatch);
+        return unsubscribeCB;
     }, [dispatch]);
 
     const sites = useAppSelector(getSitesCB);

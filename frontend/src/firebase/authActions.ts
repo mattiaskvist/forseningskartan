@@ -1,30 +1,39 @@
-import { onAuthStateChanged, signOut, deleteUser } from "firebase/auth";
+import { onAuthStateChanged, signOut, deleteUser, User } from "firebase/auth";
 import { auth } from "./firestore";
-import { store } from "../store/store";
 import { setUser, setAuthError } from "../store/authSlice";
+import type { AppDispatch } from "../store/store";
 
-export function initializeAuthListener() {
-    return onAuthStateChanged(
-        auth,
-        (user) => {
-            if (user) {
-                store.dispatch(
-                    setUser({
-                        uid: user.uid,
-                        email: user.email,
-                        displayName: user.displayName,
-                        photoURL: user.photoURL,
-                    })
-                );
-            } else {
-                store.dispatch(setUser(null));
-            }
-        },
-        (error) => {
-            console.error("Auth Listener Error:", error);
-            store.dispatch(setAuthError(error.message));
+/**
+ * Initializes the Firebase authentication listener and syncs state to Redux.
+ * * Motivation (Why we pass `dispatch` as an argument):
+ * This is a pure TypeScript function, not a React component.
+ * If we tried to call `const dispatch = useAppDispatch()` here, React would throw an error.
+ *
+ * @param dispatch - The strictly typed AppDispatch injected from React.
+ * @returns {Function} The Firebase unsubscribe function to be called on cleanup.
+ */
+export function initializeAuthListener(dispatch: AppDispatch) {
+    function handleAuthStateChangeACB(user: User | null) {
+        if (user) {
+            dispatch(
+                setUser({
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName,
+                    photoURL: user.photoURL,
+                })
+            );
+        } else {
+            dispatch(setUser(null));
         }
-    );
+    }
+
+    function handleAuthErrorACB(error: Error) {
+        console.error("Auth Listener Error:", error);
+        dispatch(setAuthError(error.message));
+    }
+
+    return onAuthStateChanged(auth, handleAuthStateChangeACB, handleAuthErrorACB);
 }
 
 export async function logoutUser() {
