@@ -6,10 +6,12 @@ import {
     getDepartureHistoricalDelaySummary,
     getAggregatedDates,
     getRouteDelays,
+    getRouteDelayTrend,
 } from "./actions";
 import { Departure, DepartureResponse, Site, StopPoint } from "../types/sl";
 import { DelaySummary } from "../types/historicalDelay";
-import { DatePreset } from "../types/departureDelay";
+import { DatePreset, EventType } from "../types/departureDelay";
+import { PageSizeOption, RouteDelayTrendPoint } from "../types/routeDelays";
 
 type SitesState = {
     data: Site[] | null;
@@ -44,6 +46,12 @@ type RouteDelayState = {
 
 type AggregatedDatesState = {
     data: string[];
+    isLoading: boolean;
+    error: Error | null;
+};
+
+type RouteDelayTrendState = {
+    data: RouteDelayTrendPoint[];
     isLoading: boolean;
     error: Error | null;
 };
@@ -179,6 +187,41 @@ export const routeDelaysSlice = createSlice({
             });
     },
 });
+
+export const routeDelayTrendSlice = createSlice({
+    name: "routeDelayTrend",
+    initialState: {
+        data: [],
+        isLoading: false,
+        error: null,
+    } as RouteDelayTrendState,
+    reducers: {
+        clearRouteDelayTrend: (state) => {
+            state.data = [];
+            state.isLoading = false;
+            state.error = null;
+        },
+    },
+    extraReducers: (builder) => {
+        builder
+            .addCase(getRouteDelayTrend.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(getRouteDelayTrend.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.data = action.payload;
+                state.error = null;
+            })
+            .addCase(getRouteDelayTrend.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error as Error;
+                console.error("Failed to fetch route delay trend:", action.error);
+            });
+    },
+});
+
+export const { clearRouteDelayTrend } = routeDelayTrendSlice.actions;
 
 export const aggregatedDatesSlice = createSlice({
     name: "aggregatedDates",

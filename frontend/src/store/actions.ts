@@ -5,11 +5,14 @@ import {
     fetchDepartureHistoricalDelaySummary,
     fetchAvailableDates,
     fetchDailyRouteDelays,
+    fetchRouteDelayTrend,
+    RouteDelayTrendParams,
 } from "../api/backend";
 import { AppThunk } from "./store";
 import { getSelectedDelayDates } from "./selectors";
 import { getStopPointGidsForSite } from "../utils/site";
 import { transportationModeToRouteType } from "../types/sl";
+import { clearRouteDelayTrend } from "./reducers";
 
 export const getSites = createAsyncThunk("sites/fetch", fetchSitesACB);
 
@@ -41,6 +44,12 @@ export const getDepartureHistoricalDelaySummary = createAsyncThunk(
 
 export const getRouteDelays = createAsyncThunk("routeDelays/fetch", (dates: string[]) =>
     fetchDailyRouteDelays(dates)
+);
+
+export const getRouteDelayTrend = createAsyncThunk(
+    "routeDelayTrend/fetch",
+    ({ dates, routeShortName, eventType }: RouteDelayTrendParams) =>
+        fetchRouteDelayTrend({ dates, routeShortName, eventType })
 );
 
 // fetch historical delay summary for selected departure
@@ -88,6 +97,39 @@ export function fetchSelectedDepartureStopDelays(): AppThunk {
                 hourUTC,
                 routeShortName,
                 routeType,
+            })
+        );
+    };
+}
+
+export function fetchSelectedRouteTrend(): AppThunk {
+    return (dispatch, getState) => {
+        const state = getState();
+        const selectedRouteSummary = state.routeDelays.data?.find(
+            (summary) => summary.key === state.routeDelayUI.selectedRouteKey
+        );
+        const selectedDates = getSelectedDelayDates({
+            selectedDatePreset: state.routeDelayUI.selectedDatePreset,
+            selectedCustomDate: state.routeDelayUI.selectedCustomDate,
+            availableDates: state.aggregatedDates.data,
+        });
+
+        if (!selectedRouteSummary || selectedDates.length === 0) {
+            dispatch(clearRouteDelayTrend());
+            return;
+        }
+
+        const selectedRouteShortName = selectedRouteSummary.route?.shortName;
+        if (!selectedRouteShortName) {
+            dispatch(clearRouteDelayTrend());
+            return;
+        }
+
+        dispatch(
+            getRouteDelayTrend({
+                dates: selectedDates,
+                routeShortName: selectedRouteShortName,
+                eventType: state.routeDelayUI.selectedEventType,
             })
         );
     };

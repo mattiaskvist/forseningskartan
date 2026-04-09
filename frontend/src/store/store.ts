@@ -12,12 +12,21 @@ import {
     departureHistoricalDelaySlice,
     aggregatedDatesSlice,
     routeDelaysSlice,
+    routeDelayTrendSlice,
     departureUISlice,
 } from "./reducers";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchSelectedDepartureStopDelays } from "./actions";
-import { setSelectedDeparture, setSelectedDatePreset, setSelectedCustomDate } from "./reducers";
-
+import {
+    fetchSelectedDepartureStopDelays,
+    fetchSelectedRouteTrend,
+    getRouteDelays,
+} from "./actions";
+import {
+    setSelectedDeparture,
+    setSelectedDatePreset,
+    setSelectedCustomDate,
+    setRouteDelaySelectedRouteKey,
+} from "./reducers";
 const listenerMiddleware = createListenerMiddleware();
 
 export const store = configureStore({
@@ -27,6 +36,7 @@ export const store = configureStore({
         stopPoints: stopPointsSlice.reducer,
         departureHistoricalDelay: departureHistoricalDelaySlice.reducer,
         routeDelays: routeDelaysSlice.reducer,
+        routeDelayTrend: routeDelayTrendSlice.reducer,
         aggregatedDates: aggregatedDatesSlice.reducer,
         departureUI: departureUISlice.reducer,
     },
@@ -42,6 +52,16 @@ listenerMiddleware.startListening({
 
         const dispatch = listenerApi.dispatch as AppDispatch;
         dispatch(fetchSelectedDepartureStopDelays());
+    },
+});
+
+listenerMiddleware.startListening({
+    matcher: isAnyOf(setRouteDelaySelectedRouteKey, getRouteDelays.fulfilled),
+    effect: (_, listenerApi) => {
+        listenerApi.cancelActiveListeners();
+
+        const dispatch = listenerApi.dispatch as AppDispatch;
+        dispatch(fetchSelectedRouteTrend());
     },
 });
 
