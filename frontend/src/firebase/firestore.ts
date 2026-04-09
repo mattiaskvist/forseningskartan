@@ -1,4 +1,5 @@
 import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -12,3 +13,13 @@ const firebaseConfig = {
 
 export const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
+
+// In test environments without a valid API key, getAuth will throw.
+let authInstance: ReturnType<typeof getAuth> | undefined;
+try {
+    authInstance = getAuth(app);
+} catch (error) {
+    console.warn("Failed to initialize Firebase Auth (likely missing API key):", error);
+}
+
+export const auth = authInstance as ReturnType<typeof getAuth>;
