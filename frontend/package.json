@@ -37,6 +37,7 @@
         "@emotion/styled": "^11.14.1",
         "@mui/icons-material": "^7.3.9",
         "@mui/material": "^7.3.9",
+        "@mui/x-charts": "^9.0.1",
         "@mui/x-date-pickers": "^8.27.2",
         "@reduxjs/toolkit": "latest",
         "@tailwindcss/vite": "^4.2.1",
