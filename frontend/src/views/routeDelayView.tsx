@@ -18,7 +18,7 @@ import {
     RouteDelaySection,
     RouteDelayTrendPoint,
 } from "../types/routeDelays";
-import { getAvgDelayMinutes } from "../utils/time";
+import { getAvgDelayMinutes, getDelayTextColorClass } from "../utils/time";
 import { getRouteDisplayName } from "../utils/route";
 
 type RouteDelayViewProps = {
@@ -113,7 +113,11 @@ export function RouteDelayView({
                             {summary.route?.shortName} {summary.route?.longName}
                         </p>
                         <p className="text-xs text-slate-600">
-                            Avg delay: {avgDelayMinutes} min, {summary.uniqueTrips} unique trips
+                            Average delay:{" "}
+                            <span className={getDelayTextColorClass(avgDelayMinutes)}>
+                                {avgDelayMinutes} min
+                            </span>
+                            , {summary.uniqueTrips} unique trips
                         </p>
                     </div>
                     <ArrowForwardIosIcon className="mr-2" />
