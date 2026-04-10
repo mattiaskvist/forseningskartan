@@ -13,6 +13,7 @@ import {
     getSitesCB,
 } from "./store/selectors";
 import { Suspense } from "./components/Suspense";
+import { GlobalSnackbar } from "./components/GlobalSnackbar";
 import { ROUTES, type RouteConfig } from "./routes";
 
 function App() {
@@ -52,6 +53,7 @@ function App() {
                 <Route path="/login" element={<LoginPresenter />} />
                 <Route path="/account" element={<AccountPresenter />} />
             </Routes>
+            <GlobalSnackbar />
         </div>
     );
 }

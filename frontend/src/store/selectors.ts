@@ -113,6 +113,18 @@ function getSelectedCustomDateCB(state: RootState) {
     return state.departureUI.selectedCustomDate;
 }
 
+function getSnackbarOpenCB(state: RootState) {
+    return state.snackbar.open;
+}
+
+function getSnackbarMessageCB(state: RootState) {
+    return state.snackbar.message;
+}
+
+function getSnackbarSeverityCB(state: RootState) {
+    return state.snackbar.severity;
+}
+
 // use createSelector for computationally expensive selectors
 // to memoize results and avoid unnecessary recalculations
 const getSelectedDelayDatesCB = createSelector(
@@ -152,6 +164,9 @@ export {
     getSelectedDepartureCB,
     getSelectedDatePresetCB,
     getSelectedCustomDateCB,
+    getSnackbarOpenCB,
+    getSnackbarMessageCB,
+    getSnackbarSeverityCB,
     getSelectedDelayDates,
     getSelectedDelayDatesCB,
 };
