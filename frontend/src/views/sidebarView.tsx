@@ -5,6 +5,7 @@ import LoginIcon from "@mui/icons-material/Login";
 import IconButton from "@mui/material/IconButton";
 import { AuthUserState } from "../store/authSlice";
 import { ROUTES, type RouteConfig } from "../routes";
+import favicon from "/favicon.png";
 
 type SidebarNavItem = Pick<RouteConfig, "label" | "path" | "icon">;
 
@@ -65,6 +66,7 @@ export function SidebarView({
             {/* Sliding panel */}
             <nav className={`sidebar-panel ${isOpen ? "sidebar-panel-open" : ""}`}>
                 <div className="sidebar-header">
+                    <img src={favicon} className="w-8 h-8" />
                     <h2 className="sidebar-title">Förseningskartan</h2>
                 </div>
 
