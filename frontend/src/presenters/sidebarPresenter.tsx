@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { SidebarView } from "../views/sidebarView";
 import { useAppSelector } from "../store/store";
 import { getAuthUserCB } from "../store/selectors";
+import { logoutUser } from "../firebase/authActions";
 
 export function SidebarPresenter() {
     const [isOpen, setIsOpen] = useState(false);
@@ -19,6 +20,15 @@ export function SidebarPresenter() {
         setIsOpen(false);
     }
 
+    async function handleLogoutCB() {
+        try {
+            await logoutUser();
+            navigate("/");
+        } catch {
+            alert("Failed to log out");
+        }
+    }
+
     return (
         <SidebarView
             isOpen={isOpen}
@@ -26,6 +36,7 @@ export function SidebarPresenter() {
             user={user}
             onToggleCB={toggleSidebarCB}
             onNavigateCB={navigateCB}
+            onLogoutCB={handleLogoutCB}
         />
     );
 }
