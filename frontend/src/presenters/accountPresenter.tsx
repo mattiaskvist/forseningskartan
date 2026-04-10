@@ -1,12 +1,14 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAppSelector } from "../store/store";
+import { useAppDispatch, useAppSelector } from "../store/store";
 import { getAuthUserCB, getAuthLoadingCB } from "../store/selectors";
 import { AccountView } from "../views/accountView";
 import { logoutUser, deleteUserAccount } from "../firebase/authActions";
 import { Suspense } from "../components/Suspense";
+import { showSnackbar } from "../store/snackbarSlice";
 
 export function AccountPresenter() {
+    const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const user = useAppSelector(getAuthUserCB);
     const loading = useAppSelector(getAuthLoadingCB);
@@ -20,6 +22,7 @@ export function AccountPresenter() {
     async function handleLogoutCB() {
         try {
             await logoutUser();
+            dispatch(showSnackbar({ message: "Logged out", severity: "success" }));
             navigate("/");
         } catch {
             alert("Failed to log out");
