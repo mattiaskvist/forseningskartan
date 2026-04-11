@@ -2,6 +2,8 @@ import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import PersonIcon from "@mui/icons-material/Person";
 import LoginIcon from "@mui/icons-material/Login";
+import LogoutIcon from "@mui/icons-material/Logout";
+import SettingsIcon from "@mui/icons-material/Settings";
 import IconButton from "@mui/material/IconButton";
 import { AuthUserState } from "../store/authSlice";
 import { ROUTES, type RouteConfig } from "../routes";
@@ -15,6 +17,7 @@ type SidebarViewProps = {
     user: AuthUserState | null;
     onToggleCB: () => void;
     onNavigateCB: (path: string) => void;
+    onLogoutCB: () => void;
 };
 
 export function SidebarView({
@@ -23,6 +26,7 @@ export function SidebarView({
     user,
     onToggleCB,
     onNavigateCB,
+    onLogoutCB,
 }: SidebarViewProps) {
     function isActiveCB(path: string): boolean {
         if (path === "/") {
@@ -51,6 +55,37 @@ export function SidebarView({
         );
     }
 
+    function renderUserItem(user: AuthUserState) {
+        return (
+            <li>
+                <div className="flex items-center gap-2 rounded-md px-3 py-2.5 text-slate-700">
+                    {user.photoURL ? (
+                        <img
+                            src={user.photoURL}
+                            alt="avatar"
+                            className="h-8 w-8 rounded-full object-cover"
+                        />
+                    ) : (
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200">
+                            <PersonIcon fontSize="small" />
+                        </div>
+                    )}
+
+                    <span className="min-w-0 flex-1 truncate text-sm font-medium">
+                        {user.displayName || user.email || "Account"}
+                    </span>
+
+                    <IconButton size="small" onClick={() => onNavigateCB("/account")}>
+                        <SettingsIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton size="small" aria-label="Log out" onClick={onLogoutCB}>
+                        <LogoutIcon fontSize="small" />
+                    </IconButton>
+                </div>
+            </li>
+        );
+    }
+
     return (
         <>
             {/* Toggle button — always visible */}
@@ -74,19 +109,7 @@ export function SidebarView({
                     {ROUTES.map(renderNavItemCB)}
                     <li className="mt-8 border-t border-slate-200/20 pt-2" />
                     {user
-                        ? renderNavItemCB({
-                              label: user.displayName || user.email || "Account",
-                              path: "/account",
-                              icon: user.photoURL ? (
-                                  <img
-                                      src={user.photoURL}
-                                      alt="avatar"
-                                      className="h-5 w-5 rounded-full object-cover"
-                                  />
-                              ) : (
-                                  <PersonIcon fontSize="small" />
-                              ),
-                          })
+                        ? renderUserItem(user)
                         : renderNavItemCB({
                               label: "Log In",
                               path: "/login",
