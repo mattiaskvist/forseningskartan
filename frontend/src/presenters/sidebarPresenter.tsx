@@ -28,7 +28,7 @@ export function SidebarPresenter() {
             dispatch(showSnackbar({ message: "Logged out", severity: "success" }));
             navigate("/");
         } catch {
-            alert("Failed to log out");
+            dispatch(showSnackbar({ message: "Failed to log out", severity: "error" }));
         }
     }
 

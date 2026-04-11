@@ -25,18 +25,24 @@ export function AccountPresenter() {
             dispatch(showSnackbar({ message: "Logged out", severity: "success" }));
             navigate("/");
         } catch {
-            alert("Failed to log out");
+            dispatch(showSnackbar({ message: "Failed to log out", severity: "error" }));
         }
     }
 
     async function handleDeleteCB() {
         try {
             await deleteUserAccount();
+            dispatch(showSnackbar({ message: "Account deleted", severity: "success" }));
             navigate("/");
         } catch (error: unknown) {
             const hasErrorCode = error !== null && typeof error === "object" && "code" in error;
             if (hasErrorCode && error.code === "auth/requires-recent-login") {
-                alert("Please log in again before deleting your account.");
+                dispatch(
+                    showSnackbar({
+                        message: "Please log in again before deleting your account.",
+                        severity: "warning",
+                    })
+                );
                 try {
                     await logoutUser();
                     navigate("/login");
@@ -44,7 +50,12 @@ export function AccountPresenter() {
                     console.error("Failed to redirect to login.");
                 }
             } else {
-                alert("Failed to delete account. Please try again later.");
+                dispatch(
+                    showSnackbar({
+                        message: "Failed to delete account. Please try again later.",
+                        severity: "error",
+                    })
+                );
             }
         }
     }
