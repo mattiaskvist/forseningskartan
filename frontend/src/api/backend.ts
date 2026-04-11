@@ -1,4 +1,7 @@
 import { DelaySummary } from "../types/historicalDelay";
+import { EventType } from "../types/departureDelay";
+import { RouteDelayTrendPoint } from "../types/routeDelays";
+import { getAvgDelayMinutes } from "../utils/time";
 
 export type DepartureHistoricalDelayParams = {
     stopPointGIDs: string[];
@@ -6,6 +9,12 @@ export type DepartureHistoricalDelayParams = {
     hourUTC: number;
     routeShortName: string;
     routeType?: string;
+};
+
+export type RouteDelayTrendParams = {
+    dates: string[];
+    routeShortName: string;
+    eventType: EventType;
 };
 
 const backendBaseURL = import.meta.env.VITE_BACKEND_API_URL ?? "http://localhost:8081";
@@ -76,15 +85,17 @@ export function fetchAvailableDates(): Promise<string[]> {
         return response.json();
     }
 
+    function catchErrorACB(error: unknown): string[] {
+        console.error(error);
+        return [];
+    }
+
     const fullURL = `${backendBaseURL}/api/available-dates`;
     return fetch(fullURL, {
         headers: getBackendAuthHeaders(),
     })
         .then(handleResponseACB)
-        .catch((err) => {
-            console.error(err);
-            return [];
-        });
+        .catch(catchErrorACB);
 }
 
 export function fetchDailyRouteDelays(dates: string[]): Promise<DelaySummary[] | null> {
@@ -99,6 +110,11 @@ export function fetchDailyRouteDelays(dates: string[]): Promise<DelaySummary[] |
         return response.json();
     }
 
+    function catchErrorACB(error: unknown): null {
+        console.error(error);
+        return null;
+    }
+
     const params = new URLSearchParams();
     appendListParam(params, "dates", dates);
 
@@ -107,8 +123,56 @@ export function fetchDailyRouteDelays(dates: string[]): Promise<DelaySummary[] |
         headers: getBackendAuthHeaders(),
     })
         .then(handleResponseACB)
-        .catch((err) => {
-            console.error(err);
-            return null;
-        });
+        .catch(catchErrorACB);
+}
+
+export function fetchRouteDelayTrend({
+    dates,
+    routeShortName,
+    eventType,
+}: RouteDelayTrendParams): Promise<RouteDelayTrendPoint[]> {
+    if (dates.length === 0) {
+        return Promise.resolve([]);
+    }
+
+    function createDatePromiseCB(date: string): Promise<RouteDelayTrendPoint> {
+        function processDailySummariesCB(
+            dailySummaries: DelaySummary[] | null
+        ): RouteDelayTrendPoint {
+            const selectedRouteSummary =
+                dailySummaries?.find((summary) => summary.route?.shortName === routeShortName) ??
+                null;
+
+            if (!selectedRouteSummary) {
+                return {
+                    date,
+                    avgDelayMinutes: null,
+                };
+            }
+
+            return {
+                date,
+                avgDelayMinutes: getAvgDelayMinutes(selectedRouteSummary, eventType),
+            };
+        }
+
+        return fetchDailyRouteDelays([date]).then(processDailySummariesCB);
+    }
+
+    const datePromises = dates.map(createDatePromiseCB);
+
+    function comparePointsByDateCB(a: RouteDelayTrendPoint, b: RouteDelayTrendPoint): number {
+        return a.date.localeCompare(b.date);
+    }
+
+    function sortResultsACB(trendResults: RouteDelayTrendPoint[]): RouteDelayTrendPoint[] {
+        return [...trendResults].sort(comparePointsByDateCB);
+    }
+
+    function catchErrorACB(error: unknown): RouteDelayTrendPoint[] {
+        console.error(error);
+        return [];
+    }
+
+    return Promise.all(datePromises).then(sortResultsACB).catch(catchErrorACB);
 }

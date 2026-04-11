@@ -1,23 +1,10 @@
 import { Departure, TransportationMode } from "../types/sl";
-import { formatDelay, formatTime, getDelayMinutes } from "../utils/time";
+import { formatDelay, formatTime, getDelayMinutes, getDelayTextColorClass } from "../utils/time";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { useMemo, useState } from "react";
 import { Card } from "@mui/material";
-
-function getDelayTextColorClass(delayMinutes: number | null) {
-    if (delayMinutes === null) {
-        return "text-slate-500";
-    }
-    if (delayMinutes <= 0) {
-        return "text-emerald-600";
-    }
-    if (delayMinutes > 0 && delayMinutes <= 3) {
-        return "text-amber-600";
-    }
-    return "text-rose-600";
-}
 
 type DepartureListProps = {
     departures: Departure[];
@@ -116,7 +103,12 @@ export function DepartureList({ departures, onSelectDepartureCB }: DepartureList
     return (
         <div className="flex flex-col gap-3">
             {uniqueModes.length > 0 ? (
-                <ToggleButtonGroup size="small" value={selectedModes} onChange={handleModeChangeCB}>
+                <ToggleButtonGroup
+                    color="primary"
+                    size="small"
+                    value={selectedModes}
+                    onChange={handleModeChangeCB}
+                >
                     {uniqueModes.map(renderModeButtonCB)}
                 </ToggleButtonGroup>
             ) : null}

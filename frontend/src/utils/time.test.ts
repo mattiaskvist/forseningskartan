@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { formatDelay, formatTime, getDelayMinutes } from "./time";
+import {
+    formatDelay,
+    formatTime,
+    getAvgDelayMinutes,
+    getAvgDelaySeconds,
+    getDelayMinutes,
+    sortDatesDescendingCB,
+} from "./time";
 import { Departure } from "../types/sl";
+import { DelaySummary } from "../types/historicalDelay";
 
 describe("formatTime", () => {
     it("returns '-' for undefined", () => {
@@ -100,5 +108,54 @@ describe("getDelayMinutes", () => {
         };
 
         expect(getDelayMinutes(departure)).toBe(5);
+    });
+});
+
+describe("getAvgDelaySeconds", () => {
+    it("returns departure delay stats average seconds", () => {
+        const summary: DelaySummary = {
+            departureDelayStats: { avgSeconds: 120 },
+            arrivalDelayStats: { avgSeconds: 90 },
+        } as DelaySummary;
+
+        expect(getAvgDelaySeconds(summary, "departure")).toBe(120);
+    });
+
+    it("returns arrival delay stats average seconds", () => {
+        const summary: DelaySummary = {
+            departureDelayStats: { avgSeconds: 120 },
+            arrivalDelayStats: { avgSeconds: 90 },
+        } as DelaySummary;
+
+        expect(getAvgDelaySeconds(summary, "arrival")).toBe(90);
+    });
+});
+
+describe("getAvgDelayMinutes", () => {
+    it("converts average delay seconds to minutes", () => {
+        const summary: DelaySummary = {
+            departureDelayStats: { avgSeconds: 300 },
+            arrivalDelayStats: { avgSeconds: 0 },
+        } as DelaySummary;
+
+        expect(getAvgDelayMinutes(summary, "departure")).toBe(5);
+    });
+
+    it("rounds to one decimal place", () => {
+        const summary: DelaySummary = {
+            departureDelayStats: { avgSeconds: 250 },
+            arrivalDelayStats: { avgSeconds: 0 },
+        } as DelaySummary;
+
+        expect(getAvgDelayMinutes(summary, "departure")).toBe(4.2);
+    });
+});
+
+describe("sortDatesDescendingCB", () => {
+    it("sorts dates in descending order", () => {
+        const dates = ["2024-01-01", "2024-01-15", "2024-01-05"];
+        const sorted = dates.sort(sortDatesDescendingCB);
+
+        expect(sorted).toEqual(["2024-01-15", "2024-01-05", "2024-01-01"]);
     });
 });

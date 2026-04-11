@@ -12,13 +12,27 @@ import {
     departureHistoricalDelaySlice,
     aggregatedDatesSlice,
     routeDelaysSlice,
+    routeDelayTrendSlice,
     departureUISlice,
+    routeDelayUISlice,
 } from "./reducers";
 import { authSlice } from "./authSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchSelectedDepartureStopDelays } from "./actions";
-import { setSelectedDeparture, setSelectedDatePreset, setSelectedCustomDate } from "./reducers";
-
+import {
+    fetchSelectedDepartureStopDelays,
+    fetchSelectedRouteDelays,
+    fetchSelectedRouteTrend,
+    getAggregatedDates,
+    getRouteDelays,
+} from "./actions";
+import {
+    setSelectedDeparture,
+    setSelectedDatePreset,
+    setSelectedCustomDate,
+    setRouteDelayDatePreset,
+    setRouteDelayCustomDate,
+    setRouteDelaySelectedRouteKey,
+} from "./reducers";
 const listenerMiddleware = createListenerMiddleware();
 
 export const store = configureStore({
@@ -29,8 +43,10 @@ export const store = configureStore({
         stopPoints: stopPointsSlice.reducer,
         departureHistoricalDelay: departureHistoricalDelaySlice.reducer,
         routeDelays: routeDelaysSlice.reducer,
+        routeDelayTrend: routeDelayTrendSlice.reducer,
         aggregatedDates: aggregatedDatesSlice.reducer,
         departureUI: departureUISlice.reducer,
+        routeDelayUI: routeDelayUISlice.reducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware().prepend(listenerMiddleware.middleware),
@@ -44,6 +60,30 @@ listenerMiddleware.startListening({
 
         const dispatch = listenerApi.dispatch as AppDispatch;
         dispatch(fetchSelectedDepartureStopDelays());
+    },
+});
+
+listenerMiddleware.startListening({
+    matcher: isAnyOf(
+        setRouteDelayDatePreset,
+        setRouteDelayCustomDate,
+        getAggregatedDates.fulfilled
+    ),
+    effect: (_, listenerApi) => {
+        listenerApi.cancelActiveListeners();
+
+        const dispatch = listenerApi.dispatch as AppDispatch;
+        dispatch(fetchSelectedRouteDelays());
+    },
+});
+
+listenerMiddleware.startListening({
+    matcher: isAnyOf(setRouteDelaySelectedRouteKey, getRouteDelays.fulfilled),
+    effect: (_, listenerApi) => {
+        listenerApi.cancelActiveListeners();
+
+        const dispatch = listenerApi.dispatch as AppDispatch;
+        dispatch(fetchSelectedRouteTrend());
     },
 });
 

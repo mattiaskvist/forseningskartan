@@ -6,10 +6,12 @@ import {
     getDepartureHistoricalDelaySummary,
     getAggregatedDates,
     getRouteDelays,
+    getRouteDelayTrend,
 } from "./actions";
-import { Departure, DepartureResponse, Site, StopPoint } from "../types/sl";
+import { Departure, DepartureResponse, Site, StopPoint, TransportationMode } from "../types/sl";
 import { DelaySummary } from "../types/historicalDelay";
-import { DatePreset } from "../types/departureDelay";
+import { DatePreset, EventType } from "../types/departureDelay";
+import { RouteDelayTrendPoint } from "../types/routeDelays";
 
 type SitesState = {
     data: Site[] | null;
@@ -48,10 +50,24 @@ type AggregatedDatesState = {
     error: Error | null;
 };
 
+type RouteDelayTrendState = {
+    data: RouteDelayTrendPoint[];
+    isLoading: boolean;
+    error: Error | null;
+};
+
 type DepartureUIState = {
     selectedDeparture: Departure | null;
     selectedDatePreset: DatePreset;
     selectedCustomDate: string | null;
+};
+
+type RouteDelayUIState = {
+    selectedDatePreset: DatePreset;
+    selectedCustomDate: string | null;
+    selectedEventType: EventType;
+    selectedTransportationMode: TransportationMode;
+    selectedRouteKey: string | null;
 };
 
 export const sitesSlice = createSlice({
@@ -180,6 +196,41 @@ export const routeDelaysSlice = createSlice({
     },
 });
 
+export const routeDelayTrendSlice = createSlice({
+    name: "routeDelayTrend",
+    initialState: {
+        data: [],
+        isLoading: false,
+        error: null,
+    } as RouteDelayTrendState,
+    reducers: {
+        clearRouteDelayTrend: (state) => {
+            state.data = [];
+            state.isLoading = false;
+            state.error = null;
+        },
+    },
+    extraReducers: (builder) => {
+        builder
+            .addCase(getRouteDelayTrend.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(getRouteDelayTrend.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.data = action.payload;
+                state.error = null;
+            })
+            .addCase(getRouteDelayTrend.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error as Error;
+                console.error("Failed to fetch route delay trend:", action.error);
+            });
+    },
+});
+
+export const { clearRouteDelayTrend } = routeDelayTrendSlice.actions;
+
 export const aggregatedDatesSlice = createSlice({
     name: "aggregatedDates",
     initialState: {
@@ -231,3 +282,44 @@ export const departureUISlice = createSlice({
 
 export const { setSelectedDeparture, setSelectedDatePreset, setSelectedCustomDate } =
     departureUISlice.actions;
+
+export const routeDelayUISlice = createSlice({
+    name: "routeDelayUI",
+    initialState: {
+        selectedDatePreset: "last7Days",
+        selectedCustomDate: null,
+        selectedEventType: "departure",
+        selectedTransportationMode: "BUS",
+        selectedRouteKey: null,
+    } as RouteDelayUIState,
+    reducers: {
+        setRouteDelayDatePreset: (state, action: { payload: DatePreset }) => {
+            state.selectedDatePreset = action.payload;
+
+            if (action.payload !== "customDate") {
+                state.selectedCustomDate = null;
+            }
+        },
+        setRouteDelayCustomDate: (state, action: { payload: string | null }) => {
+            state.selectedCustomDate = action.payload;
+        },
+        setRouteDelayEventType: (state, action: { payload: EventType }) => {
+            state.selectedEventType = action.payload;
+        },
+        setRouteDelayTransportationMode: (state, action: { payload: TransportationMode }) => {
+            state.selectedTransportationMode = action.payload;
+            state.selectedRouteKey = null;
+        },
+        setRouteDelaySelectedRouteKey: (state, action: { payload: string | null }) => {
+            state.selectedRouteKey = action.payload;
+        },
+    },
+});
+
+export const {
+    setRouteDelayDatePreset,
+    setRouteDelayCustomDate,
+    setRouteDelayEventType,
+    setRouteDelayTransportationMode,
+    setRouteDelaySelectedRouteKey,
+} = routeDelayUISlice.actions;
