@@ -1,4 +1,5 @@
 import { Site, DepartureResponse, StopPoint } from "../types/sl";
+import { backendBaseURL, getBackendAuthHeaders } from "./backend";
 
 const BASE_URL = "https://transport.integration.sl.se/v1";
 
@@ -54,7 +55,9 @@ function filterStopPointsACB(stopPoints: unknown[]): StopPoint[] {
 
 // this endpoint requires a cors proxy :(
 export function fetchStopPointsACB(): Promise<StopPoint[]> {
-    return fetch(`${BASE_URL}/stop-points`)
+    return fetch(`${backendBaseURL}/api/sl/stop-points`, {
+        headers: getBackendAuthHeaders(),
+    })
         .then(handleResponseACB)
         .then(filterStopPointsACB)
         .catch(throwErrorACB);

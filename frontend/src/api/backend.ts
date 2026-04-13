@@ -8,10 +8,10 @@ export type DepartureHistoricalDelayParams = {
     routeType?: string;
 };
 
-const backendBaseURL = import.meta.env.VITE_BACKEND_API_URL ?? "http://localhost:8081";
+export const backendBaseURL = import.meta.env.VITE_BACKEND_API_URL ?? "http://localhost:8081";
 const backendAPIKey = import.meta.env.VITE_BACKEND_API_KEY ?? "";
 
-function getBackendAuthHeaders(): HeadersInit {
+export function getBackendAuthHeaders(): HeadersInit {
     if (backendAPIKey === "") {
         return {};
     }
