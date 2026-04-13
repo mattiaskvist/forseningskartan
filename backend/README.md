@@ -168,3 +168,20 @@ Response:
 ```
 
 When no matching data exists, the endpoint returns an empty array `[]`.
+
+---
+
+`GET /api/sl/stop-points`
+
+Proxies stop points from the SL transport API (`/v1/stop-points`) via the backend so the frontend can fetch stop points without browser CORS issues.
+
+No query parameters are required.
+
+Example request:
+
+```bash
+curl -G "http://localhost:8081/api/sl/stop-points" \
+ -H "X-API-Key: <api-key>"
+```
+
+See https://www.trafiklab.se/sv/api/our-apis/sl/transport/ for the response format.
