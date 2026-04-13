@@ -21,6 +21,14 @@ function getSelectedDelayDates({
     return getDatesForPreset(selectedDatePreset, effectiveCustomDate, availableDates);
 }
 
+function getAuthUserCB(state: RootState) {
+    return state.auth.user;
+}
+
+function getAuthLoadingCB(state: RootState) {
+    return state.auth.loading;
+}
+
 function getSitesCB(state: RootState) {
     return state.sites.data;
 }
@@ -127,6 +135,18 @@ function getRouteDelayTrendLoadingCB(state: RootState) {
     return state.routeDelayTrend.isLoading;
 }
 
+function getSnackbarOpenCB(state: RootState) {
+    return state.snackbar.open;
+}
+
+function getSnackbarMessageCB(state: RootState) {
+    return state.snackbar.message;
+}
+
+function getSnackbarSeverityCB(state: RootState) {
+    return state.snackbar.severity;
+}
+
 // use createSelector for computationally expensive selectors
 // to memoize results and avoid unnecessary recalculations
 const getSelectedDelayDatesCB = createSelector(
@@ -152,6 +172,8 @@ const getSelectedRouteDelayDatesCB = createSelector(
 );
 
 export {
+    getAuthUserCB,
+    getAuthLoadingCB,
     getSitesCB,
     getSitesLoadingCB,
     getSelectedSiteIdCB,
@@ -176,6 +198,9 @@ export {
     getRouteDelaySelectedRouteKeyCB,
     getRouteDelayTrendPointsCB,
     getRouteDelayTrendLoadingCB,
+    getSnackbarOpenCB,
+    getSnackbarMessageCB,
+    getSnackbarSeverityCB,
     getSelectedDelayDates,
     getSelectedDelayDatesCB,
     getSelectedRouteDelayDatesCB,
