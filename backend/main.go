@@ -60,6 +60,7 @@ func main() {
 	apiMux.HandleFunc("/api/departure-historical-delay", srv.handleDepartureHistoricalDelay)
 	apiMux.HandleFunc("/api/available-dates", srv.handleAvailableDates)
 	apiMux.HandleFunc("/api/route-delays", srv.handleRouteDelays)
+	apiMux.HandleFunc("/api/sl/stop-points", srv.handleSLStopPoints)
 
 	rootMux := http.NewServeMux()
 	rootMux.Handle("/api/", requireAPIKeyOrAllowedOrigin(apiMux, apiKey, allowedOrigins))
