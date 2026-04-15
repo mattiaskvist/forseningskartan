@@ -14,6 +14,8 @@ import {
     routeDelaysSlice,
     departureUISlice,
 } from "./reducers";
+import { authSlice } from "./authSlice";
+import { snackbarSlice } from "./snackbarSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchSelectedDepartureStopDelays } from "./actions";
 import { setSelectedDeparture, setSelectedDatePreset, setSelectedCustomDate } from "./reducers";
@@ -22,6 +24,7 @@ const listenerMiddleware = createListenerMiddleware();
 
 export const store = configureStore({
     reducer: {
+        auth: authSlice.reducer,
         sites: sitesSlice.reducer,
         departures: departuresSlice.reducer,
         stopPoints: stopPointsSlice.reducer,
@@ -29,6 +32,7 @@ export const store = configureStore({
         routeDelays: routeDelaysSlice.reducer,
         aggregatedDates: aggregatedDatesSlice.reducer,
         departureUI: departureUISlice.reducer,
+        snackbar: snackbarSlice.reducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware().prepend(listenerMiddleware.middleware),

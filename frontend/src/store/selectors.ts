@@ -27,6 +27,14 @@ function getSelectedDelayDates({
     return getDatesForPreset(selectedDatePreset, effectiveCustomDate, availableDates);
 }
 
+function getAuthUserCB(state: RootState) {
+    return state.auth.user;
+}
+
+function getAuthLoadingCB(state: RootState) {
+    return state.auth.loading;
+}
+
 function getSitesCB(state: RootState) {
     return state.sites.data;
 }
@@ -105,6 +113,18 @@ function getSelectedCustomDateCB(state: RootState) {
     return state.departureUI.selectedCustomDate;
 }
 
+function getSnackbarOpenCB(state: RootState) {
+    return state.snackbar.open;
+}
+
+function getSnackbarMessageCB(state: RootState) {
+    return state.snackbar.message;
+}
+
+function getSnackbarSeverityCB(state: RootState) {
+    return state.snackbar.severity;
+}
+
 // use createSelector for computationally expensive selectors
 // to memoize results and avoid unnecessary recalculations
 const getSelectedDelayDatesCB = createSelector(
@@ -125,6 +145,8 @@ const getSelectedDelayDatesCB = createSelector(
 );
 
 export {
+    getAuthUserCB,
+    getAuthLoadingCB,
     getSitesCB,
     getSitesLoadingCB,
     getSelectedSiteIdCB,
@@ -142,6 +164,9 @@ export {
     getSelectedDepartureCB,
     getSelectedDatePresetCB,
     getSelectedCustomDateCB,
+    getSnackbarOpenCB,
+    getSnackbarMessageCB,
+    getSnackbarSeverityCB,
     getSelectedDelayDates,
     getSelectedDelayDatesCB,
 };

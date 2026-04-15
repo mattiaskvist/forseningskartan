@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, doc, getDoc, DocumentSnapshot } from "firebase/firestore";
-import { DelaySummary, CompactDelayStats, CompactSummary } from "../types/historicalDelay";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -11,81 +11,15 @@ const firebaseConfig = {
     appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const BY_ROUTE_CHUNK_COUNT = 16;
+export const app = initializeApp(firebaseConfig);
+export const db = getFirestore(app);
 
-function mapDelayStats(stats: CompactDelayStats): DelaySummary["arrivalDelayStats"] {
-    return { count: stats.c, avgSeconds: stats.a };
+// In test environments without a valid API key, getAuth will throw.
+let authInstance: ReturnType<typeof getAuth> | undefined;
+try {
+    authInstance = getAuth(app);
+} catch (error) {
+    console.warn("Failed to initialize Firebase Auth (likely missing API key):", error);
 }
 
-function mapSummary(summary: CompactSummary): DelaySummary {
-    return {
-        key: summary.k,
-        route: summary.r
-            ? { shortName: summary.r.sn, longName: summary.r.ln, type: summary.r.t }
-            : undefined,
-        stop: summary.s ? { name: summary.s.n } : undefined,
-        byHour: summary.h?.map(mapSummary),
-        byRoute: summary.br?.map(mapSummary),
-        arrivalEventCount: summary.ac,
-        departureEventCount: summary.dc,
-        uniqueTrips: summary.ut,
-        arrivalDelayStats: mapDelayStats(summary.ad),
-        departureDelayStats: mapDelayStats(summary.dd),
-        arrivalAheadStats: mapDelayStats(summary.aa),
-        departureAheadStats: mapDelayStats(summary.da),
-    };
-}
-
-export function fetchRouteDelays(date: string): Promise<DelaySummary[] | null> {
-    function processChunkDocsCB(chunkDocs: DocumentSnapshot[]): DelaySummary[] {
-        const result: DelaySummary[] = [];
-
-        function processChunkCB(chunkDoc: DocumentSnapshot) {
-            if (!chunkDoc.exists()) {
-                return;
-            }
-
-            const chunkData = chunkDoc.data() as { r?: CompactSummary[] };
-            if (!chunkData.r) {
-                return;
-            }
-
-            result.push(...chunkData.r.map(mapSummary));
-        }
-
-        chunkDocs.forEach(processChunkCB);
-        result.sort((a, b) => a.key.localeCompare(b.key));
-        return result;
-    }
-
-    function catchErrorACB(error: unknown) {
-        console.error(error);
-        return null;
-    }
-
-    const chunkPromises = Array.from({ length: BY_ROUTE_CHUNK_COUNT }, (_, chunkIdx) =>
-        getDoc(doc(db, date, "byRoute", `chunk_${chunkIdx}`, "data"))
-    );
-    return Promise.all(chunkPromises).then(processChunkDocsCB).catch(catchErrorACB);
-}
-
-// get dates for which aggregated data is available in firestore
-export function fetchAggregatedDates(): Promise<string[]> {
-    const dateIndexDocRef = doc(db, "index", "dates");
-
-    function processDocACB(docSnapshot: DocumentSnapshot): string[] {
-        if (!docSnapshot.exists()) {
-            return [];
-        }
-        return docSnapshot.data().dates as string[];
-    }
-
-    function catchErrorACB(error: unknown) {
-        console.error(error);
-        return [];
-    }
-
-    return getDoc(dateIndexDocRef).then(processDocACB).catch(catchErrorACB);
-}
+export const auth = authInstance as ReturnType<typeof getAuth>;
