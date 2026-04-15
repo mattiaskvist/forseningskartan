@@ -15,23 +15,33 @@ type StopMapProps = {
     sites: Site[];
     selectedSite: Site | null;
     handleSelectSiteCB: (siteId: number | null) => void;
+    mapStyle: MapStyle;
 };
+
+export const mapStyles = ["Dark", "Light", "Classic"] as const;
+export type MapStyle = (typeof mapStyles)[number];
 
 const STOCKHOLM_CENTER: [number, number] = [59.3293, 18.0686];
 const STOCKHOLM_ZOOM = 13;
 const SELECTED_SITE_ZOOM = 14;
 const ZOOM_CONTROL_POSITION: ControlPosition = "bottomleft";
 
-const TILE_LAYER_URL = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
-const TILE_LAYER_ATTRIBUTION =
-    '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>';
-
-const UNSELECTED_MARKER_STYLE: CircleMarkerOptions = {
-    radius: 4,
-    color: "#38bdf8",
-    fillColor: "#38bdf8",
-    fillOpacity: 0.7,
-    weight: 1,
+const MAP_TILES: Record<MapStyle, { url: string; attribution: string }> = {
+    Dark: {
+        url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+        attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+    },
+    Light: {
+        url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+        attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+    },
+    Classic: {
+        url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    },
 };
 
 const SELECTED_MARKER_STYLE: CircleMarkerOptions = {
@@ -42,13 +52,30 @@ const SELECTED_MARKER_STYLE: CircleMarkerOptions = {
     weight: 2,
 };
 
-function setMarkerSelectedStyleCB(marker: CircleMarker, isSelected: boolean) {
-    marker.setStyle(isSelected ? SELECTED_MARKER_STYLE : UNSELECTED_MARKER_STYLE);
+function getUnselectedMarkerStyle(mapStyle: MapStyle): CircleMarkerOptions {
+    const UNSELECTED_MARKER_COLOR_BY_STYLE: Record<MapStyle, string> = {
+        Dark: "#38bdf8",
+        Light: "#0284c7",
+        Classic: "#2563eb",
+    };
+    const color = UNSELECTED_MARKER_COLOR_BY_STYLE[mapStyle];
+    return {
+        radius: 4,
+        color,
+        fillColor: color,
+        fillOpacity: 0.7,
+        weight: 1,
+    };
 }
 
-export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProps) {
+function setMarkerSelectedStyle(marker: CircleMarker, isSelected: boolean, mapStyle: MapStyle) {
+    marker.setStyle(isSelected ? SELECTED_MARKER_STYLE : getUnselectedMarkerStyle(mapStyle));
+}
+
+export function StopMap({ sites, selectedSite, handleSelectSiteCB, mapStyle }: StopMapProps) {
     const mapContainerRef = useRef<HTMLDivElement | null>(null);
     const mapRef = useRef<LeafletMap | null>(null);
+    const tileLayerRef = useRef<TileLayer | null>(null);
     const markersLayerRef = useRef<LayerGroup | null>(null);
     const markersBySiteIdRef = useRef<Map<number, CircleMarker>>(new Map());
     const selectedMarkerRef = useRef<CircleMarker | null>(null);
@@ -69,10 +96,13 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
             position: ZOOM_CONTROL_POSITION,
         }).addTo(map);
 
-        new TileLayer(TILE_LAYER_URL, {
-            attribution: TILE_LAYER_ATTRIBUTION,
+        const initialStyle = MAP_TILES[mapStyle];
+        const tileLayer = new TileLayer(initialStyle.url, {
+            attribution: initialStyle.attribution,
             maxZoom: 19,
-        }).addTo(map);
+        });
+        tileLayer.addTo(map);
+        tileLayerRef.current = tileLayer;
 
         map.whenReady(() => {
             map.invalidateSize();
@@ -85,6 +115,7 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
         return () => {
             map.remove();
             mapRef.current = null;
+            tileLayerRef.current = null;
             markersLayerRef.current = null;
             markersBySiteId.clear();
             selectedMarkerRef.current = null;
@@ -92,6 +123,28 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
         };
     }, []);
 
+    // Update tile layer when map style changes
+    useEffect(() => {
+        const map = mapRef.current;
+        if (!map) {
+            return;
+        }
+
+        const style = MAP_TILES[mapStyle];
+
+        if (tileLayerRef.current) {
+            tileLayerRef.current.removeFrom(map);
+        }
+
+        const tileLayer = new TileLayer(style.url, {
+            attribution: style.attribution,
+            maxZoom: 19,
+        });
+        tileLayer.addTo(map);
+        tileLayerRef.current = tileLayer;
+    }, [mapStyle]);
+
+    // Update markers when sites change
     useEffect(() => {
         const markersLayer = markersLayerRef.current;
         if (!markersLayer) {
@@ -105,7 +158,10 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
         selectedMarkerRef.current = null;
 
         function addSiteMarkerCB(site: Site) {
-            const marker = new CircleMarker([site.lat, site.lon], UNSELECTED_MARKER_STYLE);
+            const marker = new CircleMarker(
+                [site.lat, site.lon],
+                getUnselectedMarkerStyle(mapStyle)
+            );
             marker.bindTooltip(site.name);
             marker.on("click", () => {
                 const selectedSiteId = selectedSiteIdRef.current;
@@ -119,6 +175,15 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
         sites.forEach(addSiteMarkerCB);
     }, [sites, handleSelectSiteCB]);
 
+    // Update marker styles when map style changes
+    useEffect(() => {
+        const selectedSiteId = selectedSiteIdRef.current;
+        function setMarkerStyleCB(marker: CircleMarker, siteId: number) {
+            setMarkerSelectedStyle(marker, siteId === selectedSiteId, mapStyle);
+        }
+        markersBySiteIdRef.current.forEach(setMarkerStyleCB);
+    }, [mapStyle]);
+
     useEffect(() => {
         if (!mapRef.current) {
             return;
@@ -126,13 +191,13 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB }: StopMapProp
         selectedSiteIdRef.current = selectedSite?.id ?? null;
 
         if (selectedMarkerRef.current) {
-            setMarkerSelectedStyleCB(selectedMarkerRef.current, false);
+            setMarkerSelectedStyle(selectedMarkerRef.current, false, mapStyle);
         }
 
         if (selectedSite) {
             const selectedMarker = markersBySiteIdRef.current.get(selectedSite.id) ?? null;
             if (selectedMarker) {
-                setMarkerSelectedStyleCB(selectedMarker, true);
+                setMarkerSelectedStyle(selectedMarker, true, mapStyle);
             }
             selectedMarkerRef.current = selectedMarker;
             return;
