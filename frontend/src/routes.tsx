@@ -2,10 +2,9 @@ import MapIcon from "@mui/icons-material/Map";
 import TimelineIcon from "@mui/icons-material/Timeline";
 import InfoIcon from "@mui/icons-material/Info";
 import { MapPresenter } from "./presenters/mapPresenter";
-import { DeparturePresenter } from "./presenters/departurePresenter";
 import { RouteDelayPresenter } from "./presenters/RouteDelayPresenter";
 import { useAppSelector } from "./store/store";
-import { getSelectedSiteCB, getSitesCB } from "./store/selectors";
+import { getSitesCB } from "./store/selectors";
 
 export type RouteConfig = {
     path: string;
@@ -17,23 +16,8 @@ export type RouteConfig = {
 // TODO: Does this adhere to MVP?
 function MapPage() {
     const sites = useAppSelector(getSitesCB)!; // guaranteed non-null by App's loading gate
-    const selectedSite = useAppSelector(getSelectedSiteCB);
 
-    return (
-        <>
-            <MapPresenter sites={sites} />
-            {selectedSite && (
-                <aside className="pointer-events-auto absolute right-4 top-4 z-1000 w-[min(420px,calc(100vw-2rem))]">
-                    <div className="flex max-h-[calc(100vh-2rem)] flex-col gap-3 overflow-y-auto pr-1">
-                        <section className="overlay-panel">
-                            <h2 className="overlay-panel-title">Departures</h2>
-                            <DeparturePresenter selectedSite={selectedSite} />
-                        </section>
-                    </div>
-                </aside>
-            )}
-        </>
-    );
+    return <MapPresenter sites={sites} />;
 }
 
 function RouteDelayPage() {
