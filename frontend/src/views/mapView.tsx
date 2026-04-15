@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { SearchBar } from "../components/SearchBar";
-import { StopMap, type MapStyle } from "../components/StopMap";
+import { StopMap } from "../components/StopMap";
 import { Site } from "../types/sl";
 import { MapStyleSelector } from "../components/MapStyleSelector";
 import { DepartureView, DepartureViewProps } from "./departureView";
+import { MapStyle } from "../types/map";
 
 type MapViewProps = {
     sites: Site[];
