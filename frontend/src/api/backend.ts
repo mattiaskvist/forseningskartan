@@ -14,6 +14,7 @@ export type DepartureHistoricalDelayParams = {
 export type RouteDelayTrendParams = {
     dates: string[];
     routeShortName: string;
+    routeType: string;
     eventType: EventType;
 };
 
@@ -129,6 +130,7 @@ export function fetchDailyRouteDelays(dates: string[]): Promise<DelaySummary[] |
 export function fetchRouteDelayTrend({
     dates,
     routeShortName,
+    routeType,
     eventType,
 }: RouteDelayTrendParams): Promise<RouteDelayTrendPoint[]> {
     if (dates.length === 0) {
@@ -140,7 +142,9 @@ export function fetchRouteDelayTrend({
             dailySummaries: DelaySummary[] | null
         ): RouteDelayTrendPoint {
             function isMatchingRouteCB(summary: DelaySummary): boolean {
-                return summary.route?.shortName === routeShortName;
+                return (
+                    summary.route?.shortName === routeShortName && summary.route?.type === routeType
+                );
             }
             const selectedRouteSummary = dailySummaries?.find(isMatchingRouteCB) ?? null;
 

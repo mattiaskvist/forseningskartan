@@ -32,7 +32,7 @@ import {
 } from "../types/sl";
 import { PageSizeOption, RouteDelaySection } from "../types/routeDelays";
 import { getAvgDelaySeconds } from "../utils/time";
-import { compareRouteNamesCB, getRouteDisplayName } from "../utils/route";
+import { compareRouteNamesCB, getRouteDisplayName, getRouteIdentityKey } from "../utils/route";
 
 function getRouteModeKey(summary: DelaySummary): string {
     return summary.route?.type ?? "unknown";
@@ -124,7 +124,7 @@ export function RouteDelayPresenter() {
         }
 
         function isSelectedRouteCB(summary: DelaySummary): boolean {
-            return summary.key === selectedRouteKey;
+            return getRouteIdentityKey(summary) === selectedRouteKey;
         }
 
         return routeDelays.find(isSelectedRouteCB) ?? null;

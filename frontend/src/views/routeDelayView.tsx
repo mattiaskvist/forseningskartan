@@ -19,7 +19,7 @@ import {
     RouteDelayTrendPoint,
 } from "../types/routeDelays";
 import { getAvgDelayMinutes, getDelayTextColorClass } from "../utils/time";
-import { getRouteDisplayName } from "../utils/route";
+import { getRouteDisplayName, getRouteIdentityKey } from "../utils/route";
 
 type RouteDelayViewProps = {
     selectedSection: RouteDelaySection;
@@ -92,7 +92,7 @@ export function RouteDelayView({
             : `Showing ${totalFilteredRoutes} filtered routes`;
 
     function getRouteListItemCB(summary: DelaySummary) {
-        const routeKey = summary.key;
+        const routeKey = getRouteIdentityKey(summary);
         const avgDelayMinutes = getAvgDelayMinutes(summary, selectedEventType);
 
         function handleClickACB() {
@@ -130,7 +130,7 @@ export function RouteDelayView({
         const avgDelayMinutes = getAvgDelayMinutes(summary, selectedEventType);
         return (
             <li
-                key={summary.key}
+                key={getRouteIdentityKey(summary)}
                 className="flex items-center justify-between text-sm text-slate-700"
             >
                 <span className="flex items-center gap-3">

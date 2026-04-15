@@ -13,6 +13,8 @@ import { getSelectedDelayDates } from "./selectors";
 import { getStopPointGidsForSite } from "../utils/site";
 import { transportationModeToRouteType } from "../types/sl";
 import { clearRouteDelayTrend } from "./reducers";
+import { getRouteIdentityKey } from "../utils/route";
+import { DelaySummary } from "../types/historicalDelay";
 
 export const getSites = createAsyncThunk("sites/fetch", fetchSitesACB);
 
@@ -48,8 +50,8 @@ export const getRouteDelays = createAsyncThunk("routeDelays/fetch", (dates: stri
 
 export const getRouteDelayTrend = createAsyncThunk(
     "routeDelayTrend/fetch",
-    ({ dates, routeShortName, eventType }: RouteDelayTrendParams) =>
-        fetchRouteDelayTrend({ dates, routeShortName, eventType })
+    ({ dates, routeShortName, routeType, eventType }: RouteDelayTrendParams) =>
+        fetchRouteDelayTrend({ dates, routeShortName, routeType, eventType })
 );
 
 // fetch historical delay summary for selected departure
@@ -121,9 +123,10 @@ export function fetchSelectedRouteDelays(): AppThunk {
 export function fetchSelectedRouteTrend(): AppThunk {
     return (dispatch, getState) => {
         const state = getState();
-        const selectedRouteSummary = state.routeDelays.data?.find(
-            (summary) => summary.key === state.routeDelayUI.selectedRouteKey
-        );
+        function isSelectedRouteSummaryCB(summary: DelaySummary): boolean {
+            return getRouteIdentityKey(summary) === state.routeDelayUI.selectedRouteKey;
+        }
+        const selectedRouteSummary = state.routeDelays.data?.find(isSelectedRouteSummaryCB);
         const selectedDates = getSelectedDelayDates({
             selectedDatePreset: state.routeDelayUI.selectedDatePreset,
             selectedCustomDate: state.routeDelayUI.selectedCustomDate,
@@ -136,7 +139,8 @@ export function fetchSelectedRouteTrend(): AppThunk {
         }
 
         const selectedRouteShortName = selectedRouteSummary.route?.shortName;
-        if (!selectedRouteShortName) {
+        const selectedRouteType = selectedRouteSummary.route?.type;
+        if (!selectedRouteShortName || !selectedRouteType) {
             dispatch(clearRouteDelayTrend());
             return;
         }
@@ -145,6 +149,7 @@ export function fetchSelectedRouteTrend(): AppThunk {
             getRouteDelayTrend({
                 dates: selectedDates,
                 routeShortName: selectedRouteShortName,
+                routeType: selectedRouteType,
                 eventType: state.routeDelayUI.selectedEventType,
             })
         );
