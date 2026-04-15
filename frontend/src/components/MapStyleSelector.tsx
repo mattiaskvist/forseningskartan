@@ -1,4 +1,4 @@
-import { mapStyles, MapStyle } from "./StopMap";
+import { MapStyle, mapStyles } from "../types/map";
 
 type MapStyleSelectorProps = {
     mapStyle: MapStyle;

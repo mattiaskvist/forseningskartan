@@ -10,6 +10,7 @@ import {
 } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { Site } from "../types/sl";
+import { MapStyle } from "../types/map";
 
 type StopMapProps = {
     sites: Site[];
@@ -17,9 +18,6 @@ type StopMapProps = {
     handleSelectSiteCB: (siteId: number | null) => void;
     mapStyle: MapStyle;
 };
-
-export const mapStyles = ["Dark", "Light", "Classic"] as const;
-export type MapStyle = (typeof mapStyles)[number];
 
 const STOCKHOLM_CENTER: [number, number] = [59.3293, 18.0686];
 const STOCKHOLM_ZOOM = 13;
@@ -80,6 +78,11 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB, mapStyle }: S
     const markersBySiteIdRef = useRef<Map<number, CircleMarker>>(new Map());
     const selectedMarkerRef = useRef<CircleMarker | null>(null);
     const selectedSiteIdRef = useRef<number | null>(null);
+    const mapStyleRef = useRef(mapStyle);
+
+    useEffect(() => {
+        mapStyleRef.current = mapStyle;
+    }, [mapStyle]);
 
     useEffect(() => {
         if (!mapContainerRef.current || mapRef.current) {
@@ -95,14 +98,6 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB, mapStyle }: S
         new Control.Zoom({
             position: ZOOM_CONTROL_POSITION,
         }).addTo(map);
-
-        const initialStyle = MAP_TILES[mapStyle];
-        const tileLayer = new TileLayer(initialStyle.url, {
-            attribution: initialStyle.attribution,
-            maxZoom: 19,
-        });
-        tileLayer.addTo(map);
-        tileLayerRef.current = tileLayer;
 
         map.whenReady(() => {
             map.invalidateSize();
@@ -160,7 +155,7 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB, mapStyle }: S
         function addSiteMarkerCB(site: Site) {
             const marker = new CircleMarker(
                 [site.lat, site.lon],
-                getUnselectedMarkerStyle(mapStyle)
+                getUnselectedMarkerStyle(mapStyleRef.current)
             );
             marker.bindTooltip(site.name);
             marker.on("click", () => {
@@ -191,13 +186,13 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB, mapStyle }: S
         selectedSiteIdRef.current = selectedSite?.id ?? null;
 
         if (selectedMarkerRef.current) {
-            setMarkerSelectedStyle(selectedMarkerRef.current, false, mapStyle);
+            setMarkerSelectedStyle(selectedMarkerRef.current, false, mapStyleRef.current);
         }
 
         if (selectedSite) {
             const selectedMarker = markersBySiteIdRef.current.get(selectedSite.id) ?? null;
             if (selectedMarker) {
-                setMarkerSelectedStyle(selectedMarker, true, mapStyle);
+                setMarkerSelectedStyle(selectedMarker, true, mapStyleRef.current);
             }
             selectedMarkerRef.current = selectedMarker;
             return;
