@@ -6,13 +6,6 @@ import { SidebarPresenter } from "./presenters/sidebarPresenter";
 import { AccountPresenter } from "./presenters/accountPresenter";
 import { LoginPresenter } from "./presenters/loginPresenter";
 import { initializeAuthListener } from "./firebase/authActions";
-import {
-    getSitesLoadingCB,
-    getStopPointsCB,
-    getStopPointsLoadingCB,
-    getSitesCB,
-} from "./store/selectors";
-import { Suspense } from "./components/Suspense";
 import { GlobalSnackbar } from "./components/GlobalSnackbar";
 import { ROUTES, type RouteConfig } from "./routes";
 
