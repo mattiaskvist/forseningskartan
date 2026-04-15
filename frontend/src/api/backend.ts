@@ -139,9 +139,10 @@ export function fetchRouteDelayTrend({
         function processDailySummariesACB(
             dailySummaries: DelaySummary[] | null
         ): RouteDelayTrendPoint {
-            const selectedRouteSummary =
-                dailySummaries?.find((summary) => summary.route?.shortName === routeShortName) ??
-                null;
+            function isMatchingRouteCB(summary: DelaySummary): boolean {
+                return summary.route?.shortName === routeShortName;
+            }
+            const selectedRouteSummary = dailySummaries?.find(isMatchingRouteCB) ?? null;
 
             if (!selectedRouteSummary) {
                 return {
