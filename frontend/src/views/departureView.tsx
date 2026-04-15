@@ -6,7 +6,7 @@ import { DepartureDetails } from "../components/DepartureDetails";
 import { DepartureList } from "../components/DepartureList";
 import { DatePreset } from "../types/departureDelay";
 
-type DepartureViewProps = {
+export type DepartureViewProps = {
     departures: Departure[];
     selectedDeparture: Departure | null;
     selectedSiteName: string;
