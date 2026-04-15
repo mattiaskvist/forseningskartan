@@ -37,24 +37,24 @@ export function DeparturePresenter({ selectedSite }: DeparturePresenterProps) {
     const selectedDepartureDelaySummary = useAppSelector(getDepartureHistoricalDelaySummaryCB);
     const isDepartureHistoricalDelayLoading = useAppSelector(getDepartureHistoricalDelayLoadingCB);
 
-    function closeDeparturesViewCB() {
+    function closeDeparturesViewACB() {
         dispatch(setSelectedDeparture(null));
         dispatch(setSelectedSiteId(null));
     }
 
-    function selectDepartureCB(departure: Departure) {
+    function selectDepartureACB(departure: Departure) {
         dispatch(setSelectedDeparture(departure));
     }
 
-    function returnToDepartureListCB() {
+    function returnToDepartureListACB() {
         dispatch(setSelectedDeparture(null));
     }
 
-    function setSelectedDatePresetCB(preset: DatePreset) {
+    function setSelectedDatePresetACB(preset: DatePreset) {
         dispatch(setSelectedDatePreset(preset));
     }
 
-    function setSelectedCustomDateCB(date: string) {
+    function setSelectedCustomDateACB(date: string) {
         dispatch(setSelectedCustomDate(date));
     }
 
@@ -65,9 +65,9 @@ export function DeparturePresenter({ selectedSite }: DeparturePresenterProps) {
             departures={departures}
             selectedDeparture={selectedDeparture}
             selectedSiteName={selectedSite.name}
-            onCloseCB={closeDeparturesViewCB}
-            onSelectDepartureCB={selectDepartureCB}
-            onBackToListCB={returnToDepartureListCB}
+            onClose={closeDeparturesViewACB}
+            onSelectDeparture={selectDepartureACB}
+            onBackToList={returnToDepartureListACB}
             isLoading={isDeparturesLoading}
             availableDates={availableDates}
             selectedDelayDates={selectedDelayDates}
@@ -75,8 +75,8 @@ export function DeparturePresenter({ selectedSite }: DeparturePresenterProps) {
             isDepartureHistoricalDelayLoading={isDepartureHistoricalDelayLoading}
             selectedDatePreset={selectedDatePreset}
             selectedCustomDate={selectedCustomDate}
-            onDatePresetChangeCB={setSelectedDatePresetCB}
-            onCustomDateChangeCB={setSelectedCustomDateCB}
+            onDatePresetChange={setSelectedDatePresetACB}
+            onCustomDateChange={setSelectedCustomDateACB}
         />
     );
 }

@@ -130,45 +130,45 @@ export function RouteDelayPresenter() {
         return routeDelays.find(isSelectedRouteCB) ?? null;
     }, [routeDelays, selectedRouteKey]);
 
-    function handleDatePresetChangeCB(preset: DatePreset) {
+    function handleDatePresetChangeACB(preset: DatePreset) {
         setCurrentPage(1);
         dispatch(setRouteDelayDatePreset(preset));
     }
 
-    function handleCustomDateChangeCB(date: string) {
+    function handleCustomDateChangeACB(date: string) {
         setCurrentPage(1);
         dispatch(setRouteDelayCustomDate(date));
     }
 
-    function handleEventTypeChangeCB(eventType: EventType) {
+    function handleEventTypeChangeACB(eventType: EventType) {
         setCurrentPage(1);
         dispatch(setRouteDelayEventType(eventType));
     }
 
-    function handleTransportationModeChangeCB(filter: TransportationMode) {
+    function handleTransportationModeChangeACB(filter: TransportationMode) {
         setCurrentPage(1);
         dispatch(setRouteDelayTransportationMode(filter));
     }
 
-    function handleSearchQueryChangeCB(query: string) {
+    function handleSearchQueryChangeACB(query: string) {
         setSearchQuery(query);
         setCurrentPage(1);
     }
 
-    function handleSelectRouteCB(routeKey: string | null) {
+    function handleSelectRouteACB(routeKey: string | null) {
         dispatch(setRouteDelaySelectedRouteKey(routeKey));
     }
 
-    function handlePageChangeCB(nextPage: number) {
+    function handlePageChangeACB(nextPage: number) {
         setCurrentPage(nextPage);
     }
 
-    function handleSetSelectedSectionCB(section: RouteDelaySection) {
+    function handleSetSelectedSectionACB(section: RouteDelaySection) {
         setSelectedSection(section);
         dispatch(setRouteDelaySelectedRouteKey(null));
     }
 
-    function handleRoutesPerPageChangeCB(nextPageSize: PageSizeOption) {
+    function handleRoutesPerPageChangeACB(nextPageSize: PageSizeOption) {
         setRoutesPerPage(nextPageSize);
         setCurrentPage(1);
     }
@@ -198,15 +198,15 @@ export function RouteDelayPresenter() {
             selectedDates={selectedDates}
             transportationModeOptions={transportationModeOptions}
             availableDates={availableDates}
-            onDatePresetChangeCB={handleDatePresetChangeCB}
-            onCustomDateChangeCB={handleCustomDateChangeCB}
-            onEventTypeChangeCB={handleEventTypeChangeCB}
-            onTransportationModeChangeCB={handleTransportationModeChangeCB}
-            onSearchQueryChangeCB={handleSearchQueryChangeCB}
-            onSelectedSectionChangeCB={handleSetSelectedSectionCB}
-            onSelectRouteCB={handleSelectRouteCB}
-            onPageChangeCB={handlePageChangeCB}
-            onRoutesPerPageChangeCB={handleRoutesPerPageChangeCB}
+            onDatePresetChange={handleDatePresetChangeACB}
+            onCustomDateChange={handleCustomDateChangeACB}
+            onEventTypeChange={handleEventTypeChangeACB}
+            onTransportationModeChange={handleTransportationModeChangeACB}
+            onSearchQueryChange={handleSearchQueryChangeACB}
+            onSelectedSectionChange={handleSetSelectedSectionACB}
+            onSelectRoute={handleSelectRouteACB}
+            onPageChange={handlePageChangeACB}
+            onRoutesPerPageChange={handleRoutesPerPageChangeACB}
         />
     );
 }
