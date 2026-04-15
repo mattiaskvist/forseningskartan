@@ -34,6 +34,7 @@ describe("departuresSlice", () => {
             data: null,
             isLoading: false,
             error: null,
+            currentRequestId: null,
         });
     });
 });

@@ -24,6 +24,7 @@ type DeparturesState = {
     data: DepartureResponse | null;
     isLoading: boolean;
     error: Error | null;
+    currentRequestId: string | null;
 };
 
 type StopPointsState = {
@@ -36,12 +37,14 @@ type DepartureHistoricalDelayState = {
     summary: DelaySummary | null;
     isLoading: boolean;
     error: Error | null;
+    currentRequestId: string | null;
 };
 
 type RouteDelayState = {
     data: DelaySummary[] | null;
     isLoading: boolean;
     error: Error | null;
+    currentRequestId: string | null;
 };
 
 type AggregatedDatesState = {
@@ -54,6 +57,7 @@ type RouteDelayTrendState = {
     data: RouteDelayTrendPoint[];
     isLoading: boolean;
     error: Error | null;
+    currentRequestId: string | null;
 };
 
 type DepartureUIState = {
@@ -101,22 +105,38 @@ export const { setSelectedSiteId } = sitesSlice.actions;
 
 export const departuresSlice = createSlice({
     name: "departures",
-    initialState: { data: null, isLoading: false, error: null } as DeparturesState,
+    initialState: {
+        data: null,
+        isLoading: false,
+        error: null,
+        currentRequestId: null,
+    } as DeparturesState,
     reducers: {},
     extraReducers: (builder) => {
         builder
-            .addCase(getDepartures.pending, (state) => {
+            .addCase(getDepartures.pending, (state, action) => {
                 state.isLoading = true;
                 state.error = null;
+                state.currentRequestId = action.meta.requestId;
             })
             .addCase(getDepartures.fulfilled, (state, action) => {
+                if (state.currentRequestId !== action.meta.requestId) {
+                    return;
+                }
+
                 state.isLoading = false;
                 state.data = action.payload;
                 state.error = null;
+                state.currentRequestId = null;
             })
             .addCase(getDepartures.rejected, (state, action) => {
+                if (state.currentRequestId !== action.meta.requestId) {
+                    return;
+                }
+
                 state.isLoading = false;
                 state.error = action.error as Error;
+                state.currentRequestId = null;
                 console.error("Failed to fetch departures:", action.error);
             });
     },
@@ -151,23 +171,35 @@ export const departureHistoricalDelaySlice = createSlice({
         summary: null,
         isLoading: false,
         error: null,
+        currentRequestId: null,
     } as DepartureHistoricalDelayState,
     reducers: {},
     extraReducers: (builder) => {
         builder
-            .addCase(getDepartureHistoricalDelaySummary.pending, (state) => {
+            .addCase(getDepartureHistoricalDelaySummary.pending, (state, action) => {
                 state.isLoading = true;
                 state.summary = null;
                 state.error = null;
+                state.currentRequestId = action.meta.requestId;
             })
             .addCase(getDepartureHistoricalDelaySummary.fulfilled, (state, action) => {
+                if (state.currentRequestId !== action.meta.requestId) {
+                    return;
+                }
+
                 state.isLoading = false;
                 state.summary = action.payload;
                 state.error = null;
+                state.currentRequestId = null;
             })
             .addCase(getDepartureHistoricalDelaySummary.rejected, (state, action) => {
+                if (state.currentRequestId !== action.meta.requestId) {
+                    return;
+                }
+
                 state.isLoading = false;
                 state.error = action.error as Error;
+                state.currentRequestId = null;
                 console.error("Failed to fetch departure historical delay summary:", action.error);
             });
     },
@@ -175,22 +207,38 @@ export const departureHistoricalDelaySlice = createSlice({
 
 export const routeDelaysSlice = createSlice({
     name: "routeDelays",
-    initialState: { data: null, isLoading: false, error: null } as RouteDelayState,
+    initialState: {
+        data: null,
+        isLoading: false,
+        error: null,
+        currentRequestId: null,
+    } as RouteDelayState,
     reducers: {},
     extraReducers: (builder) => {
         builder
-            .addCase(getRouteDelays.pending, (state) => {
+            .addCase(getRouteDelays.pending, (state, action) => {
                 state.isLoading = true;
                 state.error = null;
+                state.currentRequestId = action.meta.requestId;
             })
             .addCase(getRouteDelays.fulfilled, (state, action) => {
+                if (state.currentRequestId !== action.meta.requestId) {
+                    return;
+                }
+
                 state.isLoading = false;
                 state.data = action.payload;
                 state.error = null;
+                state.currentRequestId = null;
             })
             .addCase(getRouteDelays.rejected, (state, action) => {
+                if (state.currentRequestId !== action.meta.requestId) {
+                    return;
+                }
+
                 state.isLoading = false;
                 state.error = action.error as Error;
+                state.currentRequestId = null;
                 console.error("Failed to fetch route delays:", action.error);
             });
     },
@@ -202,28 +250,41 @@ export const routeDelayTrendSlice = createSlice({
         data: [],
         isLoading: false,
         error: null,
+        currentRequestId: null,
     } as RouteDelayTrendState,
     reducers: {
         clearRouteDelayTrend: (state) => {
             state.data = [];
             state.isLoading = false;
             state.error = null;
+            state.currentRequestId = null;
         },
     },
     extraReducers: (builder) => {
         builder
-            .addCase(getRouteDelayTrend.pending, (state) => {
+            .addCase(getRouteDelayTrend.pending, (state, action) => {
                 state.isLoading = true;
                 state.error = null;
+                state.currentRequestId = action.meta.requestId;
             })
             .addCase(getRouteDelayTrend.fulfilled, (state, action) => {
+                if (state.currentRequestId !== action.meta.requestId) {
+                    return;
+                }
+
                 state.isLoading = false;
                 state.data = action.payload;
                 state.error = null;
+                state.currentRequestId = null;
             })
             .addCase(getRouteDelayTrend.rejected, (state, action) => {
+                if (state.currentRequestId !== action.meta.requestId) {
+                    return;
+                }
+
                 state.isLoading = false;
                 state.error = action.error as Error;
+                state.currentRequestId = null;
                 console.error("Failed to fetch route delay trend:", action.error);
             });
     },
