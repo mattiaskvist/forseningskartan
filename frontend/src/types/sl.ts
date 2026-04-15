@@ -108,6 +108,11 @@ export const transportationModeToRouteType: { [K in TransportationMode]: RouteTy
     TAXI: "1501",
 };
 
+export const transportationModes = Object.entries(transportationModeToRouteType) as [
+    TransportationMode,
+    RouteType,
+][];
+
 type StopDeviation = {
     id: number;
     importance_level: number;

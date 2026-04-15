@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
 import { Departure } from "../types/sl";
-import { DatePreset } from "../types/departureDelay";
+import { DatePreset, EventType } from "../types/departureDelay";
+import { DelaySummary } from "../types/historicalDelay";
 
 export function formatTime(rawTime: string | undefined): string {
     if (!rawTime) {
@@ -45,14 +46,38 @@ export function getDelayMinutes(departure: Departure): number | null {
     return Math.round((expectedTimestamp - scheduledTimestamp) / 60000);
 }
 
+export function getAvgDelaySeconds(summary: DelaySummary, selectedEventType: EventType): number {
+    return selectedEventType === "departure"
+        ? summary.departureDelayStats.avgSeconds
+        : summary.arrivalDelayStats.avgSeconds;
+}
+
+export function getAvgDelayMinutes(summary: DelaySummary, selectedEventType: EventType): number {
+    const avgDelaySeconds = getAvgDelaySeconds(summary, selectedEventType);
+    return Number((avgDelaySeconds / 60).toFixed(1));
+}
+
+export function getDelayTextColorClass(delayMinutes: number | null) {
+    if (delayMinutes === null) {
+        return "text-slate-500";
+    }
+    if (delayMinutes <= 0) {
+        return "text-emerald-600";
+    }
+    if (delayMinutes > 0 && delayMinutes <= 3) {
+        return "text-amber-600";
+    }
+    return "text-rose-600";
+}
+
 // in dayjs 0 is Sunday and 6 Saturday
 const WEEKEND_WEEKDAYS = new Set([0, 6]);
 
-export function isBeforeReferenceDateCB(date: string, referenceDate: string): boolean {
+function isBeforeReferenceDateCB(date: string, referenceDate: string): boolean {
     return dayjs(date).isBefore(dayjs(referenceDate), "day");
 }
 
-export function isWeekendCB(date: string): boolean {
+function isWeekendCB(date: string): boolean {
     const weekday = dayjs(date).day();
     return WEEKEND_WEEKDAYS.has(weekday);
 }
@@ -76,6 +101,8 @@ export function getDatesForPreset(
     switch (selectedDatePreset) {
         case "sameDayLastWeek":
             return availableDates.includes(lastWeekDate) ? [lastWeekDate] : [];
+        case "last7Days":
+            return previousDates.slice(0, 7);
         case "last5Weekdays":
             return previousDates.filter((date) => !isWeekendCB(date)).slice(0, 5);
         case "lastWeekend":
