@@ -31,7 +31,7 @@ export function getPresetDescription(selectedDates: string[], selectedHourUTC?: 
     }
 
     const dateRange = getDateRangeText(selectedDates);
-    const hourRange = selectedHourUTC ? formatHourRangeLocal(selectedHourUTC) : "";
+    const hourRange = selectedHourUTC !== undefined ? formatHourRangeLocal(selectedHourUTC) : "";
 
     return `Selected dates: ${dateRange}${hourRange ? `, ${hourRange}` : ""}`;
 }
