@@ -21,28 +21,28 @@ function renderDetailRow(label: string, value: string) {
 
 type DepartureDetailsProps = {
     departure: Departure;
-    onBackToListCB: () => void;
+    onBackToList: () => void;
     availableDates: string[];
     selectedDelayDates: string[];
     selectedDepartureDelaySummary: DelaySummary | null;
     isDepartureHistoricalDelayLoading: boolean;
     selectedDatePreset: DatePreset;
     selectedCustomDate: string | null;
-    onDatePresetChangeCB: (preset: DatePreset) => void;
-    onCustomDateChangeCB: (date: string) => void;
+    onDatePresetChange: (preset: DatePreset) => void;
+    onCustomDateChange: (date: string) => void;
 };
 
 export function DepartureDetails({
     departure,
-    onBackToListCB,
+    onBackToList,
     availableDates,
     selectedDelayDates,
     selectedDepartureDelaySummary,
     isDepartureHistoricalDelayLoading,
     selectedDatePreset,
     selectedCustomDate,
-    onDatePresetChangeCB,
-    onCustomDateChangeCB,
+    onDatePresetChange,
+    onCustomDateChange,
 }: DepartureDetailsProps) {
     const [selectedEventType, setSelectedEventType] = useState<EventType>("departure");
 
@@ -73,7 +73,7 @@ export function DepartureDetails({
                     {departure.line.designation ?? departure.line.id} -{" "}
                     {departure.destination ?? departure.direction}
                 </p>
-                <Button variant="text" size="small" onClick={onBackToListCB}>
+                <Button variant="text" size="small" onClick={onBackToList}>
                     Back
                 </Button>
             </div>
@@ -87,9 +87,9 @@ export function DepartureDetails({
                 selectedDatePreset={selectedDatePreset}
                 selectedCustomDate={selectedCustomDate}
                 selectedEventType={selectedEventType}
-                onDatePresetChangeCB={onDatePresetChangeCB}
-                onCustomDateChangeCB={onCustomDateChangeCB}
-                onEventTypeChangeCB={setSelectedEventType}
+                onDatePresetChange={onDatePresetChange}
+                onCustomDateChange={onCustomDateChange}
+                onEventTypeChange={setSelectedEventType}
                 isLoadingData={isDepartureHistoricalDelayLoading}
                 routeSummary={selectedDepartureDelaySummary}
             />

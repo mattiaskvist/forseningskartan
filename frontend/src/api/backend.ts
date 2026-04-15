@@ -136,7 +136,7 @@ export function fetchRouteDelayTrend({
     }
 
     function createDatePromiseCB(date: string): Promise<RouteDelayTrendPoint> {
-        function processDailySummariesCB(
+        function processDailySummariesACB(
             dailySummaries: DelaySummary[] | null
         ): RouteDelayTrendPoint {
             const selectedRouteSummary =
@@ -156,7 +156,7 @@ export function fetchRouteDelayTrend({
             };
         }
 
-        return fetchDailyRouteDelays([date]).then(processDailySummariesCB);
+        return fetchDailyRouteDelays([date]).then(processDailySummariesACB);
     }
 
     const datePromises = dates.map(createDatePromiseCB);

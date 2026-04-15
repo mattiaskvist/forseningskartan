@@ -7,8 +7,14 @@ type RouteDelayTrendChartProps = {
 };
 
 export function RouteDelayTrendChart({ points, title }: RouteDelayTrendChartProps) {
-    const xLabels = points.map((point) => point.date.slice(5));
-    const yValues = points.map((point) => point.avgDelayMinutes);
+    function getMonthDayFromDateCB(point: RouteDelayTrendPoint) {
+        return point.date.slice(5);
+    }
+    function getAvgDelayMinutesCB(point: RouteDelayTrendPoint) {
+        return point.avgDelayMinutes;
+    }
+    const xLabels = points.map(getMonthDayFromDateCB);
+    const yValues = points.map(getAvgDelayMinutesCB);
 
     return (
         <div className="border border-slate-200 rounded p-3">

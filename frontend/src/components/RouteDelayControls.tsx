@@ -15,11 +15,11 @@ type RouteDelayControlsProps = {
     selectedTransportationMode: TransportationMode;
     searchQuery: string;
     transportationModeOptions: TransportationMode[];
-    onDatePresetChangeCB: (preset: DatePreset) => void;
-    onCustomDateChangeCB: (date: string) => void;
-    onEventTypeChangeCB: (eventType: EventType) => void;
-    onTransportationModeChangeCB: (filter: TransportationMode) => void;
-    onSearchQueryChangeCB: (query: string) => void;
+    onDatePresetChange: (preset: DatePreset) => void;
+    onCustomDateChange: (date: string) => void;
+    onEventTypeChange: (eventType: EventType) => void;
+    onTransportationModeChange: (filter: TransportationMode) => void;
+    onSearchQueryChange: (query: string) => void;
 };
 
 export function RouteDelayControls({
@@ -32,27 +32,27 @@ export function RouteDelayControls({
     selectedTransportationMode,
     searchQuery,
     transportationModeOptions,
-    onDatePresetChangeCB,
-    onCustomDateChangeCB,
-    onEventTypeChangeCB,
-    onTransportationModeChangeCB,
-    onSearchQueryChangeCB,
+    onDatePresetChange,
+    onCustomDateChange,
+    onEventTypeChange,
+    onTransportationModeChange,
+    onSearchQueryChange,
 }: RouteDelayControlsProps) {
-    function handleDatePresetChangeCB(
+    function handleDatePresetChangeACB(
         _: React.MouseEvent<HTMLElement>,
         nextValue: DatePreset | null
     ) {
         if (nextValue) {
-            onDatePresetChangeCB(nextValue);
+            onDatePresetChange(nextValue);
         }
     }
 
-    function handleEventTypeChangeCB(
+    function handleEventTypeChangeACB(
         _: React.MouseEvent<HTMLElement>,
         nextValue: EventType | null
     ) {
         if (nextValue) {
-            onEventTypeChangeCB(nextValue);
+            onEventTypeChange(nextValue);
         }
     }
 
@@ -72,17 +72,17 @@ export function RouteDelayControls({
         );
     }
 
-    function handleTransportationModeChangeCB(
+    function handleTransportationModeChangeACB(
         _: React.MouseEvent<HTMLElement>,
         nextValue: TransportationMode | null
     ) {
         if (nextValue) {
-            onTransportationModeChangeCB(nextValue);
+            onTransportationModeChange(nextValue);
         }
     }
 
-    function handleSearchChangeCB(event: React.ChangeEvent<HTMLInputElement>) {
-        onSearchQueryChangeCB(event.target.value);
+    function handleSearchChangeACB(event: React.ChangeEvent<HTMLInputElement>) {
+        onSearchQueryChange(event.target.value);
     }
 
     return (
@@ -92,7 +92,7 @@ export function RouteDelayControls({
                 <ToggleButtonGroup
                     color="primary"
                     exclusive
-                    onChange={handleDatePresetChangeCB}
+                    onChange={handleDatePresetChangeACB}
                     size="small"
                     value={selectedDatePreset}
                 >
@@ -107,7 +107,7 @@ export function RouteDelayControls({
                     <AvailableDatesPicker
                         availableDates={availableDates}
                         selectedDate={selectedCustomDate}
-                        onSelectDate={onCustomDateChangeCB}
+                        onSelectDate={onCustomDateChange}
                     />
                 </div>
             )}
@@ -118,7 +118,7 @@ export function RouteDelayControls({
                     <ToggleButtonGroup
                         color="primary"
                         exclusive
-                        onChange={handleEventTypeChangeCB}
+                        onChange={handleEventTypeChangeACB}
                         size="small"
                         value={selectedEventType}
                     >
@@ -135,7 +135,7 @@ export function RouteDelayControls({
                         <ToggleButtonGroup
                             color="primary"
                             size="small"
-                            onChange={handleTransportationModeChangeCB}
+                            onChange={handleTransportationModeChangeACB}
                             value={selectedTransportationMode}
                             exclusive
                         >
@@ -153,7 +153,7 @@ export function RouteDelayControls({
                         size="small"
                         label="Search route"
                         value={searchQuery}
-                        onChange={handleSearchChangeCB}
+                        onChange={handleSearchChangeACB}
                     />
                 </div>
             ) : null}

@@ -8,12 +8,12 @@ import { Card } from "@mui/material";
 
 type DepartureListProps = {
     departures: Departure[];
-    onSelectDepartureCB: (departure: Departure) => void;
+    onSelectDeparture: (departure: Departure) => void;
 };
 
 type ModeWithOther = TransportationMode | "OTHER";
 
-export function DepartureList({ departures, onSelectDepartureCB }: DepartureListProps) {
+export function DepartureList({ departures, onSelectDeparture }: DepartureListProps) {
     const uniqueModes = useMemo(() => {
         const modes = new Set<ModeWithOther>();
 
@@ -57,7 +57,7 @@ export function DepartureList({ departures, onSelectDepartureCB }: DepartureList
                 key={departureKey}
                 type="button"
                 className="w-full border-b border-slate-200 p-2 text-left last:border-b-0 hover:bg-slate-50 flex items-center justify-between"
-                onClick={() => onSelectDepartureCB(departure)}
+                onClick={() => onSelectDeparture(departure)}
             >
                 <div>
                     <p className="text-sm font-semibold text-slate-900">

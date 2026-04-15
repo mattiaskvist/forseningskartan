@@ -12,7 +12,7 @@ type RouteDetailsPageProps = {
     selectedEventType: EventType;
     trendPoints: RouteDelayTrendPoint[];
     isTrendLoading: boolean;
-    onBackCB: () => void;
+    onBack: () => void;
 };
 
 export function RouteDetailsPage({
@@ -20,7 +20,7 @@ export function RouteDetailsPage({
     selectedEventType,
     trendPoints,
     isTrendLoading,
-    onBackCB,
+    onBack,
 }: RouteDetailsPageProps) {
     return (
         <div className="overlay-panel">
@@ -29,7 +29,7 @@ export function RouteDetailsPage({
                     {getRouteTypeString(routeSummary)} {getRouteDisplayName(routeSummary)}
                 </h3>
                 <button
-                    onClick={onBackCB}
+                    onClick={onBack}
                     className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900"
                     aria-label="Back to list"
                 >

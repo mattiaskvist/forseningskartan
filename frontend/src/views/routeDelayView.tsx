@@ -41,15 +41,15 @@ type RouteDelayViewProps = {
     isTrendLoading: boolean;
     transportationModeOptions: TransportationMode[];
     availableDates: string[];
-    onDatePresetChangeCB: (preset: DatePreset) => void;
-    onCustomDateChangeCB: (date: string) => void;
-    onEventTypeChangeCB: (eventType: EventType) => void;
-    onTransportationModeChangeCB: (filter: TransportationMode) => void;
-    onSearchQueryChangeCB: (query: string) => void;
-    onSelectedSectionChangeCB: (section: RouteDelaySection) => void;
-    onSelectRouteCB: (routeKey: string | null) => void;
-    onPageChangeCB: (nextPage: number) => void;
-    onRoutesPerPageChangeCB: (nextPageSize: PageSizeOption) => void;
+    onDatePresetChange: (preset: DatePreset) => void;
+    onCustomDateChange: (date: string) => void;
+    onEventTypeChange: (eventType: EventType) => void;
+    onTransportationModeChange: (filter: TransportationMode) => void;
+    onSearchQueryChange: (query: string) => void;
+    onSelectedSectionChange: (section: RouteDelaySection) => void;
+    onSelectRoute: (routeKey: string | null) => void;
+    onPageChange: (nextPage: number) => void;
+    onRoutesPerPageChange: (nextPageSize: PageSizeOption) => void;
 };
 
 export function RouteDelayView({
@@ -72,15 +72,15 @@ export function RouteDelayView({
     isTrendLoading,
     transportationModeOptions,
     availableDates,
-    onDatePresetChangeCB,
-    onCustomDateChangeCB,
-    onEventTypeChangeCB,
-    onTransportationModeChangeCB,
-    onSearchQueryChangeCB,
-    onSelectedSectionChangeCB,
-    onSelectRouteCB,
-    onPageChangeCB,
-    onRoutesPerPageChangeCB,
+    onDatePresetChange,
+    onCustomDateChange,
+    onEventTypeChange,
+    onTransportationModeChange,
+    onSearchQueryChange,
+    onSelectedSectionChange,
+    onSelectRoute,
+    onPageChange,
+    onRoutesPerPageChange,
 }: RouteDelayViewProps) {
     const isRouteDetailsOpen = selectedRouteKey !== null;
 
@@ -95,8 +95,8 @@ export function RouteDelayView({
         const routeKey = summary.key;
         const avgDelayMinutes = getAvgDelayMinutes(summary, selectedEventType);
 
-        function handleClickCB() {
-            onSelectRouteCB(routeKey);
+        function handleClickACB() {
+            onSelectRoute(routeKey);
         }
 
         return (
@@ -106,7 +106,7 @@ export function RouteDelayView({
                     className={`w-full rounded border p-2 text-left transition 
                         border-slate-200 hover:border-slate-300 hover:bg-slate-50
                         flex items-center justify-between`}
-                    onClick={handleClickCB}
+                    onClick={handleClickACB}
                 >
                     <div>
                         <p className="text-sm font-semibold text-slate-900">
@@ -155,20 +155,20 @@ export function RouteDelayView({
         );
     }
 
-    function handleRoutesPerPageChangeCB(event: SelectChangeEvent<number>) {
-        onRoutesPerPageChangeCB(event.target.value as PageSizeOption);
+    function handleRoutesPerPageChangeACB(event: SelectChangeEvent<number>) {
+        onRoutesPerPageChange(event.target.value as PageSizeOption);
     }
 
-    function handlePaginationChangeCB(_: React.ChangeEvent<unknown>, nextPage: number) {
-        onPageChangeCB(nextPage);
+    function handlePaginationChangeACB(_: React.ChangeEvent<unknown>, nextPage: number) {
+        onPageChange(nextPage);
     }
 
-    function handleSectionChangeCB(
+    function handleSectionChangeACB(
         _: React.MouseEvent<HTMLElement>,
         nextSection: RouteDelaySection | null
     ) {
         if (nextSection) {
-            onSelectedSectionChangeCB(nextSection);
+            onSelectedSectionChange(nextSection);
         }
     }
 
@@ -179,7 +179,7 @@ export function RouteDelayView({
                     exclusive
                     fullWidth
                     value={selectedSection}
-                    onChange={handleSectionChangeCB}
+                    onChange={handleSectionChangeACB}
                 >
                     <ToggleButton value="routes" sx={{ fontWeight: 600 }}>
                         Routes
@@ -199,11 +199,11 @@ export function RouteDelayView({
                     selectedTransportationMode={selectedTransportationMode}
                     searchQuery={searchQuery}
                     transportationModeOptions={transportationModeOptions}
-                    onDatePresetChangeCB={onDatePresetChangeCB}
-                    onCustomDateChangeCB={onCustomDateChangeCB}
-                    onEventTypeChangeCB={onEventTypeChangeCB}
-                    onTransportationModeChangeCB={onTransportationModeChangeCB}
-                    onSearchQueryChangeCB={onSearchQueryChangeCB}
+                    onDatePresetChange={onDatePresetChange}
+                    onCustomDateChange={onCustomDateChange}
+                    onEventTypeChange={onEventTypeChange}
+                    onTransportationModeChange={onTransportationModeChange}
+                    onSearchQueryChange={onSearchQueryChange}
                 />
 
                 <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
@@ -224,7 +224,7 @@ export function RouteDelayView({
                                             labelId="routes-per-page-label"
                                             label="Rows"
                                             value={routesPerPage}
-                                            onChange={handleRoutesPerPageChangeCB}
+                                            onChange={handleRoutesPerPageChangeACB}
                                         >
                                             {PageSizeOptions.map(getRoutesPerPageOptionCB)}
                                         </Select>
@@ -234,7 +234,7 @@ export function RouteDelayView({
                                         <Pagination
                                             count={totalPages}
                                             page={currentPage}
-                                            onChange={handlePaginationChangeCB}
+                                            onChange={handlePaginationChangeACB}
                                             color="primary"
                                             shape="rounded"
                                             size="small"
@@ -277,7 +277,7 @@ export function RouteDelayView({
                             selectedEventType={selectedEventType}
                             trendPoints={trendPoints}
                             isTrendLoading={isTrendLoading}
-                            onBackCB={() => onSelectRouteCB(null)}
+                            onBack={() => onSelectRoute(null)}
                         />
                     )
                 )}

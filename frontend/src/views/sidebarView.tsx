@@ -15,18 +15,18 @@ type SidebarViewProps = {
     isOpen: boolean;
     currentPath: string;
     user: AuthUserState | null;
-    onToggleCB: () => void;
-    onNavigateCB: (path: string) => void;
-    onLogoutCB: () => void;
+    onToggle: () => void;
+    onNavigate: (path: string) => void;
+    onLogout: () => void;
 };
 
 export function SidebarView({
     isOpen,
     currentPath,
     user,
-    onToggleCB,
-    onNavigateCB,
-    onLogoutCB,
+    onToggle,
+    onNavigate,
+    onLogout,
 }: SidebarViewProps) {
     function isActiveCB(path: string): boolean {
         if (path === "/") {
@@ -35,11 +35,15 @@ export function SidebarView({
         return currentPath.startsWith(path);
     }
 
+    function navigateToAccountACB() {
+        onNavigate("/account");
+    }
+
     function renderNavItemCB(item: SidebarNavItem) {
         const active = isActiveCB(item.path);
 
         function handleClickCB() {
-            onNavigateCB(item.path);
+            onNavigate(item.path);
         }
 
         return (
@@ -75,10 +79,10 @@ export function SidebarView({
                         {user.displayName || user.email || "Account"}
                     </span>
 
-                    <IconButton size="small" onClick={() => onNavigateCB("/account")}>
+                    <IconButton size="small" onClick={navigateToAccountACB}>
                         <SettingsIcon fontSize="small" />
                     </IconButton>
-                    <IconButton size="small" aria-label="Log out" onClick={onLogoutCB}>
+                    <IconButton size="small" aria-label="Log out" onClick={onLogout}>
                         <LogoutIcon fontSize="small" />
                     </IconButton>
                 </div>
@@ -90,13 +94,13 @@ export function SidebarView({
         <>
             {/* Toggle button — always visible */}
             <div className="sidebar-toggle">
-                <IconButton onClick={onToggleCB} aria-label={isOpen ? "Close menu" : "Open menu"}>
+                <IconButton onClick={onToggle} aria-label={isOpen ? "Close menu" : "Open menu"}>
                     {isOpen ? <CloseIcon /> : <MenuIcon />}
                 </IconButton>
             </div>
 
             {/* Backdrop */}
-            {isOpen && <div className="sidebar-backdrop" onClick={onToggleCB} />}
+            {isOpen && <div className="sidebar-backdrop" onClick={onToggle} />}
 
             {/* Sliding panel */}
             <nav className={`sidebar-panel ${isOpen ? "sidebar-panel-open" : ""}`}>

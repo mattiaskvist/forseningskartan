@@ -7,9 +7,9 @@ type DepartureDelayControlsProps = {
     selectedDatePreset: DatePreset;
     selectedCustomDate: string | null;
     selectedEventType: EventType;
-    onDatePresetChangeCB: (preset: DatePreset) => void;
-    onCustomDateChangeCB: (date: string) => void;
-    onEventTypeChangeCB: (eventType: EventType) => void;
+    onDatePresetChange: (preset: DatePreset) => void;
+    onCustomDateChange: (date: string) => void;
+    onEventTypeChange: (eventType: EventType) => void;
 };
 
 export function DepartureDelayControls({
@@ -17,25 +17,25 @@ export function DepartureDelayControls({
     selectedDatePreset,
     selectedCustomDate,
     selectedEventType,
-    onDatePresetChangeCB,
-    onCustomDateChangeCB,
-    onEventTypeChangeCB,
+    onDatePresetChange,
+    onCustomDateChange,
+    onEventTypeChange,
 }: DepartureDelayControlsProps) {
-    function handleDatePresetChangeCB(
+    function handleDatePresetChangeACB(
         _: React.MouseEvent<HTMLElement>,
         nextValue: DatePreset | null
     ) {
         if (nextValue) {
-            onDatePresetChangeCB(nextValue);
+            onDatePresetChange(nextValue);
         }
     }
 
-    function handleEventTypeChangeCB(
+    function handleEventTypeChangeACB(
         _: React.MouseEvent<HTMLElement>,
         nextValue: EventType | null
     ) {
         if (nextValue) {
-            onEventTypeChangeCB(nextValue);
+            onEventTypeChange(nextValue);
         }
     }
 
@@ -54,7 +54,7 @@ export function DepartureDelayControls({
                 <ToggleButtonGroup
                     color="primary"
                     exclusive
-                    onChange={handleDatePresetChangeCB}
+                    onChange={handleDatePresetChangeACB}
                     size="small"
                     value={selectedDatePreset}
                 >
@@ -69,7 +69,7 @@ export function DepartureDelayControls({
                     <AvailableDatesPicker
                         availableDates={availableDates}
                         selectedDate={selectedCustomDate}
-                        onSelectDate={onCustomDateChangeCB}
+                        onSelectDate={onCustomDateChange}
                     />
                 </div>
             )}
@@ -80,7 +80,7 @@ export function DepartureDelayControls({
                     <ToggleButtonGroup
                         color="primary"
                         exclusive
-                        onChange={handleEventTypeChangeCB}
+                        onChange={handleEventTypeChangeACB}
                         size="small"
                         value={selectedEventType}
                     >
