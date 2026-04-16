@@ -50,8 +50,5 @@ export const userPreferencesSlice = createSlice({
     },
 });
 
-export const {
-    toggleFavoriteSiteId,
-    setMapStylePreference,
-    applyLoadedUserPreferences,
-} = userPreferencesSlice.actions;
+export const { toggleFavoriteSiteId, setMapStylePreference, applyLoadedUserPreferences } =
+    userPreferencesSlice.actions;

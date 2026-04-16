@@ -137,7 +137,9 @@ export function SidebarView({
                         </p>
                     </li>
                     {!user ? (
-                        <li className="px-3 py-1 text-xs text-slate-500">Log in to favorite stops</li>
+                        <li className="px-3 py-1 text-xs text-slate-500">
+                            Log in to favorite stops
+                        </li>
                     ) : favoriteStops.length === 0 ? (
                         <li className="px-3 py-1 text-xs text-slate-500">
                             Select a stop to favorite it
