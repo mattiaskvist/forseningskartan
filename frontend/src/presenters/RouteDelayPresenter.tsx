@@ -115,7 +115,7 @@ export function RouteDelayPresenter() {
         return Array.from(modes.values());
     }, [routeDelays]);
 
-    const leaderboardItems = useMemo((): DelaySummary[] => {
+    const leaderboardItems = useMemo((): RouteDelayListItem[] => {
         const filteredRoutes = routeDelays.filter(matchesTransportationFilterCB);
 
         function compareByDelayCB(a: DelaySummary, b: DelaySummary): number {
@@ -124,7 +124,16 @@ export function RouteDelayPresenter() {
             );
         }
 
-        return [...filteredRoutes].sort(compareByDelayCB);
+        function getRouteDelayListItemCB(summary: DelaySummary): RouteDelayListItem {
+            return {
+                id: getRouteIdentityKey(summary),
+                label: getRouteDisplayName(summary),
+                avgDelayMinutes: getAvgDelayMinutes(summary, selectedEventType),
+                uniqueTrips: summary.uniqueTrips,
+            };
+        }
+
+        return [...filteredRoutes].sort(compareByDelayCB).map(getRouteDelayListItemCB);
     }, [routeDelays, matchesTransportationFilterCB, selectedEventType]);
 
     const selectedRouteSummary = useMemo(() => {

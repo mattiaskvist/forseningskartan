@@ -30,7 +30,7 @@ type RouteDelayViewProps = {
     routesPerPage: PageSizeOption;
     selectedRouteKey: string | null;
     selectedRouteSummary: DelaySummary | null;
-    leaderboardItems: DelaySummary[];
+    leaderboardItems: RouteDelayListItem[];
     trendPoints: RouteDelayTrendPoint[];
     isTrendLoading: boolean;
     transportationModeOptions: TransportationMode[];
@@ -133,7 +133,6 @@ export function RouteDelayView({
                                 {selectedSection === "leaderboard" ? (
                                     <RouteDelayLeaderboardView
                                         leaderboardItems={leaderboardItems}
-                                        selectedEventType={selectedEventType}
                                     />
                                 ) : null}
                             </div>
