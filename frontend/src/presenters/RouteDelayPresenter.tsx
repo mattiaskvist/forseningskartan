@@ -33,6 +33,7 @@ import {
 import { PageSizeOption, RouteDelayListItem, RouteDelaySection } from "../types/routeDelays";
 import { getAvgDelayMinutes, getAvgDelaySeconds } from "../utils/time";
 import { compareRouteNamesCB, getRouteDisplayName, getRouteIdentityKey } from "../utils/route";
+import { getPresetDescription } from "../types/departureDelay";
 
 function getRouteModeKey(summary: DelaySummary): string {
     return summary.route?.type ?? "unknown";
@@ -100,6 +101,16 @@ export function RouteDelayPresenter() {
             uniqueTrips: summary.uniqueTrips,
         }));
     }, [pagedRoutes, selectedEventType]);
+
+    const selectedDateText = useMemo(() => {
+        return getPresetDescription(selectedDates);
+    }, [selectedDates]);
+
+    const routesInfoText = useMemo(() => {
+        return selectedSection === "routes"
+            ? `Showing ${pagedRouteItems.length} of ${totalFilteredRoutes} filtered routes`
+            : `Showing ${totalFilteredRoutes} filtered routes`;
+    }, [selectedSection, pagedRouteItems, totalFilteredRoutes]);
 
     const transportationModeOptions = useMemo(() => {
         const modes = new Map<RouteType, TransportationMode>();
@@ -202,6 +213,8 @@ export function RouteDelayPresenter() {
     return (
         <RouteDelayView
             selectedSection={selectedSection}
+            selectedDateText={selectedDateText}
+            routesInfoText={routesInfoText}
             selectedDatePreset={selectedDatePreset}
             selectedCustomDate={selectedCustomDate}
             selectedEventType={selectedEventType}
@@ -210,14 +223,12 @@ export function RouteDelayPresenter() {
             pagedRouteItems={pagedRouteItems}
             currentPage={safeCurrentPage}
             totalPages={totalPages}
-            totalFilteredRoutes={totalFilteredRoutes}
             routesPerPage={routesPerPage}
             selectedRouteKey={selectedRouteKey}
             selectedRouteSummary={selectedRouteSummary}
             leaderboardItems={leaderboardItems}
             trendPoints={selectedRouteTrend}
             isTrendLoading={isTrendLoading}
-            selectedDates={selectedDates}
             transportationModeOptions={transportationModeOptions}
             availableDates={availableDates}
             onDatePresetChange={handleDatePresetChangeACB}

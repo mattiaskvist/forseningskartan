@@ -17,7 +17,8 @@ import { RouteDelayInfoView } from "./RouteDelayInfoView";
 
 type RouteDelayViewProps = {
     selectedSection: RouteDelaySection;
-    selectedDates: string[];
+    selectedDateText: string;
+    routesInfoText: string;
     selectedDatePreset: DatePreset;
     selectedCustomDate: string | null;
     selectedEventType: EventType;
@@ -26,7 +27,6 @@ type RouteDelayViewProps = {
     pagedRouteItems: RouteDelayListItem[];
     currentPage: number;
     totalPages: number;
-    totalFilteredRoutes: number;
     routesPerPage: PageSizeOption;
     selectedRouteKey: string | null;
     selectedRouteSummary: DelaySummary | null;
@@ -49,7 +49,8 @@ type RouteDelayViewProps = {
 
 export function RouteDelayView({
     selectedSection,
-    selectedDates,
+    selectedDateText,
+    routesInfoText,
     selectedDatePreset,
     selectedCustomDate,
     selectedEventType,
@@ -58,7 +59,6 @@ export function RouteDelayView({
     pagedRouteItems,
     currentPage,
     totalPages,
-    totalFilteredRoutes,
     routesPerPage,
     selectedRouteKey,
     selectedRouteSummary,
@@ -107,10 +107,8 @@ export function RouteDelayView({
                             onSearchQueryChange={onSearchQueryChange}
                         />
                         <RouteDelayInfoView
-                            selectedDates={selectedDates}
-                            selectedSection={selectedSection}
-                            visibleRoutesCount={pagedRouteItems.length}
-                            totalFilteredRoutes={totalFilteredRoutes}
+                            selectedDateText={selectedDateText}
+                            routesInfoText={routesInfoText}
                             isRouteDetailsOpen={isRouteDetailsOpen}
                         />
                     </div>
