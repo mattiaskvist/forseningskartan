@@ -1,5 +1,3 @@
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { RouteDelayControls } from "../components/RouteDelayControls";
 import { DatePreset, EventType, getPresetDescription } from "../types/departureDelay";
 import { TransportationMode } from "../types/sl";
@@ -9,6 +7,7 @@ import { RouteDelayRoutesView } from "./routeDelayRoutesView";
 import { RouteDelayLeaderboardView } from "./routeDelayLeaderboardView";
 import { RouteDelayRouteFallbackView } from "./routeDelayRouteFallbackView";
 import { RouteDetailsPage } from "../components/RouteDetailsPage";
+import { RouteDelaySectionToggleView } from "./routeDelaySectionToggleView";
 
 type RouteDelayViewProps = {
     selectedSection: RouteDelaySection;
@@ -82,35 +81,16 @@ export function RouteDelayView({
             ? `Showing ${pagedRoutes.length} of ${totalFilteredRoutes} filtered routes`
             : `Showing ${totalFilteredRoutes} filtered routes`;
 
-    function handleSectionChangeACB(
-        _: React.MouseEvent<HTMLElement>,
-        nextSection: RouteDelaySection | null
-    ) {
-        if (nextSection) {
-            onSelectedSectionChange(nextSection);
-        }
-    }
-
     return (
         <div className="flex h-screen w-full items-start justify-center overflow-y-auto bg-slate-50 p-8">
             <section className="overlay-panel w-full max-w-3xl">
                 <h2 className="overlay-panel-title">Route Delays</h2>
                 <div className="flex w-full flex-col gap-4">
                     <div className="space-y-4">
-                        <ToggleButtonGroup
-                            exclusive
-                            fullWidth
-                            value={selectedSection}
-                            onChange={handleSectionChangeACB}
-                        >
-                            <ToggleButton value="routes" sx={{ fontWeight: 600 }}>
-                                Routes
-                            </ToggleButton>
-                            <ToggleButton value="leaderboard" sx={{ fontWeight: 600 }}>
-                                Delay Leaderboard
-                            </ToggleButton>
-                        </ToggleButtonGroup>
-
+                        <RouteDelaySectionToggleView
+                            selectedSection={selectedSection}
+                            onSelectedSectionChange={onSelectedSectionChange}
+                        />
                         <RouteDelayControls
                             selectedSection={selectedSection}
                             isRouteDetailsOpen={isRouteDetailsOpen}
