@@ -1,7 +1,12 @@
 import { RouteDelayControls } from "../components/RouteDelayControls";
 import { DatePreset, EventType } from "../types/departureDelay";
 import { TransportationMode } from "../types/sl";
-import { PageSizeOption, RouteDelaySection, RouteDelayTrendPoint } from "../types/routeDelays";
+import {
+    PageSizeOption,
+    RouteDelayListItem,
+    RouteDelaySection,
+    RouteDelayTrendPoint,
+} from "../types/routeDelays";
 import { DelaySummary } from "../types/historicalDelay";
 import { RouteDelayRoutesView } from "./routeDelayRoutesView";
 import { RouteDelayLeaderboardView } from "./routeDelayLeaderboardView";
@@ -18,7 +23,7 @@ type RouteDelayViewProps = {
     selectedEventType: EventType;
     selectedTransportationMode: TransportationMode;
     searchQuery: string;
-    pagedRoutes: DelaySummary[];
+    pagedRouteItems: RouteDelayListItem[];
     currentPage: number;
     totalPages: number;
     totalFilteredRoutes: number;
@@ -50,7 +55,7 @@ export function RouteDelayView({
     selectedEventType,
     selectedTransportationMode,
     searchQuery,
-    pagedRoutes,
+    pagedRouteItems,
     currentPage,
     totalPages,
     totalFilteredRoutes,
@@ -104,7 +109,7 @@ export function RouteDelayView({
                         <RouteDelayInfoView
                             selectedDates={selectedDates}
                             selectedSection={selectedSection}
-                            pagedRoutes={pagedRoutes}
+                            visibleRoutesCount={pagedRouteItems.length}
                             totalFilteredRoutes={totalFilteredRoutes}
                             isRouteDetailsOpen={isRouteDetailsOpen}
                         />
@@ -115,11 +120,10 @@ export function RouteDelayView({
                             <div className="flex flex-col gap-4 pt-4">
                                 {selectedSection === "routes" ? (
                                     <RouteDelayRoutesView
-                                        pagedRoutes={pagedRoutes}
+                                        pagedRouteItems={pagedRouteItems}
                                         currentPage={currentPage}
                                         totalPages={totalPages}
                                         routesPerPage={routesPerPage}
-                                        selectedEventType={selectedEventType}
                                         onSelectRoute={onSelectRoute}
                                         onPageChange={onPageChange}
                                         onRoutesPerPageChange={onRoutesPerPageChange}

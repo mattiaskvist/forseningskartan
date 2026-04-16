@@ -1,11 +1,10 @@
 import { getPresetDescription } from "../types/departureDelay";
-import { DelaySummary } from "../types/historicalDelay";
 import { RouteDelaySection } from "../types/routeDelays";
 
 type RouteDelayInfoViewProps = {
     selectedDates: string[];
     selectedSection: RouteDelaySection;
-    pagedRoutes: DelaySummary[];
+    visibleRoutesCount: number;
     totalFilteredRoutes: number;
     isRouteDetailsOpen: boolean;
 };
@@ -13,7 +12,7 @@ type RouteDelayInfoViewProps = {
 export function RouteDelayInfoView({
     selectedDates,
     selectedSection,
-    pagedRoutes,
+    visibleRoutesCount,
     totalFilteredRoutes,
     isRouteDetailsOpen,
 }: RouteDelayInfoViewProps) {
@@ -21,7 +20,7 @@ export function RouteDelayInfoView({
 
     const routesInfoText =
         selectedSection === "routes"
-            ? `Showing ${pagedRoutes.length} of ${totalFilteredRoutes} filtered routes`
+            ? `Showing ${visibleRoutesCount} of ${totalFilteredRoutes} filtered routes`
             : `Showing ${totalFilteredRoutes} filtered routes`;
 
     return (

@@ -30,8 +30,8 @@ import {
     transportationModes,
     transportationModeToRouteType,
 } from "../types/sl";
-import { PageSizeOption, RouteDelaySection } from "../types/routeDelays";
-import { getAvgDelaySeconds } from "../utils/time";
+import { PageSizeOption, RouteDelayListItem, RouteDelaySection } from "../types/routeDelays";
+import { getAvgDelayMinutes, getAvgDelaySeconds } from "../utils/time";
 import { compareRouteNamesCB, getRouteDisplayName, getRouteIdentityKey } from "../utils/route";
 
 function getRouteModeKey(summary: DelaySummary): string {
@@ -91,6 +91,15 @@ export function RouteDelayPresenter() {
         const startIndex = (safeCurrentPage - 1) * routesPerPage;
         return filteredAndSortedRoutes.slice(startIndex, startIndex + routesPerPage);
     }, [filteredAndSortedRoutes, safeCurrentPage, routesPerPage]);
+
+    const pagedRouteItems = useMemo((): RouteDelayListItem[] => {
+        return pagedRoutes.map((summary) => ({
+            id: getRouteIdentityKey(summary),
+            label: getRouteDisplayName(summary),
+            avgDelayMinutes: getAvgDelayMinutes(summary, selectedEventType),
+            uniqueTrips: summary.uniqueTrips,
+        }));
+    }, [pagedRoutes, selectedEventType]);
 
     const transportationModeOptions = useMemo(() => {
         const modes = new Map<RouteType, TransportationMode>();
@@ -189,7 +198,7 @@ export function RouteDelayPresenter() {
             selectedEventType={selectedEventType}
             selectedTransportationMode={selectedTransportationMode}
             searchQuery={searchQuery}
-            pagedRoutes={pagedRoutes}
+            pagedRouteItems={pagedRouteItems}
             currentPage={safeCurrentPage}
             totalPages={totalPages}
             totalFilteredRoutes={totalFilteredRoutes}

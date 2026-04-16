@@ -5,43 +5,37 @@ import MenuItem from "@mui/material/MenuItem";
 import Pagination from "@mui/material/Pagination";
 import Select from "@mui/material/Select";
 import type { SelectChangeEvent } from "@mui/material/Select";
-import { DelaySummary } from "../types/historicalDelay";
-import { PageSizeOption, PageSizeOptions } from "../types/routeDelays";
-import { EventType } from "../types/departureDelay";
-import { getAvgDelayMinutes, getDelayTextColorClass } from "../utils/time";
-import { getRouteIdentityKey } from "../utils/route";
+import { PageSizeOption, PageSizeOptions, RouteDelayListItem } from "../types/routeDelays";
+import { getDelayTextColorClass } from "../utils/time";
 
 type RouteDelayRoutesViewProps = {
-    pagedRoutes: DelaySummary[];
+    pagedRouteItems: RouteDelayListItem[];
     currentPage: number;
     totalPages: number;
     routesPerPage: PageSizeOption;
-    selectedEventType: EventType;
     onSelectRoute: (routeKey: string) => void;
     onPageChange: (nextPage: number) => void;
     onRoutesPerPageChange: (nextPageSize: PageSizeOption) => void;
 };
 
 export function RouteDelayRoutesView({
-    pagedRoutes,
+    pagedRouteItems,
     currentPage,
     totalPages,
     routesPerPage,
-    selectedEventType,
     onSelectRoute,
     onPageChange,
     onRoutesPerPageChange,
 }: RouteDelayRoutesViewProps) {
-    function getRouteListItemCB(summary: DelaySummary) {
-        const routeKey = getRouteIdentityKey(summary);
-        const avgDelayMinutes = getAvgDelayMinutes(summary, selectedEventType);
+    function getRouteListItemCB(routeItem: RouteDelayListItem) {
+        const { id, label, avgDelayMinutes, uniqueTrips } = routeItem;
 
         function handleClickACB() {
-            onSelectRoute(routeKey);
+            onSelectRoute(id);
         }
 
         return (
-            <li key={routeKey}>
+            <li key={id}>
                 <button
                     type="button"
                     className={`w-full rounded border p-2 text-left transition 
@@ -50,15 +44,13 @@ export function RouteDelayRoutesView({
                     onClick={handleClickACB}
                 >
                     <div>
-                        <p className="text-sm font-semibold text-slate-900">
-                            {summary.route?.shortName} {summary.route?.longName}
-                        </p>
+                        <p className="text-sm font-semibold text-slate-900">{label}</p>
                         <p className="text-xs text-slate-600">
                             Average delay:{" "}
                             <span className={getDelayTextColorClass(avgDelayMinutes)}>
                                 {avgDelayMinutes} min
                             </span>
-                            , {summary.uniqueTrips} unique trips
+                            , {uniqueTrips} unique trips
                         </p>
                     </div>
                     <ArrowForwardIosIcon className="mr-2" />
@@ -112,12 +104,12 @@ export function RouteDelayRoutesView({
                 ) : null}
             </div>
 
-            {pagedRoutes.length === 0 ? (
+            {pagedRouteItems.length === 0 ? (
                 <p className="rounded border border-slate-200 p-3 text-sm text-slate-500">
                     No routes match the selected filters.
                 </p>
             ) : (
-                <ul className="space-y-2">{pagedRoutes.map(getRouteListItemCB)}</ul>
+                <ul className="space-y-2">{pagedRouteItems.map(getRouteListItemCB)}</ul>
             )}
         </section>
     );
