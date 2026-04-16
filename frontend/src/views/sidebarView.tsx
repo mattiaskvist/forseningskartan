@@ -4,6 +4,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import LoginIcon from "@mui/icons-material/Login";
 import LogoutIcon from "@mui/icons-material/Logout";
 import SettingsIcon from "@mui/icons-material/Settings";
+import StarIcon from "@mui/icons-material/Star";
 import IconButton from "@mui/material/IconButton";
 import { AuthUserState } from "../store/authSlice";
 import { ROUTES, type RouteConfig } from "../routes";
@@ -15,18 +16,22 @@ type SidebarViewProps = {
     isOpen: boolean;
     currentPath: string;
     user: AuthUserState | null;
+    favoriteStops: { id: number; name: string }[];
     onToggle: () => void;
     onNavigate: (path: string) => void;
     onLogout: () => void;
+    onSelectFavoriteStop: (siteId: number) => void;
 };
 
 export function SidebarView({
     isOpen,
     currentPath,
     user,
+    favoriteStops,
     onToggle,
     onNavigate,
     onLogout,
+    onSelectFavoriteStop,
 }: SidebarViewProps) {
     function isActiveCB(path: string): boolean {
         if (path === "/") {
@@ -90,6 +95,21 @@ export function SidebarView({
         );
     }
 
+    function renderFavoriteStopItemCB(favoriteStop: { id: number; name: string }) {
+        function selectFavoriteStopACB() {
+            onSelectFavoriteStop(favoriteStop.id);
+        }
+
+        return (
+            <li key={favoriteStop.id}>
+                <button className="sidebar-nav-item" onClick={selectFavoriteStopACB}>
+                    <StarIcon fontSize="small" />
+                    <span>{favoriteStop.name}</span>
+                </button>
+            </li>
+        );
+    }
+
     return (
         <>
             {/* Toggle button — always visible */}
@@ -111,6 +131,22 @@ export function SidebarView({
 
                 <ul className="sidebar-nav-list">
                     {ROUTES.map(renderNavItemCB)}
+                    <li className="mt-6 px-3">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            Favorite stops
+                        </p>
+                    </li>
+                    {!user ? (
+                        <li className="px-3 py-1 text-xs text-slate-500">
+                            Log in to favorite stops
+                        </li>
+                    ) : favoriteStops.length === 0 ? (
+                        <li className="px-3 py-1 text-xs text-slate-500">
+                            Select a stop to favorite it
+                        </li>
+                    ) : (
+                        favoriteStops.map(renderFavoriteStopItemCB)
+                    )}
                     <li className="mt-8 border-t border-slate-200/20 pt-2" />
                     {user
                         ? renderUserItem(user)

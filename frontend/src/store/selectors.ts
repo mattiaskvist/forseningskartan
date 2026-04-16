@@ -147,6 +147,14 @@ function getSnackbarSeverityCB(state: RootState) {
     return state.snackbar.severity;
 }
 
+function getFavoriteSiteIdsCB(state: RootState) {
+    return state.userPreferences.favoriteSiteIds;
+}
+
+function getMapStylePreferenceCB(state: RootState) {
+    return state.userPreferences.mapStyle;
+}
+
 // use createSelector for computationally expensive selectors
 // to memoize results and avoid unnecessary recalculations
 const getSelectedDelayDatesCB = createSelector(
@@ -168,6 +176,24 @@ const getSelectedRouteDelayDatesCB = createSelector(
             selectedCustomDate,
             availableDates,
         });
+    }
+);
+
+const getFavoriteSitesCB = createSelector(
+    [getFavoriteSiteIdsCB, getSitesCB],
+    (favoriteSiteIds, sites): Site[] => {
+        if (!sites || favoriteSiteIds.length === 0) {
+            return [];
+        }
+
+        const sitesById = new Map<number, Site>();
+        for (const site of sites) {
+            sitesById.set(site.id, site);
+        }
+
+        return favoriteSiteIds
+            .map((siteId) => sitesById.get(siteId))
+            .filter((site): site is Site => Boolean(site));
     }
 );
 
@@ -201,6 +227,9 @@ export {
     getSnackbarOpenCB,
     getSnackbarMessageCB,
     getSnackbarSeverityCB,
+    getFavoriteSiteIdsCB,
+    getMapStylePreferenceCB,
+    getFavoriteSitesCB,
     getSelectedDelayDates,
     getSelectedDelayDatesCB,
     getSelectedRouteDelayDatesCB,

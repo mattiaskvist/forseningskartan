@@ -3,10 +3,13 @@ import { MapView } from "../views/mapView";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import {
     getAggregatedDatesCB,
+    getAuthUserCB,
     getDepartureHistoricalDelayLoadingCB,
     getDepartureHistoricalDelaySummaryCB,
     getDeparturesCB,
     getDeparturesLoadingCB,
+    getFavoriteSiteIdsCB,
+    getMapStylePreferenceCB,
     getSelectedCustomDateCB,
     getSelectedDatePresetCB,
     getSelectedDelayDatesCB,
@@ -27,6 +30,9 @@ import {
 import { Departure } from "../types/sl";
 import { DatePreset } from "../types/departureDelay";
 import { DepartureViewProps } from "../views/departureView";
+import { setMapStylePreference, toggleFavoriteSiteId } from "../store/userPreferencesSlice";
+import { MapStyle } from "../types/map";
+import { showSnackbar } from "../store/snackbarSlice";
 import { Suspense } from "../components/Suspense";
 
 export function MapPresenter() {
@@ -41,6 +47,9 @@ export function MapPresenter() {
     const selectedDelayDates = useAppSelector(getSelectedDelayDatesCB);
     const selectedDepartureDelaySummary = useAppSelector(getDepartureHistoricalDelaySummaryCB);
     const isDepartureHistoricalDelayLoading = useAppSelector(getDepartureHistoricalDelayLoadingCB);
+    const user = useAppSelector(getAuthUserCB);
+    const favoriteSiteIds = useAppSelector(getFavoriteSiteIdsCB);
+    const mapStyle = useAppSelector(getMapStylePreferenceCB);
     const sites = useAppSelector(getSitesCB);
     const isSitesLoading = useAppSelector(getSitesLoadingCB);
     const stopPoints = useAppSelector(getStopPointsCB);
@@ -78,6 +87,35 @@ export function MapPresenter() {
         dispatch(setSelectedCustomDate(date));
     }
 
+    function setMapStyleACB(style: MapStyle) {
+        dispatch(setMapStylePreference(style));
+    }
+
+    function toggleFavoriteStopACB() {
+        if (!selectedSite) {
+            return;
+        }
+
+        if (!user) {
+            dispatch(
+                showSnackbar({
+                    message: "Log in to save favorite stops.",
+                    severity: "info",
+                })
+            );
+            return;
+        }
+
+        const isFavorite = favoriteSiteIds.includes(selectedSite.id);
+        dispatch(toggleFavoriteSiteId(selectedSite.id));
+        dispatch(
+            showSnackbar({
+                message: isFavorite ? "Removed stop from favorites." : "Added stop to favorites.",
+                severity: "success",
+            })
+        );
+    }
+
     const departures = departureResponse?.departures ?? [];
     const departureViewProps: DepartureViewProps | null = selectedSite
         ? {
@@ -96,6 +134,9 @@ export function MapPresenter() {
               selectedCustomDate,
               onDatePresetChange: setSelectedDatePresetACB,
               onCustomDateChange: setSelectedCustomDateACB,
+              isFavoriteStop: favoriteSiteIds.includes(selectedSite.id),
+              isUserLoggedIn: Boolean(user),
+              onToggleFavoriteStop: toggleFavoriteStopACB,
           }
         : null;
 
@@ -105,6 +146,8 @@ export function MapPresenter() {
             selectedSite={selectedSite}
             handleSelectSiteCB={handleSelectSiteCB}
             departureViewProps={departureViewProps}
+            mapStyle={mapStyle}
+            onMapStyleChange={setMapStyleACB}
         />
     );
 }

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { SearchBar } from "../components/SearchBar";
 import { StopMap } from "../components/StopMap";
 import { Site } from "../types/sl";
@@ -11,6 +10,8 @@ type MapViewProps = {
     selectedSite: Site | null;
     handleSelectSiteCB: (siteId: number | null) => void;
     departureViewProps: DepartureViewProps | null;
+    mapStyle: MapStyle;
+    onMapStyleChange: (style: MapStyle) => void;
 };
 
 export function MapView({
@@ -18,9 +19,9 @@ export function MapView({
     selectedSite,
     handleSelectSiteCB,
     departureViewProps,
+    mapStyle,
+    onMapStyleChange,
 }: MapViewProps) {
-    // TODO: persist map style mode in firebase https://github.com/mattiaskvist/forseningskartan/issues/79
-    const [mapStyle, setMapStyle] = useState<MapStyle>("Dark");
     const panelWidthClass = "z-[1000] w-[min(420px,calc(100vw-2rem))]";
 
     return (
@@ -33,7 +34,7 @@ export function MapView({
             />
             <div className="pointer-events-auto absolute right-4 top-4 z-[1000] max-w-[calc(100vw-2rem)]">
                 <div className="flex items-start gap-3 max-[900px]:flex-col-reverse max-[900px]:items-end">
-                    <MapStyleSelector mapStyle={mapStyle} setMapStyle={setMapStyle} />
+                    <MapStyleSelector mapStyle={mapStyle} setMapStyle={onMapStyleChange} />
                     {departureViewProps && (
                         <aside className={`pointer-events-auto ${panelWidthClass}`}>
                             <div className="flex max-h-[calc(100vh-2rem)] flex-col gap-3 overflow-y-auto pr-1">
