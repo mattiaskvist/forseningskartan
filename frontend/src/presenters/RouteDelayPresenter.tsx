@@ -30,9 +30,10 @@ import {
     transportationModes,
     transportationModeToRouteType,
 } from "../types/sl";
-import { PageSizeOption, RouteDelaySection } from "../types/routeDelays";
-import { getAvgDelaySeconds } from "../utils/time";
+import { PageSizeOption, RouteDelayListItem, RouteDelaySection } from "../types/routeDelays";
+import { getAvgDelayMinutes, getAvgDelaySeconds } from "../utils/time";
 import { compareRouteNamesCB, getRouteDisplayName, getRouteIdentityKey } from "../utils/route";
+import { getPresetDescription } from "../types/departureDelay";
 
 function getRouteModeKey(summary: DelaySummary): string {
     return summary.route?.type ?? "unknown";
@@ -92,6 +93,25 @@ export function RouteDelayPresenter() {
         return filteredAndSortedRoutes.slice(startIndex, startIndex + routesPerPage);
     }, [filteredAndSortedRoutes, safeCurrentPage, routesPerPage]);
 
+    const pagedRouteItems = useMemo((): RouteDelayListItem[] => {
+        return pagedRoutes.map((summary) => ({
+            id: getRouteIdentityKey(summary),
+            label: getRouteDisplayName(summary),
+            avgDelayMinutes: getAvgDelayMinutes(summary, selectedEventType),
+            uniqueTrips: summary.uniqueTrips,
+        }));
+    }, [pagedRoutes, selectedEventType]);
+
+    const selectedDateText = useMemo(() => {
+        return getPresetDescription(selectedDates);
+    }, [selectedDates]);
+
+    const routesInfoText = useMemo(() => {
+        return selectedSection === "routes"
+            ? `Showing ${pagedRouteItems.length} of ${totalFilteredRoutes} filtered routes`
+            : `Showing ${totalFilteredRoutes} filtered routes`;
+    }, [selectedSection, pagedRouteItems, totalFilteredRoutes]);
+
     const transportationModeOptions = useMemo(() => {
         const modes = new Map<RouteType, TransportationMode>();
 
@@ -106,7 +126,7 @@ export function RouteDelayPresenter() {
         return Array.from(modes.values());
     }, [routeDelays]);
 
-    const leaderboardItems = useMemo((): DelaySummary[] => {
+    const leaderboardItems = useMemo((): RouteDelayListItem[] => {
         const filteredRoutes = routeDelays.filter(matchesTransportationFilterCB);
 
         function compareByDelayCB(a: DelaySummary, b: DelaySummary): number {
@@ -115,7 +135,16 @@ export function RouteDelayPresenter() {
             );
         }
 
-        return [...filteredRoutes].sort(compareByDelayCB);
+        function getRouteDelayListItemCB(summary: DelaySummary): RouteDelayListItem {
+            return {
+                id: getRouteIdentityKey(summary),
+                label: getRouteDisplayName(summary),
+                avgDelayMinutes: getAvgDelayMinutes(summary, selectedEventType),
+                uniqueTrips: summary.uniqueTrips,
+            };
+        }
+
+        return [...filteredRoutes].sort(compareByDelayCB).map(getRouteDelayListItemCB);
     }, [routeDelays, matchesTransportationFilterCB, selectedEventType]);
 
     const selectedRouteSummary = useMemo(() => {
@@ -159,6 +188,10 @@ export function RouteDelayPresenter() {
         dispatch(setRouteDelaySelectedRouteKey(routeKey));
     }
 
+    function handleBackToRoutesACB() {
+        dispatch(setRouteDelaySelectedRouteKey(null));
+    }
+
     function handlePageChangeACB(nextPage: number) {
         setCurrentPage(nextPage);
     }
@@ -180,22 +213,22 @@ export function RouteDelayPresenter() {
     return (
         <RouteDelayView
             selectedSection={selectedSection}
+            selectedDateText={selectedDateText}
+            routesInfoText={routesInfoText}
             selectedDatePreset={selectedDatePreset}
             selectedCustomDate={selectedCustomDate}
             selectedEventType={selectedEventType}
             selectedTransportationMode={selectedTransportationMode}
             searchQuery={searchQuery}
-            pagedRoutes={pagedRoutes}
+            pagedRouteItems={pagedRouteItems}
             currentPage={safeCurrentPage}
             totalPages={totalPages}
-            totalFilteredRoutes={totalFilteredRoutes}
             routesPerPage={routesPerPage}
             selectedRouteKey={selectedRouteKey}
             selectedRouteSummary={selectedRouteSummary}
             leaderboardItems={leaderboardItems}
             trendPoints={selectedRouteTrend}
             isTrendLoading={isTrendLoading}
-            selectedDates={selectedDates}
             transportationModeOptions={transportationModeOptions}
             availableDates={availableDates}
             onDatePresetChange={handleDatePresetChangeACB}
@@ -205,6 +238,7 @@ export function RouteDelayPresenter() {
             onSearchQueryChange={handleSearchQueryChangeACB}
             onSelectedSectionChange={handleSetSelectedSectionACB}
             onSelectRoute={handleSelectRouteACB}
+            onBackToRoutes={handleBackToRoutesACB}
             onPageChange={handlePageChangeACB}
             onRoutesPerPageChange={handleRoutesPerPageChangeACB}
         />
