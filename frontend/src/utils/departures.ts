@@ -11,7 +11,7 @@ const nonUpcomingStates = new Set([
     "REPLACED",
 ]);
 
-function getDepartureTimestampCB(departure: Departure) {
+function getDepartureTimestamp(departure: Departure) {
     const candidateTime = departure.expected ?? departure.scheduled;
     const parsedTime = Date.parse(candidateTime);
 
@@ -19,14 +19,14 @@ function getDepartureTimestampCB(departure: Departure) {
 }
 
 function isUpcomingDepartureCB(departure: Departure) {
-    const timestamp = getDepartureTimestampCB(departure);
+    const timestamp = getDepartureTimestamp(departure);
 
     return timestamp !== null && !nonUpcomingStates.has(departure.state);
 }
 
 function compareDeparturesCB(a: Departure, b: Departure) {
-    const aTime = getDepartureTimestampCB(a);
-    const bTime = getDepartureTimestampCB(b);
+    const aTime = getDepartureTimestamp(a);
+    const bTime = getDepartureTimestamp(b);
 
     if (aTime === null && bTime === null) {
         return 0;
