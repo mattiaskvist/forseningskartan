@@ -11,6 +11,10 @@ import {
     getSelectedDatePresetCB,
     getSelectedDelayDatesCB,
     getSelectedDepartureCB,
+    getSitesCB,
+    getSitesLoadingCB,
+    getStopPointsCB,
+    getStopPointsLoadingCB,
     getSelectedSiteCB,
 } from "../store/selectors";
 import { selectSiteCB } from "../store/selection";
@@ -20,15 +24,12 @@ import {
     setSelectedDeparture,
     setSelectedSiteId,
 } from "../store/reducers";
-import { Departure, Site } from "../types/sl";
+import { Departure } from "../types/sl";
 import { DatePreset } from "../types/departureDelay";
 import { DepartureViewProps } from "../views/departureView";
+import { Suspense } from "../components/Suspense";
 
-type MapPresenterProps = {
-    sites: Site[];
-};
-
-export function MapPresenter({ sites }: MapPresenterProps) {
+export function MapPresenter() {
     const dispatch = useAppDispatch();
     const selectedSite = useAppSelector(getSelectedSiteCB);
     const departureResponse = useAppSelector(getDeparturesCB);
@@ -40,6 +41,10 @@ export function MapPresenter({ sites }: MapPresenterProps) {
     const selectedDelayDates = useAppSelector(getSelectedDelayDatesCB);
     const selectedDepartureDelaySummary = useAppSelector(getDepartureHistoricalDelaySummaryCB);
     const isDepartureHistoricalDelayLoading = useAppSelector(getDepartureHistoricalDelayLoadingCB);
+    const sites = useAppSelector(getSitesCB);
+    const isSitesLoading = useAppSelector(getSitesLoadingCB);
+    const stopPoints = useAppSelector(getStopPointsCB);
+    const isStopPointsLoading = useAppSelector(getStopPointsLoadingCB);
 
     const handleSelectSiteCB = useCallback(
         (siteId: number | null) => {
@@ -47,6 +52,10 @@ export function MapPresenter({ sites }: MapPresenterProps) {
         },
         [dispatch]
     );
+
+    if (isSitesLoading || !sites || isStopPointsLoading || !stopPoints) {
+        return <Suspense fullscreen message="Loading transit data and preparing the map..." />;
+    }
 
     function closeDeparturesViewACB() {
         dispatch(setSelectedDeparture(null));

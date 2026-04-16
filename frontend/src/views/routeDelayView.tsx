@@ -173,124 +173,134 @@ export function RouteDelayView({
     }
 
     return (
-        <div className="flex w-full flex-col gap-4">
-            <div className="space-y-4">
-                <ToggleButtonGroup
-                    exclusive
-                    fullWidth
-                    value={selectedSection}
-                    onChange={handleSectionChangeACB}
-                >
-                    <ToggleButton value="routes" sx={{ fontWeight: 600 }}>
-                        Routes
-                    </ToggleButton>
-                    <ToggleButton value="leaderboard" sx={{ fontWeight: 600 }}>
-                        Delay Leaderboard
-                    </ToggleButton>
-                </ToggleButtonGroup>
-
-                <RouteDelayControls
-                    selectedSection={selectedSection}
-                    isRouteDetailsOpen={isRouteDetailsOpen}
-                    availableDates={availableDates}
-                    selectedDatePreset={selectedDatePreset}
-                    selectedCustomDate={selectedCustomDate}
-                    selectedEventType={selectedEventType}
-                    selectedTransportationMode={selectedTransportationMode}
-                    searchQuery={searchQuery}
-                    transportationModeOptions={transportationModeOptions}
-                    onDatePresetChange={onDatePresetChange}
-                    onCustomDateChange={onCustomDateChange}
-                    onEventTypeChange={onEventTypeChange}
-                    onTransportationModeChange={onTransportationModeChange}
-                    onSearchQueryChange={onSearchQueryChange}
-                />
-
-                <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
-                    {selectedDateText}
-                    {!isRouteDetailsOpen ? <p>{routesInfoText}</p> : null}
-                </div>
-            </div>
-
-            <div>
-                {selectedRouteKey === null ? (
-                    <div className="flex flex-col gap-4 pt-4">
-                        {selectedSection === "routes" ? (
-                            <section className="space-y-3">
-                                <div className="flex flex-wrap items-center justify-between gap-3">
-                                    <FormControl size="small" sx={{ minWidth: 125 }}>
-                                        <InputLabel id="routes-per-page-label">Rows</InputLabel>
-                                        <Select
-                                            labelId="routes-per-page-label"
-                                            label="Rows"
-                                            value={routesPerPage}
-                                            onChange={handleRoutesPerPageChangeACB}
-                                        >
-                                            {PageSizeOptions.map(getRoutesPerPageOptionCB)}
-                                        </Select>
-                                    </FormControl>
-
-                                    {totalPages > 1 ? (
-                                        <Pagination
-                                            count={totalPages}
-                                            page={currentPage}
-                                            onChange={handlePaginationChangeACB}
-                                            color="primary"
-                                            shape="rounded"
-                                            size="small"
-                                            siblingCount={1}
-                                            boundaryCount={1}
-                                        />
-                                    ) : null}
-                                </div>
-
-                                {pagedRoutes.length === 0 ? (
-                                    <p className="rounded border border-slate-200 p-3 text-sm text-slate-500">
-                                        No routes match the selected filters.
-                                    </p>
-                                ) : (
-                                    <ul className="space-y-2">
-                                        {pagedRoutes.map(getRouteListItemCB)}
-                                    </ul>
-                                )}
-                            </section>
-                        ) : null}
-
-                        {selectedSection === "leaderboard" ? (
-                            <section className="space-y-2">
-                                {leaderboardItems.length === 0 ? (
-                                    <p className="rounded border border-slate-200 p-3 text-sm text-slate-500">
-                                        No leaderboard data available.
-                                    </p>
-                                ) : (
-                                    <ol className="space-y-1 rounded border border-slate-200 p-3">
-                                        {leaderboardItems.map(getLeaderboardItemCB)}
-                                    </ol>
-                                )}
-                            </section>
-                        ) : null}
-                    </div>
-                ) : selectedRouteSummary ? (
-                    <RouteDetailsPage
-                        routeSummary={selectedRouteSummary}
-                        selectedEventType={selectedEventType}
-                        trendPoints={trendPoints}
-                        isTrendLoading={isTrendLoading}
-                        onBack={() => onSelectRoute(null)}
-                    />
-                ) : (
-                    <div className="space-y-3 rounded border border-slate-200 p-4 text-sm text-slate-700">
-                        <p>The selected route is no longer available for the current filters.</p>
-                        <button
-                            type="button"
-                            className="rounded border border-slate-300 p-2 font-medium transition hover:bg-slate-50"
-                            onClick={() => onSelectRoute(null)}
+        <div className="flex h-screen w-full items-start justify-center overflow-y-auto bg-slate-50 p-8">
+            <section className="overlay-panel w-full max-w-3xl">
+                <h2 className="overlay-panel-title">Route Delays</h2>
+                <div className="flex w-full flex-col gap-4">
+                    <div className="space-y-4">
+                        <ToggleButtonGroup
+                            exclusive
+                            fullWidth
+                            value={selectedSection}
+                            onChange={handleSectionChangeACB}
                         >
-                            Back to routes
-                        </button>
+                            <ToggleButton value="routes" sx={{ fontWeight: 600 }}>
+                                Routes
+                            </ToggleButton>
+                            <ToggleButton value="leaderboard" sx={{ fontWeight: 600 }}>
+                                Delay Leaderboard
+                            </ToggleButton>
+                        </ToggleButtonGroup>
+
+                        <RouteDelayControls
+                            selectedSection={selectedSection}
+                            isRouteDetailsOpen={isRouteDetailsOpen}
+                            availableDates={availableDates}
+                            selectedDatePreset={selectedDatePreset}
+                            selectedCustomDate={selectedCustomDate}
+                            selectedEventType={selectedEventType}
+                            selectedTransportationMode={selectedTransportationMode}
+                            searchQuery={searchQuery}
+                            transportationModeOptions={transportationModeOptions}
+                            onDatePresetChange={onDatePresetChange}
+                            onCustomDateChange={onCustomDateChange}
+                            onEventTypeChange={onEventTypeChange}
+                            onTransportationModeChange={onTransportationModeChange}
+                            onSearchQueryChange={onSearchQueryChange}
+                        />
+
+                        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+                            {selectedDateText}
+                            {!isRouteDetailsOpen ? <p>{routesInfoText}</p> : null}
+                        </div>
                     </div>
-                )}
-            </div>
+
+                    <div>
+                        {selectedRouteKey === null ? (
+                            <div className="flex flex-col gap-4 pt-4">
+                                {selectedSection === "routes" ? (
+                                    <section className="space-y-3">
+                                        <div className="flex flex-wrap items-center justify-between gap-3">
+                                            <FormControl size="small" sx={{ minWidth: 125 }}>
+                                                <InputLabel id="routes-per-page-label">
+                                                    Rows
+                                                </InputLabel>
+                                                <Select
+                                                    labelId="routes-per-page-label"
+                                                    label="Rows"
+                                                    value={routesPerPage}
+                                                    onChange={handleRoutesPerPageChangeACB}
+                                                >
+                                                    {PageSizeOptions.map(getRoutesPerPageOptionCB)}
+                                                </Select>
+                                            </FormControl>
+
+                                            {totalPages > 1 ? (
+                                                <Pagination
+                                                    count={totalPages}
+                                                    page={currentPage}
+                                                    onChange={handlePaginationChangeACB}
+                                                    color="primary"
+                                                    shape="rounded"
+                                                    size="small"
+                                                    siblingCount={1}
+                                                    boundaryCount={1}
+                                                />
+                                            ) : null}
+                                        </div>
+
+                                        {pagedRoutes.length === 0 ? (
+                                            <p className="rounded border border-slate-200 p-3 text-sm text-slate-500">
+                                                No routes match the selected filters.
+                                            </p>
+                                        ) : (
+                                            <ul className="space-y-2">
+                                                {pagedRoutes.map(getRouteListItemCB)}
+                                            </ul>
+                                        )}
+                                    </section>
+                                ) : null}
+
+                                {selectedSection === "leaderboard" ? (
+                                    <section className="space-y-2">
+                                        {leaderboardItems.length === 0 ? (
+                                            <p className="rounded border border-slate-200 p-3 text-sm text-slate-500">
+                                                No leaderboard data available.
+                                            </p>
+                                        ) : (
+                                            <ol className="space-y-1 rounded border border-slate-200 p-3">
+                                                {leaderboardItems.map(getLeaderboardItemCB)}
+                                            </ol>
+                                        )}
+                                    </section>
+                                ) : null}
+                            </div>
+                        ) : selectedRouteSummary ? (
+                            <RouteDetailsPage
+                                routeSummary={selectedRouteSummary}
+                                selectedEventType={selectedEventType}
+                                trendPoints={trendPoints}
+                                isTrendLoading={isTrendLoading}
+                                onBack={() => onSelectRoute(null)}
+                            />
+                        ) : (
+                            <div className="space-y-3 rounded border border-slate-200 p-4 text-sm text-slate-700">
+                                <p>
+                                    The selected route is no longer available for the current
+                                    filters.
+                                </p>
+                                <button
+                                    type="button"
+                                    className="rounded border border-slate-300 p-2 font-medium transition hover:bg-slate-50"
+                                    onClick={() => onSelectRoute(null)}
+                                >
+                                    Back to routes
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </section>
         </div>
     );
 }
