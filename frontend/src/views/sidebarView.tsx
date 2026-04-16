@@ -131,16 +131,20 @@ export function SidebarView({
 
                 <ul className="sidebar-nav-list">
                     {ROUTES.map(renderNavItemCB)}
-                    {user && favoriteStops.length > 0 ? (
-                        <>
-                            <li className="mt-6 px-3">
-                                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                                    Favorite stops
-                                </p>
-                            </li>
-                            {favoriteStops.map(renderFavoriteStopItemCB)}
-                        </>
-                    ) : null}
+                    <li className="mt-6 px-3">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            Favorite stops
+                        </p>
+                    </li>
+                    {!user ? (
+                        <li className="px-3 py-1 text-xs text-slate-500">Log in to favorite stops</li>
+                    ) : favoriteStops.length === 0 ? (
+                        <li className="px-3 py-1 text-xs text-slate-500">
+                            Select a stop to favorite it
+                        </li>
+                    ) : (
+                        favoriteStops.map(renderFavoriteStopItemCB)
+                    )}
                     <li className="mt-8 border-t border-slate-200/20 pt-2" />
                     {user
                         ? renderUserItem(user)

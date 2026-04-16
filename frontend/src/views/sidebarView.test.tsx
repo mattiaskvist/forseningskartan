@@ -43,8 +43,7 @@ describe("SidebarView favorites", () => {
         expect(onSelectFavoriteStop).toHaveBeenCalledWith(10);
     });
 
-    it("hides favorite stops when no user is logged in", () => {
-        // render component as a guest (user is null)
+    it("shows login prompt when no user is logged in", () => {
         render(
             <SidebarView
                 isOpen
@@ -58,7 +57,25 @@ describe("SidebarView favorites", () => {
             />
         );
 
-        // verify the favorites section does not exist
-        expect(screen.queryByText("Favorite stops")).not.toBeInTheDocument();
+        expect(screen.getByText("Favorite stops")).toBeInTheDocument();
+        expect(screen.getByText("Log in to favorite stops")).toBeInTheDocument();
+    });
+
+    it("shows guidance when user has no favorite stops", () => {
+        render(
+            <SidebarView
+                isOpen
+                currentPath="/"
+                user={mockUser}
+                favoriteStops={[]}
+                onToggle={vi.fn()}
+                onNavigate={vi.fn()}
+                onLogout={vi.fn()}
+                onSelectFavoriteStop={vi.fn()}
+            />
+        );
+
+        expect(screen.getByText("Favorite stops")).toBeInTheDocument();
+        expect(screen.getByText("Select a stop to favorite it")).toBeInTheDocument();
     });
 });
