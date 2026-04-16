@@ -1,5 +1,5 @@
 import { RouteDelayControls } from "../components/RouteDelayControls";
-import { DatePreset, EventType, getPresetDescription } from "../types/departureDelay";
+import { DatePreset, EventType } from "../types/departureDelay";
 import { TransportationMode } from "../types/sl";
 import { PageSizeOption, RouteDelaySection, RouteDelayTrendPoint } from "../types/routeDelays";
 import { DelaySummary } from "../types/historicalDelay";
@@ -8,6 +8,7 @@ import { RouteDelayLeaderboardView } from "./routeDelayLeaderboardView";
 import { RouteDelayRouteFallbackView } from "./routeDelayRouteFallbackView";
 import { RouteDetailsPage } from "../components/RouteDetailsPage";
 import { RouteDelaySectionToggleView } from "./routeDelaySectionToggleView";
+import { RouteDelayInfoView } from "./RouteDelayInfoView";
 
 type RouteDelayViewProps = {
     selectedSection: RouteDelaySection;
@@ -74,13 +75,6 @@ export function RouteDelayView({
 }: RouteDelayViewProps) {
     const isRouteDetailsOpen = selectedRouteKey !== null;
 
-    const selectedDateText = getPresetDescription(selectedDates, 0);
-
-    const routesInfoText =
-        selectedSection === "routes"
-            ? `Showing ${pagedRoutes.length} of ${totalFilteredRoutes} filtered routes`
-            : `Showing ${totalFilteredRoutes} filtered routes`;
-
     return (
         <div className="flex h-screen w-full items-start justify-center overflow-y-auto bg-slate-50 p-8">
             <section className="overlay-panel w-full max-w-3xl">
@@ -107,11 +101,13 @@ export function RouteDelayView({
                             onTransportationModeChange={onTransportationModeChange}
                             onSearchQueryChange={onSearchQueryChange}
                         />
-
-                        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
-                            {selectedDateText}
-                            {!isRouteDetailsOpen ? <p>{routesInfoText}</p> : null}
-                        </div>
+                        <RouteDelayInfoView
+                            selectedDates={selectedDates}
+                            selectedSection={selectedSection}
+                            pagedRoutes={pagedRoutes}
+                            totalFilteredRoutes={totalFilteredRoutes}
+                            isRouteDetailsOpen={isRouteDetailsOpen}
+                        />
                     </div>
 
                     <div>
