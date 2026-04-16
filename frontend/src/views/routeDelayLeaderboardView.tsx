@@ -18,7 +18,7 @@ export function RouteDelayLeaderboardView({ leaderboardItems }: RouteDelayLeader
                 </span>
                 <span className="flex font-medium tabular-nums">
                     <span className="text-right">{avgDelayMinutes} min</span>
-                    <span className="w-36 text-right">{uniqueTrips} unique trips</span>
+                    <span className="w-24 text-right">{uniqueTrips}</span>
                 </span>
             </li>
         );
@@ -39,7 +39,7 @@ export function RouteDelayLeaderboardView({ leaderboardItems }: RouteDelayLeader
                         </span>
                         <span className="flex tabular-nums">
                             <span className="text-right">Avg delay</span>
-                            <span className="w-36 text-right">Unique trips</span>
+                            <span className="w-24 text-right">Unique trips</span>
                         </span>
                     </div>
                     <ol className="space-y-1 p-3">{leaderboardItems.map(getLeaderboardItemCB)}</ol>
