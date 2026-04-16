@@ -17,7 +17,7 @@ export function RouteDelayInfoView({
     totalFilteredRoutes,
     isRouteDetailsOpen,
 }: RouteDelayInfoViewProps) {
-    const selectedDateText = getPresetDescription(selectedDates, 0);
+    const selectedDateText = getPresetDescription(selectedDates);
 
     const routesInfoText =
         selectedSection === "routes"
