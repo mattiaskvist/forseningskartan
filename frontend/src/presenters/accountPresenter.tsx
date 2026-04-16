@@ -19,7 +19,7 @@ export function AccountPresenter() {
         }
     }, [user, loading, navigate]);
 
-    async function handleLogoutCB() {
+    async function handleLogoutACB() {
         try {
             await logoutUser();
             dispatch(showSnackbar({ message: "Logged out", severity: "success" }));
@@ -29,7 +29,7 @@ export function AccountPresenter() {
         }
     }
 
-    async function handleDeleteCB() {
+    async function handleDeleteACB() {
         try {
             await deleteUserAccount();
             dispatch(showSnackbar({ message: "Account deleted", severity: "success" }));
@@ -64,5 +64,5 @@ export function AccountPresenter() {
         return <Suspense fullscreen message="Loading account details..." />;
     }
 
-    return <AccountView user={user} onLogoutCB={handleLogoutCB} onDeleteCB={handleDeleteCB} />;
+    return <AccountView user={user} onLogout={handleLogoutACB} onDelete={handleDeleteACB} />;
 }

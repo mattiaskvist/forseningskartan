@@ -11,9 +11,9 @@ type DepartureHistoricalDelaysProps = {
     selectedDatePreset: DatePreset;
     selectedCustomDate: string | null;
     selectedEventType: EventType;
-    onDatePresetChangeCB: (preset: DatePreset) => void;
-    onCustomDateChangeCB: (date: string) => void;
-    onEventTypeChangeCB: (eventType: EventType) => void;
+    onDatePresetChange: (preset: DatePreset) => void;
+    onCustomDateChange: (date: string) => void;
+    onEventTypeChange: (eventType: EventType) => void;
     isLoadingData: boolean;
     routeSummary: DelaySummary | null;
 };
@@ -25,9 +25,9 @@ export function DepartureHistoricalDelays({
     selectedDatePreset,
     selectedCustomDate,
     selectedEventType,
-    onDatePresetChangeCB,
-    onCustomDateChangeCB,
-    onEventTypeChangeCB,
+    onDatePresetChange,
+    onCustomDateChange,
+    onEventTypeChange,
     isLoadingData,
     routeSummary,
 }: DepartureHistoricalDelaysProps) {
@@ -39,9 +39,9 @@ export function DepartureHistoricalDelays({
                 selectedDatePreset={selectedDatePreset}
                 selectedCustomDate={selectedCustomDate}
                 selectedEventType={selectedEventType}
-                onDatePresetChangeCB={onDatePresetChangeCB}
-                onCustomDateChangeCB={onCustomDateChangeCB}
-                onEventTypeChangeCB={onEventTypeChangeCB}
+                onDatePresetChange={onDatePresetChange}
+                onCustomDateChange={onCustomDateChange}
+                onEventTypeChange={onEventTypeChange}
             />
 
             <div className="rounded border border-slate-200 p-2">

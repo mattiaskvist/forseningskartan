@@ -5,22 +5,16 @@ import { getDatesForPreset, sortDatesDescendingCB } from "../utils/time";
 import { RootState } from "./store";
 
 type SelectedDelayDatesInput = {
-    selectedDeparture: unknown | null;
     selectedDatePreset: DatePreset;
     selectedCustomDate: string | null;
     availableDates: string[];
 };
 
 function getSelectedDelayDates({
-    selectedDeparture,
     selectedDatePreset,
     selectedCustomDate,
     availableDates,
 }: SelectedDelayDatesInput): string[] {
-    if (!selectedDeparture) {
-        return [];
-    }
-
     const latestDate = [...availableDates].sort(sortDatesDescendingCB)[0];
     const effectiveCustomDate = selectedCustomDate ?? latestDate ?? null;
 
@@ -78,7 +72,7 @@ function getDepartureHistoricalDelayLoadingCB(state: RootState) {
 }
 
 function getRouteDelaysCB(state: RootState) {
-    return state.routeDelays.data;
+    return state.routeDelays.data ?? [];
 }
 
 function getRouteDelaysLoadingCB(state: RootState) {
@@ -113,6 +107,34 @@ function getSelectedCustomDateCB(state: RootState) {
     return state.departureUI.selectedCustomDate;
 }
 
+function getRouteDelaySelectedDatePresetCB(state: RootState) {
+    return state.routeDelayUI.selectedDatePreset;
+}
+
+function getRouteDelaySelectedCustomDateCB(state: RootState) {
+    return state.routeDelayUI.selectedCustomDate;
+}
+
+function getRouteDelaySelectedEventTypeCB(state: RootState) {
+    return state.routeDelayUI.selectedEventType;
+}
+
+function getRouteDelaySelectedTransportationModeCB(state: RootState) {
+    return state.routeDelayUI.selectedTransportationMode;
+}
+
+function getRouteDelaySelectedRouteKeyCB(state: RootState) {
+    return state.routeDelayUI.selectedRouteKey;
+}
+
+function getRouteDelayTrendPointsCB(state: RootState) {
+    return state.routeDelayTrend.data;
+}
+
+function getRouteDelayTrendLoadingCB(state: RootState) {
+    return state.routeDelayTrend.isLoading;
+}
+
 function getSnackbarOpenCB(state: RootState) {
     return state.snackbar.open;
 }
@@ -128,15 +150,20 @@ function getSnackbarSeverityCB(state: RootState) {
 // use createSelector for computationally expensive selectors
 // to memoize results and avoid unnecessary recalculations
 const getSelectedDelayDatesCB = createSelector(
-    [
-        getSelectedDepartureCB,
-        getSelectedDatePresetCB,
-        getSelectedCustomDateCB,
-        getAggregatedDatesCB,
-    ],
-    (selectedDeparture, selectedDatePreset, selectedCustomDate, availableDates) => {
+    [getSelectedDatePresetCB, getSelectedCustomDateCB, getAggregatedDatesCB],
+    (selectedDatePreset, selectedCustomDate, availableDates) => {
         return getSelectedDelayDates({
-            selectedDeparture,
+            selectedDatePreset,
+            selectedCustomDate,
+            availableDates,
+        });
+    }
+);
+
+const getSelectedRouteDelayDatesCB = createSelector(
+    [getRouteDelaySelectedDatePresetCB, getRouteDelaySelectedCustomDateCB, getAggregatedDatesCB],
+    (selectedDatePreset, selectedCustomDate, availableDates) => {
+        return getSelectedDelayDates({
             selectedDatePreset,
             selectedCustomDate,
             availableDates,
@@ -164,9 +191,17 @@ export {
     getSelectedDepartureCB,
     getSelectedDatePresetCB,
     getSelectedCustomDateCB,
+    getRouteDelaySelectedDatePresetCB,
+    getRouteDelaySelectedCustomDateCB,
+    getRouteDelaySelectedEventTypeCB,
+    getRouteDelaySelectedTransportationModeCB,
+    getRouteDelaySelectedRouteKeyCB,
+    getRouteDelayTrendPointsCB,
+    getRouteDelayTrendLoadingCB,
     getSnackbarOpenCB,
     getSnackbarMessageCB,
     getSnackbarSeverityCB,
     getSelectedDelayDates,
     getSelectedDelayDatesCB,
+    getSelectedRouteDelayDatesCB,
 };

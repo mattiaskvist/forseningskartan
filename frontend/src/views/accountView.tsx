@@ -2,11 +2,21 @@ import { AuthUserState } from "../store/authSlice";
 
 type AccountViewProps = {
     user: AuthUserState;
-    onLogoutCB: () => void;
-    onDeleteCB: () => void;
+    onLogout: () => void;
+    onDelete: () => void;
 };
 
-export function AccountView({ user, onLogoutCB, onDeleteCB }: AccountViewProps) {
+export function AccountView({ user, onLogout, onDelete }: AccountViewProps) {
+    function deleteAccountACB() {
+        if (
+            window.confirm(
+                "Are you sure you want to delete your account? This action cannot be undone."
+            )
+        ) {
+            onDelete();
+        }
+    }
+
     return (
         <div className="flex h-screen w-full items-start justify-center overflow-y-auto bg-slate-50 p-8 pt-20">
             <section className="overlay-panel w-full max-w-lg">
@@ -35,21 +45,13 @@ export function AccountView({ user, onLogoutCB, onDeleteCB }: AccountViewProps) 
 
                 <div className="flex flex-col gap-3 mt-4 border-t border-slate-200 pt-6">
                     <button
-                        onClick={onLogoutCB}
+                        onClick={onLogout}
                         className="w-full rounded-md bg-white border border-slate-300 px-4 py-2 font-medium text-slate-700 hover:bg-slate-50 transition-colors"
                     >
                         Sign Out
                     </button>
                     <button
-                        onClick={() => {
-                            if (
-                                window.confirm(
-                                    "Are you sure you want to delete your account? This action cannot be undone."
-                                )
-                            ) {
-                                onDeleteCB();
-                            }
-                        }}
+                        onClick={deleteAccountACB}
                         className="w-full rounded-md bg-red-50 border border-red-200 px-4 py-2 font-medium text-red-600 hover:bg-red-100 transition-colors"
                     >
                         Delete Account

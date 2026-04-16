@@ -6,13 +6,13 @@ import { DepartureDetails } from "../components/DepartureDetails";
 import { DepartureList } from "../components/DepartureList";
 import { DatePreset } from "../types/departureDelay";
 
-type DepartureViewProps = {
+export type DepartureViewProps = {
     departures: Departure[];
     selectedDeparture: Departure | null;
     selectedSiteName: string;
-    onCloseCB: () => void;
-    onSelectDepartureCB: (departure: Departure) => void;
-    onBackToListCB: () => void;
+    onClose: () => void;
+    onSelectDeparture: (departure: Departure) => void;
+    onBackToList: () => void;
     isLoading: boolean;
     availableDates: string[];
     selectedDelayDates: string[];
@@ -20,17 +20,17 @@ type DepartureViewProps = {
     isDepartureHistoricalDelayLoading: boolean;
     selectedDatePreset: DatePreset;
     selectedCustomDate: string | null;
-    onDatePresetChangeCB: (preset: DatePreset) => void;
-    onCustomDateChangeCB: (date: string) => void;
+    onDatePresetChange: (preset: DatePreset) => void;
+    onCustomDateChange: (date: string) => void;
 };
 
 export function DepartureView({
     departures,
     selectedDeparture,
     selectedSiteName,
-    onCloseCB,
-    onSelectDepartureCB,
-    onBackToListCB,
+    onClose,
+    onSelectDeparture,
+    onBackToList,
     isLoading,
     availableDates,
     selectedDelayDates,
@@ -38,8 +38,8 @@ export function DepartureView({
     isDepartureHistoricalDelayLoading,
     selectedDatePreset,
     selectedCustomDate,
-    onDatePresetChangeCB,
-    onCustomDateChangeCB,
+    onDatePresetChange,
+    onCustomDateChange,
 }: DepartureViewProps) {
     const nonUpcomingStates = new Set([
         "DEPARTED",
@@ -90,7 +90,7 @@ export function DepartureView({
                 <Button
                     variant="text"
                     size="small"
-                    onClick={onCloseCB}
+                    onClick={onClose}
                     aria-label="Close departures view"
                 >
                     Close
@@ -101,20 +101,20 @@ export function DepartureView({
             ) : selectedDeparture ? (
                 <DepartureDetails
                     departure={selectedDeparture}
-                    onBackToListCB={onBackToListCB}
+                    onBackToList={onBackToList}
                     availableDates={availableDates}
                     selectedDelayDates={selectedDelayDates}
                     selectedDepartureDelaySummary={selectedDepartureDelaySummary}
                     isDepartureHistoricalDelayLoading={isDepartureHistoricalDelayLoading}
                     selectedDatePreset={selectedDatePreset}
                     selectedCustomDate={selectedCustomDate}
-                    onDatePresetChangeCB={onDatePresetChangeCB}
-                    onCustomDateChangeCB={onCustomDateChangeCB}
+                    onDatePresetChange={onDatePresetChange}
+                    onCustomDateChange={onCustomDateChange}
                 />
             ) : upcomingDepartures.length > 0 ? (
                 <DepartureList
                     departures={upcomingDepartures}
-                    onSelectDepartureCB={onSelectDepartureCB}
+                    onSelectDeparture={onSelectDeparture}
                 />
             ) : (
                 <p className="text-sm text-slate-600">No upcoming departures</p>

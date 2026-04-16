@@ -22,7 +22,7 @@ export function SidebarPresenter() {
         setIsOpen(false);
     }
 
-    async function handleLogoutCB() {
+    async function handleLogoutACB() {
         try {
             await logoutUser();
             dispatch(showSnackbar({ message: "Logged out", severity: "success" }));
@@ -37,9 +37,9 @@ export function SidebarPresenter() {
             isOpen={isOpen}
             currentPath={location.pathname}
             user={user}
-            onToggleCB={toggleSidebarCB}
-            onNavigateCB={navigateCB}
-            onLogoutCB={handleLogoutCB}
+            onToggle={toggleSidebarCB}
+            onNavigate={navigateCB}
+            onLogout={handleLogoutACB}
         />
     );
 }
