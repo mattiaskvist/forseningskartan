@@ -2,9 +2,10 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { SidebarView } from "../views/sidebarView";
 import { useAppDispatch, useAppSelector } from "../store/store";
-import { getAuthUserCB } from "../store/selectors";
+import { getAuthUserCB, getFavoriteSitesCB } from "../store/selectors";
 import { logoutUser } from "../firebase/authActions";
 import { showSnackbar } from "../store/snackbarSlice";
+import { selectSiteCB } from "../store/selection";
 
 export function SidebarPresenter() {
     const [isOpen, setIsOpen] = useState(false);
@@ -12,6 +13,7 @@ export function SidebarPresenter() {
     const navigate = useNavigate();
     const location = useLocation();
     const user = useAppSelector(getAuthUserCB);
+    const favoriteSites = useAppSelector(getFavoriteSitesCB);
 
     function toggleSidebarCB() {
         setIsOpen(!isOpen);
@@ -19,6 +21,12 @@ export function SidebarPresenter() {
 
     function navigateCB(path: string) {
         navigate(path);
+        setIsOpen(false);
+    }
+
+    function selectFavoriteStopACB(siteId: number) {
+        selectSiteCB({ dispatch, siteId });
+        navigate("/");
         setIsOpen(false);
     }
 
@@ -37,9 +45,11 @@ export function SidebarPresenter() {
             isOpen={isOpen}
             currentPath={location.pathname}
             user={user}
+            favoriteStops={favoriteSites.map((site) => ({ id: site.id, name: site.name }))}
             onToggle={toggleSidebarCB}
             onNavigate={navigateCB}
             onLogout={handleLogoutACB}
+            onSelectFavoriteStop={selectFavoriteStopACB}
         />
     );
 }

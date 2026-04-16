@@ -4,7 +4,7 @@ The application is currently available at https://forseningskartan.web.app/.
 
 Förseningskartan is a web application for exploring public transport delays, currently only in Stockholm. It combines live departure data from SL with historically aggregated GTFS delay data so users can understand both what is happening now and what usually happens at a stop/route/time. GTFS (General Transit Feed Specification) is a standardized data format used by transit agencies to share schedules and real-time updates, including delays, routes, and stop information.
 
-## What has been done (as of 2026-04-10)
+## What has been done (as of 2026-04-16)
 
 The following has been implemented:
 
@@ -17,16 +17,17 @@ The following has been implemented:
 - Frontend deployment
 - Basic sidebar with navigation
 - User account view in sidebar and login with Google
+- User personalization:
+  - Favorite stops in departures view
+  - Favorite stops shown in sidebar for logged-in users
+  - User preferences (favorite stops, map style) persisted to Firestore
 
 For an up-to-date list of completed work, please visit [the project board and roadmap](https://github.com/users/mattiaskvist/projects/5).
 
-## What is still planned (as of 2026-04-10)
+## What is still planned (as of 2026-04-16)
 
 The following work is still planned:
 
-- User accounts and personalization:
-  - Users can favorite stops in departure view, stored in Firestore
-  - Show favorite stops in sidebar
 - Historical delay data improvements:
   - Per-route delay stats refinements
   - Show where delays happen on the map (_strech goal_)
