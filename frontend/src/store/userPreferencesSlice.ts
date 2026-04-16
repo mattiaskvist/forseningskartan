@@ -47,10 +47,6 @@ export const userPreferencesSlice = createSlice({
             state.favoriteSiteIds = normalizeFavoriteSiteIds(action.payload.favoriteSiteIds);
             state.mapStyle = action.payload.mapStyle;
         },
-        resetUserPreferences: (state) => {
-            state.favoriteSiteIds = [];
-            state.mapStyle = "Dark";
-        },
     },
 });
 
@@ -58,5 +54,4 @@ export const {
     toggleFavoriteSiteId,
     setMapStylePreference,
     applyLoadedUserPreferences,
-    resetUserPreferences,
 } = userPreferencesSlice.actions;

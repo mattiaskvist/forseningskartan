@@ -20,7 +20,6 @@ import { authSlice, setUser } from "./authSlice";
 import { showSnackbar, snackbarSlice } from "./snackbarSlice";
 import {
     applyLoadedUserPreferences,
-    resetUserPreferences,
     setMapStylePreference,
     toggleFavoriteSiteId,
     userPreferencesSlice,
@@ -105,7 +104,6 @@ listenerMiddleware.startListening({
         const user = action.payload;
 
         if (!user) {
-            dispatch(resetUserPreferences());
             return;
         }
 
