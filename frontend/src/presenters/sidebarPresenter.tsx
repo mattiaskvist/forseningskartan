@@ -3,9 +3,9 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { SidebarView } from "../views/sidebarView";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import { getAuthUserCB, getFavoriteSitesCB } from "../store/selectors";
-import { logoutUser } from "../firebase/authActions";
 import { showSnackbar } from "../store/snackbarSlice";
 import { selectSiteCB } from "../store/selection";
+import { logoutCurrentUser } from "../store/authThunks";
 
 export function SidebarPresenter() {
     const [isOpen, setIsOpen] = useState(false);
@@ -32,7 +32,7 @@ export function SidebarPresenter() {
 
     async function handleLogoutACB() {
         try {
-            await logoutUser();
+            await dispatch(logoutCurrentUser()).unwrap();
             dispatch(showSnackbar({ message: "Logged out", severity: "success" }));
             navigate("/");
         } catch {

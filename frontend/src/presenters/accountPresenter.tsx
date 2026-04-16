@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import { getAuthUserCB, getAuthLoadingCB } from "../store/selectors";
 import { AccountView } from "../views/accountView";
-import { logoutUser, deleteUserAccount } from "../firebase/authActions";
 import { Suspense } from "../components/Suspense";
 import { showSnackbar } from "../store/snackbarSlice";
+import { deleteCurrentUser, logoutCurrentUser } from "../store/authThunks";
 
 export function AccountPresenter() {
     const dispatch = useAppDispatch();
@@ -21,7 +21,7 @@ export function AccountPresenter() {
 
     async function handleLogoutACB() {
         try {
-            await logoutUser();
+            await dispatch(logoutCurrentUser()).unwrap();
             dispatch(showSnackbar({ message: "Logged out", severity: "success" }));
             navigate("/");
         } catch {
@@ -30,8 +30,16 @@ export function AccountPresenter() {
     }
 
     async function handleDeleteACB() {
+        if (
+            !window.confirm(
+                "Are you sure you want to delete your account? This action cannot be undone."
+            )
+        ) {
+            return;
+        }
+
         try {
-            await deleteUserAccount();
+            await dispatch(deleteCurrentUser()).unwrap();
             dispatch(showSnackbar({ message: "Account deleted", severity: "success" }));
             navigate("/");
         } catch (error: unknown) {
@@ -44,7 +52,7 @@ export function AccountPresenter() {
                     })
                 );
                 try {
-                    await logoutUser();
+                    await dispatch(logoutCurrentUser()).unwrap();
                     navigate("/login");
                 } catch {
                     console.error("Failed to redirect to login.");
