@@ -12,7 +12,6 @@ const mockUser: AuthUserState = {
 };
 
 describe("SidebarView favorites", () => {
-    
     it("shows favorite stops for logged in users", () => {
         // mock function to track click events
         const onSelectFavoriteStop = vi.fn();
@@ -36,10 +35,10 @@ describe("SidebarView favorites", () => {
 
         // verify the favorites section is visible
         expect(screen.getByText("Favorite stops")).toBeInTheDocument();
-        
+
         // simulate clicking a specific stop
         fireEvent.click(screen.getByRole("button", { name: "Odenplan" }));
-        
+
         // ensure the correct stop ID was passed to the callback
         expect(onSelectFavoriteStop).toHaveBeenCalledWith(10);
     });

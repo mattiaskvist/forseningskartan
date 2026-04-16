@@ -9,7 +9,7 @@ import {
 describe("userPreferencesSlice", () => {
     // vrify the slice has the correct initial state before the user does anything.
     it("starts with default preferences", () => {
-        // Passing 'undefined' as the current state and a generic '@@INIT' action 
+        // Passing 'undefined' as the current state and a generic '@@INIT' action
         // forces the Redux reducer to return its baseline default state.
         const initialState = userPreferencesSlice.reducer(undefined, { type: "@@INIT" });
 
@@ -27,14 +27,20 @@ describe("userPreferencesSlice", () => {
         expect(withFavorite.favoriteSiteIds).toEqual([42]);
 
         // toggle ID 42 again, but this time pass in the state from before, should remove
-        const withoutFavorite = userPreferencesSlice.reducer(withFavorite, toggleFavoriteSiteId(42));
+        const withoutFavorite = userPreferencesSlice.reducer(
+            withFavorite,
+            toggleFavoriteSiteId(42)
+        );
         expect(withoutFavorite.favoriteSiteIds).toEqual([]);
     });
 
     // verify updating a simple string preference
     it("sets map style preference", () => {
         // dispatch the action to change the map style from the default to 'Light'
-        const updatedState = userPreferencesSlice.reducer(undefined, setMapStylePreference("Light"));
+        const updatedState = userPreferencesSlice.reducer(
+            undefined,
+            setMapStylePreference("Light")
+        );
 
         expect(updatedState.mapStyle).toBe("Light");
     });
