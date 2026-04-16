@@ -34,6 +34,7 @@ import { setMapStylePreference, toggleFavoriteSiteId } from "../store/userPrefer
 import { MapStyle } from "../types/map";
 import { showSnackbar } from "../store/snackbarSlice";
 import { Suspense } from "../components/Suspense";
+import { getUpcomingDepartures } from "../utils/departures";
 
 export function MapPresenter() {
     const dispatch = useAppDispatch();
@@ -117,9 +118,10 @@ export function MapPresenter() {
     }
 
     const departures = departureResponse?.departures ?? [];
+    const upcomingDepartures = getUpcomingDepartures(departures);
     const departureViewProps: DepartureViewProps | null = selectedSite
         ? {
-              departures,
+              upcomingDepartures,
               selectedDeparture,
               selectedSiteName: selectedSite.name,
               onClose: closeDeparturesViewACB,
