@@ -159,6 +159,10 @@ export function RouteDelayPresenter() {
         dispatch(setRouteDelaySelectedRouteKey(routeKey));
     }
 
+    function handleBackToRoutesACB() {
+        dispatch(setRouteDelaySelectedRouteKey(null));
+    }
+
     function handlePageChangeACB(nextPage: number) {
         setCurrentPage(nextPage);
     }
@@ -205,6 +209,7 @@ export function RouteDelayPresenter() {
             onSearchQueryChange={handleSearchQueryChangeACB}
             onSelectedSectionChange={handleSetSelectedSectionACB}
             onSelectRoute={handleSelectRouteACB}
+            onBackToRoutes={handleBackToRoutesACB}
             onPageChange={handlePageChangeACB}
             onRoutesPerPageChange={handleRoutesPerPageChangeACB}
         />
