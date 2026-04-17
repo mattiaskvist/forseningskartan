@@ -1,6 +1,16 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { AppStyle } from "../types/appStyle";
+import { AppStyle, appStyles } from "../types/appStyle";
 import { MapStyle } from "../types/map";
+
+const APP_STYLE_STORAGE_KEY = "appStyle";
+
+function getStoredAppStyle(): AppStyle {
+    const stored = localStorage.getItem(APP_STYLE_STORAGE_KEY);
+    if (stored && (appStyles as readonly string[]).includes(stored)) {
+        return stored as AppStyle;
+    }
+    return "Dark";
+}
 
 export type UserPreferencesState = {
     favoriteSiteIds: number[];
@@ -9,7 +19,7 @@ export type UserPreferencesState = {
 
 export const defaultUserPreferencesState: UserPreferencesState = {
     favoriteSiteIds: [],
-    appStyle: "Dark",
+    appStyle: getStoredAppStyle(),
 };
 
 function normalizeFavoriteSiteIds(favoriteSiteIds: number[]): number[] {
@@ -48,10 +58,12 @@ export const userPreferencesSlice = createSlice({
         },
         setAppStylePreference: (state, action: PayloadAction<AppStyle>) => {
             state.appStyle = action.payload;
+            localStorage.setItem(APP_STYLE_STORAGE_KEY, action.payload);
         },
         applyLoadedUserPreferences: (state, action: PayloadAction<UserPreferencesState>) => {
             state.favoriteSiteIds = normalizeFavoriteSiteIds(action.payload.favoriteSiteIds);
             state.appStyle = action.payload.appStyle;
+            localStorage.setItem(APP_STYLE_STORAGE_KEY, action.payload.appStyle);
         },
     },
 });
