@@ -30,11 +30,9 @@ describe("createAppMuiTheme", () => {
         expect(theme.palette.text.primary).toBe("#3f2f1f");
     });
 
-    it("provides MUI component overrides", () => {
+    it("overrides textTransform on buttons", () => {
         const theme = createAppMuiTheme("Light");
+        expect(theme.components?.MuiButton?.styleOverrides).toBeDefined();
         expect(theme.components?.MuiToggleButton?.styleOverrides).toBeDefined();
-        expect(theme.components?.MuiToggleButtonGroup?.styleOverrides).toBeDefined();
-        expect(theme.components?.MuiOutlinedInput?.styleOverrides).toBeDefined();
-        expect(theme.components?.MuiPaginationItem?.styleOverrides).toBeDefined();
     });
 });

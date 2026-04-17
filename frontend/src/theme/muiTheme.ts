@@ -8,102 +8,29 @@ function createBaseTheme(palette: Parameters<typeof createTheme>[0]): Theme {
         ...palette,
         shape: { borderRadius: 8 },
         components: {
+            // MUI defaults to UPPERCASE text and elevated buttons.
             MuiButton: {
                 defaultProps: { disableElevation: true },
                 styleOverrides: {
-                    root: {
-                        borderRadius: 8,
-                        textTransform: "none",
-                        fontWeight: 600,
-                    },
+                    root: { textTransform: "none", fontWeight: 600 },
                 },
             },
-            MuiToggleButtonGroup: {
-                styleOverrides: {
-                    root: { display: "flex", gap: 4, flexWrap: "wrap" },
-                    grouped: ({ theme }) => ({
-                        margin: 0,
-                        borderRadius: 6,
-                        borderColor: theme.palette.divider,
-                    }),
-                },
-            },
+            // MUI defaults to UPPERCASE text on toggle buttons.
             MuiToggleButton: {
                 styleOverrides: {
-                    root: ({ theme }) => ({
-                        color: theme.palette.text.secondary,
-                        borderColor: theme.palette.divider,
-                        backgroundColor: "transparent",
-                        textTransform: "none",
-                        fontWeight: 600,
-                        "&:hover": {
-                            backgroundColor: theme.palette.action.hover,
-                            color: theme.palette.text.primary,
-                        },
-                        "&.Mui-selected": {
-                            backgroundColor: theme.palette.action.selected,
-                            color: theme.palette.primary.main,
-                        },
-                        "&.Mui-selected:hover": {
-                            backgroundColor: theme.palette.action.selected,
-                        },
-                    }),
+                    root: { textTransform: "none", fontWeight: 600 },
                 },
             },
-            MuiPaper: {
-                styleOverrides: {
-                    outlined: ({ theme }) => ({
-                        borderColor: theme.palette.divider,
-                    }),
-                },
-            },
-            MuiCard: {
-                styleOverrides: {
-                    root: ({ theme }) => ({
-                        borderColor: theme.palette.divider,
-                    }),
-                },
-            },
+            // MUI's OutlinedInput uses a hardcoded alpha for its border
+            // instead of palette.divider, so we override to keep input
+            // borders consistent with the rest of the UI. The subtle
+            // background fill is a design choice (MUI default is transparent).
             MuiOutlinedInput: {
                 styleOverrides: {
                     root: ({ theme }) => ({
                         backgroundColor: theme.palette.action.hover,
                         "& .MuiOutlinedInput-notchedOutline": {
                             borderColor: theme.palette.divider,
-                        },
-                        "&:hover .MuiOutlinedInput-notchedOutline": {
-                            borderColor: theme.palette.text.secondary,
-                        },
-                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                            borderColor: theme.palette.primary.main,
-                        },
-                    }),
-                    input: ({ theme }) => ({
-                        color: theme.palette.text.primary,
-                    }),
-                },
-            },
-            MuiInputLabel: {
-                styleOverrides: {
-                    root: ({ theme }) => ({
-                        color: theme.palette.text.secondary,
-                    }),
-                },
-            },
-            MuiIconButton: {
-                styleOverrides: {
-                    root: ({ theme }) => ({
-                        color: theme.palette.text.secondary,
-                    }),
-                },
-            },
-            MuiPaginationItem: {
-                styleOverrides: {
-                    root: ({ theme }) => ({
-                        color: theme.palette.text.secondary,
-                        "&.Mui-selected": {
-                            backgroundColor: theme.palette.action.selected,
-                            color: theme.palette.primary.main,
                         },
                     }),
                 },
