@@ -24,11 +24,11 @@ export function AvailableDatesPicker({
     const maxDate = dayjs.max(dayjsDates) ?? undefined;
     const selectedDayjsDate = selectedDate ? getDayjsDateCB(selectedDate) : null;
 
-    function shouldDisableDate(date: Dayjs): boolean {
+    function shouldDisableDateCB(date: Dayjs): boolean {
         return !availableDates.includes(date.format("YYYY-MM-DD"));
     }
 
-    function handleDateChange(selectedDate: Dayjs | null) {
+    function handleDateChangeACB(selectedDate: Dayjs | null) {
         if (selectedDate) {
             onSelectDate(selectedDate.format("YYYY-MM-DD"));
         }
@@ -42,8 +42,8 @@ export function AvailableDatesPicker({
                 label={"Select delay date"}
                 minDate={minDate}
                 maxDate={maxDate}
-                onChange={handleDateChange}
-                shouldDisableDate={shouldDisableDate}
+                onChange={handleDateChangeACB}
+                shouldDisableDate={shouldDisableDateCB}
                 value={selectedDayjsDate}
             />
         </LocalizationProvider>

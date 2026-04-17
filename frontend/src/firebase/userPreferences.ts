@@ -10,6 +10,10 @@ function isMapStyle(candidate: unknown): candidate is MapStyle {
 }
 
 export function sanitizeUserPreferences(candidate: unknown): UserPreferencesState {
+    function isIntegerSiteIdCB(siteId: unknown): siteId is number {
+        return Number.isInteger(siteId);
+    }
+
     if (candidate === null || typeof candidate !== "object") {
         return { ...defaultUserPreferencesState };
     }
@@ -22,9 +26,7 @@ export function sanitizeUserPreferences(candidate: unknown): UserPreferencesStat
         ? parsedCandidate.mapStyle
         : defaultUserPreferencesState.mapStyle;
     const favoriteSiteIds = Array.isArray(parsedCandidate.favoriteSiteIds)
-        ? parsedCandidate.favoriteSiteIds.filter((siteId): siteId is number =>
-              Number.isInteger(siteId)
-          )
+        ? parsedCandidate.favoriteSiteIds.filter(isIntegerSiteIdCB)
         : [];
 
     return {

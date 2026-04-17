@@ -182,6 +182,13 @@ const getSelectedRouteDelayDatesCB = createSelector(
 const getFavoriteSitesCB = createSelector(
     [getFavoriteSiteIdsCB, getSitesCB],
     (favoriteSiteIds, sites): Site[] => {
+        function getSiteByIdCB(siteId: number): Site | undefined {
+            return sitesById.get(siteId);
+        }
+        function isSiteDefinedCB(site: Site | undefined): site is Site {
+            return Boolean(site);
+        }
+
         if (!sites || favoriteSiteIds.length === 0) {
             return [];
         }
@@ -191,9 +198,7 @@ const getFavoriteSitesCB = createSelector(
             sitesById.set(site.id, site);
         }
 
-        return favoriteSiteIds
-            .map((siteId) => sitesById.get(siteId))
-            .filter((site): site is Site => Boolean(site));
+        return favoriteSiteIds.map(getSiteByIdCB).filter(isSiteDefinedCB);
     }
 );
 

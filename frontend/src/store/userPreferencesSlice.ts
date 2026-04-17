@@ -31,10 +31,12 @@ export const userPreferencesSlice = createSlice({
             const siteId = action.payload;
             const isFavorite = state.favoriteSiteIds.includes(siteId);
 
+            function isNotSelectedFavoriteSiteIdCB(favoriteSiteId: number): boolean {
+                return favoriteSiteId !== siteId;
+            }
+
             if (isFavorite) {
-                state.favoriteSiteIds = state.favoriteSiteIds.filter(
-                    (favoriteSiteId) => favoriteSiteId !== siteId
-                );
+                state.favoriteSiteIds = state.favoriteSiteIds.filter(isNotSelectedFavoriteSiteIdCB);
                 return;
             }
 
