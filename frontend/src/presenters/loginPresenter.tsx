@@ -1,19 +1,18 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { EmailAuthProvider, GoogleAuthProvider } from "firebase/auth";
-import * as firebaseui from "firebaseui";
 import "firebaseui/dist/firebaseui.css";
-import { auth } from "../firebase/firestore";
 import { LoginView } from "../views/loginView";
 import { useNavigate } from "react-router-dom";
-import { useAppSelector } from "../store/store";
+import { useAppDispatch, useAppSelector } from "../store/store";
 import { getAuthUserCB, getAuthLoadingCB } from "../store/selectors";
 import { Suspense } from "../components/Suspense";
+import { getLoginAuthUI, resetLoginAuthUI } from "../store/authThunks";
 
 export function LoginPresenter() {
+    const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const user = useAppSelector(getAuthUserCB);
     const loading = useAppSelector(getAuthLoadingCB);
-    const uiRef = useRef<firebaseui.auth.AuthUI | null>(null);
 
     useEffect(() => {
         if (!loading && user) {
@@ -24,11 +23,7 @@ export function LoginPresenter() {
     useEffect(() => {
         if (loading || user) return;
 
-        // Initialize FirebaseUI, reusing existing if available
-        if (!uiRef.current) {
-            uiRef.current =
-                firebaseui.auth.AuthUI.getInstance() || new firebaseui.auth.AuthUI(auth);
-        }
+        const authUI = dispatch(getLoginAuthUI());
 
         const uiConfig = {
             signInFlow: "popup",
@@ -42,16 +37,17 @@ export function LoginPresenter() {
         };
 
         // Delay to ensure the container is rendered
-        setTimeout(() => {
+        const setupTimeout = setTimeout(() => {
             if (document.getElementById("firebaseui-auth-container")) {
-                uiRef.current?.start("#firebaseui-auth-container", uiConfig);
+                authUI.start("#firebaseui-auth-container", uiConfig);
             }
         }, 0);
 
         return () => {
-            uiRef.current?.reset();
+            clearTimeout(setupTimeout);
+            dispatch(resetLoginAuthUI());
         };
-    }, [loading, user, navigate]);
+    }, [loading, user, navigate, dispatch]);
 
     if (loading) {
         return <Suspense fullscreen message="Loading authentication..." />;

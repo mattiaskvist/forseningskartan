@@ -7,16 +7,6 @@ type AccountViewProps = {
 };
 
 export function AccountView({ user, onLogout, onDelete }: AccountViewProps) {
-    function deleteAccountACB() {
-        if (
-            window.confirm(
-                "Are you sure you want to delete your account? This action cannot be undone."
-            )
-        ) {
-            onDelete();
-        }
-    }
-
     return (
         <div className="flex h-screen w-full items-start justify-center overflow-y-auto bg-slate-50 p-8 pt-20">
             <section className="overlay-panel w-full max-w-lg">
@@ -51,7 +41,7 @@ export function AccountView({ user, onLogout, onDelete }: AccountViewProps) {
                         Sign Out
                     </button>
                     <button
-                        onClick={deleteAccountACB}
+                        onClick={onDelete}
                         className="w-full rounded-md bg-red-50 border border-red-200 px-4 py-2 font-medium text-red-600 hover:bg-red-100 transition-colors"
                     >
                         Delete Account

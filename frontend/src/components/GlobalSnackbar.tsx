@@ -1,31 +1,23 @@
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
-import { useAppDispatch, useAppSelector } from "../store/store";
-import { getSnackbarMessageCB, getSnackbarOpenCB, getSnackbarSeverityCB } from "../store/selectors";
-import { hideSnackbar } from "../store/snackbarSlice";
+import { SnackbarSeverity } from "../store/snackbarSlice";
 
-export function GlobalSnackbar() {
-    const dispatch = useAppDispatch();
-    const isOpen = useAppSelector(getSnackbarOpenCB);
-    const message = useAppSelector(getSnackbarMessageCB);
-    const severity = useAppSelector(getSnackbarSeverityCB);
+type GlobalSnackbarProps = {
+    isOpen: boolean;
+    message: string;
+    severity: SnackbarSeverity;
+    onClose: (_event?: React.SyntheticEvent | Event, reason?: string) => void;
+};
 
-    function handleCloseCB(_event?: React.SyntheticEvent | Event, reason?: string) {
-        if (reason === "clickaway") {
-            return;
-        }
-
-        dispatch(hideSnackbar());
-    }
-
+export function GlobalSnackbar({ isOpen, message, severity, onClose }: GlobalSnackbarProps) {
     return (
         <Snackbar
             open={isOpen}
             autoHideDuration={3000}
-            onClose={handleCloseCB}
+            onClose={onClose}
             anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         >
-            <Alert onClose={handleCloseCB} severity={severity} variant="filled">
+            <Alert onClose={onClose} severity={severity} variant="filled">
                 {message}
             </Alert>
         </Snackbar>

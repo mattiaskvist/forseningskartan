@@ -5,8 +5,8 @@ import { useAppDispatch } from "./store/store";
 import { SidebarPresenter } from "./presenters/sidebarPresenter";
 import { AccountPresenter } from "./presenters/accountPresenter";
 import { LoginPresenter } from "./presenters/loginPresenter";
-import { initializeAuthListener } from "./firebase/authActions";
-import { GlobalSnackbar } from "./components/GlobalSnackbar";
+import { initializeAuthSync } from "./store/authThunks";
+import { GlobalSnackbarPresenter } from "./presenters/globalSnackbarPresenter";
 import { ROUTES, type RouteConfig } from "./routes";
 
 function App() {
@@ -20,7 +20,7 @@ function App() {
 
         // return the unsubscribe function to stop the firebase connection
         // if this component ever unmounts to prevent memory leaks.
-        const unsubscribeCB = initializeAuthListener(dispatch);
+        const unsubscribeCB = dispatch(initializeAuthSync());
         return unsubscribeCB;
     }, [dispatch]);
 
@@ -36,7 +36,7 @@ function App() {
                 <Route path="/login" element={<LoginPresenter />} />
                 <Route path="/account" element={<AccountPresenter />} />
             </Routes>
-            <GlobalSnackbar />
+            <GlobalSnackbarPresenter />
         </div>
     );
 }
