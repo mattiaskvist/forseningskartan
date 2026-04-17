@@ -2,19 +2,19 @@ import { type MouseEvent } from "react";
 import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { AppStyle, appStyles } from "../types/appStyle";
 
-type MapStyleSelectorProps = {
+type AppStyleSelectorProps = {
     appStyle: AppStyle;
     setAppStyle: (style: AppStyle) => void;
 };
 
-export function MapStyleSelector({ appStyle, setAppStyle }: MapStyleSelectorProps) {
+export function AppStyleSelector({ appStyle, setAppStyle }: AppStyleSelectorProps) {
     function handleStyleChangeACB(_: MouseEvent<HTMLElement>, nextStyle: AppStyle | null) {
         if (nextStyle) {
             setAppStyle(nextStyle);
         }
     }
 
-    function getMapStyleButtonCB(style: AppStyle) {
+    function getAppStyleButtonCB(style: AppStyle) {
         return (
             <ToggleButton key={style} value={style}>
                 {style}
@@ -30,7 +30,7 @@ export function MapStyleSelector({ appStyle, setAppStyle }: MapStyleSelectorProp
             onChange={handleStyleChangeACB}
             aria-label="App style selector"
         >
-            {appStyles.map(getMapStyleButtonCB)}
+            {appStyles.map(getAppStyleButtonCB)}
         </ToggleButtonGroup>
     );
 }

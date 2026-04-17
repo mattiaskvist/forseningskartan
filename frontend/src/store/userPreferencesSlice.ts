@@ -5,11 +5,23 @@ import { MapStyle } from "../types/map";
 const APP_STYLE_STORAGE_KEY = "appStyle";
 
 function getStoredAppStyle(): AppStyle {
-    const stored = localStorage.getItem(APP_STYLE_STORAGE_KEY);
-    if (stored && (appStyles as readonly string[]).includes(stored)) {
-        return stored as AppStyle;
+    try {
+        const stored = localStorage.getItem(APP_STYLE_STORAGE_KEY);
+        if (stored && (appStyles as readonly string[]).includes(stored)) {
+            return stored as AppStyle;
+        }
+    } catch {
+        // localStorage unavailable at module init in test environments
     }
     return "Dark";
+}
+
+function storeAppStyle(style: AppStyle) {
+    try {
+        localStorage.setItem(APP_STYLE_STORAGE_KEY, style);
+    } catch {
+        // ignore — test environments
+    }
 }
 
 export type UserPreferencesState = {
@@ -58,12 +70,12 @@ export const userPreferencesSlice = createSlice({
         },
         setAppStylePreference: (state, action: PayloadAction<AppStyle>) => {
             state.appStyle = action.payload;
-            localStorage.setItem(APP_STYLE_STORAGE_KEY, action.payload);
+            storeAppStyle(action.payload);
         },
         applyLoadedUserPreferences: (state, action: PayloadAction<UserPreferencesState>) => {
             state.favoriteSiteIds = normalizeFavoriteSiteIds(action.payload.favoriteSiteIds);
             state.appStyle = action.payload.appStyle;
-            localStorage.setItem(APP_STYLE_STORAGE_KEY, action.payload.appStyle);
+            storeAppStyle(action.payload.appStyle);
         },
     },
 });

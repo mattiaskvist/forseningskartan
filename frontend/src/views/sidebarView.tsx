@@ -24,7 +24,7 @@ import { ROUTES, type RouteConfig } from "../routes";
 import favicon from "/favicon.png";
 import { Site } from "../types/sl";
 import { AppStyle } from "../types/appStyle";
-import { MapStyleSelector } from "../components/MapStyleSelector";
+import { AppStyleSelector } from "../components/AppStyleSelector";
 
 type SidebarNavItem = Pick<RouteConfig, "label" | "path" | "icon">;
 
@@ -262,7 +262,7 @@ export function SidebarView({
                             Style
                         </Typography>
                         <Box sx={{ pt: 1 }}>
-                            <MapStyleSelector appStyle={appStyle} setAppStyle={onAppStyleChange} />
+                            <AppStyleSelector appStyle={appStyle} setAppStyle={onAppStyleChange} />
                         </Box>
                     </ListItem>
 
