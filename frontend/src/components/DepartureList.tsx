@@ -46,6 +46,10 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
     }, [departures]);
 
     function renderDepartureCB(departure: Departure) {
+        function handleSelectDepartureACB() {
+            onSelectDeparture(departure);
+        }
+
         const destination = departure.destination ?? departure.direction;
         const transportMode = departure.line.transport_mode ?? "-";
         const line = departure.line.designation ?? `${departure.line.id}`;
@@ -57,7 +61,7 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
                 key={departureKey}
                 type="button"
                 className="w-full border-b border-slate-200 p-2 text-left last:border-b-0 hover:bg-slate-50 flex items-center justify-between"
-                onClick={() => onSelectDeparture(departure)}
+                onClick={handleSelectDepartureACB}
             >
                 <div>
                     <p className="text-sm font-semibold text-slate-900">

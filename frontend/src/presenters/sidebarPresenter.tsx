@@ -45,7 +45,7 @@ export function SidebarPresenter() {
             isOpen={isOpen}
             currentPath={location.pathname}
             user={user}
-            favoriteStops={favoriteSites.map((site) => ({ id: site.id, name: site.name }))}
+            favoriteStops={favoriteSites}
             onToggle={toggleSidebarCB}
             onNavigate={navigateCB}
             onLogout={handleLogoutACB}

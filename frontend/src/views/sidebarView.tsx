@@ -9,6 +9,7 @@ import IconButton from "@mui/material/IconButton";
 import { AuthUserState } from "../store/authSlice";
 import { ROUTES, type RouteConfig } from "../routes";
 import favicon from "/favicon.png";
+import { Site } from "../types/sl";
 
 type SidebarNavItem = Pick<RouteConfig, "label" | "path" | "icon">;
 
@@ -16,7 +17,7 @@ type SidebarViewProps = {
     isOpen: boolean;
     currentPath: string;
     user: AuthUserState | null;
-    favoriteStops: { id: number; name: string }[];
+    favoriteStops: Site[];
     onToggle: () => void;
     onNavigate: (path: string) => void;
     onLogout: () => void;
@@ -95,7 +96,7 @@ export function SidebarView({
         );
     }
 
-    function renderFavoriteStopItemCB(favoriteStop: { id: number; name: string }) {
+    function renderFavoriteStopItemCB(favoriteStop: Site) {
         function selectFavoriteStopACB() {
             onSelectFavoriteStop(favoriteStop.id);
         }

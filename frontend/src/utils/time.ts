@@ -93,9 +93,15 @@ export function getDatesForPreset(
 ): string[] {
     const referenceDate = dayjs().format("YYYY-MM-DD"); // relative to todays date
     const sortedDates = [...availableDates].sort(sortDatesDescendingCB);
-    const previousDates = sortedDates.filter((date) =>
-        isBeforeReferenceDateCB(date, referenceDate)
-    );
+    function isBeforeReferenceDateFilterCB(date: string): boolean {
+        return isBeforeReferenceDateCB(date, referenceDate);
+    }
+
+    function isWeekdayCB(date: string): boolean {
+        return !isWeekendCB(date);
+    }
+
+    const previousDates = sortedDates.filter(isBeforeReferenceDateFilterCB);
     const lastWeekDate = dayjs(referenceDate).subtract(7, "day").format("YYYY-MM-DD");
 
     switch (selectedDatePreset) {
@@ -104,7 +110,7 @@ export function getDatesForPreset(
         case "last7Days":
             return previousDates.slice(0, 7);
         case "last5Weekdays":
-            return previousDates.filter((date) => !isWeekendCB(date)).slice(0, 5);
+            return previousDates.filter(isWeekdayCB).slice(0, 5);
         case "lastWeekend":
             return previousDates.filter(isWeekendCB).slice(0, 2);
         case "customDate":

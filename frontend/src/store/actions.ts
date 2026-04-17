@@ -59,7 +59,12 @@ export function fetchSelectedDepartureStopDelays(): AppThunk {
     return (dispatch, getState) => {
         const state = getState();
         const selectedSiteId = state.sites.selectedSiteId;
-        const selectedSite = state.sites.data?.find((site) => site.id === selectedSiteId) ?? null;
+
+        function isSelectedSiteCB(site: { id: number }): boolean {
+            return site.id === selectedSiteId;
+        }
+
+        const selectedSite = state.sites.data?.find(isSelectedSiteCB) ?? null;
         const selectedDeparture = state.departureUI.selectedDeparture;
         const stopPoints = state.stopPoints.data ?? [];
         if (!selectedSite || !selectedDeparture || stopPoints.length === 0) {

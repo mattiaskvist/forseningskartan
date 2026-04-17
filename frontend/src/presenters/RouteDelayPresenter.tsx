@@ -94,12 +94,15 @@ export function RouteDelayPresenter() {
     }, [filteredAndSortedRoutes, safeCurrentPage, routesPerPage]);
 
     const pagedRouteItems = useMemo((): RouteDelayListItem[] => {
-        return pagedRoutes.map((summary) => ({
-            id: getRouteIdentityKey(summary),
-            label: getRouteDisplayName(summary),
-            avgDelayMinutes: getAvgDelayMinutes(summary, selectedEventType),
-            uniqueTrips: summary.uniqueTrips,
-        }));
+        function mapSummaryToRouteDelayListItemCB(summary: DelaySummary): RouteDelayListItem {
+            return {
+                id: getRouteIdentityKey(summary),
+                label: getRouteDisplayName(summary),
+                avgDelayMinutes: getAvgDelayMinutes(summary, selectedEventType),
+                uniqueTrips: summary.uniqueTrips,
+            };
+        }
+        return pagedRoutes.map(mapSummaryToRouteDelayListItemCB);
     }, [pagedRoutes, selectedEventType]);
 
     const selectedDateText = useMemo(() => {

@@ -99,9 +99,10 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB, mapStyle }: S
             position: ZOOM_CONTROL_POSITION,
         }).addTo(map);
 
-        map.whenReady(() => {
+        function handleMapReadyACB() {
             map.invalidateSize();
-        });
+        }
+        map.whenReady(handleMapReadyACB);
 
         mapRef.current = map;
         markersLayerRef.current = new LayerGroup().addTo(map);
@@ -158,11 +159,14 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB, mapStyle }: S
                 getUnselectedMarkerStyle(mapStyleRef.current)
             );
             marker.bindTooltip(site.name);
-            marker.on("click", () => {
+
+            function handleSiteMarkerClickACB() {
                 const selectedSiteId = selectedSiteIdRef.current;
                 const nextSiteId = selectedSiteId === site.id ? null : site.id;
                 handleSelectSiteCB(nextSiteId);
-            });
+            }
+            marker.on("click", handleSiteMarkerClickACB);
+
             marker.addTo(currentMarkersLayer);
             markersBySiteId.set(site.id, marker);
         }
