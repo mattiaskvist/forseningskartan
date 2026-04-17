@@ -19,7 +19,6 @@ import {
     Button,
     Divider,
 } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import { AuthUserState } from "../store/authSlice";
 import { ROUTES, type RouteConfig } from "../routes";
 import favicon from "/favicon.png";
@@ -54,8 +53,6 @@ export function SidebarView({
     appStyle,
     onAppStyleChange,
 }: SidebarViewProps) {
-    const theme = useTheme();
-
     function isActiveCB(path: string): boolean {
         if (path === "/") {
             return currentPath === "/" || currentPath === "";
@@ -78,15 +75,15 @@ export function SidebarView({
             <ListItem key={item.path} disablePadding>
                 <ListItemButton
                     onClick={handleClickCB}
+                    selected={active}
                     sx={{
                         borderRadius: 1,
-                        color: active
-                            ? theme.palette.surface.navActiveText
-                            : theme.palette.text.secondary,
-                        bgcolor: active ? theme.palette.surface.navActiveBg : "transparent",
-                        "&:hover": {
-                            bgcolor: theme.palette.surface.navHoverBg,
-                            color: theme.palette.surface.navHoverText,
+                        "&.Mui-selected": {
+                            bgcolor: "action.selected",
+                            color: "primary.main",
+                        },
+                        "&.Mui-selected:hover": {
+                            bgcolor: "action.selected",
                         },
                     }}
                 >
@@ -118,14 +115,7 @@ export function SidebarView({
                     {user.photoURL ? (
                         <Avatar src={user.photoURL} alt="avatar" sx={{ width: 32, height: 32 }} />
                     ) : (
-                        <Avatar
-                            sx={{
-                                width: 32,
-                                height: 32,
-                                bgcolor: theme.palette.surface.avatarBg,
-                                color: theme.palette.surface.avatarText,
-                            }}
-                        >
+                        <Avatar sx={{ width: 32, height: 32 }}>
                             <PersonIcon fontSize="small" />
                         </Avatar>
                     )}
@@ -164,14 +154,7 @@ export function SidebarView({
             <ListItem key={favoriteStop.id} disablePadding>
                 <ListItemButton
                     onClick={selectFavoriteStopACB}
-                    sx={{
-                        borderRadius: 1,
-                        color: "text.secondary",
-                        "&:hover": {
-                            bgcolor: theme.palette.surface.navHoverBg,
-                            color: theme.palette.surface.navHoverText,
-                        },
-                    }}
+                    sx={{ borderRadius: 1, color: "text.secondary" }}
                 >
                     <ListItemIcon sx={{ minWidth: 36, color: "inherit" }}>
                         <StarIcon fontSize="small" />
@@ -217,8 +200,8 @@ export function SidebarView({
                     boxShadow: 3,
                     backdropFilter: "blur(4px)",
                     border: 1,
-                    borderColor: theme.palette.surface.panelBorder,
-                    bgcolor: theme.palette.surface.panelBg,
+                    borderColor: "divider",
+                    bgcolor: "background.paper",
                 }}
             >
                 <IconButton onClick={onToggle} aria-label={isOpen ? "Close menu" : "Open menu"}>
@@ -226,34 +209,18 @@ export function SidebarView({
                 </IconButton>
             </Box>
 
-            {/* Backdrop */}
-            {isOpen && (
-                <Box
-                    onClick={onToggle}
-                    sx={{
-                        position: "fixed",
-                        inset: 0,
-                        zIndex: 1050,
-                        backdropFilter: "blur(2px)",
-                        bgcolor: theme.palette.surface.sidebarBackdrop,
-                        transition: "opacity 300ms",
-                    }}
-                />
-            )}
-
-            {/* Sliding panel */}
+            {/* Drawer with built-in backdrop */}
             <Drawer
                 open={isOpen}
                 onClose={onToggle}
                 variant="temporary"
-                hideBackdrop
                 sx={{
                     zIndex: 1100,
                     "& .MuiDrawer-paper": {
                         width: 256,
-                        bgcolor: theme.palette.surface.panelBg,
+                        bgcolor: "background.paper",
                         borderRight: 1,
-                        borderColor: theme.palette.surface.panelBorder,
+                        borderColor: "divider",
                         backdropFilter: "blur(4px)",
                         boxShadow: 6,
                     },
@@ -265,20 +232,14 @@ export function SidebarView({
                         alignItems: "center",
                         gap: 1,
                         borderBottom: 1,
-                        borderColor: theme.palette.surface.panelBorder,
+                        borderColor: "divider",
                         px: 2.5,
                         py: 2,
                         pt: 9,
                     }}
                 >
                     <img src={favicon} className="w-8 h-8" />
-                    <Typography
-                        variant="subtitle1"
-                        sx={{
-                            fontWeight: 600,
-                            color: theme.palette.surface.panelTitle,
-                        }}
-                    >
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "text.primary" }}>
                         Förseningskartan
                     </Typography>
                 </Box>

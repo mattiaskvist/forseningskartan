@@ -1,5 +1,4 @@
 import { Box, Typography } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import { LineChart } from "@mui/x-charts/LineChart";
 import { RouteDelayTrendPoint } from "../types/routeDelays";
 
@@ -9,8 +8,6 @@ type RouteDelayTrendChartProps = {
 };
 
 export function RouteDelayTrendChart({ points, title }: RouteDelayTrendChartProps) {
-    const theme = useTheme();
-
     function getMonthDayFromDateCB(point: RouteDelayTrendPoint) {
         return point.date.slice(5);
     }
@@ -24,7 +21,7 @@ export function RouteDelayTrendChart({ points, title }: RouteDelayTrendChartProp
         <Box
             sx={{
                 border: 1,
-                borderColor: theme.palette.surface.panelBorder,
+                borderColor: "divider",
                 borderRadius: 1,
                 p: 1.5,
             }}

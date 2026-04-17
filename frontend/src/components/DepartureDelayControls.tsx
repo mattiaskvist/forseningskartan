@@ -1,5 +1,4 @@
 import { Box, Typography, ToggleButton, ToggleButtonGroup } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import { AvailableDatesPicker } from "./AvailableDatesPicker";
 import { DatePreset, EventType, DatePresets, DatePresetLabelMap } from "../types/departureDelay";
 
@@ -22,8 +21,6 @@ export function DepartureDelayControls({
     onCustomDateChange,
     onEventTypeChange,
 }: DepartureDelayControlsProps) {
-    const theme = useTheme();
-
     function handleDatePresetChangeACB(
         _: React.MouseEvent<HTMLElement>,
         nextValue: DatePreset | null
@@ -58,7 +55,7 @@ export function DepartureDelayControls({
                 gap: 1,
                 borderRadius: 1,
                 border: 1,
-                borderColor: theme.palette.surface.panelBorder,
+                borderColor: "divider",
                 p: 1,
             }}
         >

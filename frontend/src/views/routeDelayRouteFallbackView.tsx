@@ -1,18 +1,15 @@
 import { Box, Button, Typography } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 
 type RouteDelayRouteFallbackViewProps = {
     onBackToRoutes: () => void;
 };
 
 export function RouteDelayRouteFallbackView({ onBackToRoutes }: RouteDelayRouteFallbackViewProps) {
-    const theme = useTheme();
-
     return (
         <Box
             sx={{
                 border: 1,
-                borderColor: theme.palette.surface.panelBorder,
+                borderColor: "divider",
                 borderRadius: 1,
                 p: 2,
                 display: "flex",

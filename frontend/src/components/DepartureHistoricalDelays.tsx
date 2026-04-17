@@ -1,5 +1,4 @@
 import { Box, Typography } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import { DelaySummary } from "../types/historicalDelay";
 import { DatePreset, EventType, getPresetDescription } from "../types/departureDelay";
 import { DepartureDelayControls } from "./DepartureDelayControls";
@@ -33,8 +32,6 @@ export function DepartureHistoricalDelays({
     isLoadingData,
     routeSummary,
 }: DepartureHistoricalDelaysProps) {
-    const theme = useTheme();
-
     return (
         <div className="flex flex-col gap-2">
             <Typography sx={{ fontSize: "0.875rem", fontWeight: 600, color: "text.primary" }}>
@@ -53,7 +50,7 @@ export function DepartureHistoricalDelays({
             <Box
                 sx={{
                     border: 1,
-                    borderColor: theme.palette.surface.panelBorder,
+                    borderColor: "divider",
                     borderRadius: 1,
                     p: 1,
                 }}

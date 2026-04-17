@@ -4,7 +4,6 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ToggleButton from "@mui/material/ToggleButton";
 import { useMemo, useState } from "react";
 import { Box, Card, TextField, Typography } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import { FilterToggleButtonGroup } from "./FilterToggleButtonGroup";
 
 type DepartureListProps = {
@@ -15,8 +14,6 @@ type DepartureListProps = {
 type ModeWithOther = TransportationMode | "OTHER";
 
 export function DepartureList({ departures, onSelectDeparture }: DepartureListProps) {
-    const theme = useTheme();
-
     const uniqueModes = useMemo(() => {
         const modes = new Set<ModeWithOther>();
 
@@ -83,7 +80,7 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
                 sx={{
                     width: "100%",
                     borderBottom: 1,
-                    borderColor: theme.palette.surface.panelBorder,
+                    borderColor: "divider",
                     p: 1,
                     textAlign: "left",
                     display: "flex",
@@ -93,7 +90,7 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
                     cursor: "pointer",
                     transition: "background-color 150ms ease-in-out",
                     "&:hover": {
-                        bgcolor: theme.palette.surface.hoverBg,
+                        bgcolor: "action.hover",
                     },
                     "&:last-child": {
                         borderBottom: 0,
@@ -125,9 +122,9 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
             <Card key={mode} variant="outlined">
                 <Box
                     sx={{
-                        bgcolor: theme.palette.surface.subtleBg,
+                        bgcolor: "action.hover",
                         borderBottom: 1,
-                        borderColor: theme.palette.surface.panelBorder,
+                        borderColor: "divider",
                         px: 1,
                         py: 0.5,
                         fontSize: "0.75rem",

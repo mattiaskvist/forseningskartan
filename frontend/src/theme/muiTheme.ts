@@ -1,30 +1,6 @@
 import { createTheme, type Theme } from "@mui/material/styles";
 import { type AppStyle } from "../types/appStyle";
 
-/* ── MUI module augmentation ── */
-
-declare module "@mui/material/styles" {
-    interface Palette {
-        surface: {
-            panelBg: string;
-            panelBorder: string;
-            panelTitle: string;
-            subtleBg: string;
-            hoverBg: string;
-            navHoverBg: string;
-            navHoverText: string;
-            navActiveBg: string;
-            navActiveText: string;
-            sidebarBackdrop: string;
-            avatarBg: string;
-            avatarText: string;
-        };
-    }
-    interface PaletteOptions {
-        surface?: Partial<Palette["surface"]>;
-    }
-}
-
 /* ── Theme definitions ── */
 
 function createBaseTheme(palette: Parameters<typeof createTheme>[0]): Theme {
@@ -48,7 +24,7 @@ function createBaseTheme(palette: Parameters<typeof createTheme>[0]): Theme {
                     grouped: ({ theme }) => ({
                         margin: 0,
                         borderRadius: 6,
-                        borderColor: theme.palette.surface.panelBorder,
+                        borderColor: theme.palette.divider,
                     }),
                 },
             },
@@ -56,48 +32,44 @@ function createBaseTheme(palette: Parameters<typeof createTheme>[0]): Theme {
                 styleOverrides: {
                     root: ({ theme }) => ({
                         color: theme.palette.text.secondary,
-                        borderColor: theme.palette.surface.panelBorder,
+                        borderColor: theme.palette.divider,
                         backgroundColor: "transparent",
                         textTransform: "none",
                         fontWeight: 600,
                         "&:hover": {
-                            backgroundColor: theme.palette.surface.hoverBg,
+                            backgroundColor: theme.palette.action.hover,
                             color: theme.palette.text.primary,
                         },
                         "&.Mui-selected": {
-                            backgroundColor: theme.palette.surface.navActiveBg,
-                            color: theme.palette.surface.navActiveText,
+                            backgroundColor: theme.palette.action.selected,
+                            color: theme.palette.primary.main,
                         },
                         "&.Mui-selected:hover": {
-                            backgroundColor: theme.palette.surface.navActiveBg,
+                            backgroundColor: theme.palette.action.selected,
                         },
                     }),
                 },
             },
             MuiPaper: {
                 styleOverrides: {
-                    root: ({ theme }) => ({
-                        backgroundColor: theme.palette.surface.panelBg,
-                        color: theme.palette.text.primary,
-                    }),
                     outlined: ({ theme }) => ({
-                        borderColor: theme.palette.surface.panelBorder,
+                        borderColor: theme.palette.divider,
                     }),
                 },
             },
             MuiCard: {
                 styleOverrides: {
                     root: ({ theme }) => ({
-                        borderColor: theme.palette.surface.panelBorder,
+                        borderColor: theme.palette.divider,
                     }),
                 },
             },
             MuiOutlinedInput: {
                 styleOverrides: {
                     root: ({ theme }) => ({
-                        backgroundColor: theme.palette.surface.subtleBg,
+                        backgroundColor: theme.palette.action.hover,
                         "& .MuiOutlinedInput-notchedOutline": {
-                            borderColor: theme.palette.surface.panelBorder,
+                            borderColor: theme.palette.divider,
                         },
                         "&:hover .MuiOutlinedInput-notchedOutline": {
                             borderColor: theme.palette.text.secondary,
@@ -130,8 +102,8 @@ function createBaseTheme(palette: Parameters<typeof createTheme>[0]): Theme {
                     root: ({ theme }) => ({
                         color: theme.palette.text.secondary,
                         "&.Mui-selected": {
-                            backgroundColor: theme.palette.surface.navActiveBg,
-                            color: theme.palette.surface.navActiveText,
+                            backgroundColor: theme.palette.action.selected,
+                            color: theme.palette.primary.main,
                         },
                     }),
                 },
@@ -145,21 +117,12 @@ const themes: Record<AppStyle, Theme> = {
         palette: {
             mode: "dark",
             primary: { main: "#60a5fa" },
-            background: { default: "#0f172a", paper: "#1e293b" },
+            background: { default: "#0f172a", paper: "rgba(15, 23, 42, 0.88)" },
             text: { primary: "#e2e8f0", secondary: "#94a3b8" },
-            surface: {
-                panelBg: "rgba(15, 23, 42, 0.88)",
-                panelBorder: "rgba(148, 163, 184, 0.45)",
-                panelTitle: "#f8fafc",
-                subtleBg: "rgba(51, 65, 85, 0.55)",
-                hoverBg: "rgba(71, 85, 105, 0.65)",
-                navHoverBg: "rgba(30, 41, 59, 0.9)",
-                navHoverText: "#f8fafc",
-                navActiveBg: "rgba(30, 64, 175, 0.45)",
-                navActiveText: "#bfdbfe",
-                sidebarBackdrop: "rgba(2, 6, 23, 0.45)",
-                avatarBg: "rgba(51, 65, 85, 0.95)",
-                avatarText: "#f8fafc",
+            divider: "rgba(148, 163, 184, 0.45)",
+            action: {
+                hover: "rgba(71, 85, 105, 0.65)",
+                selected: "rgba(30, 64, 175, 0.45)",
             },
         },
     }),
@@ -167,21 +130,12 @@ const themes: Record<AppStyle, Theme> = {
         palette: {
             mode: "light",
             primary: { main: "#2563eb" },
-            background: { default: "#f1f5f9", paper: "#ffffff" },
+            background: { default: "#f1f5f9", paper: "rgba(255, 255, 255, 0.95)" },
             text: { primary: "#0f172a", secondary: "#475569" },
-            surface: {
-                panelBg: "rgba(255, 255, 255, 0.95)",
-                panelBorder: "rgba(148, 163, 184, 0.55)",
-                panelTitle: "#1e293b",
-                subtleBg: "#e2e8f0",
-                hoverBg: "#cbd5e1",
-                navHoverBg: "#e2e8f0",
-                navHoverText: "#0f172a",
-                navActiveBg: "#dbeafe",
-                navActiveText: "#1d4ed8",
-                sidebarBackdrop: "rgba(15, 23, 42, 0.2)",
-                avatarBg: "#e2e8f0",
-                avatarText: "#1e293b",
+            divider: "rgba(148, 163, 184, 0.55)",
+            action: {
+                hover: "#cbd5e1",
+                selected: "#dbeafe",
             },
         },
     }),
@@ -189,21 +143,12 @@ const themes: Record<AppStyle, Theme> = {
         palette: {
             mode: "light",
             primary: { main: "#8b5e3b" },
-            background: { default: "#f7f0df", paper: "#fff8e6" },
+            background: { default: "#f7f0df", paper: "rgba(255, 248, 230, 0.95)" },
             text: { primary: "#3f2f1f", secondary: "#6b5842" },
-            surface: {
-                panelBg: "rgba(255, 248, 230, 0.95)",
-                panelBorder: "rgba(166, 124, 82, 0.5)",
-                panelTitle: "#3f2f1f",
-                subtleBg: "rgba(217, 189, 151, 0.45)",
-                hoverBg: "rgba(191, 141, 90, 0.45)",
-                navHoverBg: "rgba(217, 189, 151, 0.5)",
-                navHoverText: "#3f2f1f",
-                navActiveBg: "rgba(191, 141, 90, 0.32)",
-                navActiveText: "#6f3f19",
-                sidebarBackdrop: "rgba(63, 47, 31, 0.3)",
-                avatarBg: "rgba(217, 189, 151, 0.55)",
-                avatarText: "#3f2f1f",
+            divider: "rgba(166, 124, 82, 0.5)",
+            action: {
+                hover: "rgba(191, 141, 90, 0.45)",
+                selected: "rgba(191, 141, 90, 0.32)",
             },
         },
     }),

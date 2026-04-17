@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Button, Box, Typography } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { Departure } from "../types/sl";
@@ -45,7 +44,6 @@ export function DepartureDetails({
     onDatePresetChange,
     onCustomDateChange,
 }: DepartureDetailsProps) {
-    const theme = useTheme();
     const [selectedEventType, setSelectedEventType] = useState<EventType>("departure");
 
     const selectedDepartureDate = dayjs(departure.expected ?? departure.scheduled).utc();
@@ -69,13 +67,13 @@ export function DepartureDetails({
             <Box
                 sx={{
                     border: 1,
-                    borderColor: theme.palette.surface.panelBorder,
+                    borderColor: "divider",
                     borderRadius: 1,
                     px: 1.5,
                     py: 0.5,
                     "& > div:not(:last-child)": {
                         borderBottom: 1,
-                        borderColor: theme.palette.surface.panelBorder,
+                        borderColor: "divider",
                     },
                 }}
             >

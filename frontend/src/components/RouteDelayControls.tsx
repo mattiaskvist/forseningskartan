@@ -1,5 +1,4 @@
 import { Box, ToggleButton } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import TextField from "@mui/material/TextField";
 import { AvailableDatesPicker } from "./AvailableDatesPicker";
 import { DatePreset, EventType, DatePresets, DatePresetLabelMap } from "../types/departureDelay";
@@ -40,8 +39,6 @@ export function RouteDelayControls({
     onTransportationModeChange,
     onSearchQueryChange,
 }: RouteDelayControlsProps) {
-    const theme = useTheme();
-
     function getPresetButtonCB(option: DatePreset) {
         return (
             <ToggleButton key={option} value={option}>
@@ -78,7 +75,7 @@ export function RouteDelayControls({
                 gap: 1.5,
                 borderRadius: 1,
                 border: 1,
-                borderColor: theme.palette.surface.panelBorder,
+                borderColor: "divider",
                 p: 1.5,
             }}
         >

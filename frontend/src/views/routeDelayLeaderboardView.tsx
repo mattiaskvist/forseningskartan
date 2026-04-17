@@ -1,5 +1,4 @@
 import { Box, Typography } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import { RouteDelayListItem } from "../types/routeDelays";
 
 type RouteDelayLeaderboardViewProps = {
@@ -7,8 +6,6 @@ type RouteDelayLeaderboardViewProps = {
 };
 
 export function RouteDelayLeaderboardView({ leaderboardItems }: RouteDelayLeaderboardViewProps) {
-    const theme = useTheme();
-
     function getLeaderboardItemCB(item: RouteDelayListItem, index: number) {
         const { id, label, avgDelayMinutes, uniqueTrips } = item;
 
@@ -43,7 +40,7 @@ export function RouteDelayLeaderboardView({ leaderboardItems }: RouteDelayLeader
                 <Typography
                     sx={{
                         border: 1,
-                        borderColor: theme.palette.surface.panelBorder,
+                        borderColor: "divider",
                         borderRadius: 1,
                         p: 1.5,
                         fontSize: "0.875rem",
@@ -56,7 +53,7 @@ export function RouteDelayLeaderboardView({ leaderboardItems }: RouteDelayLeader
                 <Box
                     sx={{
                         border: 1,
-                        borderColor: theme.palette.surface.panelBorder,
+                        borderColor: "divider",
                         borderRadius: 1,
                     }}
                 >
@@ -66,7 +63,7 @@ export function RouteDelayLeaderboardView({ leaderboardItems }: RouteDelayLeader
                             alignItems: "center",
                             justifyContent: "space-between",
                             borderBottom: 1,
-                            borderColor: theme.palette.surface.panelBorder,
+                            borderColor: "divider",
                             px: 1.5,
                             py: 1,
                             fontSize: "0.75rem",

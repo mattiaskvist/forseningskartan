@@ -1,5 +1,4 @@
 import { Box, Paper, Typography } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import { RouteDelayControls } from "../components/RouteDelayControls";
 import { DatePreset, EventType } from "../types/departureDelay";
 import { TransportationMode } from "../types/sl";
@@ -80,7 +79,6 @@ export function RouteDelayView({
     onPageChange,
     onRoutesPerPageChange,
 }: RouteDelayViewProps) {
-    const theme = useTheme();
     const isRouteDetailsOpen = selectedRouteKey !== null;
 
     return (
@@ -112,7 +110,7 @@ export function RouteDelayView({
                     sx={{
                         fontWeight: 600,
                         mb: 1,
-                        color: theme.palette.surface.panelTitle,
+                        color: "text.primary",
                     }}
                 >
                     Route Delays

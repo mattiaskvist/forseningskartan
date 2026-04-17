@@ -1,5 +1,4 @@
 import { Box, Paper, Typography, Avatar, Button, Divider } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import { AuthUserState } from "../store/authSlice";
 
 type AccountViewProps = {
@@ -9,8 +8,6 @@ type AccountViewProps = {
 };
 
 export function AccountView({ user, onLogout, onDelete }: AccountViewProps) {
-    const theme = useTheme();
-
     return (
         <Box
             sx={{
@@ -38,11 +35,7 @@ export function AccountView({ user, onLogout, onDelete }: AccountViewProps) {
             >
                 <Typography
                     variant="subtitle1"
-                    sx={{
-                        fontWeight: 600,
-                        mb: 1,
-                        color: theme.palette.surface.panelTitle,
-                    }}
+                    sx={{ fontWeight: 600, mb: 1, color: "text.primary" }}
                 >
                     My Account
                 </Typography>
@@ -70,8 +63,6 @@ export function AccountView({ user, onLogout, onDelete }: AccountViewProps) {
                                 boxShadow: 3,
                                 fontSize: "1.875rem",
                                 fontWeight: 700,
-                                bgcolor: theme.palette.surface.avatarBg,
-                                color: theme.palette.surface.avatarText,
                             }}
                         >
                             {(user.displayName || user.email || "?")[0].toUpperCase()}

@@ -1,5 +1,4 @@
 import { Paper, Typography } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import { DepartureView, DepartureViewProps } from "./departureView";
 
 type MapDeparturesPanelViewProps = {
@@ -7,8 +6,6 @@ type MapDeparturesPanelViewProps = {
 };
 
 export function MapDeparturesPanelView({ departureViewProps }: MapDeparturesPanelViewProps) {
-    const theme = useTheme();
-
     return (
         <aside className="pointer-events-auto z-[1000] w-[min(420px,calc(100vw-2rem))]">
             <Paper
@@ -24,13 +21,7 @@ export function MapDeparturesPanelView({ departureViewProps }: MapDeparturesPane
                     backdropFilter: "blur(4px)",
                 }}
             >
-                <Typography
-                    variant="subtitle1"
-                    sx={{
-                        fontWeight: 600,
-                        color: theme.palette.surface.panelTitle,
-                    }}
-                >
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "text.primary" }}>
                     Departures
                 </Typography>
                 <DepartureView {...departureViewProps} />

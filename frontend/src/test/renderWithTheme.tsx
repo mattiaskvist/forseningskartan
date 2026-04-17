@@ -7,7 +7,7 @@ const testTheme = createAppMuiTheme("Dark");
 
 /**
  * render() wrapper that provides the MUI ThemeProvider with
- * our custom palette (including palette.surface).
+ * our app theme (custom palette colors, component overrides, etc.).
  */
 export function renderWithTheme(ui: ReactElement, options?: RenderOptions) {
     return render(<ThemeProvider theme={testTheme}>{ui}</ThemeProvider>, options);

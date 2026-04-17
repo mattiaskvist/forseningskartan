@@ -9,7 +9,6 @@ import {
     Select,
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material/Select";
-import { useTheme } from "@mui/material/styles";
 import { PageSizeOption, PageSizeOptions, RouteDelayListItem } from "../types/routeDelays";
 import { getDelayTextColorClass } from "../utils/time";
 
@@ -32,8 +31,6 @@ export function RouteDelayRoutesView({
     onPageChange,
     onRoutesPerPageChange,
 }: RouteDelayRoutesViewProps) {
-    const theme = useTheme();
-
     function getRouteListItemCB(routeItem: RouteDelayListItem) {
         const { id, label, avgDelayMinutes, uniqueTrips } = routeItem;
 
@@ -51,7 +48,7 @@ export function RouteDelayRoutesView({
                         width: "100%",
                         borderRadius: 1,
                         border: 1,
-                        borderColor: theme.palette.surface.panelBorder,
+                        borderColor: "divider",
                         p: 1,
                         textAlign: "left",
                         transition: "opacity 150ms",
@@ -132,7 +129,7 @@ export function RouteDelayRoutesView({
                 <Typography
                     sx={{
                         border: 1,
-                        borderColor: theme.palette.surface.panelBorder,
+                        borderColor: "divider",
                         borderRadius: 1,
                         p: 1.5,
                         fontSize: "0.875rem",

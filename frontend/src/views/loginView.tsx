@@ -1,9 +1,6 @@
 import { Box, Paper, Typography } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 
 export function LoginView() {
-    const theme = useTheme();
-
     return (
         <Box
             sx={{
@@ -35,7 +32,7 @@ export function LoginView() {
                         fontWeight: 600,
                         textAlign: "center",
                         mb: 3,
-                        color: theme.palette.surface.panelTitle,
+                        color: "text.primary",
                     }}
                 >
                     Sign In

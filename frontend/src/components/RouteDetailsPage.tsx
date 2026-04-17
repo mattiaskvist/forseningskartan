@@ -1,6 +1,5 @@
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Box, Button, Divider, Paper, Typography } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import { DelaySummary } from "../types/historicalDelay";
 import { EventType } from "../types/departureDelay";
 import { getRouteDisplayName, getRouteTypeString } from "../utils/route";
@@ -24,8 +23,6 @@ export function RouteDetailsPage({
     isTrendLoading,
     onBackToRoutes,
 }: RouteDetailsPageProps) {
-    const theme = useTheme();
-
     return (
         <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2, backdropFilter: "blur(4px)" }}>
             <div className="flex items-center justify-between">
@@ -33,7 +30,7 @@ export function RouteDetailsPage({
                     variant="subtitle1"
                     sx={{
                         fontWeight: 600,
-                        color: theme.palette.surface.panelTitle,
+                        color: "text.primary",
                     }}
                 >
                     {getRouteTypeString(routeSummary)} {getRouteDisplayName(routeSummary)}
@@ -54,7 +51,7 @@ export function RouteDetailsPage({
                     component="section"
                     sx={{
                         border: 1,
-                        borderColor: theme.palette.surface.panelBorder,
+                        borderColor: "divider",
                         borderRadius: 1,
                         p: 1.5,
                         display: "flex",
