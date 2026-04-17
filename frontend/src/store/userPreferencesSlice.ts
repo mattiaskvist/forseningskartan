@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AppStyle, appStyles } from "../types/appStyle";
-import { MapStyle } from "../types/map";
 
 const APP_STYLE_STORAGE_KEY = "appStyle";
 
@@ -65,9 +64,7 @@ export const userPreferencesSlice = createSlice({
 
             state.favoriteSiteIds.push(siteId);
         },
-        setMapStylePreference: (state, action: PayloadAction<MapStyle>) => {
-            state.appStyle = action.payload;
-        },
+
         setAppStylePreference: (state, action: PayloadAction<AppStyle>) => {
             state.appStyle = action.payload;
             storeAppStyle(action.payload);
@@ -82,7 +79,6 @@ export const userPreferencesSlice = createSlice({
 
 export const {
     toggleFavoriteSiteId,
-    setMapStylePreference,
     setAppStylePreference,
     applyLoadedUserPreferences,
 } = userPreferencesSlice.actions;

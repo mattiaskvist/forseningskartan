@@ -1,6 +1,6 @@
 import { Site } from "../types/sl";
 import { DepartureViewProps } from "./departureView";
-import { MapStyle } from "../types/map";
+import { AppStyle } from "../types/appStyle";
 import { MapSearchView } from "./mapSearchView";
 import { MapDeparturesPanelView } from "./mapDeparturesPanelView";
 import { StopMap } from "../components/StopMap";
@@ -10,7 +10,7 @@ type MapViewProps = {
     selectedSite: Site | null;
     handleSelectSiteCB: (siteId: number | null) => void;
     departureViewProps: DepartureViewProps | null;
-    mapStyle: MapStyle;
+    appStyle: AppStyle;
 };
 
 export function MapView({
@@ -18,7 +18,7 @@ export function MapView({
     selectedSite,
     handleSelectSiteCB,
     departureViewProps,
-    mapStyle,
+    appStyle,
 }: MapViewProps) {
     return (
         <div className="relative h-full w-full">
@@ -26,7 +26,7 @@ export function MapView({
                 sites={sites}
                 selectedSite={selectedSite}
                 handleSelectSiteCB={handleSelectSiteCB}
-                mapStyle={mapStyle}
+                appStyle={appStyle}
             />
             <div className="pointer-events-auto absolute right-4 top-4 z-[1000] max-w-[calc(100vw-2rem)]">
                 {departureViewProps && (

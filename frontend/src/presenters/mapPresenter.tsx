@@ -9,7 +9,7 @@ import {
     getDeparturesCB,
     getDeparturesLoadingCB,
     getFavoriteSiteIdsCB,
-    getMapStylePreferenceCB,
+    getAppStylePreferenceCB,
     getSelectedCustomDateCB,
     getSelectedDatePresetCB,
     getSelectedDelayDatesCB,
@@ -49,7 +49,7 @@ export function MapPresenter() {
     const isDepartureHistoricalDelayLoading = useAppSelector(getDepartureHistoricalDelayLoadingCB);
     const user = useAppSelector(getAuthUserCB);
     const favoriteSiteIds = useAppSelector(getFavoriteSiteIdsCB);
-    const mapStyle = useAppSelector(getMapStylePreferenceCB);
+    const appStyle = useAppSelector(getAppStylePreferenceCB);
     const sites = useAppSelector(getSitesCB);
     const isSitesLoading = useAppSelector(getSitesLoadingCB);
     const stopPoints = useAppSelector(getStopPointsCB);
@@ -143,7 +143,7 @@ export function MapPresenter() {
             selectedSite={selectedSite}
             handleSelectSiteCB={handleSelectSiteCB}
             departureViewProps={departureViewProps}
-            mapStyle={mapStyle}
+            appStyle={appStyle}
         />
     );
 }

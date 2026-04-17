@@ -1,6 +1,6 @@
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { defaultUserPreferencesState, UserPreferencesState } from "../store/userPreferencesSlice";
-import { appStyles, AppStyle, getMapStyleForAppStyle } from "../types/appStyle";
+import { appStyles, AppStyle } from "../types/appStyle";
 import { db } from "./firestore";
 
 const USER_PREFERENCES_COLLECTION = "userPreferences";
@@ -55,7 +55,6 @@ export async function saveUserPreferences(uid: string, preferences: UserPreferen
         userPreferencesRef,
         {
             ...preferences,
-            mapStyle: getMapStyleForAppStyle(preferences.appStyle),
             updatedAt: serverTimestamp(),
         },
         { merge: true }
