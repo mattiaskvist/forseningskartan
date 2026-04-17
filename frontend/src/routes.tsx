@@ -25,10 +25,10 @@ export const ROUTES: RouteConfig[] = [
         icon: <InfoIcon fontSize="small" />,
         element: (
             // TODO: placeholder, use presenter and view
-            <div className="flex h-screen w-full items-start justify-center overflow-y-auto bg-slate-50 p-8 pt-20">
+            <div className="page-shell pt-20">
                 <section className="overlay-panel w-full max-w-3xl">
                     <h2 className="overlay-panel-title">About</h2>
-                    <p className="text-sm text-slate-600">
+                    <p className="themed-text-muted text-sm">
                         Förseningskartan - a transit delay visualization tool.
                     </p>
                 </section>

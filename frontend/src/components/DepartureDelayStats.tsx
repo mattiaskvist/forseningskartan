@@ -32,7 +32,7 @@ type DepartureDelayStatsProps = {
 
 export function DepartureDelayStats({ routeSummary, selectedEventType }: DepartureDelayStatsProps) {
     if (!routeSummary) {
-        return <p className="text-sm text-slate-500">No route delay data found.</p>;
+        return <p className="themed-text-muted text-sm">No route delay data found.</p>;
     }
     const delayedStats = statsMap[selectedEventType].delay(routeSummary);
     const aheadStats = statsMap[selectedEventType].ahead(routeSummary);
@@ -41,25 +41,25 @@ export function DepartureDelayStats({ routeSummary, selectedEventType }: Departu
 
     return (
         <div className="space-y-2">
-            <p className="text-lg font-semibold text-slate-900">
+            <p className="themed-text text-lg font-semibold">
                 {eventCount} {selectedEventType === "departure" ? "departures" : "arrivals"}, on
                 time {pluralize(onTimeCount, "time")}
             </p>
-            <p className="text-sm text-slate-700">
+            <p className="themed-text text-sm">
                 <span className="font-medium text-red-600">
                     Delayed: {pluralize(delayedStats.count, "time")}
                 </span>
                 , on average by{" "}
-                <span className="font-medium text-slate-700">
+                <span className="themed-text font-medium">
                     {pluralize(Number((delayedStats.avgSeconds / 60).toFixed(1)), "minute")}
                 </span>
             </p>
-            <p className="text-sm text-slate-700">
+            <p className="themed-text text-sm">
                 <span className="font-medium text-green-600">
                     Ahead: {pluralize(aheadStats.count, "time")}
                 </span>
                 , on average by{" "}
-                <span className="font-medium text-slate-700">
+                <span className="themed-text font-medium">
                     {pluralize(Number((aheadStats.avgSeconds / 60).toFixed(1)), "minute")}
                 </span>
             </p>

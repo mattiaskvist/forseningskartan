@@ -1,26 +1,180 @@
 @import "tailwindcss";
 @source "./**/*.{ts,tsx,js,jsx}";
 
+:root,
+[data-app-style="Dark"] {
+    --app-bg: #0f172a;
+    --app-text: #e2e8f0;
+    --app-text-muted: #94a3b8;
+    --panel-bg: rgba(15, 23, 42, 0.88);
+    --panel-border: rgba(148, 163, 184, 0.45);
+    --panel-title: #f8fafc;
+    --surface-subtle-bg: rgba(51, 65, 85, 0.55);
+    --surface-hover-bg: rgba(71, 85, 105, 0.65);
+    --nav-hover-bg: rgba(30, 41, 59, 0.9);
+    --nav-hover-text: #f8fafc;
+    --nav-active-bg: rgba(30, 64, 175, 0.45);
+    --nav-active-text: #bfdbfe;
+    --sidebar-backdrop: rgba(2, 6, 23, 0.45);
+    --button-primary-bg: #2563eb;
+    --button-primary-hover: #1d4ed8;
+    --button-primary-text: #ffffff;
+    --button-secondary-bg: rgba(15, 23, 42, 0.8);
+    --button-secondary-border: rgba(148, 163, 184, 0.45);
+    --button-secondary-text: #e2e8f0;
+    --button-danger-bg: rgba(127, 29, 29, 0.35);
+    --button-danger-border: rgba(239, 68, 68, 0.45);
+    --button-danger-text: #fecaca;
+    --avatar-bg: rgba(51, 65, 85, 0.95);
+    --avatar-text: #f8fafc;
+}
+
+[data-app-style="Light"] {
+    --app-bg: #f1f5f9;
+    --app-text: #0f172a;
+    --app-text-muted: #475569;
+    --panel-bg: rgba(255, 255, 255, 0.95);
+    --panel-border: rgba(148, 163, 184, 0.55);
+    --panel-title: #1e293b;
+    --surface-subtle-bg: #e2e8f0;
+    --surface-hover-bg: #cbd5e1;
+    --nav-hover-bg: #e2e8f0;
+    --nav-hover-text: #0f172a;
+    --nav-active-bg: #dbeafe;
+    --nav-active-text: #1d4ed8;
+    --sidebar-backdrop: rgba(15, 23, 42, 0.2);
+    --button-primary-bg: #2563eb;
+    --button-primary-hover: #1d4ed8;
+    --button-primary-text: #ffffff;
+    --button-secondary-bg: #ffffff;
+    --button-secondary-border: rgba(148, 163, 184, 0.6);
+    --button-secondary-text: #1e293b;
+    --button-danger-bg: #fef2f2;
+    --button-danger-border: #fecaca;
+    --button-danger-text: #dc2626;
+    --avatar-bg: #e2e8f0;
+    --avatar-text: #1e293b;
+}
+
+[data-app-style="Classic"] {
+    --app-bg: #f7f0df;
+    --app-text: #3f2f1f;
+    --app-text-muted: #6b5842;
+    --panel-bg: rgba(255, 248, 230, 0.95);
+    --panel-border: rgba(166, 124, 82, 0.5);
+    --panel-title: #3f2f1f;
+    --surface-subtle-bg: rgba(217, 189, 151, 0.45);
+    --surface-hover-bg: rgba(191, 141, 90, 0.45);
+    --nav-hover-bg: rgba(217, 189, 151, 0.5);
+    --nav-hover-text: #3f2f1f;
+    --nav-active-bg: rgba(191, 141, 90, 0.32);
+    --nav-active-text: #6f3f19;
+    --sidebar-backdrop: rgba(63, 47, 31, 0.3);
+    --button-primary-bg: #8b5e3b;
+    --button-primary-hover: #70492b;
+    --button-primary-text: #fff8e6;
+    --button-secondary-bg: #fff8e6;
+    --button-secondary-border: rgba(166, 124, 82, 0.5);
+    --button-secondary-text: #3f2f1f;
+    --button-danger-bg: rgba(127, 29, 29, 0.08);
+    --button-danger-border: rgba(185, 28, 28, 0.35);
+    --button-danger-text: #991b1b;
+    --avatar-bg: rgba(217, 189, 151, 0.55);
+    --avatar-text: #3f2f1f;
+}
+
+body {
+    background-color: var(--app-bg);
+    color: var(--app-text);
+}
+
 @layer components {
+    .app-shell {
+        background-color: var(--app-bg);
+        color: var(--app-text);
+    }
+
+    .page-shell {
+        @apply flex h-screen w-full items-start justify-center overflow-y-auto p-8;
+        background-color: var(--app-bg);
+        color: var(--app-text);
+    }
+
+    .themed-text {
+        color: var(--app-text);
+    }
+
+    .themed-text-muted {
+        color: var(--app-text-muted);
+    }
+
+    .themed-divider {
+        border-color: var(--panel-border);
+    }
+
+    .themed-surface-subtle {
+        background-color: var(--surface-subtle-bg);
+    }
+
+    .themed-hover-surface {
+        transition: background-color 150ms ease-in-out;
+    }
+
+    .themed-hover-surface:hover {
+        background-color: var(--surface-hover-bg);
+    }
+
+    .style-selector {
+        @apply rounded-md border p-1;
+        border-color: var(--panel-border);
+        background-color: var(--surface-subtle-bg);
+    }
+
+    .style-selector-buttons {
+        @apply flex items-center gap-1;
+    }
+
+    .style-selector-button {
+        @apply rounded-md px-2 py-1 text-sm font-semibold transition-colors duration-150;
+        color: var(--app-text-muted);
+    }
+
+    .style-selector-button:hover {
+        background-color: var(--surface-hover-bg);
+        color: var(--app-text);
+    }
+
+    .style-selector-button-active {
+        background-color: var(--nav-active-bg);
+        color: var(--nav-active-text);
+    }
+
     .overlay-panel {
-        @apply rounded-md border border-slate-200/80 bg-white/95 p-3 shadow-lg backdrop-blur-sm;
+        @apply rounded-md border p-3 shadow-lg backdrop-blur-sm;
+        border-color: var(--panel-border);
+        background-color: var(--panel-bg);
+        color: var(--app-text);
     }
 
     .overlay-panel-title {
-        @apply mb-2 text-sm font-semibold text-slate-800;
+        @apply mb-2 text-sm font-semibold;
+        color: var(--panel-title);
     }
 
     /* ── Sidebar ── */
 
     .sidebar-toggle {
-        @apply fixed left-4 top-4 z-[1200] rounded-md bg-white/95 shadow-lg backdrop-blur-sm
-               border border-slate-200/80;
+        @apply fixed left-4 top-4 z-[1200] rounded-md shadow-lg backdrop-blur-sm border;
+        border-color: var(--panel-border);
+        background-color: var(--panel-bg);
     }
 
     .sidebar-panel {
         @apply fixed left-0 top-0 z-[1100] flex h-full w-64 -translate-x-full flex-col
-               border-r border-slate-200/80 bg-white/95 shadow-xl backdrop-blur-sm
+               border-r shadow-xl backdrop-blur-sm
                transition-transform duration-300 ease-in-out;
+        border-color: var(--panel-border);
+        background-color: var(--panel-bg);
     }
 
     .sidebar-panel-open {
@@ -28,16 +182,18 @@
     }
 
     .sidebar-backdrop {
-        @apply fixed inset-0 z-[1050] bg-black/20 backdrop-blur-[2px]
-               transition-opacity duration-300;
+        @apply fixed inset-0 z-[1050] backdrop-blur-[2px] transition-opacity duration-300;
+        background-color: var(--sidebar-backdrop);
     }
 
     .sidebar-header {
-        @apply flex items-center gap-2 border-b border-slate-200/80 px-5 py-4 pt-18;
+        @apply flex items-center gap-2 border-b px-5 py-4 pt-18;
+        border-color: var(--panel-border);
     }
 
     .sidebar-title {
-        @apply text-base font-semibold text-slate-800;
+        @apply text-base font-semibold;
+        color: var(--panel-title);
     }
 
     .sidebar-nav-list {
@@ -46,11 +202,63 @@
 
     .sidebar-nav-item {
         @apply flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2.5
-               text-left text-sm font-medium text-slate-600
-               transition-colors duration-150 hover:bg-slate-100 hover:text-slate-900;
+               text-left text-sm font-medium transition-colors duration-150;
+        color: var(--app-text-muted);
+    }
+
+    .sidebar-nav-item:hover {
+        background-color: var(--nav-hover-bg);
+        color: var(--nav-hover-text);
     }
 
     .sidebar-nav-item-active {
-        @apply bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800;
+        background-color: var(--nav-active-bg);
+        color: var(--nav-active-text);
+    }
+
+    .sidebar-meta-text {
+        color: var(--app-text-muted);
+    }
+
+    .sidebar-user-row {
+        color: var(--app-text);
+    }
+
+    .sidebar-avatar-fallback {
+        background-color: var(--avatar-bg);
+        color: var(--avatar-text);
+    }
+
+    .sidebar-divider {
+        border-color: var(--panel-border);
+    }
+
+    .sidebar-login-button {
+        @apply w-full flex items-center justify-center gap-2 rounded-md px-4 py-2.5 font-medium;
+        background-color: var(--button-primary-bg);
+        color: var(--button-primary-text);
+    }
+
+    .sidebar-login-button:hover {
+        background-color: var(--button-primary-hover);
+    }
+
+    .account-avatar-fallback {
+        background-color: var(--avatar-bg);
+        color: var(--avatar-text);
+    }
+
+    .account-button-secondary {
+        @apply w-full rounded-md border px-4 py-2 font-medium transition-colors;
+        background-color: var(--button-secondary-bg);
+        border-color: var(--button-secondary-border);
+        color: var(--button-secondary-text);
+    }
+
+    .account-button-danger {
+        @apply w-full rounded-md border px-4 py-2 font-medium transition-colors;
+        background-color: var(--button-danger-bg);
+        border-color: var(--button-danger-border);
+        color: var(--button-danger-text);
     }
 }

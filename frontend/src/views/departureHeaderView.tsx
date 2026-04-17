@@ -19,7 +19,7 @@ export function DepartureHeaderView({
 }: DepartureHeaderViewProps) {
     return (
         <div className="flex items-center justify-between gap-2">
-            <h3 className="text-sm font-medium text-slate-800">{selectedSiteName}</h3>
+            <h3 className="themed-text text-sm font-medium">{selectedSiteName}</h3>
             <div className="flex items-center gap-1">
                 <Button
                     variant="text"

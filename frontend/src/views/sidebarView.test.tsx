@@ -30,6 +30,8 @@ describe("SidebarView favorites", () => {
                 onNavigate={vi.fn()}
                 onLogout={vi.fn()}
                 onSelectFavoriteStop={onSelectFavoriteStop}
+                appStyle="Dark"
+                onAppStyleChange={vi.fn()}
             />
         );
 
@@ -54,6 +56,8 @@ describe("SidebarView favorites", () => {
                 onNavigate={vi.fn()}
                 onLogout={vi.fn()}
                 onSelectFavoriteStop={vi.fn()}
+                appStyle="Dark"
+                onAppStyleChange={vi.fn()}
             />
         );
 
@@ -72,10 +76,34 @@ describe("SidebarView favorites", () => {
                 onNavigate={vi.fn()}
                 onLogout={vi.fn()}
                 onSelectFavoriteStop={vi.fn()}
+                appStyle="Dark"
+                onAppStyleChange={vi.fn()}
             />
         );
 
         expect(screen.getByText("Favorite stops")).toBeInTheDocument();
         expect(screen.getByText("Select a stop to favorite it")).toBeInTheDocument();
+    });
+
+    it("lets users change app style in the sidebar", () => {
+        const onAppStyleChange = vi.fn();
+
+        render(
+            <SidebarView
+                isOpen
+                currentPath="/"
+                user={mockUser}
+                favoriteStops={[]}
+                onToggle={vi.fn()}
+                onNavigate={vi.fn()}
+                onLogout={vi.fn()}
+                onSelectFavoriteStop={vi.fn()}
+                appStyle="Dark"
+                onAppStyleChange={onAppStyleChange}
+            />
+        );
+
+        fireEvent.click(screen.getByRole("button", { name: "Light" }));
+        expect(onAppStyleChange).toHaveBeenCalledWith("Light");
     });
 });

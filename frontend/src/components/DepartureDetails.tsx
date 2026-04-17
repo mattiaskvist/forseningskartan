@@ -13,8 +13,8 @@ dayjs.extend(utc);
 function renderDetailRow(label: string, value: string) {
     return (
         <div key={label} className="py-1">
-            <p className="text-xs text-slate-500">{label}</p>
-            <p className="text-sm text-slate-900">{value}</p>
+            <p className="themed-text-muted text-xs">{label}</p>
+            <p className="themed-text text-sm">{value}</p>
         </div>
     );
 }
@@ -68,7 +68,7 @@ export function DepartureDetails({
     return (
         <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-                <p className="text-m font-semibold text-slate-900">
+                <p className="themed-text text-m font-semibold">
                     {departure.line.transport_mode}{" "}
                     {departure.line.designation ?? departure.line.id} -{" "}
                     {departure.destination ?? departure.direction}
@@ -77,9 +77,7 @@ export function DepartureDetails({
                     Back
                 </Button>
             </div>
-            <div className="divide-y divide-slate-200 rounded border border-slate-200 px-3 py-1">
-                {detailRows}
-            </div>
+            <div className="themed-divider divide-y rounded border px-3 py-1">{detailRows}</div>
             <DepartureHistoricalDelays
                 availableDates={availableDates}
                 selectedDelayDates={selectedDelayDates}

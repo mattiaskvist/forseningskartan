@@ -24,7 +24,7 @@ export function FilterToggleButtonGroup<T>({
 
     return (
         <div>
-            {label && <p className="text-xs text-slate-900">{label}</p>}
+            {label && <p className="themed-text text-xs">{label}</p>}
             <ToggleButtonGroup
                 color="primary"
                 size="small"

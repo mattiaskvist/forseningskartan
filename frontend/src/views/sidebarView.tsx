@@ -10,6 +10,8 @@ import { AuthUserState } from "../store/authSlice";
 import { ROUTES, type RouteConfig } from "../routes";
 import favicon from "/favicon.png";
 import { Site } from "../types/sl";
+import { AppStyle } from "../types/appStyle";
+import { MapStyleSelector } from "../components/MapStyleSelector";
 
 type SidebarNavItem = Pick<RouteConfig, "label" | "path" | "icon">;
 
@@ -22,6 +24,8 @@ type SidebarViewProps = {
     onNavigate: (path: string) => void;
     onLogout: () => void;
     onSelectFavoriteStop: (siteId: number) => void;
+    appStyle: AppStyle;
+    onAppStyleChange: (style: AppStyle) => void;
 };
 
 export function SidebarView({
@@ -33,6 +37,8 @@ export function SidebarView({
     onNavigate,
     onLogout,
     onSelectFavoriteStop,
+    appStyle,
+    onAppStyleChange,
 }: SidebarViewProps) {
     function isActiveCB(path: string): boolean {
         if (path === "/") {
@@ -68,7 +74,7 @@ export function SidebarView({
     function renderUserItem(user: AuthUserState) {
         return (
             <li>
-                <div className="flex items-center gap-2 rounded-md px-3 py-2.5 text-slate-700">
+                <div className="sidebar-user-row flex items-center gap-2 rounded-md px-3 py-2.5">
                     {user.photoURL ? (
                         <img
                             src={user.photoURL}
@@ -76,7 +82,7 @@ export function SidebarView({
                             className="h-8 w-8 rounded-full object-cover"
                         />
                     ) : (
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200">
+                        <div className="sidebar-avatar-fallback flex h-8 w-8 items-center justify-center rounded-full">
                             <PersonIcon fontSize="small" />
                         </div>
                     )}
@@ -118,11 +124,7 @@ export function SidebarView({
 
         return (
             <li className="px-3">
-                <button
-                    onClick={handleClickCB}
-                    className="w-full flex items-center justify-center gap-2 rounded-md 
-                                bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 font-medium"
-                >
+                <button onClick={handleClickCB} className="sidebar-login-button">
                     <LoginIcon fontSize="small" />
                     <span>Log In</span>
                 </button>
@@ -150,23 +152,31 @@ export function SidebarView({
 
                 <ul className="sidebar-nav-list">
                     {ROUTES.map(renderNavItemCB)}
+                    <li className="mt-4 px-3">
+                        <p className="sidebar-meta-text text-xs font-semibold uppercase tracking-wide">
+                            Style
+                        </p>
+                        <div className="pt-2">
+                            <MapStyleSelector appStyle={appStyle} setAppStyle={onAppStyleChange} />
+                        </div>
+                    </li>
                     <li className="mt-6 px-3">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <p className="sidebar-meta-text text-xs font-semibold uppercase tracking-wide">
                             Favorite stops
                         </p>
                     </li>
                     {!user ? (
-                        <li className="px-3 py-1 text-xs text-slate-500">
+                        <li className="sidebar-meta-text px-3 py-1 text-xs">
                             Log in to favorite stops
                         </li>
                     ) : favoriteStops.length === 0 ? (
-                        <li className="px-3 py-1 text-xs text-slate-500">
+                        <li className="sidebar-meta-text px-3 py-1 text-xs">
                             Select a stop to favorite it
                         </li>
                     ) : (
                         favoriteStops.map(renderFavoriteStopItemCB)
                     )}
-                    <li className="mt-8 border-t border-slate-200/20 pt-2" />
+                    <li className="sidebar-divider mt-8 border-t pt-2" />
                     {user ? renderUserItem(user) : renderLoginButton()}
                 </ul>
             </nav>

@@ -17,8 +17,8 @@ export function RouteDelayTrendChart({ points, title }: RouteDelayTrendChartProp
     const yValues = points.map(getAvgDelayMinutesCB);
 
     return (
-        <div className="border border-slate-200 rounded p-3">
-            <p className="text-sm text-slate-900">{title}</p>
+        <div className="themed-divider rounded border p-3">
+            <p className="themed-text text-sm">{title}</p>
             <LineChart
                 height={250}
                 margin={{ top: 24, right: 32, bottom: 4, left: 16 }}

@@ -1,6 +1,7 @@
 import { createSelector } from "@reduxjs/toolkit";
 import { DatePreset } from "../types/departureDelay";
 import { Site } from "../types/sl";
+import { getMapStyleForAppStyle } from "../types/appStyle";
 import { getDatesForPreset, sortDatesDescendingCB } from "../utils/time";
 import { RootState } from "./store";
 
@@ -151,8 +152,12 @@ function getFavoriteSiteIdsCB(state: RootState) {
     return state.userPreferences.favoriteSiteIds;
 }
 
+function getAppStylePreferenceCB(state: RootState) {
+    return state.userPreferences.appStyle;
+}
+
 function getMapStylePreferenceCB(state: RootState) {
-    return state.userPreferences.mapStyle;
+    return getMapStyleForAppStyle(state.userPreferences.appStyle);
 }
 
 // use createSelector for computationally expensive selectors
@@ -233,6 +238,7 @@ export {
     getSnackbarMessageCB,
     getSnackbarSeverityCB,
     getFavoriteSiteIdsCB,
+    getAppStylePreferenceCB,
     getMapStylePreferenceCB,
     getFavoriteSitesCB,
     getSelectedDelayDates,

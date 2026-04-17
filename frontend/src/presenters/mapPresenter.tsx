@@ -30,8 +30,7 @@ import {
 import { Departure } from "../types/sl";
 import { DatePreset } from "../types/departureDelay";
 import { DepartureViewProps } from "../views/departureView";
-import { setMapStylePreference, toggleFavoriteSiteId } from "../store/userPreferencesSlice";
-import { MapStyle } from "../types/map";
+import { toggleFavoriteSiteId } from "../store/userPreferencesSlice";
 import { showSnackbar } from "../store/snackbarSlice";
 import { Suspense } from "../components/Suspense";
 import { getUpcomingDepartures } from "../utils/departures";
@@ -86,10 +85,6 @@ export function MapPresenter() {
 
     function setSelectedCustomDateACB(date: string) {
         dispatch(setSelectedCustomDate(date));
-    }
-
-    function setMapStyleACB(style: MapStyle) {
-        dispatch(setMapStylePreference(style));
     }
 
     function toggleFavoriteStopACB() {
@@ -149,7 +144,6 @@ export function MapPresenter() {
             handleSelectSiteCB={handleSelectSiteCB}
             departureViewProps={departureViewProps}
             mapStyle={mapStyle}
-            onMapStyleChange={setMapStyleACB}
         />
     );
 }

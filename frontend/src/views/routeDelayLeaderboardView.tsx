@@ -9,9 +9,9 @@ export function RouteDelayLeaderboardView({ leaderboardItems }: RouteDelayLeader
         const { id, label, avgDelayMinutes, uniqueTrips } = item;
 
         return (
-            <li key={id} className="flex items-center justify-between text-sm text-slate-700">
+            <li key={id} className="themed-text flex items-center justify-between text-sm">
                 <span className="flex items-center gap-3">
-                    <span className="w-6 text-right font-semibold text-slate-500 tabular-nums">
+                    <span className="themed-text-muted w-6 text-right font-semibold tabular-nums">
                         {index + 1}.
                     </span>
                     <span>{label}</span>
@@ -27,12 +27,12 @@ export function RouteDelayLeaderboardView({ leaderboardItems }: RouteDelayLeader
     return (
         <section className="space-y-2">
             {leaderboardItems.length === 0 ? (
-                <p className="rounded border border-slate-200 p-3 text-sm text-slate-500">
+                <p className="themed-divider themed-text-muted rounded border p-3 text-sm">
                     No leaderboard data available.
                 </p>
             ) : (
-                <div className="rounded border border-slate-200">
-                    <div className="flex items-center justify-between border-b border-slate-200 px-3 py-2 text-xs font-semibold text-slate-500">
+                <div className="themed-divider rounded border">
+                    <div className="themed-divider themed-text-muted flex items-center justify-between border-b px-3 py-2 text-xs font-semibold">
                         <span className="flex items-center gap-3">
                             <span className="w-6 text-right">Rank</span>
                             <span>Route</span>

@@ -48,9 +48,9 @@ export function DepartureDelayControls({
     }
 
     return (
-        <div className="flex flex-col gap-2 rounded border border-slate-200 p-2">
+        <div className="themed-divider flex flex-col gap-2 rounded border p-2">
             <div>
-                <p className="text-xs text-slate-900">Date selection</p>
+                <p className="themed-text text-xs">Date selection</p>
                 <ToggleButtonGroup
                     color="primary"
                     exclusive
@@ -76,7 +76,7 @@ export function DepartureDelayControls({
 
             <div className="flex flex-col gap-2 pt-1">
                 <div>
-                    <p className="text-xs text-slate-900">Event type</p>
+                    <p className="themed-text text-xs">Event type</p>
                     <ToggleButtonGroup
                         color="primary"
                         exclusive

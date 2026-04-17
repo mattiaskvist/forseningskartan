@@ -20,6 +20,7 @@ import { authSlice, setUser } from "./authSlice";
 import { showSnackbar, snackbarSlice } from "./snackbarSlice";
 import {
     applyLoadedUserPreferences,
+    setAppStylePreference,
     setMapStylePreference,
     toggleFavoriteSiteId,
     userPreferencesSlice,
@@ -130,7 +131,7 @@ listenerMiddleware.startListening({
 });
 
 listenerMiddleware.startListening({
-    matcher: isAnyOf(toggleFavoriteSiteId, setMapStylePreference),
+    matcher: isAnyOf(toggleFavoriteSiteId, setAppStylePreference, setMapStylePreference),
     effect: async (_, listenerApi) => {
         const state = listenerApi.getState() as RootState;
         const user = state.auth.user;

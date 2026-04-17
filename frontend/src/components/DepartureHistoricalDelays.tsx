@@ -33,7 +33,7 @@ export function DepartureHistoricalDelays({
 }: DepartureHistoricalDelaysProps) {
     return (
         <div className="flex flex-col gap-2">
-            <p className="text-sm font-semibold text-slate-900">Historical delays</p>
+            <p className="themed-text text-sm font-semibold">Historical delays</p>
             <DepartureDelayControls
                 availableDates={availableDates}
                 selectedDatePreset={selectedDatePreset}
@@ -44,8 +44,8 @@ export function DepartureHistoricalDelays({
                 onEventTypeChange={onEventTypeChange}
             />
 
-            <div className="rounded border border-slate-200 p-2">
-                <p className="text-xs text-slate-500">
+            <div className="themed-divider rounded border p-2">
+                <p className="themed-text-muted text-xs">
                     {getPresetDescription(selectedDelayDates, selectedDepartureHourUTC)}
                 </p>
                 {isLoadingData ? (

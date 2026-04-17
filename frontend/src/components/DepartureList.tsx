@@ -75,14 +75,14 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
             <button
                 key={departureKey}
                 type="button"
-                className="w-full border-b border-slate-200 p-2 text-left last:border-b-0 hover:bg-slate-50 flex items-center justify-between"
+                className="themed-hover-surface themed-divider w-full border-b p-2 text-left last:border-b-0 flex items-center justify-between"
                 onClick={handleSelectDepartureACB}
             >
                 <div>
-                    <p className="text-sm font-semibold text-slate-900">
+                    <p className="themed-text text-sm font-semibold">
                         {transportMode} {line} to {destination}
                     </p>
-                    <p className="text-sm text-slate-700">
+                    <p className="themed-text text-sm">
                         Planned {formatTime(departure.scheduled)} · Predicted{" "}
                         {formatTime(departure.expected ?? departure.scheduled)}
                     </p>
@@ -99,7 +99,7 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
         const modeDepartures = departuresByMode.get(mode) ?? [];
         return (
             <Card key={mode} variant="outlined">
-                <div className="px-2 py-1 border-b border-slate-200 bg-slate-100 text-xs font-semibold">
+                <div className="themed-surface-subtle themed-divider themed-text px-2 py-1 border-b text-xs font-semibold">
                     {mode}
                 </div>
                 {modeDepartures.map(renderDepartureCB)}
@@ -140,7 +140,7 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
             {selectedMode ? (
                 renderModeDepartures(selectedMode)
             ) : (
-                <p className="text-sm text-slate-600">No transport modes selected</p>
+                <p className="themed-text-muted text-sm">No transport modes selected</p>
             )}
         </div>
     );

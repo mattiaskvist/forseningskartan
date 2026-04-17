@@ -10,7 +10,7 @@ export function RouteDelayInfoView({
     isRouteDetailsOpen,
 }: RouteDelayInfoViewProps) {
     return (
-        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+        <div className="themed-text-muted flex flex-wrap items-center justify-between gap-2 text-xs">
             {selectedDateText}
             {!isRouteDetailsOpen ? <p>{routesInfoText}</p> : null}
         </div>

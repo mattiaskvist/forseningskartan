@@ -1,14 +1,15 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { AppStyle } from "../types/appStyle";
 import { MapStyle } from "../types/map";
 
 export type UserPreferencesState = {
     favoriteSiteIds: number[];
-    mapStyle: MapStyle;
+    appStyle: AppStyle;
 };
 
 export const defaultUserPreferencesState: UserPreferencesState = {
     favoriteSiteIds: [],
-    mapStyle: "Dark",
+    appStyle: "Dark",
 };
 
 function normalizeFavoriteSiteIds(favoriteSiteIds: number[]): number[] {
@@ -43,14 +44,21 @@ export const userPreferencesSlice = createSlice({
             state.favoriteSiteIds.push(siteId);
         },
         setMapStylePreference: (state, action: PayloadAction<MapStyle>) => {
-            state.mapStyle = action.payload;
+            state.appStyle = action.payload;
+        },
+        setAppStylePreference: (state, action: PayloadAction<AppStyle>) => {
+            state.appStyle = action.payload;
         },
         applyLoadedUserPreferences: (state, action: PayloadAction<UserPreferencesState>) => {
             state.favoriteSiteIds = normalizeFavoriteSiteIds(action.payload.favoriteSiteIds);
-            state.mapStyle = action.payload.mapStyle;
+            state.appStyle = action.payload.appStyle;
         },
     },
 });
 
-export const { toggleFavoriteSiteId, setMapStylePreference, applyLoadedUserPreferences } =
-    userPreferencesSlice.actions;
+export const {
+    toggleFavoriteSiteId,
+    setMapStylePreference,
+    setAppStylePreference,
+    applyLoadedUserPreferences,
+} = userPreferencesSlice.actions;

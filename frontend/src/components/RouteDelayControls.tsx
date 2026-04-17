@@ -68,7 +68,7 @@ export function RouteDelayControls({
     }
 
     return (
-        <div className="flex flex-col gap-3 rounded border border-slate-200 p-3">
+        <div className="themed-divider flex flex-col gap-3 rounded border p-3">
             <div>
                 <FilterToggleButtonGroup
                     label="Date selection"

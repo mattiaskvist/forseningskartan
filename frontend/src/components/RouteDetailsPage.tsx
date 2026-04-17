@@ -30,7 +30,7 @@ export function RouteDetailsPage({
                 </h3>
                 <button
                     onClick={onBackToRoutes}
-                    className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900"
+                    className="themed-text-muted flex items-center gap-2 text-sm font-medium hover:opacity-80"
                     aria-label="Back to list"
                 >
                     <ArrowBackIcon fontSize="small" />
@@ -38,11 +38,11 @@ export function RouteDetailsPage({
             </div>
 
             <div className="grid gap-4 pt-4">
-                <section className="space-y-3 rounded border border-slate-200 p-3">
-                    <p className="text-lg font-semibold text-slate-900">
+                <section className="themed-divider space-y-3 rounded border p-3">
+                    <p className="themed-text text-lg font-semibold">
                         {routeSummary.uniqueTrips} unique trips
                     </p>
-                    <hr className="border-slate-200 -mx-3" />
+                    <hr className="themed-divider -mx-3" />
                     <DepartureDelayStats
                         routeSummary={routeSummary}
                         selectedEventType={selectedEventType}

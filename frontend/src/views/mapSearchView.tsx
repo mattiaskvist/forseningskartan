@@ -9,10 +9,7 @@ type MapSearchViewProps = {
 
 export function MapSearchView({ sites, selectedSite, handleSelectSiteCB }: MapSearchViewProps) {
     return (
-        <div
-            className={`absolute left-18 top-4 z-[1000] w-[min(420px,calc(100vw-2rem))] 
-                        rounded-md border bg-white p-2 shadow-lg`}
-        >
+        <div className="overlay-panel absolute left-18 top-4 z-[1000] w-[min(420px,calc(100vw-2rem))] p-2">
             <SearchBar
                 sites={sites}
                 selectedSite={selectedSite}

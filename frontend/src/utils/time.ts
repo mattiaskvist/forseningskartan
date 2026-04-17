@@ -59,7 +59,7 @@ export function getAvgDelayMinutes(summary: DelaySummary, selectedEventType: Eve
 
 export function getDelayTextColorClass(delayMinutes: number | null) {
     if (delayMinutes === null) {
-        return "text-slate-500";
+        return "themed-text-muted";
     }
     if (delayMinutes <= 0) {
         return "text-emerald-600";

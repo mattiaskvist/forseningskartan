@@ -39,13 +39,13 @@ export function RouteDelayRoutesView({
                 <button
                     type="button"
                     className={`w-full rounded border p-2 text-left transition 
-                        border-slate-200 hover:border-slate-300 hover:bg-slate-50
+                        themed-divider hover:opacity-90
                         flex items-center justify-between`}
                     onClick={handleClickACB}
                 >
                     <div>
-                        <p className="text-sm font-semibold text-slate-900">{label}</p>
-                        <p className="text-xs text-slate-600">
+                        <p className="themed-text text-sm font-semibold">{label}</p>
+                        <p className="themed-text-muted text-xs">
                             Average delay:{" "}
                             <span className={getDelayTextColorClass(avgDelayMinutes)}>
                                 {avgDelayMinutes} min
@@ -105,7 +105,7 @@ export function RouteDelayRoutesView({
             </div>
 
             {pagedRouteItems.length === 0 ? (
-                <p className="rounded border border-slate-200 p-3 text-sm text-slate-500">
+                <p className="themed-divider themed-text-muted rounded border p-3 text-sm">
                     No routes match the selected filters.
                 </p>
             ) : (

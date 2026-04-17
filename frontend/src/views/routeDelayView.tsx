@@ -81,7 +81,7 @@ export function RouteDelayView({
     const isRouteDetailsOpen = selectedRouteKey !== null;
 
     return (
-        <div className="flex h-screen w-full items-start justify-center overflow-y-auto bg-slate-50 p-8">
+        <div className="page-shell">
             <section className="overlay-panel w-full max-w-3xl">
                 <h2 className="overlay-panel-title">Route Delays</h2>
                 <div className="flex w-full flex-col gap-4">
