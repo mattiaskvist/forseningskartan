@@ -2,7 +2,7 @@ import { ToggleButtonGroup } from "@mui/material";
 import React from "react";
 
 type FilterToggleButtonGroupProps<T> = {
-    label: string;
+    label?: string;
     options: T[];
     selectedValue: T;
     onValueChange: (value: T) => void;
@@ -24,7 +24,7 @@ export function FilterToggleButtonGroup<T>({
 
     return (
         <div>
-            <p className="text-xs text-slate-900">{label}</p>
+            {label && <p className="text-xs text-slate-900">{label}</p>}
             <ToggleButtonGroup
                 color="primary"
                 size="small"
