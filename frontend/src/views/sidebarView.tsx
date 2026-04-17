@@ -111,6 +111,24 @@ export function SidebarView({
         );
     }
 
+    function renderLoginButton() {
+        function handleClickCB() {
+            onNavigate("/login");
+        }
+
+        return (
+            <li className="px-3">
+                <button
+                    onClick={handleClickCB}
+                    className="w-full flex items-center justify-center gap-2 rounded-md 
+                                bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 font-medium"
+                >
+                    <LoginIcon fontSize="small" />
+                    <span>Log In</span>
+                </button>
+            </li>
+        );
+    }
     return (
         <>
             {/* Toggle button — always visible */}
@@ -149,13 +167,7 @@ export function SidebarView({
                         favoriteStops.map(renderFavoriteStopItemCB)
                     )}
                     <li className="mt-8 border-t border-slate-200/20 pt-2" />
-                    {user
-                        ? renderUserItem(user)
-                        : renderNavItemCB({
-                              label: "Log In",
-                              path: "/login",
-                              icon: <LoginIcon fontSize="small" />,
-                          })}
+                    {user ? renderUserItem(user) : renderLoginButton()}
                 </ul>
             </nav>
         </>

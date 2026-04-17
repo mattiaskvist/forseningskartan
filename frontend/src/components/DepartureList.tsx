@@ -2,9 +2,9 @@ import { Departure, TransportationMode } from "../types/sl";
 import { formatDelay, formatTime, getDelayMinutes, getDelayTextColorClass } from "../utils/time";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { useMemo, useState } from "react";
 import { Card, TextField } from "@mui/material";
+import { FilterToggleButtonGroup } from "./FilterToggleButtonGroup";
 
 type DepartureListProps = {
     departures: Departure[];
@@ -24,10 +24,10 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
             }
         }
 
-        return Array.from(modes);
+        return Array.from(modes).sort();
     }, [departures]);
 
-    const [selectedModes, setSelectedModes] = useState<ModeWithOther[]>(uniqueModes);
+    const [selectedMode, setSelectedMode] = useState<ModeWithOther>(uniqueModes[0] ?? null);
     const [searchQuery, setSearchQuery] = useState("");
 
     const departuresByMode = useMemo(() => {
@@ -95,7 +95,7 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
         );
     }
 
-    function renderModeDeparturesCB(mode: ModeWithOther) {
+    function renderModeDepartures(mode: ModeWithOther) {
         const modeDepartures = departuresByMode.get(mode) ?? [];
         return (
             <Card key={mode} variant="outlined">
@@ -105,10 +105,6 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
                 {modeDepartures.map(renderDepartureCB)}
             </Card>
         );
-    }
-
-    function handleModeChangeACB(_: React.MouseEvent<HTMLElement>, modes: ModeWithOther[]) {
-        setSelectedModes(modes);
     }
 
     function renderModeButtonCB(mode: ModeWithOther) {
@@ -132,19 +128,17 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
                 value={searchQuery}
                 onChange={handleSearchChangeACB}
             />
-            {uniqueModes.length > 0 ? (
-                <ToggleButtonGroup
-                    color="primary"
-                    size="small"
-                    value={selectedModes}
-                    onChange={handleModeChangeACB}
-                >
-                    {uniqueModes.map(renderModeButtonCB)}
-                </ToggleButtonGroup>
+            {uniqueModes.length > 0 && selectedMode ? (
+                <FilterToggleButtonGroup
+                    options={uniqueModes}
+                    selectedValue={selectedMode}
+                    onValueChange={setSelectedMode}
+                    renderButtonCB={renderModeButtonCB}
+                />
             ) : null}
 
-            {selectedModes.length > 0 ? (
-                selectedModes.map(renderModeDeparturesCB)
+            {selectedMode ? (
+                renderModeDepartures(selectedMode)
             ) : (
                 <p className="text-sm text-slate-600">No transport modes selected</p>
             )}
