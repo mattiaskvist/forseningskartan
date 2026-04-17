@@ -36,13 +36,14 @@ export function getPresetDescription(selectedDates: string[], selectedHourUTC?: 
     return `Selected dates: ${dateRange}${hourRange ? `, ${hourRange}` : ""}`;
 }
 
-export const DatePresetLabels: { preset: DatePreset; label: string }[] = [
-    { preset: "sameDayLastWeek", label: "Same day last week" },
-    { preset: "last7Days", label: "Last 7 days" },
-    { preset: "last5Weekdays", label: "Last 5 weekdays" },
-    { preset: "lastWeekend", label: "Last weekend" },
-    { preset: "customDate", label: "Custom date" },
-];
+export const DatePresetLabelMap: Record<DatePreset, string> = {
+    sameDayLastWeek: "Same day last week",
+    last7Days: "Last 7 days",
+    last5Weekdays: "Last 5 weekdays",
+    lastWeekend: "Last weekend",
+    customDate: "Custom date",
+};
+export const DatePresets: DatePreset[] = Object.keys(DatePresetLabelMap) as DatePreset[];
 
 export type DatePreset =
     | "sameDayLastWeek"

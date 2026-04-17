@@ -1,9 +1,10 @@
-import { ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { ToggleButton } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import { AvailableDatesPicker } from "./AvailableDatesPicker";
-import { DatePresetLabels, DatePreset, EventType } from "../types/departureDelay";
+import { DatePreset, EventType, DatePresets, DatePresetLabelMap } from "../types/departureDelay";
 import { TransportationMode } from "../types/sl";
 import { RouteDelaySection } from "../types/routeDelays";
+import { FilterToggleButtonGroup } from "./FilterToggleButtonGroup";
 
 type RouteDelayControlsProps = {
     selectedSection: RouteDelaySection;
@@ -38,47 +39,28 @@ export function RouteDelayControls({
     onTransportationModeChange,
     onSearchQueryChange,
 }: RouteDelayControlsProps) {
-    function handleDatePresetChangeACB(
-        _: React.MouseEvent<HTMLElement>,
-        nextValue: DatePreset | null
-    ) {
-        if (nextValue) {
-            onDatePresetChange(nextValue);
-        }
-    }
-
-    function handleEventTypeChangeACB(
-        _: React.MouseEvent<HTMLElement>,
-        nextValue: EventType | null
-    ) {
-        if (nextValue) {
-            onEventTypeChange(nextValue);
-        }
-    }
-
-    function getPresetButtonCB(option: { preset: DatePreset; label: string }) {
+    function getPresetButtonCB(option: DatePreset) {
         return (
-            <ToggleButton key={option.preset} value={option.preset}>
-                {option.label}
+            <ToggleButton key={option} value={option}>
+                {DatePresetLabelMap[option]}
             </ToggleButton>
         );
     }
 
-    function renderModeButtonCB(mode: TransportationMode) {
+    function getEventTypeButtonCB(eventType: EventType) {
+        return (
+            <ToggleButton key={eventType} value={eventType}>
+                {eventType === "departure" ? "Departure" : "Arrival"}
+            </ToggleButton>
+        );
+    }
+
+    function getTransportationModeButtonCB(mode: TransportationMode) {
         return (
             <ToggleButton key={mode} value={mode}>
                 {mode}
             </ToggleButton>
         );
-    }
-
-    function handleTransportationModeChangeACB(
-        _: React.MouseEvent<HTMLElement>,
-        nextValue: TransportationMode | null
-    ) {
-        if (nextValue) {
-            onTransportationModeChange(nextValue);
-        }
     }
 
     function handleSearchChangeACB(event: React.ChangeEvent<HTMLInputElement>) {
@@ -88,18 +70,13 @@ export function RouteDelayControls({
     return (
         <div className="flex flex-col gap-3 rounded border border-slate-200 p-3">
             <div>
-                <p className="text-xs text-slate-900">Date selection</p>
-                <ToggleButtonGroup
-                    color="primary"
-                    exclusive
-                    onChange={handleDatePresetChangeACB}
-                    size="small"
-                    value={selectedDatePreset}
-                >
-                    <div className="mt-1 flex flex-wrap gap-0.5">
-                        {DatePresetLabels.map(getPresetButtonCB)}
-                    </div>
-                </ToggleButtonGroup>
+                <FilterToggleButtonGroup
+                    label="Date selection"
+                    options={DatePresets}
+                    selectedValue={selectedDatePreset}
+                    onValueChange={onDatePresetChange}
+                    renderButtonCB={getPresetButtonCB}
+                />
             </div>
 
             {selectedDatePreset === "customDate" && (
@@ -114,35 +91,24 @@ export function RouteDelayControls({
 
             <div className="flex items-center gap-20">
                 <div>
-                    <p className="text-xs text-slate-900">Event type</p>
-                    <ToggleButtonGroup
-                        color="primary"
-                        exclusive
-                        onChange={handleEventTypeChangeACB}
-                        size="small"
-                        value={selectedEventType}
-                    >
-                        <div className="mt-1 flex flex-wrap gap-1">
-                            <ToggleButton value="departure">Departure</ToggleButton>
-                            <ToggleButton value="arrival">Arrival</ToggleButton>
-                        </div>
-                    </ToggleButtonGroup>
+                    <FilterToggleButtonGroup
+                        label="Event type"
+                        options={["departure", "arrival"] as EventType[]}
+                        selectedValue={selectedEventType}
+                        onValueChange={onEventTypeChange}
+                        renderButtonCB={getEventTypeButtonCB}
+                    />
                 </div>
 
                 {!isRouteDetailsOpen ? (
                     <div>
-                        <p className="text-xs text-slate-900">Transport Mode</p>
-                        <ToggleButtonGroup
-                            color="primary"
-                            size="small"
-                            onChange={handleTransportationModeChangeACB}
-                            value={selectedTransportationMode}
-                            exclusive
-                        >
-                            <div className="mt-1 flex flex-wrap gap-1">
-                                {transportationModeOptions.map(renderModeButtonCB)}
-                            </div>
-                        </ToggleButtonGroup>
+                        <FilterToggleButtonGroup
+                            label="Transport Mode"
+                            options={transportationModeOptions}
+                            selectedValue={selectedTransportationMode}
+                            onValueChange={onTransportationModeChange}
+                            renderButtonCB={getTransportationModeButtonCB}
+                        />
                     </div>
                 ) : null}
             </div>

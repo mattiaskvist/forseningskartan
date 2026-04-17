@@ -1,6 +1,6 @@
 import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { AvailableDatesPicker } from "./AvailableDatesPicker";
-import { DatePresetLabels, DatePreset, EventType } from "../types/departureDelay";
+import { DatePreset, EventType, DatePresets, DatePresetLabelMap } from "../types/departureDelay";
 
 type DepartureDelayControlsProps = {
     availableDates: string[];
@@ -39,10 +39,10 @@ export function DepartureDelayControls({
         }
     }
 
-    function getPresetButtonCB(option: { preset: DatePreset; label: string }) {
+    function getPresetButtonCB(preset: DatePreset) {
         return (
-            <ToggleButton key={option.preset} value={option.preset}>
-                {option.label}
+            <ToggleButton key={preset} value={preset}>
+                {DatePresetLabelMap[preset]}
             </ToggleButton>
         );
     }
@@ -59,7 +59,7 @@ export function DepartureDelayControls({
                     value={selectedDatePreset}
                 >
                     <div className="flex flex-wrap gap-0.5 mt-1">
-                        {DatePresetLabels.map(getPresetButtonCB)}
+                        {DatePresets.map(getPresetButtonCB)}
                     </div>
                 </ToggleButtonGroup>
             </div>
