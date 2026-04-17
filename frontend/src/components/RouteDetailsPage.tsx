@@ -1,4 +1,6 @@
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { Box, Button, Divider, Paper, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { DelaySummary } from "../types/historicalDelay";
 import { EventType } from "../types/departureDelay";
 import { getRouteDisplayName, getRouteTypeString } from "../utils/route";
@@ -22,32 +24,55 @@ export function RouteDetailsPage({
     isTrendLoading,
     onBackToRoutes,
 }: RouteDetailsPageProps) {
+    const theme = useTheme();
+
     return (
-        <div className="overlay-panel">
+        <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2, backdropFilter: "blur(4px)" }}>
             <div className="flex items-center justify-between">
-                <h3 className="overlay-panel-title m-0">
+                <Typography
+                    variant="subtitle1"
+                    sx={{
+                        fontWeight: 600,
+                        color: theme.palette.surface.panelTitle,
+                    }}
+                >
                     {getRouteTypeString(routeSummary)} {getRouteDisplayName(routeSummary)}
-                </h3>
-                <button
+                </Typography>
+                <Button
+                    variant="text"
+                    size="small"
+                    startIcon={<ArrowBackIcon fontSize="small" />}
                     onClick={onBackToRoutes}
-                    className="themed-text-muted flex items-center gap-2 text-sm font-medium hover:opacity-80"
                     aria-label="Back to list"
                 >
-                    <ArrowBackIcon fontSize="small" />
-                </button>
+                    Back
+                </Button>
             </div>
 
             <div className="grid gap-4 pt-4">
-                <section className="themed-divider space-y-3 rounded border p-3">
-                    <p className="themed-text text-lg font-semibold">
+                <Box
+                    component="section"
+                    sx={{
+                        border: 1,
+                        borderColor: theme.palette.surface.panelBorder,
+                        borderRadius: 1,
+                        p: 1.5,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 1.5,
+                    }}
+                >
+                    <Typography
+                        sx={{ fontSize: "1.125rem", fontWeight: 600, color: "text.primary" }}
+                    >
                         {routeSummary.uniqueTrips} unique trips
-                    </p>
-                    <hr className="themed-divider -mx-3" />
+                    </Typography>
+                    <Divider />
                     <DepartureDelayStats
                         routeSummary={routeSummary}
                         selectedEventType={selectedEventType}
                     />
-                </section>
+                </Box>
 
                 {isTrendLoading ? (
                     <Suspense message="Loading route trend..." />
@@ -60,6 +85,6 @@ export function RouteDetailsPage({
                     />
                 )}
             </div>
-        </div>
+        </Paper>
     );
 }

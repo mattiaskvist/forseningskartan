@@ -3,7 +3,8 @@ import { formatDelay, formatTime, getDelayMinutes, getDelayTextColorClass } from
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ToggleButton from "@mui/material/ToggleButton";
 import { useMemo, useState } from "react";
-import { Card, TextField } from "@mui/material";
+import { Box, Card, TextField, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { FilterToggleButtonGroup } from "./FilterToggleButtonGroup";
 
 type DepartureListProps = {
@@ -14,6 +15,8 @@ type DepartureListProps = {
 type ModeWithOther = TransportationMode | "OTHER";
 
 export function DepartureList({ departures, onSelectDeparture }: DepartureListProps) {
+    const theme = useTheme();
+
     const uniqueModes = useMemo(() => {
         const modes = new Set<ModeWithOther>();
 
@@ -72,26 +75,47 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
         const delayMinutes = getDelayMinutes(departure);
 
         return (
-            <button
+            <Box
+                component="button"
                 key={departureKey}
                 type="button"
-                className="themed-hover-surface themed-divider w-full border-b p-2 text-left last:border-b-0 flex items-center justify-between"
                 onClick={handleSelectDepartureACB}
+                sx={{
+                    width: "100%",
+                    borderBottom: 1,
+                    borderColor: theme.palette.surface.panelBorder,
+                    p: 1,
+                    textAlign: "left",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    bgcolor: "transparent",
+                    cursor: "pointer",
+                    transition: "background-color 150ms ease-in-out",
+                    "&:hover": {
+                        bgcolor: theme.palette.surface.hoverBg,
+                    },
+                    "&:last-child": {
+                        borderBottom: 0,
+                    },
+                }}
             >
                 <div>
-                    <p className="themed-text text-sm font-semibold">
+                    <Typography
+                        sx={{ fontSize: "0.875rem", fontWeight: 600, color: "text.primary" }}
+                    >
                         {transportMode} {line} to {destination}
-                    </p>
-                    <p className="themed-text text-sm">
+                    </Typography>
+                    <Typography sx={{ fontSize: "0.875rem", color: "text.primary" }}>
                         Planned {formatTime(departure.scheduled)} · Predicted{" "}
                         {formatTime(departure.expected ?? departure.scheduled)}
-                    </p>
+                    </Typography>
                     <p className={`text-sm font-medium ${getDelayTextColorClass(delayMinutes)}`}>
                         {formatDelay(delayMinutes)}
                     </p>
                 </div>
                 <ArrowForwardIosIcon className="mr-2" />
-            </button>
+            </Box>
         );
     }
 
@@ -99,9 +123,20 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
         const modeDepartures = departuresByMode.get(mode) ?? [];
         return (
             <Card key={mode} variant="outlined">
-                <div className="themed-surface-subtle themed-divider themed-text px-2 py-1 border-b text-xs font-semibold">
+                <Box
+                    sx={{
+                        bgcolor: theme.palette.surface.subtleBg,
+                        borderBottom: 1,
+                        borderColor: theme.palette.surface.panelBorder,
+                        px: 1,
+                        py: 0.5,
+                        fontSize: "0.75rem",
+                        fontWeight: 600,
+                        color: "text.primary",
+                    }}
+                >
                     {mode}
-                </div>
+                </Box>
                 {modeDepartures.map(renderDepartureCB)}
             </Card>
         );
@@ -140,7 +175,9 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
             {selectedMode ? (
                 renderModeDepartures(selectedMode)
             ) : (
-                <p className="themed-text-muted text-sm">No transport modes selected</p>
+                <Typography sx={{ fontSize: "0.875rem", color: "text.secondary" }}>
+                    No transport modes selected
+                </Typography>
             )}
         </div>
     );

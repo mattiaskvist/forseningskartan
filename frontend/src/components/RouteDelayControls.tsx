@@ -1,4 +1,5 @@
-import { ToggleButton } from "@mui/material";
+import { Box, ToggleButton } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import TextField from "@mui/material/TextField";
 import { AvailableDatesPicker } from "./AvailableDatesPicker";
 import { DatePreset, EventType, DatePresets, DatePresetLabelMap } from "../types/departureDelay";
@@ -39,6 +40,8 @@ export function RouteDelayControls({
     onTransportationModeChange,
     onSearchQueryChange,
 }: RouteDelayControlsProps) {
+    const theme = useTheme();
+
     function getPresetButtonCB(option: DatePreset) {
         return (
             <ToggleButton key={option} value={option}>
@@ -68,7 +71,17 @@ export function RouteDelayControls({
     }
 
     return (
-        <div className="themed-divider flex flex-col gap-3 rounded border p-3">
+        <Box
+            sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 1.5,
+                borderRadius: 1,
+                border: 1,
+                borderColor: theme.palette.surface.panelBorder,
+                p: 1.5,
+            }}
+        >
             <div>
                 <FilterToggleButtonGroup
                     label="Date selection"
@@ -123,6 +136,6 @@ export function RouteDelayControls({
                     />
                 </div>
             ) : null}
-        </div>
+        </Box>
     );
 }

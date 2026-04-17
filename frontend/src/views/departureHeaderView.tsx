@@ -1,3 +1,4 @@
+import { Typography } from "@mui/material";
 import Button from "@mui/material/Button";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
@@ -19,7 +20,9 @@ export function DepartureHeaderView({
 }: DepartureHeaderViewProps) {
     return (
         <div className="flex items-center justify-between gap-2">
-            <h3 className="themed-text text-sm font-medium">{selectedSiteName}</h3>
+            <Typography sx={{ fontSize: "0.875rem", fontWeight: 500, color: "text.primary" }}>
+                {selectedSiteName}
+            </Typography>
             <div className="flex items-center gap-1">
                 <Button
                     variant="text"

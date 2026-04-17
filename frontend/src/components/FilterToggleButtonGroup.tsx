@@ -1,4 +1,4 @@
-import { ToggleButtonGroup } from "@mui/material";
+import { Typography, ToggleButtonGroup } from "@mui/material";
 import React from "react";
 
 type FilterToggleButtonGroupProps<T> = {
@@ -24,7 +24,9 @@ export function FilterToggleButtonGroup<T>({
 
     return (
         <div>
-            {label && <p className="themed-text text-xs">{label}</p>}
+            {label && (
+                <Typography sx={{ fontSize: "0.75rem", color: "text.primary" }}>{label}</Typography>
+            )}
             <ToggleButtonGroup
                 color="primary"
                 size="small"

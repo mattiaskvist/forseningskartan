@@ -1,3 +1,5 @@
+import { Box, Paper, Typography, Avatar, Button, Divider } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { AuthUserState } from "../store/authSlice";
 
 type AccountViewProps = {
@@ -7,39 +9,94 @@ type AccountViewProps = {
 };
 
 export function AccountView({ user, onLogout, onDelete }: AccountViewProps) {
-    return (
-        <div className="page-shell pt-20">
-            <section className="overlay-panel w-full max-w-lg">
-                <h2 className="overlay-panel-title">My Account</h2>
+    const theme = useTheme();
 
-                <div className="flex flex-col items-center py-6 gap-4">
+    return (
+        <Box
+            sx={{
+                display: "flex",
+                height: "100vh",
+                width: "100%",
+                alignItems: "flex-start",
+                justifyContent: "center",
+                overflowY: "auto",
+                p: 4,
+                pt: 10,
+                bgcolor: "background.default",
+                color: "text.primary",
+            }}
+        >
+            <Paper
+                variant="outlined"
+                sx={{
+                    width: "100%",
+                    maxWidth: "32rem",
+                    p: 3,
+                    borderRadius: 2,
+                    backdropFilter: "blur(4px)",
+                }}
+            >
+                <Typography
+                    variant="subtitle1"
+                    sx={{
+                        fontWeight: 600,
+                        mb: 1,
+                        color: theme.palette.surface.panelTitle,
+                    }}
+                >
+                    My Account
+                </Typography>
+
+                <Box
+                    sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        py: 3,
+                        gap: 2,
+                    }}
+                >
                     {user.photoURL ? (
-                        <img
+                        <Avatar
                             src={user.photoURL}
                             alt={`${user.displayName || "User"}'s avatar`}
-                            className="w-24 h-24 rounded-full shadow-md object-cover"
+                            sx={{ width: 96, height: 96, boxShadow: 3 }}
                         />
                     ) : (
-                        <div className="account-avatar-fallback w-24 h-24 rounded-full flex items-center justify-center font-bold text-3xl shadow-md">
+                        <Avatar
+                            sx={{
+                                width: 96,
+                                height: 96,
+                                boxShadow: 3,
+                                fontSize: "1.875rem",
+                                fontWeight: 700,
+                                bgcolor: theme.palette.surface.avatarBg,
+                                color: theme.palette.surface.avatarText,
+                            }}
+                        >
                             {(user.displayName || user.email || "?")[0].toUpperCase()}
-                        </div>
+                        </Avatar>
                     )}
 
-                    <div className="text-center">
-                        <h3 className="text-xl font-semibold">{user.displayName || "User"}</h3>
-                        <p className="themed-text-muted">{user.email}</p>
-                    </div>
-                </div>
+                    <Box sx={{ textAlign: "center" }}>
+                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                            {user.displayName || "User"}
+                        </Typography>
+                        <Typography color="text.secondary">{user.email}</Typography>
+                    </Box>
+                </Box>
 
-                <div className="themed-divider mt-4 flex flex-col gap-3 border-t pt-6">
-                    <button onClick={onLogout} className="account-button-secondary">
+                <Divider sx={{ mt: 2 }} />
+
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, pt: 3 }}>
+                    <Button fullWidth variant="outlined" onClick={onLogout}>
                         Sign Out
-                    </button>
-                    <button onClick={onDelete} className="account-button-danger">
+                    </Button>
+                    <Button fullWidth variant="outlined" color="error" onClick={onDelete}>
                         Delete Account
-                    </button>
-                </div>
-            </section>
-        </div>
+                    </Button>
+                </Box>
+            </Paper>
+        </Box>
     );
 }

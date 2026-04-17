@@ -1,7 +1,8 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { DepartureList } from "./DepartureList";
 import { Departure } from "../types/sl";
+import { renderWithTheme } from "../test/renderWithTheme";
 
 const departureFixture: Departure = {
     direction: "Centralen",
@@ -31,18 +32,20 @@ const departureFixture: Departure = {
 };
 
 describe("DepartureList", () => {
-    it("uses app-style hover class for departure rows", () => {
-        render(<DepartureList departures={[departureFixture]} onSelectDeparture={vi.fn()} />);
+    it("renders departure rows as clickable buttons", () => {
+        renderWithTheme(
+            <DepartureList departures={[departureFixture]} onSelectDeparture={vi.fn()} />
+        );
 
         const departureRow = screen.getByRole("button", { name: /BUS 4 to Centralen/i });
-        expect(departureRow).toHaveClass("themed-hover-surface");
+        expect(departureRow).toBeInTheDocument();
     });
 
-    it("uses app-style surface class for transport mode header", () => {
-        render(<DepartureList departures={[departureFixture]} onSelectDeparture={vi.fn()} />);
+    it("renders transport mode header", () => {
+        renderWithTheme(
+            <DepartureList departures={[departureFixture]} onSelectDeparture={vi.fn()} />
+        );
         const modeLabels = screen.getAllByText("BUS");
-        const headerLabel = modeLabels.find((element) => element.className.includes("text-xs"));
-        expect(headerLabel).toBeDefined();
-        expect(headerLabel).toHaveClass("themed-surface-subtle");
+        expect(modeLabels.length).toBeGreaterThan(0);
     });
 });

@@ -1,7 +1,8 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { RouteDetailsPage } from "./RouteDetailsPage";
 import { DelaySummary } from "../types/historicalDelay";
+import { renderWithTheme } from "../test/renderWithTheme";
 
 const routeSummaryFixture: DelaySummary = {
     key: "route-1",
@@ -20,8 +21,8 @@ const routeSummaryFixture: DelaySummary = {
 };
 
 describe("RouteDetailsPage", () => {
-    it("uses themed text class for unique trips count", () => {
-        render(
+    it("renders unique trips count", () => {
+        renderWithTheme(
             <RouteDetailsPage
                 routeSummary={routeSummaryFixture}
                 selectedEventType="departure"
@@ -31,6 +32,6 @@ describe("RouteDetailsPage", () => {
             />
         );
 
-        expect(screen.getByText("14 unique trips")).toHaveClass("themed-text");
+        expect(screen.getByText("14 unique trips")).toBeInTheDocument();
     });
 });

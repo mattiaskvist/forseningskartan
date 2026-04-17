@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Button } from "@mui/material";
+import { Button, Box, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { Departure } from "../types/sl";
@@ -10,11 +11,11 @@ import { DelaySummary } from "../types/historicalDelay";
 
 dayjs.extend(utc);
 
-function renderDetailRow(label: string, value: string) {
+function DetailRow({ label, value }: { label: string; value: string }) {
     return (
-        <div key={label} className="py-1">
-            <p className="themed-text-muted text-xs">{label}</p>
-            <p className="themed-text text-sm">{value}</p>
+        <div className="py-1">
+            <Typography sx={{ fontSize: "0.75rem", color: "text.secondary" }}>{label}</Typography>
+            <Typography sx={{ fontSize: "0.875rem", color: "text.primary" }}>{value}</Typography>
         </div>
     );
 }
@@ -44,6 +45,7 @@ export function DepartureDetails({
     onDatePresetChange,
     onCustomDateChange,
 }: DepartureDetailsProps) {
+    const theme = useTheme();
     const [selectedEventType, setSelectedEventType] = useState<EventType>("departure");
 
     const selectedDepartureDate = dayjs(departure.expected ?? departure.scheduled).utc();
@@ -52,32 +54,42 @@ export function DepartureDetails({
         ? selectedDepartureDate.hour()
         : dayjs().utc().hour();
 
-    const detailRows = [
-        renderDetailRow("Planned departure", formatTime(departure.scheduled)),
-        renderDetailRow(
-            "Expected departure",
-            formatTime(departure.expected ?? departure.scheduled)
-        ),
-        renderDetailRow("Delay", formatDelay(getDelayMinutes(departure))),
-        renderDetailRow(
-            "Stop",
-            `${departure.stop_area.name} ${departure.stop_point.designation ?? ""}`
-        ),
-    ];
-
     return (
         <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-                <p className="themed-text text-m font-semibold">
+                <Typography sx={{ fontWeight: 600, color: "text.primary" }}>
                     {departure.line.transport_mode}{" "}
                     {departure.line.designation ?? departure.line.id} -{" "}
                     {departure.destination ?? departure.direction}
-                </p>
+                </Typography>
                 <Button variant="text" size="small" onClick={onBackToList}>
                     Back
                 </Button>
             </div>
-            <div className="themed-divider divide-y rounded border px-3 py-1">{detailRows}</div>
+            <Box
+                sx={{
+                    border: 1,
+                    borderColor: theme.palette.surface.panelBorder,
+                    borderRadius: 1,
+                    px: 1.5,
+                    py: 0.5,
+                    "& > div:not(:last-child)": {
+                        borderBottom: 1,
+                        borderColor: theme.palette.surface.panelBorder,
+                    },
+                }}
+            >
+                <DetailRow label="Planned departure" value={formatTime(departure.scheduled)} />
+                <DetailRow
+                    label="Expected departure"
+                    value={formatTime(departure.expected ?? departure.scheduled)}
+                />
+                <DetailRow label="Delay" value={formatDelay(getDelayMinutes(departure))} />
+                <DetailRow
+                    label="Stop"
+                    value={`${departure.stop_area.name} ${departure.stop_point.designation ?? ""}`}
+                />
+            </Box>
             <DepartureHistoricalDelays
                 availableDates={availableDates}
                 selectedDelayDates={selectedDelayDates}

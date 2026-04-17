@@ -1,3 +1,5 @@
+import { Typography } from "@mui/material";
+
 type RouteDelayInfoViewProps = {
     selectedDateText: string;
     routesInfoText: string;
@@ -10,9 +12,20 @@ export function RouteDelayInfoView({
     isRouteDetailsOpen,
 }: RouteDelayInfoViewProps) {
     return (
-        <div className="themed-text-muted flex flex-wrap items-center justify-between gap-2 text-xs">
+        <Typography
+            component="div"
+            sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 1,
+                fontSize: "0.75rem",
+                color: "text.secondary",
+            }}
+        >
             {selectedDateText}
             {!isRouteDetailsOpen ? <p>{routesInfoText}</p> : null}
-        </div>
+        </Typography>
     );
 }

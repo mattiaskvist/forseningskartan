@@ -1,10 +1,15 @@
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import Pagination from "@mui/material/Pagination";
-import Select from "@mui/material/Select";
+import {
+    Box,
+    Typography,
+    FormControl,
+    InputLabel,
+    MenuItem,
+    Pagination,
+    Select,
+} from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material/Select";
+import { useTheme } from "@mui/material/styles";
 import { PageSizeOption, PageSizeOptions, RouteDelayListItem } from "../types/routeDelays";
 import { getDelayTextColorClass } from "../utils/time";
 
@@ -27,6 +32,8 @@ export function RouteDelayRoutesView({
     onPageChange,
     onRoutesPerPageChange,
 }: RouteDelayRoutesViewProps) {
+    const theme = useTheme();
+
     function getRouteListItemCB(routeItem: RouteDelayListItem) {
         const { id, label, avgDelayMinutes, uniqueTrips } = routeItem;
 
@@ -36,25 +43,42 @@ export function RouteDelayRoutesView({
 
         return (
             <li key={id}>
-                <button
+                <Box
+                    component="button"
                     type="button"
-                    className={`w-full rounded border p-2 text-left transition 
-                        themed-divider hover:opacity-90
-                        flex items-center justify-between`}
                     onClick={handleClickACB}
+                    sx={{
+                        width: "100%",
+                        borderRadius: 1,
+                        border: 1,
+                        borderColor: theme.palette.surface.panelBorder,
+                        p: 1,
+                        textAlign: "left",
+                        transition: "opacity 150ms",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        bgcolor: "transparent",
+                        cursor: "pointer",
+                        "&:hover": { opacity: 0.9 },
+                    }}
                 >
                     <div>
-                        <p className="themed-text text-sm font-semibold">{label}</p>
-                        <p className="themed-text-muted text-xs">
+                        <Typography
+                            sx={{ fontSize: "0.875rem", fontWeight: 600, color: "text.primary" }}
+                        >
+                            {label}
+                        </Typography>
+                        <Typography sx={{ fontSize: "0.75rem", color: "text.secondary" }}>
                             Average delay:{" "}
                             <span className={getDelayTextColorClass(avgDelayMinutes)}>
                                 {avgDelayMinutes} min
                             </span>
                             , {uniqueTrips} unique trips
-                        </p>
+                        </Typography>
                     </div>
                     <ArrowForwardIosIcon className="mr-2" />
-                </button>
+                </Box>
             </li>
         );
     }
@@ -105,9 +129,18 @@ export function RouteDelayRoutesView({
             </div>
 
             {pagedRouteItems.length === 0 ? (
-                <p className="themed-divider themed-text-muted rounded border p-3 text-sm">
+                <Typography
+                    sx={{
+                        border: 1,
+                        borderColor: theme.palette.surface.panelBorder,
+                        borderRadius: 1,
+                        p: 1.5,
+                        fontSize: "0.875rem",
+                        color: "text.secondary",
+                    }}
+                >
                     No routes match the selected filters.
-                </p>
+                </Typography>
             ) : (
                 <ul className="space-y-2">{pagedRouteItems.map(getRouteListItemCB)}</ul>
             )}

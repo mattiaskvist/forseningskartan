@@ -1,10 +1,47 @@
+import { Box, Paper, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+
 export function LoginView() {
+    const theme = useTheme();
+
     return (
-        <div className="page-shell pt-20">
-            <section className="overlay-panel w-full max-w-md">
-                <h2 className="overlay-panel-title text-center text-2xl mb-6">Sign In</h2>
+        <Box
+            sx={{
+                display: "flex",
+                height: "100vh",
+                width: "100%",
+                alignItems: "flex-start",
+                justifyContent: "center",
+                overflowY: "auto",
+                p: 4,
+                pt: 10,
+                bgcolor: "background.default",
+                color: "text.primary",
+            }}
+        >
+            <Paper
+                variant="outlined"
+                sx={{
+                    width: "100%",
+                    maxWidth: "28rem",
+                    p: 3,
+                    borderRadius: 2,
+                    backdropFilter: "blur(4px)",
+                }}
+            >
+                <Typography
+                    variant="h5"
+                    sx={{
+                        fontWeight: 600,
+                        textAlign: "center",
+                        mb: 3,
+                        color: theme.palette.surface.panelTitle,
+                    }}
+                >
+                    Sign In
+                </Typography>
                 <div id="firebaseui-auth-container" className="pt-2 pb-4"></div>
-            </section>
-        </div>
+            </Paper>
+        </Box>
     );
 }

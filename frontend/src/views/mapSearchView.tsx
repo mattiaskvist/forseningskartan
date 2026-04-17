@@ -1,3 +1,4 @@
+import { Paper } from "@mui/material";
 import { SearchBar } from "../components/SearchBar";
 import { Site } from "../types/sl";
 
@@ -9,12 +10,24 @@ type MapSearchViewProps = {
 
 export function MapSearchView({ sites, selectedSite, handleSelectSiteCB }: MapSearchViewProps) {
     return (
-        <div className="overlay-panel absolute left-18 top-4 z-[1000] w-[min(420px,calc(100vw-2rem))] p-2">
+        <Paper
+            variant="outlined"
+            sx={{
+                position: "absolute",
+                left: 72,
+                top: 16,
+                zIndex: 1000,
+                width: "min(420px, calc(100vw - 2rem))",
+                p: 1,
+                borderRadius: 2,
+                backdropFilter: "blur(4px)",
+            }}
+        >
             <SearchBar
                 sites={sites}
                 selectedSite={selectedSite}
                 handleSelectSiteCB={handleSelectSiteCB}
             />
-        </div>
+        </Paper>
     );
 }

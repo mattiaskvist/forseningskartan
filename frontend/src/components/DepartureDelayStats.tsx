@@ -1,3 +1,4 @@
+import { Typography } from "@mui/material";
 import { DelaySummary } from "../types/historicalDelay";
 import { EventType } from "../types/departureDelay";
 
@@ -32,7 +33,11 @@ type DepartureDelayStatsProps = {
 
 export function DepartureDelayStats({ routeSummary, selectedEventType }: DepartureDelayStatsProps) {
     if (!routeSummary) {
-        return <p className="themed-text-muted text-sm">No route delay data found.</p>;
+        return (
+            <Typography sx={{ fontSize: "0.875rem", color: "text.secondary" }}>
+                No route delay data found.
+            </Typography>
+        );
     }
     const delayedStats = statsMap[selectedEventType].delay(routeSummary);
     const aheadStats = statsMap[selectedEventType].ahead(routeSummary);
@@ -41,28 +46,28 @@ export function DepartureDelayStats({ routeSummary, selectedEventType }: Departu
 
     return (
         <div className="space-y-2">
-            <p className="themed-text text-lg font-semibold">
+            <Typography sx={{ fontSize: "1.125rem", fontWeight: 600, color: "text.primary" }}>
                 {eventCount} {selectedEventType === "departure" ? "departures" : "arrivals"}, on
                 time {pluralize(onTimeCount, "time")}
-            </p>
-            <p className="themed-text text-sm">
+            </Typography>
+            <Typography sx={{ fontSize: "0.875rem", color: "text.primary" }}>
                 <span className="font-medium text-red-600">
                     Delayed: {pluralize(delayedStats.count, "time")}
                 </span>
                 , on average by{" "}
-                <span className="themed-text font-medium">
+                <Typography component="span" sx={{ fontWeight: 500, color: "text.primary" }}>
                     {pluralize(Number((delayedStats.avgSeconds / 60).toFixed(1)), "minute")}
-                </span>
-            </p>
-            <p className="themed-text text-sm">
+                </Typography>
+            </Typography>
+            <Typography sx={{ fontSize: "0.875rem", color: "text.primary" }}>
                 <span className="font-medium text-green-600">
                     Ahead: {pluralize(aheadStats.count, "time")}
                 </span>
                 , on average by{" "}
-                <span className="themed-text font-medium">
+                <Typography component="span" sx={{ fontWeight: 500, color: "text.primary" }}>
                     {pluralize(Number((aheadStats.avgSeconds / 60).toFixed(1)), "minute")}
-                </span>
-            </p>
+                </Typography>
+            </Typography>
         </div>
     );
 }

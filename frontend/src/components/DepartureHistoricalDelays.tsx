@@ -1,3 +1,5 @@
+import { Box, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { DelaySummary } from "../types/historicalDelay";
 import { DatePreset, EventType, getPresetDescription } from "../types/departureDelay";
 import { DepartureDelayControls } from "./DepartureDelayControls";
@@ -31,9 +33,13 @@ export function DepartureHistoricalDelays({
     isLoadingData,
     routeSummary,
 }: DepartureHistoricalDelaysProps) {
+    const theme = useTheme();
+
     return (
         <div className="flex flex-col gap-2">
-            <p className="themed-text text-sm font-semibold">Historical delays</p>
+            <Typography sx={{ fontSize: "0.875rem", fontWeight: 600, color: "text.primary" }}>
+                Historical delays
+            </Typography>
             <DepartureDelayControls
                 availableDates={availableDates}
                 selectedDatePreset={selectedDatePreset}
@@ -44,10 +50,17 @@ export function DepartureHistoricalDelays({
                 onEventTypeChange={onEventTypeChange}
             />
 
-            <div className="themed-divider rounded border p-2">
-                <p className="themed-text-muted text-xs">
+            <Box
+                sx={{
+                    border: 1,
+                    borderColor: theme.palette.surface.panelBorder,
+                    borderRadius: 1,
+                    p: 1,
+                }}
+            >
+                <Typography sx={{ fontSize: "0.75rem", color: "text.secondary" }}>
                     {getPresetDescription(selectedDelayDates, selectedDepartureHourUTC)}
-                </p>
+                </Typography>
                 {isLoadingData ? (
                     <Suspense message="Loading historical delay stats..." />
                 ) : (
@@ -58,7 +71,7 @@ export function DepartureHistoricalDelays({
                         />
                     </div>
                 )}
-            </div>
+            </Box>
         </div>
     );
 }

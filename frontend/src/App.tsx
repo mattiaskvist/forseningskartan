@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { Routes, Route } from "react-router-dom";
-import { CssBaseline } from "@mui/material";
+import { CssBaseline, Box } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { getAggregatedDates, getSites, getStopPoints } from "./store/actions";
 import { useAppDispatch, useAppSelector } from "./store/store";
@@ -12,13 +12,11 @@ import { GlobalSnackbarPresenter } from "./presenters/globalSnackbarPresenter";
 import { ROUTES, type RouteConfig } from "./routes";
 import { getAppStylePreferenceCB } from "./store/selectors";
 import { createAppMuiTheme } from "./theme/muiTheme";
-import { getAppStyleCssVariables } from "./theme/appStyleTheme";
 
 function App() {
     const dispatch = useAppDispatch();
     const appStyle = useAppSelector(getAppStylePreferenceCB);
     const muiTheme = useMemo(() => createAppMuiTheme(appStyle), [appStyle]);
-    const appStyleVariables = useMemo(() => getAppStyleCssVariables(appStyle), [appStyle]);
 
     // Fetch sites, stop points, and aggregated dates on app load
     useEffect(() => {
@@ -39,9 +37,9 @@ function App() {
     return (
         <ThemeProvider theme={muiTheme}>
             <CssBaseline />
-            <div
-                style={appStyleVariables}
-                className="app-shell relative h-screen w-screen overflow-hidden"
+            <Box
+                className="relative h-screen w-screen overflow-hidden"
+                sx={{ bgcolor: "background.default", color: "text.primary" }}
             >
                 <SidebarPresenter />
                 <Routes>
@@ -50,7 +48,7 @@ function App() {
                     <Route path="/account" element={<AccountPresenter />} />
                 </Routes>
                 <GlobalSnackbarPresenter />
-            </div>
+            </Box>
         </ThemeProvider>
     );
 }
