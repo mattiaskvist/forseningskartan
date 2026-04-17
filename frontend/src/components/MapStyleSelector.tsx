@@ -1,3 +1,5 @@
+import { type MouseEvent } from "react";
+import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { AppStyle, appStyles } from "../types/appStyle";
 
 type MapStyleSelectorProps = {
@@ -6,26 +8,29 @@ type MapStyleSelectorProps = {
 };
 
 export function MapStyleSelector({ appStyle, setAppStyle }: MapStyleSelectorProps) {
-    function getMapStyleButtonCB(style: AppStyle) {
-        function setMapStyleACB() {
-            setAppStyle(style);
+    function handleStyleChangeACB(_: MouseEvent<HTMLElement>, nextStyle: AppStyle | null) {
+        if (nextStyle) {
+            setAppStyle(nextStyle);
         }
-        const isActive = appStyle === style;
+    }
 
+    function getMapStyleButtonCB(style: AppStyle) {
         return (
-            <button
-                key={style}
-                onClick={setMapStyleACB}
-                className={`style-selector-button ${isActive ? "style-selector-button-active" : ""}`}
-            >
+            <ToggleButton key={style} value={style}>
                 {style}
-            </button>
+            </ToggleButton>
         );
     }
 
     return (
-        <div className="style-selector">
-            <div className="style-selector-buttons">{appStyles.map(getMapStyleButtonCB)}</div>
-        </div>
+        <ToggleButtonGroup
+            size="small"
+            exclusive
+            value={appStyle}
+            onChange={handleStyleChangeACB}
+            aria-label="App style selector"
+        >
+            {appStyles.map(getMapStyleButtonCB)}
+        </ToggleButtonGroup>
     );
 }

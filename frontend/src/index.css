@@ -1,8 +1,7 @@
 @import "tailwindcss";
 @source "./**/*.{ts,tsx,js,jsx}";
 
-:root,
-[data-app-style="Dark"] {
+:root {
     --app-bg: #0f172a;
     --app-text: #e2e8f0;
     --app-text-muted: #94a3b8;
@@ -27,60 +26,6 @@
     --button-danger-text: #fecaca;
     --avatar-bg: rgba(51, 65, 85, 0.95);
     --avatar-text: #f8fafc;
-}
-
-[data-app-style="Light"] {
-    --app-bg: #f1f5f9;
-    --app-text: #0f172a;
-    --app-text-muted: #475569;
-    --panel-bg: rgba(255, 255, 255, 0.95);
-    --panel-border: rgba(148, 163, 184, 0.55);
-    --panel-title: #1e293b;
-    --surface-subtle-bg: #e2e8f0;
-    --surface-hover-bg: #cbd5e1;
-    --nav-hover-bg: #e2e8f0;
-    --nav-hover-text: #0f172a;
-    --nav-active-bg: #dbeafe;
-    --nav-active-text: #1d4ed8;
-    --sidebar-backdrop: rgba(15, 23, 42, 0.2);
-    --button-primary-bg: #2563eb;
-    --button-primary-hover: #1d4ed8;
-    --button-primary-text: #ffffff;
-    --button-secondary-bg: #ffffff;
-    --button-secondary-border: rgba(148, 163, 184, 0.6);
-    --button-secondary-text: #1e293b;
-    --button-danger-bg: #fef2f2;
-    --button-danger-border: #fecaca;
-    --button-danger-text: #dc2626;
-    --avatar-bg: #e2e8f0;
-    --avatar-text: #1e293b;
-}
-
-[data-app-style="Classic"] {
-    --app-bg: #f7f0df;
-    --app-text: #3f2f1f;
-    --app-text-muted: #6b5842;
-    --panel-bg: rgba(255, 248, 230, 0.95);
-    --panel-border: rgba(166, 124, 82, 0.5);
-    --panel-title: #3f2f1f;
-    --surface-subtle-bg: rgba(217, 189, 151, 0.45);
-    --surface-hover-bg: rgba(191, 141, 90, 0.45);
-    --nav-hover-bg: rgba(217, 189, 151, 0.5);
-    --nav-hover-text: #3f2f1f;
-    --nav-active-bg: rgba(191, 141, 90, 0.32);
-    --nav-active-text: #6f3f19;
-    --sidebar-backdrop: rgba(63, 47, 31, 0.3);
-    --button-primary-bg: #8b5e3b;
-    --button-primary-hover: #70492b;
-    --button-primary-text: #fff8e6;
-    --button-secondary-bg: #fff8e6;
-    --button-secondary-border: rgba(166, 124, 82, 0.5);
-    --button-secondary-text: #3f2f1f;
-    --button-danger-bg: rgba(127, 29, 29, 0.08);
-    --button-danger-border: rgba(185, 28, 28, 0.35);
-    --button-danger-text: #991b1b;
-    --avatar-bg: rgba(217, 189, 151, 0.55);
-    --avatar-text: #3f2f1f;
 }
 
 body {
@@ -122,31 +67,6 @@ body {
 
     .themed-hover-surface:hover {
         background-color: var(--surface-hover-bg);
-    }
-
-    .style-selector {
-        @apply rounded-md border p-1;
-        border-color: var(--panel-border);
-        background-color: var(--surface-subtle-bg);
-    }
-
-    .style-selector-buttons {
-        @apply flex items-center gap-1;
-    }
-
-    .style-selector-button {
-        @apply rounded-md px-2 py-1 text-sm font-semibold transition-colors duration-150;
-        color: var(--app-text-muted);
-    }
-
-    .style-selector-button:hover {
-        background-color: var(--surface-hover-bg);
-        color: var(--app-text);
-    }
-
-    .style-selector-button-active {
-        background-color: var(--nav-active-bg);
-        color: var(--nav-active-text);
     }
 
     .overlay-panel {

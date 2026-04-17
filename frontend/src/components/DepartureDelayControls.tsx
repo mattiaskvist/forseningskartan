@@ -57,10 +57,9 @@ export function DepartureDelayControls({
                     onChange={handleDatePresetChangeACB}
                     size="small"
                     value={selectedDatePreset}
+                    className="mt-1"
                 >
-                    <div className="flex flex-wrap gap-0.5 mt-1">
-                        {DatePresets.map(getPresetButtonCB)}
-                    </div>
+                    {DatePresets.map(getPresetButtonCB)}
                 </ToggleButtonGroup>
             </div>
 
@@ -83,11 +82,10 @@ export function DepartureDelayControls({
                         onChange={handleEventTypeChangeACB}
                         size="small"
                         value={selectedEventType}
+                        className="mt-1"
                     >
-                        <div className="flex flex-wrap gap-1 mt-1">
-                            <ToggleButton value="departure">Departure</ToggleButton>
-                            <ToggleButton value="arrival">Arrival</ToggleButton>
-                        </div>
+                        <ToggleButton value="departure">Departure</ToggleButton>
+                        <ToggleButton value="arrival">Arrival</ToggleButton>
                     </ToggleButtonGroup>
                 </div>
             </div>
