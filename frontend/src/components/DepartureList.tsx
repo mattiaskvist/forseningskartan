@@ -3,7 +3,7 @@ import { formatDelay, formatTime, getDelayMinutes, getDelayTextColorClass } from
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ToggleButton from "@mui/material/ToggleButton";
 import { useMemo, useState } from "react";
-import { Card } from "@mui/material";
+import { Card, TextField } from "@mui/material";
 import { FilterToggleButtonGroup } from "./FilterToggleButtonGroup";
 
 type DepartureListProps = {
@@ -28,12 +28,27 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
     }, [departures]);
 
     const [selectedMode, setSelectedMode] = useState<ModeWithOther>(uniqueModes[0] ?? null);
+    const [searchQuery, setSearchQuery] = useState("");
 
     const departuresByMode = useMemo(() => {
         const groupedDepartures = new Map<ModeWithOther, Departure[]>();
 
         for (const departure of departures) {
             const mode = departure.line.transport_mode ?? "OTHER";
+            const destination = departure.destination ?? departure.direction;
+            const line = departure.line.designation ?? `${departure.line.id}`;
+
+            // Filter by search query
+            const normalizedQuery = searchQuery.trim().toLowerCase();
+            if (normalizedQuery) {
+                const matchesDestination =
+                    destination.toLowerCase().includes(normalizedQuery) ?? false;
+                const matchesLine = line.toLowerCase().includes(normalizedQuery) ?? false;
+                // Allow if either destination or line matches query
+                if (!matchesDestination && !matchesLine) {
+                    continue;
+                }
+            }
 
             if (!groupedDepartures.has(mode)) {
                 groupedDepartures.set(mode, []);
@@ -43,7 +58,7 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
         }
 
         return groupedDepartures;
-    }, [departures]);
+    }, [departures, searchQuery]);
 
     function renderDepartureCB(departure: Departure) {
         function handleSelectDepartureACB() {
@@ -100,8 +115,19 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
         );
     }
 
+    function handleSearchChangeACB(e: React.ChangeEvent<HTMLInputElement>) {
+        setSearchQuery(e.target.value);
+    }
+
     return (
         <div className="flex flex-col gap-3">
+            <TextField
+                placeholder="Search by destination or line"
+                variant="outlined"
+                size="small"
+                value={searchQuery}
+                onChange={handleSearchChangeACB}
+            />
             {uniqueModes.length > 0 && selectedMode ? (
                 <FilterToggleButtonGroup
                     options={uniqueModes}
