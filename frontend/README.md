@@ -30,16 +30,16 @@ src/App.tsx                     <- wraps the app in <ThemeProvider>
 
 `muiTheme.ts` defines one MUI `createTheme()` per color mode. Each theme only sets standard MUI palette properties:
 
-| MUI palette property   | What it controls                               |
-| ---------------------- | ---------------------------------------------- |
-| `background.default`   | Page / app background                          |
-| `background.paper`     | Panel, card, and drawer surfaces               |
-| `text.primary`         | Main body text                                 |
-| `text.secondary`       | Muted / secondary text                         |
-| `primary.main`         | Accent color (links, active nav, selected item) |
-| `divider`              | Borders and separators                         |
-| `action.hover`         | Hover backgrounds, subtle surface fills        |
-| `action.selected`      | Active / selected item backgrounds             |
+| MUI palette property | What it controls                                |
+| -------------------- | ----------------------------------------------- |
+| `background.default` | Page / app background                           |
+| `background.paper`   | Panel, card, and drawer surfaces                |
+| `text.primary`       | Main body text                                  |
+| `text.secondary`     | Muted / secondary text                          |
+| `primary.main`       | Accent color (links, active nav, selected item) |
+| `divider`            | Borders and separators                          |
+| `action.hover`       | Hover backgrounds, subtle surface fills         |
+| `action.selected`    | Active / selected item backgrounds              |
 
 No module augmentation or custom palette keys — every color in the app maps to a built-in MUI token.
 

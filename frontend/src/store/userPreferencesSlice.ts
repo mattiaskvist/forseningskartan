@@ -77,8 +77,5 @@ export const userPreferencesSlice = createSlice({
     },
 });
 
-export const {
-    toggleFavoriteSiteId,
-    setAppStylePreference,
-    applyLoadedUserPreferences,
-} = userPreferencesSlice.actions;
+export const { toggleFavoriteSiteId, setAppStylePreference, applyLoadedUserPreferences } =
+    userPreferencesSlice.actions;
