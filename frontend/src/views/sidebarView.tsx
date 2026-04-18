@@ -238,7 +238,7 @@ export function SidebarView({
                         pt: 9,
                     }}
                 >
-                    <img src={favicon} className="w-8 h-8" />
+                    <img src={favicon} alt="" className="w-8 h-8" />
                     <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "text.primary" }}>
                         Förseningskartan
                     </Typography>
