@@ -296,7 +296,7 @@ export function SidebarView({
                         favoriteStops.map(renderFavoriteStopItemCB)
                     )}
 
-                    <Divider sx={{ mt: 4, mb: 1 }} />
+                    <Divider component="li" sx={{ mt: 4, mb: 1 }} />
                     {user ? renderUserItem(user) : renderLoginButton()}
                 </List>
             </Drawer>
