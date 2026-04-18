@@ -68,7 +68,14 @@ export function RouteDelayRoutesView({
                         </Typography>
                         <Typography sx={{ fontSize: "0.75rem", color: "text.secondary" }}>
                             Average delay:{" "}
-                            <Typography component="span" sx={{ fontSize: "inherit", fontWeight: 500, color: getDelayColorToken(avgDelayMinutes) }}>
+                            <Typography
+                                component="span"
+                                sx={{
+                                    fontSize: "inherit",
+                                    fontWeight: 500,
+                                    color: getDelayColorToken(avgDelayMinutes),
+                                }}
+                            >
                                 {avgDelayMinutes} min
                             </Typography>
                             , {uniqueTrips} unique trips
