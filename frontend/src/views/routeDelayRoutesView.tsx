@@ -1,12 +1,16 @@
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import Pagination from "@mui/material/Pagination";
-import Select from "@mui/material/Select";
+import {
+    Box,
+    Typography,
+    FormControl,
+    InputLabel,
+    MenuItem,
+    Pagination,
+    Select,
+} from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import { PageSizeOption, PageSizeOptions, RouteDelayListItem } from "../types/routeDelays";
-import { getDelayTextColorClass } from "../utils/time";
+import { getDelayColorToken } from "../utils/time";
 
 type RouteDelayRoutesViewProps = {
     pagedRouteItems: RouteDelayListItem[];
@@ -36,25 +40,49 @@ export function RouteDelayRoutesView({
 
         return (
             <li key={id}>
-                <button
+                <Box
+                    component="button"
                     type="button"
-                    className={`w-full rounded border p-2 text-left transition 
-                        border-slate-200 hover:border-slate-300 hover:bg-slate-50
-                        flex items-center justify-between`}
                     onClick={handleClickACB}
+                    sx={{
+                        width: "100%",
+                        borderRadius: 1,
+                        border: 1,
+                        borderColor: "divider",
+                        p: 1,
+                        textAlign: "left",
+                        transition: "opacity 150ms",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        bgcolor: "transparent",
+                        cursor: "pointer",
+                        "&:hover": { opacity: 0.9 },
+                    }}
                 >
                     <div>
-                        <p className="text-sm font-semibold text-slate-900">{label}</p>
-                        <p className="text-xs text-slate-600">
+                        <Typography
+                            sx={{ fontSize: "0.875rem", fontWeight: 600, color: "text.primary" }}
+                        >
+                            {label}
+                        </Typography>
+                        <Typography sx={{ fontSize: "0.75rem", color: "text.secondary" }}>
                             Average delay:{" "}
-                            <span className={getDelayTextColorClass(avgDelayMinutes)}>
+                            <Typography
+                                component="span"
+                                sx={{
+                                    fontSize: "inherit",
+                                    fontWeight: 500,
+                                    color: getDelayColorToken(avgDelayMinutes),
+                                }}
+                            >
                                 {avgDelayMinutes} min
-                            </span>
+                            </Typography>
                             , {uniqueTrips} unique trips
-                        </p>
+                        </Typography>
                     </div>
                     <ArrowForwardIosIcon className="mr-2" />
-                </button>
+                </Box>
             </li>
         );
     }
@@ -105,9 +133,18 @@ export function RouteDelayRoutesView({
             </div>
 
             {pagedRouteItems.length === 0 ? (
-                <p className="rounded border border-slate-200 p-3 text-sm text-slate-500">
+                <Typography
+                    sx={{
+                        border: 1,
+                        borderColor: "divider",
+                        borderRadius: 1,
+                        p: 1.5,
+                        fontSize: "0.875rem",
+                        color: "text.secondary",
+                    }}
+                >
                     No routes match the selected filters.
-                </p>
+                </Typography>
             ) : (
                 <ul className="space-y-2">{pagedRouteItems.map(getRouteListItemCB)}</ul>
             )}

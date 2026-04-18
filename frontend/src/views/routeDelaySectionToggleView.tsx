@@ -25,6 +25,13 @@ export function RouteDelaySectionToggleView({
             fullWidth
             value={selectedSection}
             onChange={handleSectionChangeACB}
+            sx={{
+                flexWrap: "nowrap",
+                gap: 0,
+                "& .MuiToggleButtonGroup-grouped": {
+                    flex: 1,
+                },
+            }}
         >
             <ToggleButton value="routes" sx={{ fontWeight: 600 }}>
                 Routes

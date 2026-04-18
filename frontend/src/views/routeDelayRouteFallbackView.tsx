@@ -1,18 +1,28 @@
+import { Box, Button, Typography } from "@mui/material";
+
 type RouteDelayRouteFallbackViewProps = {
     onBackToRoutes: () => void;
 };
 
 export function RouteDelayRouteFallbackView({ onBackToRoutes }: RouteDelayRouteFallbackViewProps) {
     return (
-        <div className="space-y-3 rounded border border-slate-200 p-4 text-sm text-slate-700">
-            <p>The selected route is no longer available for the current filters.</p>
-            <button
-                type="button"
-                className="rounded border border-slate-300 p-2 font-medium transition hover:bg-slate-50"
-                onClick={onBackToRoutes}
-            >
+        <Box
+            sx={{
+                border: 1,
+                borderColor: "divider",
+                borderRadius: 1,
+                p: 2,
+                display: "flex",
+                flexDirection: "column",
+                gap: 1.5,
+            }}
+        >
+            <Typography sx={{ fontSize: "0.875rem", color: "text.primary" }}>
+                The selected route is no longer available for the current filters.
+            </Typography>
+            <Button variant="outlined" size="small" onClick={onBackToRoutes}>
                 Back to routes
-            </button>
-        </div>
+            </Button>
+        </Box>
     );
 }

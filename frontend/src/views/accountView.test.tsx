@@ -1,12 +1,13 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { AccountView } from "./accountView";
+import { renderWithTheme } from "../test/renderWithTheme";
 
 describe("AccountView", () => {
     it("calls onDelete directly when delete button is clicked", () => {
         const onDelete = vi.fn();
 
-        render(
+        renderWithTheme(
             <AccountView
                 user={{
                     uid: "uid-1",

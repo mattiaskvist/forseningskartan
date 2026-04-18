@@ -2,10 +2,12 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { SidebarView } from "../views/sidebarView";
 import { useAppDispatch, useAppSelector } from "../store/store";
-import { getAuthUserCB, getFavoriteSitesCB } from "../store/selectors";
+import { getAppStylePreferenceCB, getAuthUserCB, getFavoriteSitesCB } from "../store/selectors";
 import { showSnackbar } from "../store/snackbarSlice";
 import { selectSiteCB } from "../store/selection";
 import { logoutCurrentUser } from "../store/authThunks";
+import { AppStyle } from "../types/appStyle";
+import { setAppStylePreference } from "../store/userPreferencesSlice";
 
 export function SidebarPresenter() {
     const [isOpen, setIsOpen] = useState(false);
@@ -14,6 +16,7 @@ export function SidebarPresenter() {
     const location = useLocation();
     const user = useAppSelector(getAuthUserCB);
     const favoriteSites = useAppSelector(getFavoriteSitesCB);
+    const appStyle = useAppSelector(getAppStylePreferenceCB);
 
     function toggleSidebarCB() {
         setIsOpen(!isOpen);
@@ -40,6 +43,10 @@ export function SidebarPresenter() {
         }
     }
 
+    function handleAppStyleChangeACB(style: AppStyle) {
+        dispatch(setAppStylePreference(style));
+    }
+
     return (
         <SidebarView
             isOpen={isOpen}
@@ -50,6 +57,8 @@ export function SidebarPresenter() {
             onNavigate={navigateCB}
             onLogout={handleLogoutACB}
             onSelectFavoriteStop={selectFavoriteStopACB}
+            appStyle={appStyle}
+            onAppStyleChange={handleAppStyleChangeACB}
         />
     );
 }

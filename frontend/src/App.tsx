@@ -1,16 +1,22 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Routes, Route } from "react-router-dom";
+import { CssBaseline, Box } from "@mui/material";
+import { ThemeProvider } from "@mui/material/styles";
 import { getAggregatedDates, getSites, getStopPoints } from "./store/actions";
-import { useAppDispatch } from "./store/store";
+import { useAppDispatch, useAppSelector } from "./store/store";
 import { SidebarPresenter } from "./presenters/sidebarPresenter";
 import { AccountPresenter } from "./presenters/accountPresenter";
 import { LoginPresenter } from "./presenters/loginPresenter";
 import { initializeAuthSync } from "./store/authThunks";
 import { GlobalSnackbarPresenter } from "./presenters/globalSnackbarPresenter";
 import { ROUTES, type RouteConfig } from "./routes";
+import { getAppStylePreferenceCB } from "./store/selectors";
+import { createAppMuiTheme } from "./theme/muiTheme";
 
 function App() {
     const dispatch = useAppDispatch();
+    const appStyle = useAppSelector(getAppStylePreferenceCB);
+    const muiTheme = useMemo(() => createAppMuiTheme(appStyle), [appStyle]);
 
     // Fetch sites, stop points, and aggregated dates on app load
     useEffect(() => {
@@ -29,15 +35,21 @@ function App() {
     }
 
     return (
-        <div className="relative h-screen w-screen overflow-hidden">
-            <SidebarPresenter />
-            <Routes>
-                {ROUTES.map(renderRouteCB)}
-                <Route path="/login" element={<LoginPresenter />} />
-                <Route path="/account" element={<AccountPresenter />} />
-            </Routes>
-            <GlobalSnackbarPresenter />
-        </div>
+        <ThemeProvider theme={muiTheme}>
+            <CssBaseline />
+            <Box
+                className="relative h-screen w-screen overflow-hidden"
+                sx={{ bgcolor: "background.default", color: "text.primary" }}
+            >
+                <SidebarPresenter />
+                <Routes>
+                    {ROUTES.map(renderRouteCB)}
+                    <Route path="/login" element={<LoginPresenter />} />
+                    <Route path="/account" element={<AccountPresenter />} />
+                </Routes>
+                <GlobalSnackbarPresenter />
+            </Box>
+        </ThemeProvider>
     );
 }
 

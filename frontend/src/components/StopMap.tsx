@@ -10,13 +10,13 @@ import {
 } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { Site } from "../types/sl";
-import { MapStyle } from "../types/map";
+import { AppStyle } from "../types/appStyle";
 
 type StopMapProps = {
     sites: Site[];
     selectedSite: Site | null;
     handleSelectSiteCB: (siteId: number | null) => void;
-    mapStyle: MapStyle;
+    appStyle: AppStyle;
 };
 
 const STOCKHOLM_CENTER: [number, number] = [59.3293, 18.0686];
@@ -24,7 +24,7 @@ const STOCKHOLM_ZOOM = 13;
 const SELECTED_SITE_ZOOM = 14;
 const ZOOM_CONTROL_POSITION: ControlPosition = "bottomleft";
 
-const MAP_TILES: Record<MapStyle, { url: string; attribution: string }> = {
+const MAP_TILES: Record<AppStyle, { url: string; attribution: string }> = {
     Dark: {
         url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
         attribution:
@@ -50,13 +50,13 @@ const SELECTED_MARKER_STYLE: CircleMarkerOptions = {
     weight: 2,
 };
 
-function getUnselectedMarkerStyle(mapStyle: MapStyle): CircleMarkerOptions {
-    const UNSELECTED_MARKER_COLOR_BY_STYLE: Record<MapStyle, string> = {
+function getUnselectedMarkerStyle(appStyle: AppStyle): CircleMarkerOptions {
+    const UNSELECTED_MARKER_COLOR_BY_STYLE: Record<AppStyle, string> = {
         Dark: "#38bdf8",
         Light: "#0284c7",
         Classic: "#2563eb",
     };
-    const color = UNSELECTED_MARKER_COLOR_BY_STYLE[mapStyle];
+    const color = UNSELECTED_MARKER_COLOR_BY_STYLE[appStyle];
     return {
         radius: 4,
         color,
@@ -66,11 +66,11 @@ function getUnselectedMarkerStyle(mapStyle: MapStyle): CircleMarkerOptions {
     };
 }
 
-function setMarkerSelectedStyle(marker: CircleMarker, isSelected: boolean, mapStyle: MapStyle) {
-    marker.setStyle(isSelected ? SELECTED_MARKER_STYLE : getUnselectedMarkerStyle(mapStyle));
+function setMarkerSelectedStyle(marker: CircleMarker, isSelected: boolean, appStyle: AppStyle) {
+    marker.setStyle(isSelected ? SELECTED_MARKER_STYLE : getUnselectedMarkerStyle(appStyle));
 }
 
-export function StopMap({ sites, selectedSite, handleSelectSiteCB, mapStyle }: StopMapProps) {
+export function StopMap({ sites, selectedSite, handleSelectSiteCB, appStyle }: StopMapProps) {
     const mapContainerRef = useRef<HTMLDivElement | null>(null);
     const mapRef = useRef<LeafletMap | null>(null);
     const tileLayerRef = useRef<TileLayer | null>(null);
@@ -78,11 +78,11 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB, mapStyle }: S
     const markersBySiteIdRef = useRef<Map<number, CircleMarker>>(new Map());
     const selectedMarkerRef = useRef<CircleMarker | null>(null);
     const selectedSiteIdRef = useRef<number | null>(null);
-    const mapStyleRef = useRef(mapStyle);
+    const mapStyleRef = useRef(appStyle);
 
     useEffect(() => {
-        mapStyleRef.current = mapStyle;
-    }, [mapStyle]);
+        mapStyleRef.current = appStyle;
+    }, [appStyle]);
 
     useEffect(() => {
         if (!mapContainerRef.current || mapRef.current) {
@@ -126,7 +126,7 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB, mapStyle }: S
             return;
         }
 
-        const style = MAP_TILES[mapStyle];
+        const style = MAP_TILES[appStyle];
 
         if (tileLayerRef.current) {
             tileLayerRef.current.removeFrom(map);
@@ -138,7 +138,7 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB, mapStyle }: S
         });
         tileLayer.addTo(map);
         tileLayerRef.current = tileLayer;
-    }, [mapStyle]);
+    }, [appStyle]);
 
     // Update markers when sites change
     useEffect(() => {
@@ -178,10 +178,10 @@ export function StopMap({ sites, selectedSite, handleSelectSiteCB, mapStyle }: S
     useEffect(() => {
         const selectedSiteId = selectedSiteIdRef.current;
         function setMarkerStyleCB(marker: CircleMarker, siteId: number) {
-            setMarkerSelectedStyle(marker, siteId === selectedSiteId, mapStyle);
+            setMarkerSelectedStyle(marker, siteId === selectedSiteId, appStyle);
         }
         markersBySiteIdRef.current.forEach(setMarkerStyleCB);
-    }, [mapStyle]);
+    }, [appStyle]);
 
     useEffect(() => {
         if (!mapRef.current) {

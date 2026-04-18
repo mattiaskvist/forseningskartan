@@ -9,7 +9,7 @@ import {
     getDeparturesCB,
     getDeparturesLoadingCB,
     getFavoriteSiteIdsCB,
-    getMapStylePreferenceCB,
+    getAppStylePreferenceCB,
     getSelectedCustomDateCB,
     getSelectedDatePresetCB,
     getSelectedDelayDatesCB,
@@ -29,9 +29,9 @@ import {
 } from "../store/reducers";
 import { Departure } from "../types/sl";
 import { DatePreset } from "../types/departureDelay";
+import { AppStyle } from "../types/appStyle";
 import { DepartureViewProps } from "../views/departureView";
-import { setMapStylePreference, toggleFavoriteSiteId } from "../store/userPreferencesSlice";
-import { MapStyle } from "../types/map";
+import { setAppStylePreference, toggleFavoriteSiteId } from "../store/userPreferencesSlice";
 import { showSnackbar } from "../store/snackbarSlice";
 import { Suspense } from "../components/Suspense";
 import { getUpcomingDepartures } from "../utils/departures";
@@ -50,7 +50,7 @@ export function MapPresenter() {
     const isDepartureHistoricalDelayLoading = useAppSelector(getDepartureHistoricalDelayLoadingCB);
     const user = useAppSelector(getAuthUserCB);
     const favoriteSiteIds = useAppSelector(getFavoriteSiteIdsCB);
-    const mapStyle = useAppSelector(getMapStylePreferenceCB);
+    const appStyle = useAppSelector(getAppStylePreferenceCB);
     const sites = useAppSelector(getSitesCB);
     const isSitesLoading = useAppSelector(getSitesLoadingCB);
     const stopPoints = useAppSelector(getStopPointsCB);
@@ -88,8 +88,8 @@ export function MapPresenter() {
         dispatch(setSelectedCustomDate(date));
     }
 
-    function setMapStyleACB(style: MapStyle) {
-        dispatch(setMapStylePreference(style));
+    function handleAppStyleChangeACB(style: AppStyle) {
+        dispatch(setAppStylePreference(style));
     }
 
     function toggleFavoriteStopACB() {
@@ -148,8 +148,8 @@ export function MapPresenter() {
             selectedSite={selectedSite}
             handleSelectSiteCB={handleSelectSiteCB}
             departureViewProps={departureViewProps}
-            mapStyle={mapStyle}
-            onMapStyleChange={setMapStyleACB}
+            appStyle={appStyle}
+            onAppStyleChange={handleAppStyleChangeACB}
         />
     );
 }

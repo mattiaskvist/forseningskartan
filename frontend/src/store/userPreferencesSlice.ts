@@ -1,14 +1,36 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { MapStyle } from "../types/map";
+import { AppStyle, appStyles } from "../types/appStyle";
+
+const APP_STYLE_STORAGE_KEY = "appStyle";
+
+function getStoredAppStyle(): AppStyle {
+    try {
+        const stored = localStorage.getItem(APP_STYLE_STORAGE_KEY);
+        if (stored && (appStyles as readonly string[]).includes(stored)) {
+            return stored as AppStyle;
+        }
+    } catch {
+        // localStorage unavailable at module init in test environments
+    }
+    return "Dark";
+}
+
+function storeAppStyle(style: AppStyle) {
+    try {
+        localStorage.setItem(APP_STYLE_STORAGE_KEY, style);
+    } catch {
+        // ignore — test environments
+    }
+}
 
 export type UserPreferencesState = {
     favoriteSiteIds: number[];
-    mapStyle: MapStyle;
+    appStyle: AppStyle;
 };
 
 export const defaultUserPreferencesState: UserPreferencesState = {
     favoriteSiteIds: [],
-    mapStyle: "Dark",
+    appStyle: getStoredAppStyle(),
 };
 
 function normalizeFavoriteSiteIds(favoriteSiteIds: number[]): number[] {
@@ -42,15 +64,18 @@ export const userPreferencesSlice = createSlice({
 
             state.favoriteSiteIds.push(siteId);
         },
-        setMapStylePreference: (state, action: PayloadAction<MapStyle>) => {
-            state.mapStyle = action.payload;
+
+        setAppStylePreference: (state, action: PayloadAction<AppStyle>) => {
+            state.appStyle = action.payload;
+            storeAppStyle(action.payload);
         },
         applyLoadedUserPreferences: (state, action: PayloadAction<UserPreferencesState>) => {
             state.favoriteSiteIds = normalizeFavoriteSiteIds(action.payload.favoriteSiteIds);
-            state.mapStyle = action.payload.mapStyle;
+            state.appStyle = action.payload.appStyle;
+            storeAppStyle(action.payload.appStyle);
         },
     },
 });
 
-export const { toggleFavoriteSiteId, setMapStylePreference, applyLoadedUserPreferences } =
+export const { toggleFavoriteSiteId, setAppStylePreference, applyLoadedUserPreferences } =
     userPreferencesSlice.actions;
