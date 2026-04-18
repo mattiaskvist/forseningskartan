@@ -1,5 +1,5 @@
 import { Departure, TransportationMode } from "../types/sl";
-import { formatDelay, formatTime, getDelayMinutes, getDelayTextColorClass } from "../utils/time";
+import { formatDelay, formatTime, getDelayMinutes, getDelayColorToken } from "../utils/time";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ToggleButton from "@mui/material/ToggleButton";
 import { useMemo, useState } from "react";
@@ -107,9 +107,15 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
                         Planned {formatTime(departure.scheduled)} · Predicted{" "}
                         {formatTime(departure.expected ?? departure.scheduled)}
                     </Typography>
-                    <p className={`text-sm font-medium ${getDelayTextColorClass(delayMinutes)}`}>
+                    <Typography
+                        sx={{
+                            fontSize: "0.875rem",
+                            fontWeight: 500,
+                            color: getDelayColorToken(delayMinutes),
+                        }}
+                    >
                         {formatDelay(delayMinutes)}
-                    </p>
+                    </Typography>
                 </div>
                 <ArrowForwardIosIcon className="mr-2" />
             </Box>

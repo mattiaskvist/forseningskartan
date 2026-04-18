@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import { PageSizeOption, PageSizeOptions, RouteDelayListItem } from "../types/routeDelays";
-import { getDelayTextColorClass } from "../utils/time";
+import { getDelayColorToken } from "../utils/time";
 
 type RouteDelayRoutesViewProps = {
     pagedRouteItems: RouteDelayListItem[];
@@ -68,9 +68,9 @@ export function RouteDelayRoutesView({
                         </Typography>
                         <Typography sx={{ fontSize: "0.75rem", color: "text.secondary" }}>
                             Average delay:{" "}
-                            <span className={getDelayTextColorClass(avgDelayMinutes)}>
+                            <Typography component="span" sx={{ fontSize: "inherit", fontWeight: 500, color: getDelayColorToken(avgDelayMinutes) }}>
                                 {avgDelayMinutes} min
-                            </span>
+                            </Typography>
                             , {uniqueTrips} unique trips
                         </Typography>
                     </div>
