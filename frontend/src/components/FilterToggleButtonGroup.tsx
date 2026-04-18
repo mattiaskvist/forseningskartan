@@ -33,8 +33,7 @@ export function FilterToggleButtonGroup<T>({
                 exclusive
                 value={selectedValue}
                 onChange={handleChangeACB}
-                className="mt-1"
-                sx={{ flexWrap: "wrap", gap: 1 }}
+                sx={{ mt: 1 }}
             >
                 {options.map(renderButtonCB)}
             </ToggleButtonGroup>

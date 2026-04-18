@@ -69,7 +69,7 @@ export function DepartureDelayControls({
                     onChange={handleDatePresetChangeACB}
                     size="small"
                     value={selectedDatePreset}
-                    className="mt-1"
+                    sx={{ mt: 1 }}
                 >
                     {DatePresets.map(getPresetButtonCB)}
                 </ToggleButtonGroup>

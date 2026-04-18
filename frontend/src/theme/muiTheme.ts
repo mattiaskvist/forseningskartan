@@ -15,6 +15,18 @@ function createBaseTheme(palette: Parameters<typeof createTheme>[0]): Theme {
                     root: { textTransform: "none", fontWeight: 600 },
                 },
             },
+            // We use ToggleButtonGroups as "chips" that wrap, so they need a gap
+            // and independent borders/radii.
+            MuiToggleButtonGroup: {
+                styleOverrides: {
+                    root: { display: "flex", flexWrap: "wrap", gap: 8 },
+                    grouped: ({ theme }) => ({
+                        margin: 0,
+                        border: `1px solid ${theme.palette.divider} !important`,
+                        borderRadius: "6px !important",
+                    }),
+                },
+            },
             // MUI defaults to UPPERCASE text on toggle buttons.
             MuiToggleButton: {
                 styleOverrides: {
