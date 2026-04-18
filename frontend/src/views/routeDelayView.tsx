@@ -90,7 +90,7 @@ export function RouteDelayView({
                 alignItems: "flex-start",
                 justifyContent: "center",
                 overflowY: "auto",
-                p: 4,
+                p: 2,
                 bgcolor: "background.default",
                 color: "text.primary",
             }}
@@ -100,9 +100,10 @@ export function RouteDelayView({
                 sx={{
                     width: "100%",
                     maxWidth: "48rem",
-                    p: 3,
+                    p: 2.5,
                     borderRadius: 2,
                     backdropFilter: "blur(4px)",
+                    boxShadow: 3,
                 }}
             >
                 <Typography

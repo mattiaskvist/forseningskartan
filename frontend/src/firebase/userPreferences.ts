@@ -20,14 +20,11 @@ export function sanitizeUserPreferences(candidate: unknown): UserPreferencesStat
 
     const parsedCandidate = candidate as {
         appStyle?: unknown;
-        mapStyle?: unknown;
         favoriteSiteIds?: unknown;
     };
     const appStyle = isAppStyle(parsedCandidate.appStyle)
         ? parsedCandidate.appStyle
-        : isAppStyle(parsedCandidate.mapStyle)
-          ? parsedCandidate.mapStyle
-          : defaultUserPreferencesState.appStyle;
+        : defaultUserPreferencesState.appStyle;
     const favoriteSiteIds = Array.isArray(parsedCandidate.favoriteSiteIds)
         ? parsedCandidate.favoriteSiteIds.filter(isIntegerSiteIdCB)
         : [];

@@ -40,7 +40,10 @@ function createBaseTheme(palette: Parameters<typeof createTheme>[0]): Theme {
             MuiOutlinedInput: {
                 styleOverrides: {
                     root: ({ theme }) => ({
-                        backgroundColor: theme.palette.action.hover,
+                        backgroundColor:
+                            theme.palette.mode === "dark"
+                                ? theme.palette.action.hover
+                                : theme.palette.background.paper,
                         "& .MuiOutlinedInput-notchedOutline": {
                             borderColor: theme.palette.divider,
                         },

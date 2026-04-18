@@ -39,6 +39,10 @@ export function RouteDelayControls({
     onTransportationModeChange,
     onSearchQueryChange,
 }: RouteDelayControlsProps) {
+    function getTransportationModeLabel(mode: TransportationMode) {
+        return `${mode.charAt(0)}${mode.slice(1).toLowerCase()}`;
+    }
+
     function getPresetButtonCB(option: DatePreset) {
         return (
             <ToggleButton key={option} value={option}>
@@ -58,7 +62,7 @@ export function RouteDelayControls({
     function getTransportationModeButtonCB(mode: TransportationMode) {
         return (
             <ToggleButton key={mode} value={mode}>
-                {mode}
+                {getTransportationModeLabel(mode)}
             </ToggleButton>
         );
     }

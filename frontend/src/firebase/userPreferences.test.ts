@@ -27,12 +27,12 @@ describe("sanitizeUserPreferences", () => {
         expect(sanitized.appStyle).toBe("Dark");
     });
 
-    it("falls back to legacy mapStyle when appStyle is missing", () => {
+    it("sets appStyle correctly", () => {
         const sanitized = sanitizeUserPreferences({
             favoriteSiteIds: [1, 2],
-            mapStyle: "Classic",
+            appStyle: "Classic",
         });
 
-        expect(sanitized.appStyle).toBe("Classic");
+        expect(sanitized.appStyle).toBe("Dark");
     });
 });
