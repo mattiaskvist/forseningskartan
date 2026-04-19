@@ -38,6 +38,30 @@ The following work is still planned:
 
 For an up-to-date list of planned work, please visit [the project board and roadmap](https://github.com/users/mattiaskvist/projects/5).
 
+## Prototyping Stage User Consultation (2026-03-21)
+
+To satisfy the prototyping-stage user consultation requirement, a documented user consultation was carried out and recorded in [Issue #30](https://github.com/mattiaskvist/forseningskartan/issues/30).
+
+### Feedback received
+
+The consultation produced the following suggestions:
+
+1. Show where delays happen on the map, for example with lines drawn on specific streets where delays happen due to traffic etc.
+2. Unclear that departures in departure list can be selected, add an arrow to show that.
+3. Would be good to see the route of the bus/train/metro when a departure is selected, see where it goes and to what stops on the map.
+4. The departure list can be long, group departures by mode of transport in departure list and allow filtering.
+
+### Addressing feedback
+
+1. Quite difficult to implement, added as a stretch goal [Issue #44: Show where delays happen on the map](https://github.com/mattiaskvist/forseningskartan/issues/44).
+2. Addressed in [Issue #43: Addressing feedback from prototyping stage user consultation](https://github.com/mattiaskvist/forseningskartan/issues/43).
+3. Was already an idea to implement in [Issue #12: Get live vehicle position and draw route on map](https://github.com/mattiaskvist/forseningskartan/issues/12).
+4. Addressed in [Issue #43: Addressing feedback from prototyping stage user consultation](https://github.com/mattiaskvist/forseningskartan/issues/43).
+
+## Evaluation stage user consultation
+
+TODO, https://github.com/mattiaskvist/forseningskartan/issues/31
+
 ## Project file structure
 
 Directory overview:
