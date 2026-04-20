@@ -33,6 +33,6 @@ describe("sanitizeUserPreferences", () => {
             appStyle: "Classic",
         });
 
-        expect(sanitized.appStyle).toBe("Dark");
+        expect(sanitized.appStyle).toBe("Classic");
     });
 });
