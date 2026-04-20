@@ -1,13 +1,18 @@
 import { type MouseEvent } from "react";
-import { ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { Paper, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { AppStyle, appStyles } from "../types/appStyle";
 
 type AppStyleSelectorProps = {
     appStyle: AppStyle;
     setAppStyle: (style: AppStyle) => void;
+    isQuickOverlay?: boolean;
 };
 
-export function AppStyleSelector({ appStyle, setAppStyle }: AppStyleSelectorProps) {
+export function AppStyleSelector({
+    appStyle,
+    setAppStyle,
+    isQuickOverlay = false,
+}: AppStyleSelectorProps) {
     function handleStyleChangeACB(_: MouseEvent<HTMLElement>, nextStyle: AppStyle | null) {
         if (nextStyle) {
             setAppStyle(nextStyle);
@@ -22,7 +27,7 @@ export function AppStyleSelector({ appStyle, setAppStyle }: AppStyleSelectorProp
         );
     }
 
-    return (
+    const toggleGroup = (
         <ToggleButtonGroup
             size="small"
             exclusive
@@ -32,5 +37,26 @@ export function AppStyleSelector({ appStyle, setAppStyle }: AppStyleSelectorProp
         >
             {appStyles.map(getAppStyleButtonCB)}
         </ToggleButtonGroup>
+    );
+
+    if (!isQuickOverlay) {
+        return toggleGroup;
+    }
+
+    // wrap in Paper with backdrop blur and shadow for better visibility
+    // used when the selector is overlaid on the map, to ensure it stands out against the map background
+    return (
+        <Paper
+            variant="outlined"
+            sx={{
+                p: 0.5,
+                borderRadius: 1.5,
+                bgcolor: "background.paper",
+                backdropFilter: "blur(4px)",
+                boxShadow: 4,
+            }}
+        >
+            {toggleGroup}
+        </Paper>
     );
 }

@@ -37,7 +37,7 @@ describe("DepartureList", () => {
             <DepartureList departures={[departureFixture]} onSelectDeparture={vi.fn()} />
         );
 
-        const departureRow = screen.getByRole("button", { name: /BUS 4 to Centralen/i });
+        const departureRow = screen.getByRole("button", { name: /Bus 4 to Centralen/i });
         expect(departureRow).toBeInTheDocument();
     });
 
@@ -45,7 +45,7 @@ describe("DepartureList", () => {
         renderWithTheme(
             <DepartureList departures={[departureFixture]} onSelectDeparture={vi.fn()} />
         );
-        const modeLabels = screen.getAllByText("BUS");
+        const modeLabels = screen.getAllByText("Bus");
         expect(modeLabels.length).toBeGreaterThan(0);
     });
 });

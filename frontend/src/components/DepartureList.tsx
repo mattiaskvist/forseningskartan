@@ -14,6 +14,10 @@ type DepartureListProps = {
 type ModeWithOther = TransportationMode | "OTHER";
 
 export function DepartureList({ departures, onSelectDeparture }: DepartureListProps) {
+    function getModeLabel(mode: ModeWithOther) {
+        return `${mode.charAt(0)}${mode.slice(1).toLowerCase()}`;
+    }
+
     const uniqueModes = useMemo(() => {
         const modes = new Set<ModeWithOther>();
 
@@ -66,7 +70,8 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
         }
 
         const destination = departure.destination ?? departure.direction;
-        const transportMode = departure.line.transport_mode ?? "-";
+        const transportMode = departure.line.transport_mode;
+        const transportModeLabel = transportMode ? getModeLabel(transportMode) : "-";
         const line = departure.line.designation ?? `${departure.line.id}`;
         const departureKey = `${departure.journey.id}-${departure.scheduled}-${departure.stop_point.id}`;
         const delayMinutes = getDelayMinutes(departure);
@@ -101,7 +106,7 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
                     <Typography
                         sx={{ fontSize: "0.875rem", fontWeight: 600, color: "text.primary" }}
                     >
-                        {transportMode} {line} to {destination}
+                        {transportModeLabel} {line} to {destination}
                     </Typography>
                     <Typography sx={{ fontSize: "0.875rem", color: "text.primary" }}>
                         Planned {formatTime(departure.scheduled)} · Predicted{" "}
@@ -138,7 +143,7 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
                         color: "text.primary",
                     }}
                 >
-                    {mode}
+                    {getModeLabel(mode)}
                 </Box>
                 {modeDepartures.map(renderDepartureCB)}
             </Card>
@@ -148,7 +153,7 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
     function renderModeButtonCB(mode: ModeWithOther) {
         return (
             <ToggleButton key={mode} value={mode}>
-                {mode}
+                {getModeLabel(mode)}
             </ToggleButton>
         );
     }

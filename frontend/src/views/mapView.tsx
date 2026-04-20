@@ -39,17 +39,30 @@ export function MapView({
                     top: 16,
                     zIndex: 1000,
                     maxWidth: "calc(100vw - 2rem)",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-end",
-                    gap: 1,
                     pointerEvents: "auto",
                 }}
             >
-                <AppStyleSelector appStyle={appStyle} setAppStyle={onAppStyleChange} />
-                {departureViewProps && (
-                    <MapDeparturesPanelView departureViewProps={departureViewProps} />
-                )}
+                <Box
+                    sx={{
+                        display: "flex",
+                        alignItems: { xs: "flex-end", md: "flex-start" },
+                        gap: 1.5,
+                        flexDirection: { xs: "column-reverse", md: "row" },
+                        // ensure child components can receive pointer events
+                        "& > *": {
+                            pointerEvents: "auto",
+                        },
+                    }}
+                >
+                    <AppStyleSelector
+                        appStyle={appStyle}
+                        setAppStyle={onAppStyleChange}
+                        isQuickOverlay
+                    />
+                    {departureViewProps && (
+                        <MapDeparturesPanelView departureViewProps={departureViewProps} />
+                    )}
+                </Box>
             </Box>
             <MapSearchView
                 sites={sites}
