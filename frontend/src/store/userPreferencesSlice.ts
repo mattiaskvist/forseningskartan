@@ -24,14 +24,41 @@ function storeAppStyle(style: AppStyle) {
     }
 }
 
+/** Normalizes recent search ids by:
+ * - requiring an array input
+ * - keeping only integer values
+ * - removing duplicates while preserving first occurrence
+ * - truncating to 5 entries
+ * 
+ * We do this to prevent corrupted data from localStorage causing issues.
+ */
+function normalizeRecentSearchSiteIds(recentSearchSiteIds: unknown): number[] {
+    if (!Array.isArray(recentSearchSiteIds)) {
+        return [];
+    }
+
+    const uniqueRecentSearchSiteIds = new Set<number>();
+
+    for (const siteId of recentSearchSiteIds) {
+        if (!Number.isInteger(siteId) || uniqueRecentSearchSiteIds.has(siteId)) {
+            continue;
+        }
+
+        uniqueRecentSearchSiteIds.add(siteId);
+        if (uniqueRecentSearchSiteIds.size === 5) {
+            break;
+        }
+    }
+
+    return Array.from(uniqueRecentSearchSiteIds);
+}
+
 function getStoredRecentSearchSiteIds(): number[] {
     try {
         const stored = localStorage.getItem(RECENT_SEARCH_STORAGE_KEY);
         if (stored) {
             const parsed = JSON.parse(stored);
-            if (Array.isArray(parsed)) {
-                return parsed;
-            }
+            return normalizeRecentSearchSiteIds(parsed);
         }
     } catch {
         // localStorage unavailable at module init in test environments
@@ -41,7 +68,10 @@ function getStoredRecentSearchSiteIds(): number[] {
 
 export function storeRecentSearchSiteIds(siteIds: number[]) {
     try {
-        localStorage.setItem(RECENT_SEARCH_STORAGE_KEY, JSON.stringify(siteIds));
+        localStorage.setItem(
+            RECENT_SEARCH_STORAGE_KEY,
+            JSON.stringify(normalizeRecentSearchSiteIds(siteIds))
+        );
     } catch {
         // ignore — test environments
     }
@@ -77,27 +107,6 @@ function normalizeFavoriteSiteIds(favoriteSiteIds: number[]): number[] {
     }
 
     return Array.from(uniqueFavoriteSiteIds);
-}
-
-/** Normalizes the recentSearchSiteIds array by:
- * - removing duplicates
- * - keeping only integer values
- * - truncating to 5 entries
- */
-function normalizeRecentSearchSiteIds(recentSearchSiteIds: number[] | undefined): number[] {
-    if (!recentSearchSiteIds) {
-        return [];
-    }
-
-    const uniqueRecentSearchSiteIds = new Set<number>();
-
-    for (const siteId of recentSearchSiteIds) {
-        if (Number.isInteger(siteId)) {
-            uniqueRecentSearchSiteIds.add(siteId);
-        }
-    }
-
-    return Array.from(uniqueRecentSearchSiteIds).slice(0, 5); // keep max 5 recent searches
 }
 
 export const userPreferencesSlice = createSlice({
