@@ -37,6 +37,7 @@ type staticStopInfo struct {
 }
 
 func runStaticRefresh(config Config) error {
+	StartStaticRefresh()
 	if strings.TrimSpace(config.StaticPostgresDSN) == "" {
 		return nil
 	}
@@ -74,6 +75,8 @@ func runStaticRefresh(config Config) error {
 	if err := writer.writeStaticRefresh(ctx, payload); err != nil {
 		return fmt.Errorf("write static refresh to postgres: %w", err)
 	}
+
+	RecordStaticRefreshComplete(len(payload.StopPoints), len(payload.Routes), len(payload.StopPointRoutes))
 
 	fmt.Printf(
 		"Stored static GTFS data in Postgres (%d stop points, %d routes, %d stop-point-route mappings)\n",
