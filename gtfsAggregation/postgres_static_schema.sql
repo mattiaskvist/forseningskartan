@@ -32,8 +32,7 @@ CREATE TABLE IF NOT EXISTS static_feed_refresh_status (
     refreshed_at TIMESTAMPTZ NOT NULL,
     stop_point_count INTEGER NOT NULL,
     route_count INTEGER NOT NULL,
-    stop_point_route_count INTEGER NOT NULL,
-    source_url TEXT NOT NULL
+    stop_point_route_count INTEGER NOT NULL
 );
 
 CREATE INDEX IF NOT EXISTS idx_static_stop_point_routes_stop_point_gid

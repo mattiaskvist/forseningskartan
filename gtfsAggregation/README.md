@@ -31,7 +31,7 @@ https://api.koda.trafiklab.se/KoDa/api/v2/gtfs-static/sl?date=2026-03-01&key={ap
 
 ## Setup
 
-### Step 1: set up a local database
+### Step 1: set up local databases
 
 Install [PostgreSQL](https://www.postgresql.org/download/) and run the following:
 
@@ -39,21 +39,24 @@ Install [PostgreSQL](https://www.postgresql.org/download/) and run the following
 sudo -u postgres psql
 CREATE USER user WITH PASSWORD 'password';
 CREATE DATABASE forseningskartan;
+CREATE DATABASE forseningskartan_static;
 GRANT ALL PRIVILEGES ON DATABASE forseningskartan TO user;
+GRANT ALL PRIVILEGES ON DATABASE forseningskartan_static TO user;
 \q
 ```
 
-### Step 2: create the Postgres schema
+### Step 2: create the Postgres schemas
 
-Run the schema file before running ingestion:
+Run both schema files before running ingestion:
 
 ```bash
-psql "postgres://<user>:<password>@<host>:5432/<database>" -f postgres_schema.sql
+psql "postgres://<user>:<password>@<host>:5432/forseningskartan" -f postgres_schema.sql
+psql "postgres://<user>:<password>@<host>:5432/forseningskartan_static" -f postgres_static_schema.sql
 ```
 
 ## Running the script
 
-There are three ways of running the script:
+There are four ways of running the script:
 
 1. Aggregate the data for a specified date:
 
@@ -67,10 +70,28 @@ go run . -api-key "<koda_api_key>" -date "2026-03-01" -postgres-dsn "postgres://
 go run . -api-key "<koda_api_key>" -postgres-dsn "postgres://<user>:<password>@<host>:5432/<database>" -recent-days 30
 ```
 
-3. Same as 2. but runs as a cronjob with a provided schedule:
+3. Optionally, the recent date mode (2) can be run with a provided static API key for also refreshing the static GTFS data from the [GTFS Regional API](https://www.trafiklab.se/api/gtfs-datasets/gtfs-regional/#static-data). The static data is stored in a separate database and fully replaced on each run:
 
 ```bash
-go run . -api-key "<koda_api_key>" -postgres-dsn "postgres://<user>:<password>@<host>:5432/<database>" -recent-days 30 -cron-schedule "0 6,7,8 * * *"
+go run . \
+	-api-key "<koda_api_key>" \
+	-static-api-key "<static_api_key>" \
+	-postgres-dsn "postgres://<user>:<password>@<host>:5432/forseningskartan" \
+	-static-postgres-dsn "postgres://<user>:<password>@<host>:5432/forseningskartan_static" \
+	-recent-days 30
+```
+
+3. Same as 3. but runs as a cronjob with a provided schedule:
+
+```bash
+go run . \
+	-api-key "<koda_api_key>" \
+	-static-api-key "<static_api_key>" \
+	-postgres-dsn "postgres://<user>:<password>@<host>:5432/forseningskartan" \
+	-static-postgres-dsn "postgres://<user>:<password>@<host>:5432/forseningskartan_static" \
+	-recent-days 30 \
+	-cron-schedule "0 6,7,8 * * *" \
+	-static-cron-schedule "10 6 * * *"
 ```
 
 ## Using the data
