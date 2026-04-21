@@ -4,6 +4,7 @@ import Autocomplete, {
 } from "@mui/material/Autocomplete";
 import { FilterOptionsState } from "@mui/material";
 import TextField from "@mui/material/TextField";
+import HistoryIcon from "@mui/icons-material/History";
 import { Site } from "../types/sl";
 
 const defaultFilterOptions = createFilterOptions<Site>({
@@ -46,24 +47,52 @@ export function SearchBar({
         props: React.HTMLAttributes<HTMLLIElement> & { key: React.Key },
         site: Site
     ) {
+        // check if the site is in the recent search site ids to show a history icon next to it
+        const isRecent = recentSearchSiteIds.includes(site.id);
+
         // customize how options are shown and avoid dupicate key errors
         return (
             <li {...props} key={site.id}>
+                {isRecent && (
+                    <HistoryIcon
+                        fontSize="small"
+                        color="action"
+                        sx={{ marginRight: 1, opacity: 0.7 }}
+                    />
+                )}
                 {site.name}
             </li>
         );
     }
 
+    // prioritize sites that are in the recent search list
+    function compareSitesByRecencyCB(siteA: Site, siteB: Site): number {
+        const aIsRecent = recentSearchSiteIds.includes(siteA.id);
+        const bIsRecent = recentSearchSiteIds.includes(siteB.id);
+        if (aIsRecent && !bIsRecent) return -1;
+        if (!aIsRecent && bIsRecent) return 1;
+        return 0;
+    }
+
     // this custom filter options function checks if the user has typed anything in the search bar,
-    // if not it shows the recent search site ids as suggestions,
+    // if not it shows the recent search site ids as suggestions at the top of the list,
     // otherwise it uses the default filter options function to show matching sites based on the user input
+    // but bubbles up matching recent search sites for a nice user experience
     function customFilterOptionsCB(options: Site[], state: FilterOptionsState<Site>) {
+        let defaultOptions = defaultFilterOptions(options, state);
+
         if (state.inputValue.trim() === "" && recentSearchSiteIds.length > 0) {
-            return recentSearchSiteIds
+            const recentSites = recentSearchSiteIds
                 .map((siteId) => options.find((site) => site.id === siteId))
                 .filter((site): site is Site => !!site);
+
+            const remainingSites = defaultOptions.filter((site) => !recentSites.includes(site)); // avoid duplicates
+            return [...recentSites, ...remainingSites].slice(0, defaultOptions.length); // keep the total number of options within the default limit
         }
-        return defaultFilterOptions(options, state);
+
+        // bubble up recent searches
+        defaultOptions.sort(compareSitesByRecencyCB);
+        return defaultOptions;
     }
 
     return (
