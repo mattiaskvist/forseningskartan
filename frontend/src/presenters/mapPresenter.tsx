@@ -63,6 +63,13 @@ export function MapPresenter() {
     const stopPoints = useAppSelector(getStopPointsCB);
     const isStopPointsLoading = useAppSelector(getStopPointsLoadingCB);
     const routesByStopPoint = useAppSelector(getRoutesByStopPointCB);
+    const siteIdsWithNoDepartures = useMemo(() => {
+        if (!sites || !stopPoints) {
+            return new Set<number>();
+        }
+
+        return getSiteIdsWithNoDepartures(sites, stopPoints, routesByStopPoint);
+    }, [sites, stopPoints, routesByStopPoint]);
 
     const handleSelectSiteCB = useCallback(
         (siteId: number | null) => {
@@ -130,9 +137,6 @@ export function MapPresenter() {
 
     const departures = departureResponse?.departures ?? [];
     const upcomingDepartures = getUpcomingDepartures(departures);
-    const siteIdsWithNoDepartures = useMemo(() => {
-        return getSiteIdsWithNoDepartures(sites, stopPoints, routesByStopPoint);
-    }, [sites, stopPoints, routesByStopPoint]);
 
     const departureViewProps: DepartureViewProps | null = selectedSite
         ? {
