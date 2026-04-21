@@ -39,7 +39,7 @@ export function MapView({
                     top: 16,
                     zIndex: 1000,
                     maxWidth: "calc(100vw - 2rem)",
-                    pointerEvents: "auto",
+                    pointerEvents: "none", // allow clicks to pass through invisible overlay wrapper
                 }}
             >
                 <Box
