@@ -285,3 +285,53 @@ func (s *server) queryRouteDelays(ctx context.Context, dates []string) ([]*delay
 	recordDBQueryResult(queryName, QueryResultSuccess, time.Since(start))
 	return summaries, nil
 }
+
+func (s *server) queryStopPointRoutes(ctx context.Context) (map[string][]*routeMeta, error) {
+	const queryName = "stop_point_routes"
+	start := time.Now()
+
+	query := `
+		SELECT
+			spr.stop_point_gid,
+			COALESCE(sr.short_name, ''),
+			COALESCE(sr.long_name, ''),
+			COALESCE(sr.route_type, '')
+		FROM static_stop_point_routes spr
+		JOIN static_routes sr ON sr.route_id = spr.route_id
+		ORDER BY spr.stop_point_gid, sr.short_name, spr.route_id
+	`
+
+	rows, err := s.staticDB.QueryContext(ctx, query)
+	if err != nil {
+		recordDBQueryResult(queryName, QueryResultError, time.Since(start))
+		return nil, err
+	}
+	defer rows.Close() // nolint: errcheck
+
+	result := make(map[string][]*routeMeta)
+	for rows.Next() {
+		var stopPointGID string
+		var shortName string
+		var longName string
+		var routeType string
+
+		if err := rows.Scan(&stopPointGID, &shortName, &longName, &routeType); err != nil {
+			recordDBQueryResult(queryName, QueryResultError, time.Since(start))
+			return nil, err
+		}
+
+		result[stopPointGID] = append(result[stopPointGID], &routeMeta{
+			ShortName: shortName,
+			LongName:  longName,
+			Type:      routeType,
+		})
+	}
+
+	if err := rows.Err(); err != nil {
+		recordDBQueryResult(queryName, QueryResultError, time.Since(start))
+		return nil, err
+	}
+
+	recordDBQueryResult(queryName, QueryResultSuccess, time.Since(start))
+	return result, nil
+}

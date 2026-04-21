@@ -13,7 +13,8 @@ import (
 )
 
 type server struct {
-	db *sql.DB
+	db       *sql.DB
+	staticDB *sql.DB
 }
 
 const slBaseURL = "https://transport.integration.sl.se/v1"
@@ -158,4 +159,27 @@ func (s *server) handleRouteDelays(w http.ResponseWriter, r *http.Request) {
 		summaries = []*delaySummary{} // return empty list instead of null
 	}
 	_ = json.NewEncoder(w).Encode(summaries)
+}
+
+func (s *server) handleStopPointRoutes(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
+	defer cancel()
+
+	stopPointRoutes, err := s.queryStopPointRoutes(ctx)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("query failed: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	if stopPointRoutes == nil {
+		stopPointRoutes = map[string][]*routeMeta{}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(stopPointRoutes)
 }
