@@ -21,6 +21,11 @@ jobs:
         run: docker compose down -v
 
       - name: Build aggregator image and start database
+        env:
+          API_KEY: ${{ secrets.GTFS_API_KEY }}
+          STATIC_API_KEY: ${{ secrets.GTFS_REGIONAL_STATIC_API_KEY }}
+          POSTGRES_DSN: postgres://postgres:postgres@db:5432/forseningskartan?sslmode=disable
+          STATIC_POSTGRES_DSN: postgres://postgres:postgres@db:5432/forseningskartan_static?sslmode=disable
         run: |
           docker compose build aggregator
           docker compose up -d db aggregator
