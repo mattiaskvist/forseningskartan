@@ -79,7 +79,7 @@ export function SearchBar({
     // otherwise it uses the default filter options function to show matching sites based on the user input
     // but bubbles up matching recent search sites for a nice user experience
     function customFilterOptionsCB(options: Site[], state: FilterOptionsState<Site>) {
-        let defaultOptions = defaultFilterOptions(options, state);
+        const defaultOptions = defaultFilterOptions(options, state);
 
         if (state.inputValue.trim() === "" && recentSearchSiteIds.length > 0) {
             const recentSites = recentSearchSiteIds
