@@ -29,7 +29,7 @@ function storeAppStyle(style: AppStyle) {
  * - keeping only integer values
  * - removing duplicates while preserving first occurrence
  * - truncating to 5 entries
- * 
+ *
  * We do this to prevent corrupted data from localStorage causing issues.
  */
 function normalizeRecentSearchSiteIds(recentSearchSiteIds: unknown): number[] {

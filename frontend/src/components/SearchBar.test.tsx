@@ -13,11 +13,11 @@ const sites = [
 describe("SearchBar", () => {
     it("sorts recent searches first and displays history icons", async () => {
         renderWithTheme(
-            <SearchBar 
-                sites={sites} 
-                selectedSite={null} 
-                handleSelectSiteCB={() => {}} 
-                recentSearchSiteIds={[3, 1]} 
+            <SearchBar
+                sites={sites}
+                selectedSite={null}
+                handleSelectSiteCB={() => {}}
+                recentSearchSiteIds={[3, 1]}
             />
         );
 
@@ -27,7 +27,7 @@ describe("SearchBar", () => {
         fireEvent.keyDown(input, { key: "ArrowDown" });
 
         const options = await screen.findAllByRole("option");
-        
+
         expect(options.map((o) => o.textContent)).toEqual(["Gamma", "Alpha", "Beta"]);
 
         // check that the history icon is shown for recent searches and not for non-recent ones
@@ -38,11 +38,11 @@ describe("SearchBar", () => {
 
     it("bubbles recent matches to the top when filtering by input", async () => {
         renderWithTheme(
-            <SearchBar 
-                sites={sites} 
-                selectedSite={null} 
-                handleSelectSiteCB={() => {}} 
-                recentSearchSiteIds={[2]} 
+            <SearchBar
+                sites={sites}
+                selectedSite={null}
+                handleSelectSiteCB={() => {}}
+                recentSearchSiteIds={[2]}
             />
         );
 
@@ -52,7 +52,7 @@ describe("SearchBar", () => {
         fireEvent.keyDown(input, { key: "ArrowDown" });
 
         const options = await screen.findAllByRole("option");
-        
+
         // beta should be first because it's a recent search
         expect(options.map((o) => o.textContent)).toEqual(["Beta", "Alpha", "Gamma"]);
         expect(within(options[0]).getByTestId("HistoryIcon")).toBeInTheDocument();
