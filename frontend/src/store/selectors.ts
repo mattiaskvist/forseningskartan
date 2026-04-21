@@ -155,6 +155,10 @@ function getAppStylePreferenceCB(state: RootState) {
     return state.userPreferences.appStyle;
 }
 
+function getRecentSearchSiteIdsCB(state: RootState) {
+    return state.userPreferences.recentSearchSiteIds ?? [];
+}
+
 // use createSelector for computationally expensive selectors
 // to memoize results and avoid unnecessary recalculations
 const getSelectedDelayDatesCB = createSelector(
@@ -234,6 +238,7 @@ export {
     getSnackbarSeverityCB,
     getFavoriteSiteIdsCB,
     getAppStylePreferenceCB,
+    getRecentSearchSiteIdsCB,
     getFavoriteSitesCB,
     getSelectedDelayDates,
     getSelectedDelayDatesCB,
