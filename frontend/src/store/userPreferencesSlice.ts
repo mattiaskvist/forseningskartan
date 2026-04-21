@@ -39,9 +39,17 @@ function getStoredRecentSearchSiteIds(): number[] {
     return [];
 }
 
-function storeRecentSearchSiteIds(siteIds: number[]) {
+export function storeRecentSearchSiteIds(siteIds: number[]) {
     try {
         localStorage.setItem(RECENT_SEARCH_STORAGE_KEY, JSON.stringify(siteIds));
+    } catch {
+        // ignore — test environments
+    }
+}
+
+export function clearStoredRecentSearchSiteIds() {
+    try {
+        localStorage.removeItem(RECENT_SEARCH_STORAGE_KEY);
     } catch {
         // ignore — test environments
     }
@@ -127,6 +135,10 @@ export const userPreferencesSlice = createSlice({
 
             state.recentSearchSiteIds = [siteId, ...filteredRecentSearchSiteIds].slice(0, 5); // keep max 5 recent searches
         },
+        clearRecentSearchSiteIds: (state) => {
+            state.recentSearchSiteIds = [];
+            clearStoredRecentSearchSiteIds();
+        },
 
         setAppStylePreference: (state, action: PayloadAction<AppStyle>) => {
             state.appStyle = action.payload;
@@ -139,7 +151,6 @@ export const userPreferencesSlice = createSlice({
             );
             state.appStyle = action.payload.appStyle;
             storeAppStyle(action.payload.appStyle);
-            storeRecentSearchSiteIds(state.recentSearchSiteIds);
         },
     },
 });
@@ -149,4 +160,5 @@ export const {
     setAppStylePreference,
     applyLoadedUserPreferences,
     recordRecentSearchSiteId,
+    clearRecentSearchSiteIds,
 } = userPreferencesSlice.actions;
