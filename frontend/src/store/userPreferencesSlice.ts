@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AppStyle, appStyles } from "../types/appStyle";
 
 const APP_STYLE_STORAGE_KEY = "appStyle";
+const RECENT_SEARCH_STORAGE_KEY = "recentSearchSiteIds";
 
 function getStoredAppStyle(): AppStyle {
     try {
@@ -23,13 +24,76 @@ function storeAppStyle(style: AppStyle) {
     }
 }
 
+/** Normalizes recent search ids by:
+ * - requiring an array input
+ * - keeping only integer values
+ * - removing duplicates while preserving first occurrence
+ * - truncating to 5 entries
+ *
+ * We do this to prevent corrupted data from localStorage causing issues.
+ */
+function normalizeRecentSearchSiteIds(recentSearchSiteIds: unknown): number[] {
+    if (!Array.isArray(recentSearchSiteIds)) {
+        return [];
+    }
+
+    const uniqueRecentSearchSiteIds = new Set<number>();
+
+    for (const siteId of recentSearchSiteIds) {
+        if (!Number.isInteger(siteId) || uniqueRecentSearchSiteIds.has(siteId)) {
+            continue;
+        }
+
+        uniqueRecentSearchSiteIds.add(siteId);
+        if (uniqueRecentSearchSiteIds.size === 5) {
+            break;
+        }
+    }
+
+    return Array.from(uniqueRecentSearchSiteIds);
+}
+
+function getStoredRecentSearchSiteIds(): number[] {
+    try {
+        const stored = localStorage.getItem(RECENT_SEARCH_STORAGE_KEY);
+        if (stored) {
+            const parsed = JSON.parse(stored);
+            return normalizeRecentSearchSiteIds(parsed);
+        }
+    } catch {
+        // localStorage unavailable at module init in test environments
+    }
+    return [];
+}
+
+export function storeRecentSearchSiteIds(siteIds: number[]) {
+    try {
+        localStorage.setItem(
+            RECENT_SEARCH_STORAGE_KEY,
+            JSON.stringify(normalizeRecentSearchSiteIds(siteIds))
+        );
+    } catch {
+        // ignore — test environments
+    }
+}
+
+export function clearStoredRecentSearchSiteIds() {
+    try {
+        localStorage.removeItem(RECENT_SEARCH_STORAGE_KEY);
+    } catch {
+        // ignore — test environments
+    }
+}
+
 export type UserPreferencesState = {
     favoriteSiteIds: number[];
+    recentSearchSiteIds: number[];
     appStyle: AppStyle;
 };
 
 export const defaultUserPreferencesState: UserPreferencesState = {
     favoriteSiteIds: [],
+    recentSearchSiteIds: getStoredRecentSearchSiteIds(),
     appStyle: getStoredAppStyle(),
 };
 
@@ -64,6 +128,26 @@ export const userPreferencesSlice = createSlice({
 
             state.favoriteSiteIds.push(siteId);
         },
+        /** removes existing occurrence of siteId if present.
+         * prepends siteId to the beginning of the recentSearchSiteIds array.
+         * truncates to 5 entries.
+         */
+        recordRecentSearchSiteId: (state, action: PayloadAction<number>) => {
+            const siteId = action.payload;
+
+            function isNotSelectedSiteIdCB(recentSiteId: number): boolean {
+                return recentSiteId !== siteId;
+            }
+
+            const filteredRecentSearchSiteIds =
+                state.recentSearchSiteIds?.filter(isNotSelectedSiteIdCB) ?? [];
+
+            state.recentSearchSiteIds = [siteId, ...filteredRecentSearchSiteIds].slice(0, 5); // keep max 5 recent searches
+        },
+        clearRecentSearchSiteIds: (state) => {
+            state.recentSearchSiteIds = [];
+            clearStoredRecentSearchSiteIds();
+        },
 
         setAppStylePreference: (state, action: PayloadAction<AppStyle>) => {
             state.appStyle = action.payload;
@@ -71,11 +155,19 @@ export const userPreferencesSlice = createSlice({
         },
         applyLoadedUserPreferences: (state, action: PayloadAction<UserPreferencesState>) => {
             state.favoriteSiteIds = normalizeFavoriteSiteIds(action.payload.favoriteSiteIds);
+            state.recentSearchSiteIds = normalizeRecentSearchSiteIds(
+                action.payload.recentSearchSiteIds
+            );
             state.appStyle = action.payload.appStyle;
             storeAppStyle(action.payload.appStyle);
         },
     },
 });
 
-export const { toggleFavoriteSiteId, setAppStylePreference, applyLoadedUserPreferences } =
-    userPreferencesSlice.actions;
+export const {
+    toggleFavoriteSiteId,
+    setAppStylePreference,
+    applyLoadedUserPreferences,
+    recordRecentSearchSiteId,
+    clearRecentSearchSiteIds,
+} = userPreferencesSlice.actions;

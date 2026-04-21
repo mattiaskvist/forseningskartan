@@ -6,9 +6,15 @@ type MapSearchViewProps = {
     sites: Site[];
     selectedSite: Site | null;
     handleSelectSiteCB: (siteId: number | null) => void;
+    recentSearchSiteIds: number[];
 };
 
-export function MapSearchView({ sites, selectedSite, handleSelectSiteCB }: MapSearchViewProps) {
+export function MapSearchView({
+    sites,
+    selectedSite,
+    handleSelectSiteCB,
+    recentSearchSiteIds,
+}: MapSearchViewProps) {
     return (
         <Paper
             variant="outlined"
@@ -27,6 +33,7 @@ export function MapSearchView({ sites, selectedSite, handleSelectSiteCB }: MapSe
                 sites={sites}
                 selectedSite={selectedSite}
                 handleSelectSiteCB={handleSelectSiteCB}
+                recentSearchSiteIds={recentSearchSiteIds}
             />
         </Paper>
     );

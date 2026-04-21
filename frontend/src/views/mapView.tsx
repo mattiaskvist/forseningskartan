@@ -11,6 +11,7 @@ type MapViewProps = {
     sites: Site[];
     selectedSite: Site | null;
     handleSelectSiteCB: (siteId: number | null) => void;
+    recentSearchSiteIds: number[];
     departureViewProps: DepartureViewProps | null;
     appStyle: AppStyle;
     onAppStyleChange: (style: AppStyle) => void;
@@ -20,6 +21,7 @@ export function MapView({
     sites,
     selectedSite,
     handleSelectSiteCB,
+    recentSearchSiteIds,
     departureViewProps,
     appStyle,
     onAppStyleChange,
@@ -68,6 +70,7 @@ export function MapView({
                 sites={sites}
                 selectedSite={selectedSite}
                 handleSelectSiteCB={handleSelectSiteCB}
+                recentSearchSiteIds={recentSearchSiteIds}
             />
         </div>
     );

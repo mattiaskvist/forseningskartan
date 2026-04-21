@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
     applyLoadedUserPreferences,
+    recordRecentSearchSiteId,
     setAppStylePreference,
     toggleFavoriteSiteId,
     userPreferencesSlice,
@@ -16,6 +17,7 @@ describe("userPreferencesSlice", () => {
         // We expect a brand new user to have no favorites and a 'Dark' map style.
         expect(initialState).toEqual({
             favoriteSiteIds: [],
+            recentSearchSiteIds: [],
             appStyle: "Dark",
         });
     });
@@ -53,6 +55,7 @@ describe("userPreferencesSlice", () => {
             undefined,
             applyLoadedUserPreferences({
                 favoriteSiteIds: [2, 9],
+                recentSearchSiteIds: [1, 3, 5],
                 appStyle: "Classic",
             })
         );
@@ -60,7 +63,29 @@ describe("userPreferencesSlice", () => {
         // state should now exactly match the loaded data
         expect(hydratedState).toEqual({
             favoriteSiteIds: [2, 9],
+            recentSearchSiteIds: [1, 3, 5],
             appStyle: "Classic",
         });
+    });
+
+    // verify that recording recent searches works as expected
+    it("records recent search site IDs", () => {
+        let state = userPreferencesSlice.reducer(undefined, recordRecentSearchSiteId(10));
+        expect(state.recentSearchSiteIds).toEqual([10]);
+
+        // add more searches
+        state = userPreferencesSlice.reducer(state, recordRecentSearchSiteId(20));
+        state = userPreferencesSlice.reducer(state, recordRecentSearchSiteId(30));
+        expect(state.recentSearchSiteIds).toEqual([30, 20, 10]);
+
+        // re-add an existing search to move it to the front
+        state = userPreferencesSlice.reducer(state, recordRecentSearchSiteId(20));
+        expect(state.recentSearchSiteIds).toEqual([20, 30, 10]);
+
+        // add more searches to exceed the limit of 5
+        state = userPreferencesSlice.reducer(state, recordRecentSearchSiteId(40));
+        state = userPreferencesSlice.reducer(state, recordRecentSearchSiteId(50));
+        state = userPreferencesSlice.reducer(state, recordRecentSearchSiteId(60));
+        expect(state.recentSearchSiteIds).toEqual([60, 50, 40, 20, 30]); // should keep only the 5 most recent
     });
 });

@@ -9,11 +9,11 @@ function isAppStyle(candidate: unknown): candidate is AppStyle {
     return typeof candidate === "string" && (appStyles as readonly string[]).includes(candidate);
 }
 
-export function sanitizeUserPreferences(candidate: unknown): UserPreferencesState {
-    function isIntegerSiteIdCB(siteId: unknown): siteId is number {
-        return Number.isInteger(siteId);
-    }
+function isIntegerSiteIdCB(siteId: unknown): siteId is number {
+    return Number.isInteger(siteId);
+}
 
+export function sanitizeUserPreferences(candidate: unknown): UserPreferencesState {
     if (candidate === null || typeof candidate !== "object") {
         return { ...defaultUserPreferencesState };
     }
@@ -21,6 +21,7 @@ export function sanitizeUserPreferences(candidate: unknown): UserPreferencesStat
     const parsedCandidate = candidate as {
         appStyle?: unknown;
         favoriteSiteIds?: unknown;
+        recentSearchSiteIds?: unknown;
     };
     const appStyle = isAppStyle(parsedCandidate.appStyle)
         ? parsedCandidate.appStyle
@@ -28,10 +29,15 @@ export function sanitizeUserPreferences(candidate: unknown): UserPreferencesStat
     const favoriteSiteIds = Array.isArray(parsedCandidate.favoriteSiteIds)
         ? parsedCandidate.favoriteSiteIds.filter(isIntegerSiteIdCB)
         : [];
-
+    const recentSearchSiteIds = Array.isArray(parsedCandidate.recentSearchSiteIds)
+        ? parsedCandidate.recentSearchSiteIds
+              .filter(isIntegerSiteIdCB) // keep only integers
+              .slice(0, 5) // keep only the 5 most recent
+        : [];
     return {
         appStyle,
         favoriteSiteIds,
+        recentSearchSiteIds,
     };
 }
 

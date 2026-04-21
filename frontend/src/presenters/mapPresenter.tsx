@@ -9,6 +9,7 @@ import {
     getDeparturesCB,
     getDeparturesLoadingCB,
     getFavoriteSiteIdsCB,
+    getRecentSearchSiteIdsCB,
     getAppStylePreferenceCB,
     getSelectedCustomDateCB,
     getSelectedDatePresetCB,
@@ -31,7 +32,11 @@ import { Departure } from "../types/sl";
 import { DatePreset } from "../types/departureDelay";
 import { AppStyle } from "../types/appStyle";
 import { DepartureViewProps } from "../views/departureView";
-import { setAppStylePreference, toggleFavoriteSiteId } from "../store/userPreferencesSlice";
+import {
+    recordRecentSearchSiteId,
+    setAppStylePreference,
+    toggleFavoriteSiteId,
+} from "../store/userPreferencesSlice";
 import { showSnackbar } from "../store/snackbarSlice";
 import { Suspense } from "../components/Suspense";
 import { getUpcomingDepartures } from "../utils/departures";
@@ -50,6 +55,7 @@ export function MapPresenter() {
     const isDepartureHistoricalDelayLoading = useAppSelector(getDepartureHistoricalDelayLoadingCB);
     const user = useAppSelector(getAuthUserCB);
     const favoriteSiteIds = useAppSelector(getFavoriteSiteIdsCB);
+    const recentSearchSiteIds = useAppSelector(getRecentSearchSiteIdsCB);
     const appStyle = useAppSelector(getAppStylePreferenceCB);
     const sites = useAppSelector(getSitesCB);
     const isSitesLoading = useAppSelector(getSitesLoadingCB);
@@ -59,6 +65,9 @@ export function MapPresenter() {
     const handleSelectSiteCB = useCallback(
         (siteId: number | null) => {
             selectSiteCB({ dispatch, siteId });
+            if (siteId !== null) {
+                dispatch(recordRecentSearchSiteId(siteId));
+            }
         },
         [dispatch]
     );
@@ -147,6 +156,7 @@ export function MapPresenter() {
             sites={sites}
             selectedSite={selectedSite}
             handleSelectSiteCB={handleSelectSiteCB}
+            recentSearchSiteIds={recentSearchSiteIds}
             departureViewProps={departureViewProps}
             appStyle={appStyle}
             onAppStyleChange={handleAppStyleChangeACB}

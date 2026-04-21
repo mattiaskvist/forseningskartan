@@ -20,9 +20,13 @@ import { authSlice, setUser } from "./authSlice";
 import { showSnackbar, snackbarSlice } from "./snackbarSlice";
 import {
     applyLoadedUserPreferences,
+    clearRecentSearchSiteIds,
+    clearStoredRecentSearchSiteIds,
     setAppStylePreference,
+    storeRecentSearchSiteIds,
     toggleFavoriteSiteId,
     userPreferencesSlice,
+    recordRecentSearchSiteId,
 } from "./userPreferencesSlice";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -41,7 +45,28 @@ import {
     setRouteDelaySelectedRouteKey,
 } from "./reducers";
 import { fetchUserPreferences, saveUserPreferences } from "../firebase/userPreferences";
+import { deleteCurrentUser, logoutCurrentUser } from "./authThunks";
 const listenerMiddleware = createListenerMiddleware();
+
+function mergeRecentSearchSiteIds(
+    localRecentSearchSiteIds: number[] = [],
+    firebaseRecentSearchSiteIds: number[] = []
+): number[] {
+    const uniqueRecentSearchSiteIds = new Set<number>();
+
+    for (const siteId of [...localRecentSearchSiteIds, ...firebaseRecentSearchSiteIds]) {
+        if (!Number.isInteger(siteId) || uniqueRecentSearchSiteIds.has(siteId)) {
+            continue;
+        }
+
+        uniqueRecentSearchSiteIds.add(siteId);
+        if (uniqueRecentSearchSiteIds.size === 5) {
+            break;
+        }
+    }
+
+    return Array.from(uniqueRecentSearchSiteIds);
+}
 
 export const store = configureStore({
     reducer: {
@@ -109,14 +134,26 @@ listenerMiddleware.startListening({
 
         try {
             const loadedPreferences = await fetchUserPreferences(user.uid);
+            const state = listenerApi.getState() as RootState;
+            const localPreferences = state.userPreferences;
 
             if (loadedPreferences) {
-                dispatch(applyLoadedUserPreferences(loadedPreferences));
+                const mergedPreferences = {
+                    ...loadedPreferences,
+                    recentSearchSiteIds: mergeRecentSearchSiteIds(
+                        localPreferences.recentSearchSiteIds,
+                        loadedPreferences.recentSearchSiteIds
+                    ),
+                };
+
+                dispatch(applyLoadedUserPreferences(mergedPreferences));
+                await saveUserPreferences(user.uid, mergedPreferences);
+                clearStoredRecentSearchSiteIds();
                 return;
             }
 
-            const state = listenerApi.getState() as RootState;
-            await saveUserPreferences(user.uid, state.userPreferences);
+            await saveUserPreferences(user.uid, localPreferences);
+            clearStoredRecentSearchSiteIds();
         } catch (error) {
             console.error("Failed to load user preferences:", error);
             dispatch(
@@ -130,12 +167,23 @@ listenerMiddleware.startListening({
 });
 
 listenerMiddleware.startListening({
-    matcher: isAnyOf(toggleFavoriteSiteId, setAppStylePreference),
+    matcher: isAnyOf(logoutCurrentUser.fulfilled, deleteCurrentUser.fulfilled),
+    effect: (_, listenerApi) => {
+        const dispatch = listenerApi.dispatch as AppDispatch;
+        dispatch(clearRecentSearchSiteIds());
+    },
+});
+
+// user preferences
+listenerMiddleware.startListening({
+    matcher: isAnyOf(toggleFavoriteSiteId, setAppStylePreference, recordRecentSearchSiteId),
     effect: async (_, listenerApi) => {
         const state = listenerApi.getState() as RootState;
         const user = state.auth.user;
+        const recentSearchSiteIds = state.userPreferences.recentSearchSiteIds ?? [];
 
         if (!user) {
+            storeRecentSearchSiteIds(recentSearchSiteIds);
             return;
         }
 
