@@ -40,7 +40,7 @@ func (w *staticDBWriter) writeStaticRefresh(ctx context.Context, payload staticR
 
 	if _, err := tx.ExecContext(ctx, `
 		TRUNCATE TABLE
-			static_stop_point_routes,
+			static_stop_point_routes_by_date,
 			static_stop_points,
 			static_routes
 	`); err != nil {
@@ -75,15 +75,22 @@ func (w *staticDBWriter) writeStaticRefresh(ctx context.Context, payload staticR
 		}
 	}
 
-	for _, mapping := range payload.StopPointRoutes {
+	for _, mapping := range payload.StopPointRoutesByDate {
 		if _, err := tx.ExecContext(ctx, `
-			INSERT INTO static_stop_point_routes (
+			INSERT INTO static_stop_point_routes_by_date (
+				service_date,
 				stop_point_gid,
 				route_id
 			)
-			VALUES ($1, $2)
-		`, mapping.StopPointGID, mapping.RouteID); err != nil {
-			return fmt.Errorf("insert static stop point route %s -> %s: %w", mapping.StopPointGID, mapping.RouteID, err)
+			VALUES ($1::date, $2, $3)
+		`, mapping.ServiceDate, mapping.StopPointGID, mapping.RouteID); err != nil {
+			return fmt.Errorf(
+				"insert static stop point route %s %s -> %s: %w",
+				mapping.ServiceDate,
+				mapping.StopPointGID,
+				mapping.RouteID,
+				err,
+			)
 		}
 	}
 
@@ -106,7 +113,7 @@ func (w *staticDBWriter) writeStaticRefresh(ctx context.Context, payload staticR
 		time.Now().UTC(),
 		len(payload.StopPoints),
 		len(payload.Routes),
-		len(payload.StopPointRoutes),
+		len(payload.StopPointRoutesByDate),
 	); err != nil {
 		return fmt.Errorf("upsert static refresh status: %w", err)
 	}

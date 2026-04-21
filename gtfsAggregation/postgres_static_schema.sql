@@ -19,10 +19,11 @@ CREATE TABLE IF NOT EXISTS static_stop_points (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS static_stop_point_routes (
+CREATE TABLE IF NOT EXISTS static_stop_point_routes_by_date (
+    service_date DATE NOT NULL,
     stop_point_gid TEXT NOT NULL,
     route_id TEXT NOT NULL,
-    PRIMARY KEY (stop_point_gid, route_id),
+    PRIMARY KEY (service_date, stop_point_gid, route_id),
     FOREIGN KEY (stop_point_gid) REFERENCES static_stop_points(stop_point_gid) ON DELETE CASCADE,
     FOREIGN KEY (route_id) REFERENCES static_routes(route_id) ON DELETE CASCADE
 );
@@ -35,5 +36,8 @@ CREATE TABLE IF NOT EXISTS static_feed_refresh_status (
     stop_point_route_count INTEGER NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS idx_static_stop_point_routes_stop_point_gid
-ON static_stop_point_routes(stop_point_gid);
+CREATE INDEX IF NOT EXISTS idx_static_stop_point_routes_by_date_date
+ON static_stop_point_routes_by_date(service_date);
+
+CREATE INDEX IF NOT EXISTS idx_static_stop_point_routes_by_date_date_stop
+ON static_stop_point_routes_by_date(service_date, stop_point_gid);

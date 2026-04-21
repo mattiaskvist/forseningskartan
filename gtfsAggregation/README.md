@@ -135,6 +135,7 @@ WHERE a.hour_start_utc >= TIMESTAMPTZ '2026-03-17T00:00:00Z'
 
 - The script downloads and extracts GTFS-RT and GTFS-static archives to a temp directory and cleans up automatically.
 - `routes.txt`, `stops.txt`, and `trips.txt` are used to enrich route/stop/trip metadata when available.
+- Static stop-point-route mappings are materialized per service date using `calendar_dates.txt` as the service-date source. `calendar.txt` is used only to validate each service date against the service validity window.
 
 Check storage use of each table:
 

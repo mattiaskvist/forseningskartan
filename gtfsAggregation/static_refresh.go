@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 )
 
 type staticRouteRecord struct {
@@ -21,19 +22,25 @@ type staticStopPointRecord struct {
 }
 
 type staticStopPointRouteMapping struct {
+	ServiceDate  string
 	StopPointGID string
 	RouteID      string
 }
 
 type staticRefreshPayload struct {
-	Routes          []staticRouteRecord
-	StopPoints      []staticStopPointRecord
-	StopPointRoutes []staticStopPointRouteMapping
+	Routes                []staticRouteRecord
+	StopPoints            []staticStopPointRecord
+	StopPointRoutesByDate []staticStopPointRouteMapping
 }
 
 type staticStopInfo struct {
 	Name         string
 	LocationType string
+}
+
+type calendarValidityRange struct {
+	StartDate time.Time
+	EndDate   time.Time
 }
 
 func runStaticRefresh(config Config) error {
@@ -76,13 +83,13 @@ func runStaticRefresh(config Config) error {
 		return fmt.Errorf("write static refresh to postgres: %w", err)
 	}
 
-	RecordStaticRefreshComplete(len(payload.StopPoints), len(payload.Routes), len(payload.StopPointRoutes))
+	RecordStaticRefreshComplete(len(payload.StopPoints), len(payload.Routes), len(payload.StopPointRoutesByDate))
 
 	fmt.Printf(
-		"Stored static GTFS data in Postgres (%d stop points, %d routes, %d stop-point-route mappings)\n",
+		"Stored static GTFS data in Postgres (%d stop points, %d routes, %d stop-point-route-date mappings)\n",
 		len(payload.StopPoints),
 		len(payload.Routes),
-		len(payload.StopPointRoutes),
+		len(payload.StopPointRoutesByDate),
 	)
 	return nil
 }
@@ -104,9 +111,19 @@ func resolveStaticSubdir(staticRoot string) (string, error) {
 }
 
 func buildStaticRefreshPayload(staticDir string) (staticRefreshPayload, error) {
+	const staticDateLayout = "20060102"
+
 	routeRows, err := readCSV(filepath.Join(staticDir, "routes.txt"))
 	if err != nil {
 		return staticRefreshPayload{}, fmt.Errorf("load routes.txt: %w", err)
+	}
+	calendarRows, err := readCSV(filepath.Join(staticDir, "calendar.txt"))
+	if err != nil {
+		return staticRefreshPayload{}, fmt.Errorf("load calendar.txt: %w", err)
+	}
+	calendarDateRows, err := readCSV(filepath.Join(staticDir, "calendar_dates.txt"))
+	if err != nil {
+		return staticRefreshPayload{}, fmt.Errorf("load calendar_dates.txt: %w", err)
 	}
 	tripRows, err := readCSV(filepath.Join(staticDir, "trips.txt"))
 	if err != nil {
@@ -136,14 +153,71 @@ func buildStaticRefreshPayload(staticDir string) (staticRefreshPayload, error) {
 		}
 	}
 
+	serviceValidityRanges := make(map[string]calendarValidityRange, len(calendarRows))
+	for _, row := range calendarRows {
+		serviceID := strings.TrimSpace(row["service_id"])
+		startDateRaw := strings.TrimSpace(row["start_date"])
+		endDateRaw := strings.TrimSpace(row["end_date"])
+		if serviceID == "" || startDateRaw == "" || endDateRaw == "" {
+			continue
+		}
+
+		startDate, err := time.Parse(staticDateLayout, startDateRaw)
+		if err != nil {
+			continue
+		}
+		endDate, err := time.Parse(staticDateLayout, endDateRaw)
+		if err != nil {
+			continue
+		}
+
+		serviceValidityRanges[serviceID] = calendarValidityRange{StartDate: startDate, EndDate: endDate}
+	}
+
+	serviceDatesByServiceID := make(map[string]map[string]struct{}, len(calendarDateRows))
+	for _, row := range calendarDateRows {
+		serviceID := strings.TrimSpace(row["service_id"])
+		dateRaw := strings.TrimSpace(row["date"])
+		exceptionType := strings.TrimSpace(row["exception_type"])
+		if serviceID == "" || dateRaw == "" || exceptionType == "" {
+			continue
+		}
+
+		serviceDate, err := time.Parse(staticDateLayout, dateRaw)
+		if err != nil {
+			continue
+		}
+
+		if validity, hasValidity := serviceValidityRanges[serviceID]; hasValidity {
+			if serviceDate.Before(validity.StartDate) || serviceDate.After(validity.EndDate) {
+				continue
+			}
+		}
+
+		serviceDateISO := serviceDate.Format("2006-01-02")
+		if _, exists := serviceDatesByServiceID[serviceID]; !exists {
+			serviceDatesByServiceID[serviceID] = make(map[string]struct{})
+		}
+
+		switch exceptionType {
+		case "1":
+			serviceDatesByServiceID[serviceID][serviceDateISO] = struct{}{}
+		case "2":
+			delete(serviceDatesByServiceID[serviceID], serviceDateISO)
+		}
+	}
+
 	tripToRoute := make(map[string]string, len(tripRows))
+	tripToService := make(map[string]string, len(tripRows))
 	for _, row := range tripRows {
 		tripID := strings.TrimSpace(row["trip_id"])
 		routeID := strings.TrimSpace(row["route_id"])
-		if tripID == "" || routeID == "" {
+		serviceID := strings.TrimSpace(row["service_id"])
+		if tripID == "" || routeID == "" || serviceID == "" {
 			continue
 		}
 		tripToRoute[tripID] = routeID
+		tripToService[tripID] = serviceID
 	}
 
 	stops := make(map[string]staticStopInfo, len(stopRows))
@@ -177,6 +251,14 @@ func buildStaticRefreshPayload(staticDir string) (staticRefreshPayload, error) {
 		if !routeExists || strings.TrimSpace(routeID) == "" {
 			continue
 		}
+		serviceID, serviceExists := tripToService[tripID]
+		if !serviceExists || serviceID == "" {
+			continue
+		}
+		serviceDates, hasServiceDates := serviceDatesByServiceID[serviceID]
+		if !hasServiceDates || len(serviceDates) == 0 {
+			continue
+		}
 		if _, routeMetaExists := routes[routeID]; !routeMetaExists {
 			continue
 		}
@@ -186,10 +268,13 @@ func buildStaticRefreshPayload(staticDir string) (staticRefreshPayload, error) {
 			Name:         stop.Name,
 		}
 
-		relationKey := stopID + "|" + routeID
-		stopPointRoutes[relationKey] = staticStopPointRouteMapping{
-			StopPointGID: stopID,
-			RouteID:      routeID,
+		for serviceDate := range serviceDates {
+			relationKey := serviceDate + "|" + stopID + "|" + routeID
+			stopPointRoutes[relationKey] = staticStopPointRouteMapping{
+				ServiceDate:  serviceDate,
+				StopPointGID: stopID,
+				RouteID:      routeID,
+			}
 		}
 		usedRouteIDs[routeID] = struct{}{}
 	}
@@ -218,16 +303,19 @@ func buildStaticRefreshPayload(staticDir string) (staticRefreshPayload, error) {
 		stopPointRouteSlice = append(stopPointRouteSlice, mapping)
 	}
 	sort.Slice(stopPointRouteSlice, func(i, j int) bool {
-		if stopPointRouteSlice[i].StopPointGID == stopPointRouteSlice[j].StopPointGID {
-			return stopPointRouteSlice[i].RouteID < stopPointRouteSlice[j].RouteID
+		if stopPointRouteSlice[i].ServiceDate == stopPointRouteSlice[j].ServiceDate {
+			if stopPointRouteSlice[i].StopPointGID == stopPointRouteSlice[j].StopPointGID {
+				return stopPointRouteSlice[i].RouteID < stopPointRouteSlice[j].RouteID
+			}
+			return stopPointRouteSlice[i].StopPointGID < stopPointRouteSlice[j].StopPointGID
 		}
-		return stopPointRouteSlice[i].StopPointGID < stopPointRouteSlice[j].StopPointGID
+		return stopPointRouteSlice[i].ServiceDate < stopPointRouteSlice[j].ServiceDate
 	})
 
 	return staticRefreshPayload{
-		Routes:          routeSlice,
-		StopPoints:      stopPointSlice,
-		StopPointRoutes: stopPointRouteSlice,
+		Routes:                routeSlice,
+		StopPoints:            stopPointSlice,
+		StopPointRoutesByDate: stopPointRouteSlice,
 	}, nil
 }
 
