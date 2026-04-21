@@ -31,7 +31,11 @@ import { Departure } from "../types/sl";
 import { DatePreset } from "../types/departureDelay";
 import { AppStyle } from "../types/appStyle";
 import { DepartureViewProps } from "../views/departureView";
-import { setAppStylePreference, toggleFavoriteSiteId } from "../store/userPreferencesSlice";
+import {
+    recordRecentSearchSiteId,
+    setAppStylePreference,
+    toggleFavoriteSiteId,
+} from "../store/userPreferencesSlice";
 import { showSnackbar } from "../store/snackbarSlice";
 import { Suspense } from "../components/Suspense";
 import { getUpcomingDepartures } from "../utils/departures";
@@ -59,6 +63,9 @@ export function MapPresenter() {
     const handleSelectSiteCB = useCallback(
         (siteId: number | null) => {
             selectSiteCB({ dispatch, siteId });
+            if (siteId) {
+                dispatch(recordRecentSearchSiteId(siteId));
+            }
         },
         [dispatch]
     );
