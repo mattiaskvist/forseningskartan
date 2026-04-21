@@ -45,6 +45,7 @@ import {
     setRouteDelaySelectedRouteKey,
 } from "./reducers";
 import { fetchUserPreferences, saveUserPreferences } from "../firebase/userPreferences";
+import { deleteCurrentUser, logoutCurrentUser } from "./authThunks";
 const listenerMiddleware = createListenerMiddleware();
 
 function mergeRecentSearchSiteIds(
@@ -126,16 +127,8 @@ listenerMiddleware.startListening({
     effect: async (action, listenerApi) => {
         const dispatch = listenerApi.dispatch as AppDispatch;
         const user = action.payload;
-        const previousState = listenerApi.getOriginalState() as RootState;
-
-        // if the user was not null before but is now, it means they logged out
-        // so we should clear recent searches from local storage.
-        const didLogout = previousState.auth.user !== null && user === null;
 
         if (!user) {
-            if (didLogout) {
-                dispatch(clearRecentSearchSiteIds());
-            }
             return;
         }
 
@@ -170,6 +163,14 @@ listenerMiddleware.startListening({
                 })
             );
         }
+    },
+});
+
+listenerMiddleware.startListening({
+    matcher: isAnyOf(logoutCurrentUser.fulfilled, deleteCurrentUser.fulfilled),
+    effect: (_, listenerApi) => {
+        const dispatch = listenerApi.dispatch as AppDispatch;
+        dispatch(clearRecentSearchSiteIds());
     },
 });
 
