@@ -6,6 +6,7 @@ import {
     fetchAvailableDates,
     fetchDailyRouteDelays,
     fetchRouteDelayTrend,
+    fetchStopPointRoutesByDate,
     RouteDelayTrendParams,
 } from "../api/backend";
 import { AppThunk } from "./store";
@@ -23,6 +24,10 @@ export const getDepartures = createAsyncThunk("departures/fetch", (siteId: numbe
 );
 
 export const getStopPoints = createAsyncThunk("stopPoints/fetch", () => fetchStopPointsACB());
+
+export const getTodayStopPointRoutes = createAsyncThunk("stopPointRoutes/fetch", () =>
+    fetchStopPointRoutesByDate(new Date().toLocaleDateString("sv-SE"))
+);
 
 export const getAggregatedDates = createAsyncThunk("aggregatedDates/fetch", fetchAvailableDates);
 

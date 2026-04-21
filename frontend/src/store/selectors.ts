@@ -63,6 +63,14 @@ function getStopPointsLoadingCB(state: RootState) {
     return state.stopPoints.isLoading;
 }
 
+function getRoutesByStopPointCB(state: RootState) {
+    return state.stopPointRoutes.data;
+}
+
+function getStopPointRoutesLoadingCB(state: RootState) {
+    return state.stopPointRoutes.isLoading;
+}
+
 function getDepartureHistoricalDelaySummaryCB(state: RootState) {
     return state.departureHistoricalDelay.summary;
 }
@@ -215,6 +223,8 @@ export {
     getSelectedSiteCB,
     getStopPointsCB,
     getStopPointsLoadingCB,
+    getRoutesByStopPointCB,
+    getStopPointRoutesLoadingCB,
     getDepartureHistoricalDelayLoadingCB,
     getDepartureHistoricalDelaySummaryCB,
     getRouteDelaysCB,

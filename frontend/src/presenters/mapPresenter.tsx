@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { MapView } from "../views/mapView";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import {
@@ -20,6 +20,7 @@ import {
     getStopPointsCB,
     getStopPointsLoadingCB,
     getSelectedSiteCB,
+    getRoutesByStopPointCB,
 } from "../store/selectors";
 import { selectSiteCB } from "../store/selection";
 import {
@@ -39,7 +40,7 @@ import {
 } from "../store/userPreferencesSlice";
 import { showSnackbar } from "../store/snackbarSlice";
 import { Suspense } from "../components/Suspense";
-import { getUpcomingDepartures } from "../utils/departures";
+import { getSiteIdsWithNoDepartures, getUpcomingDepartures } from "../utils/departures";
 
 export function MapPresenter() {
     const dispatch = useAppDispatch();
@@ -61,6 +62,7 @@ export function MapPresenter() {
     const isSitesLoading = useAppSelector(getSitesLoadingCB);
     const stopPoints = useAppSelector(getStopPointsCB);
     const isStopPointsLoading = useAppSelector(getStopPointsLoadingCB);
+    const routesByStopPoint = useAppSelector(getRoutesByStopPointCB);
 
     const handleSelectSiteCB = useCallback(
         (siteId: number | null) => {
@@ -128,6 +130,10 @@ export function MapPresenter() {
 
     const departures = departureResponse?.departures ?? [];
     const upcomingDepartures = getUpcomingDepartures(departures);
+    const siteIdsWithNoDepartures = useMemo(() => {
+        return getSiteIdsWithNoDepartures(sites, stopPoints, routesByStopPoint);
+    }, [sites, stopPoints, routesByStopPoint]);
+
     const departureViewProps: DepartureViewProps | null = selectedSite
         ? {
               upcomingDepartures,
@@ -157,6 +163,7 @@ export function MapPresenter() {
             selectedSite={selectedSite}
             handleSelectSiteCB={handleSelectSiteCB}
             recentSearchSiteIds={recentSearchSiteIds}
+            siteIdsWithNoDepartures={siteIdsWithNoDepartures}
             departureViewProps={departureViewProps}
             appStyle={appStyle}
             onAppStyleChange={handleAppStyleChangeACB}

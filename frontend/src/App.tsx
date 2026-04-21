@@ -2,7 +2,12 @@ import { useEffect, useMemo } from "react";
 import { Routes, Route } from "react-router-dom";
 import { CssBaseline, Box } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
-import { getAggregatedDates, getSites, getStopPoints } from "./store/actions";
+import {
+    getAggregatedDates,
+    getSites,
+    getStopPoints,
+    getTodayStopPointRoutes,
+} from "./store/actions";
 import { useAppDispatch, useAppSelector } from "./store/store";
 import { SidebarPresenter } from "./presenters/sidebarPresenter";
 import { AccountPresenter } from "./presenters/accountPresenter";
@@ -22,6 +27,7 @@ function App() {
     useEffect(() => {
         dispatch(getSites());
         dispatch(getStopPoints());
+        dispatch(getTodayStopPointRoutes());
         dispatch(getAggregatedDates());
 
         // return the unsubscribe function to stop the firebase connection

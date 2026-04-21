@@ -3,11 +3,13 @@ import {
     getSites,
     getDepartures,
     getStopPoints,
+    getTodayStopPointRoutes,
     getDepartureHistoricalDelaySummary,
     getAggregatedDates,
     getRouteDelays,
     getRouteDelayTrend,
 } from "./actions";
+import { RoutesByStopPoint } from "../api/backend";
 import { Departure, DepartureResponse, Site, StopPoint, TransportationMode } from "../types/sl";
 import { DelaySummary } from "../types/historicalDelay";
 import { DatePreset, EventType } from "../types/departureDelay";
@@ -29,6 +31,12 @@ type DeparturesState = {
 
 type StopPointsState = {
     data: StopPoint[] | null;
+    isLoading: boolean;
+    error: Error | null;
+};
+
+type StopPointRoutesState = {
+    data: RoutesByStopPoint;
     isLoading: boolean;
     error: Error | null;
 };
@@ -161,6 +169,29 @@ export const stopPointsSlice = createSlice({
                 state.isLoading = false;
                 state.error = action.error as Error;
                 console.error("Failed to fetch stop points:", action.error);
+            });
+    },
+});
+
+export const stopPointRoutesSlice = createSlice({
+    name: "stopPointRoutes",
+    initialState: { data: {}, isLoading: false, error: null } as StopPointRoutesState,
+    reducers: {},
+    extraReducers: (builder) => {
+        builder
+            .addCase(getTodayStopPointRoutes.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(getTodayStopPointRoutes.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.data = action.payload;
+                state.error = null;
+            })
+            .addCase(getTodayStopPointRoutes.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error as Error;
+                console.error("Failed to fetch stop point routes:", action.error);
             });
     },
 });
