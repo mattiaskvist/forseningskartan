@@ -167,10 +167,20 @@ func (s *server) handleStopPointRoutes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	date := strings.TrimSpace(r.URL.Query().Get("date"))
+	if date == "" {
+		http.Error(w, "missing date parameter", http.StatusBadRequest)
+		return
+	}
+	if _, err := time.Parse("2006-01-02", date); err != nil {
+		http.Error(w, "invalid date format (expected YYYY-MM-DD)", http.StatusBadRequest)
+		return
+	}
+
 	ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
 	defer cancel()
 
-	stopPointRoutes, err := s.queryStopPointRoutes(ctx)
+	stopPointRoutes, err := s.queryStopPointRoutes(ctx, date)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("query failed: %v", err), http.StatusInternalServerError)
 		return

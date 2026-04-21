@@ -139,13 +139,18 @@ curl -G "http://localhost:8081/api/route-delays" \
 
 `GET /api/stop-point-routes`
 
-Returns a map keyed by `stopPointGID` where each value is an array of route metadata for routes that depart from that stop point.
+Returns a map keyed by `stopPointGID` where each value is an array of route metadata for routes that depart from that stop point on the requested service date.
+
+Query parameters:
+
+- `date`: single date in `YYYY-MM-DD` (required)
 
 Example request:
 
 ```bash
 curl -G "http://localhost:8081/api/stop-point-routes" \
-  -H "X-API-Key: <api-key>"
+  -H "X-API-Key: <api-key>" \
+  --data-urlencode "date=2026-03-20"
 ```
 
 Example response:

@@ -286,7 +286,7 @@ func (s *server) queryRouteDelays(ctx context.Context, dates []string) ([]*delay
 	return summaries, nil
 }
 
-func (s *server) queryStopPointRoutes(ctx context.Context) (map[string][]*routeMeta, error) {
+func (s *server) queryStopPointRoutes(ctx context.Context, date string) (map[string][]*routeMeta, error) {
 	const queryName = "stop_point_routes"
 	start := time.Now()
 
@@ -296,12 +296,13 @@ func (s *server) queryStopPointRoutes(ctx context.Context) (map[string][]*routeM
 			COALESCE(sr.short_name, ''),
 			COALESCE(sr.long_name, ''),
 			COALESCE(sr.route_type, '')
-		FROM static_stop_point_routes spr
+		FROM static_stop_point_routes_by_date spr
 		JOIN static_routes sr ON sr.route_id = spr.route_id
+		WHERE spr.service_date = $1::date
 		ORDER BY spr.stop_point_gid, sr.short_name, spr.route_id
 	`
 
-	rows, err := s.staticDB.QueryContext(ctx, query)
+	rows, err := s.staticDB.QueryContext(ctx, query, date)
 	if err != nil {
 		recordDBQueryResult(queryName, QueryResultError, time.Since(start))
 		return nil, err
