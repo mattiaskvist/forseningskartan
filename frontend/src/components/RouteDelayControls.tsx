@@ -1,4 +1,4 @@
-import { ToggleButton } from "@mui/material";
+import { Box, ToggleButton } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import { AvailableDatesPicker } from "./AvailableDatesPicker";
 import { DatePreset, EventType, DatePresets, DatePresetLabelMap } from "../types/departureDelay";
@@ -39,6 +39,10 @@ export function RouteDelayControls({
     onTransportationModeChange,
     onSearchQueryChange,
 }: RouteDelayControlsProps) {
+    function getTransportationModeLabel(mode: TransportationMode) {
+        return `${mode.charAt(0)}${mode.slice(1).toLowerCase()}`;
+    }
+
     function getPresetButtonCB(option: DatePreset) {
         return (
             <ToggleButton key={option} value={option}>
@@ -58,7 +62,7 @@ export function RouteDelayControls({
     function getTransportationModeButtonCB(mode: TransportationMode) {
         return (
             <ToggleButton key={mode} value={mode}>
-                {mode}
+                {getTransportationModeLabel(mode)}
             </ToggleButton>
         );
     }
@@ -68,7 +72,17 @@ export function RouteDelayControls({
     }
 
     return (
-        <div className="flex flex-col gap-3 rounded border border-slate-200 p-3">
+        <Box
+            sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 1.5,
+                borderRadius: 1,
+                border: 1,
+                borderColor: "divider",
+                p: 1.5,
+            }}
+        >
             <div>
                 <FilterToggleButtonGroup
                     label="Date selection"
@@ -123,6 +137,6 @@ export function RouteDelayControls({
                     />
                 </div>
             ) : null}
-        </div>
+        </Box>
     );
 }

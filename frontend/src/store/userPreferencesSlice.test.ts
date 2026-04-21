@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
     applyLoadedUserPreferences,
-    setMapStylePreference,
+    setAppStylePreference,
     toggleFavoriteSiteId,
     userPreferencesSlice,
 } from "./userPreferencesSlice";
@@ -16,7 +16,7 @@ describe("userPreferencesSlice", () => {
         // We expect a brand new user to have no favorites and a 'Dark' map style.
         expect(initialState).toEqual({
             favoriteSiteIds: [],
-            mapStyle: "Dark",
+            appStyle: "Dark",
         });
     });
 
@@ -35,14 +35,14 @@ describe("userPreferencesSlice", () => {
     });
 
     // verify updating a simple string preference
-    it("sets map style preference", () => {
+    it("sets app style preference", () => {
         // dispatch the action to change the map style from the default to 'Light'
         const updatedState = userPreferencesSlice.reducer(
             undefined,
-            setMapStylePreference("Light")
+            setAppStylePreference("Light")
         );
 
-        expect(updatedState.mapStyle).toBe("Light");
+        expect(updatedState.appStyle).toBe("Light");
     });
 
     // verify that we can load saved data
@@ -53,14 +53,14 @@ describe("userPreferencesSlice", () => {
             undefined,
             applyLoadedUserPreferences({
                 favoriteSiteIds: [2, 9],
-                mapStyle: "Classic",
+                appStyle: "Classic",
             })
         );
 
         // state should now exactly match the loaded data
         expect(hydratedState).toEqual({
             favoriteSiteIds: [2, 9],
-            mapStyle: "Classic",
+            appStyle: "Classic",
         });
     });
 });

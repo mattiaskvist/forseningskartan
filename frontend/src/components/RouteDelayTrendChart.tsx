@@ -1,3 +1,4 @@
+import { Box, Typography } from "@mui/material";
 import { LineChart } from "@mui/x-charts/LineChart";
 import { RouteDelayTrendPoint } from "../types/routeDelays";
 
@@ -17,8 +18,15 @@ export function RouteDelayTrendChart({ points, title }: RouteDelayTrendChartProp
     const yValues = points.map(getAvgDelayMinutesCB);
 
     return (
-        <div className="border border-slate-200 rounded p-3">
-            <p className="text-sm text-slate-900">{title}</p>
+        <Box
+            sx={{
+                border: 1,
+                borderColor: "divider",
+                borderRadius: 1,
+                p: 1.5,
+            }}
+        >
+            <Typography sx={{ fontSize: "0.875rem", color: "text.primary" }}>{title}</Typography>
             <LineChart
                 height={250}
                 margin={{ top: 24, right: 32, bottom: 4, left: 16 }}
@@ -43,6 +51,6 @@ export function RouteDelayTrendChart({ points, title }: RouteDelayTrendChartProp
                     },
                 ]}
             />
-        </div>
+        </Box>
     );
 }

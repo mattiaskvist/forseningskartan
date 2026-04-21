@@ -1,18 +1,19 @@
+import { Box } from "@mui/material";
 import { Site } from "../types/sl";
 import { DepartureViewProps } from "./departureView";
-import { MapStyle } from "../types/map";
+import { AppStyle } from "../types/appStyle";
 import { MapSearchView } from "./mapSearchView";
 import { MapDeparturesPanelView } from "./mapDeparturesPanelView";
-import { MapStyleSelector } from "../components/MapStyleSelector";
 import { StopMap } from "../components/StopMap";
+import { AppStyleSelector } from "../components/AppStyleSelector";
 
 type MapViewProps = {
     sites: Site[];
     selectedSite: Site | null;
     handleSelectSiteCB: (siteId: number | null) => void;
     departureViewProps: DepartureViewProps | null;
-    mapStyle: MapStyle;
-    onMapStyleChange: (style: MapStyle) => void;
+    appStyle: AppStyle;
+    onAppStyleChange: (style: AppStyle) => void;
 };
 
 export function MapView({
@@ -20,8 +21,8 @@ export function MapView({
     selectedSite,
     handleSelectSiteCB,
     departureViewProps,
-    mapStyle,
-    onMapStyleChange,
+    appStyle,
+    onAppStyleChange,
 }: MapViewProps) {
     return (
         <div className="relative h-full w-full">
@@ -29,16 +30,40 @@ export function MapView({
                 sites={sites}
                 selectedSite={selectedSite}
                 handleSelectSiteCB={handleSelectSiteCB}
-                mapStyle={mapStyle}
+                appStyle={appStyle}
             />
-            <div className="pointer-events-auto absolute right-4 top-4 z-[1000] max-w-[calc(100vw-2rem)]">
-                <div className="flex items-start gap-3 max-[900px]:flex-col-reverse max-[900px]:items-end">
-                    <MapStyleSelector mapStyle={mapStyle} setMapStyle={onMapStyleChange} />
+            <Box
+                sx={{
+                    position: "absolute",
+                    right: 16,
+                    top: 16,
+                    zIndex: 1000,
+                    maxWidth: "calc(100vw - 2rem)",
+                    pointerEvents: "auto",
+                }}
+            >
+                <Box
+                    sx={{
+                        display: "flex",
+                        alignItems: { xs: "flex-end", md: "flex-start" },
+                        gap: 1.5,
+                        flexDirection: { xs: "column-reverse", md: "row" },
+                        // ensure child components can receive pointer events
+                        "& > *": {
+                            pointerEvents: "auto",
+                        },
+                    }}
+                >
+                    <AppStyleSelector
+                        appStyle={appStyle}
+                        setAppStyle={onAppStyleChange}
+                        isQuickOverlay
+                    />
                     {departureViewProps && (
                         <MapDeparturesPanelView departureViewProps={departureViewProps} />
                     )}
-                </div>
-            </div>
+                </Box>
+            </Box>
             <MapSearchView
                 sites={sites}
                 selectedSite={selectedSite}

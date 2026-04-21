@@ -1,10 +1,11 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { RouteDelayLeaderboardView } from "./routeDelayLeaderboardView";
+import { renderWithTheme } from "../test/renderWithTheme";
 
 describe("RouteDelayLeaderboardView", () => {
     it("shows leaderboard column headers", () => {
-        render(
+        renderWithTheme(
             <RouteDelayLeaderboardView
                 leaderboardItems={[
                     {

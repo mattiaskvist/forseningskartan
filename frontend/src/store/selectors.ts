@@ -151,8 +151,8 @@ function getFavoriteSiteIdsCB(state: RootState) {
     return state.userPreferences.favoriteSiteIds;
 }
 
-function getMapStylePreferenceCB(state: RootState) {
-    return state.userPreferences.mapStyle;
+function getAppStylePreferenceCB(state: RootState) {
+    return state.userPreferences.appStyle;
 }
 
 // use createSelector for computationally expensive selectors
@@ -233,7 +233,7 @@ export {
     getSnackbarMessageCB,
     getSnackbarSeverityCB,
     getFavoriteSiteIdsCB,
-    getMapStylePreferenceCB,
+    getAppStylePreferenceCB,
     getFavoriteSitesCB,
     getSelectedDelayDates,
     getSelectedDelayDatesCB,

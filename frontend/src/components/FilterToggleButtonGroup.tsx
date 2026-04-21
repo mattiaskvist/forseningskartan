@@ -1,4 +1,4 @@
-import { ToggleButtonGroup } from "@mui/material";
+import { Typography, ToggleButtonGroup } from "@mui/material";
 import React from "react";
 
 type FilterToggleButtonGroupProps<T> = {
@@ -24,15 +24,18 @@ export function FilterToggleButtonGroup<T>({
 
     return (
         <div>
-            {label && <p className="text-xs text-slate-900">{label}</p>}
+            {label && (
+                <Typography sx={{ fontSize: "0.75rem", color: "text.primary" }}>{label}</Typography>
+            )}
             <ToggleButtonGroup
                 color="primary"
                 size="small"
                 exclusive
                 value={selectedValue}
                 onChange={handleChangeACB}
+                sx={{ mt: 1 }}
             >
-                <div className="mt-1 flex flex-wrap gap-1">{options.map(renderButtonCB)}</div>
+                {options.map(renderButtonCB)}
             </ToggleButtonGroup>
         </div>
     );

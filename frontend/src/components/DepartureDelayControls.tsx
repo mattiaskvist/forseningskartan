@@ -1,4 +1,4 @@
-import { ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { Box, Typography, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { AvailableDatesPicker } from "./AvailableDatesPicker";
 import { DatePreset, EventType, DatePresets, DatePresetLabelMap } from "../types/departureDelay";
 
@@ -48,19 +48,30 @@ export function DepartureDelayControls({
     }
 
     return (
-        <div className="flex flex-col gap-2 rounded border border-slate-200 p-2">
+        <Box
+            sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 1,
+                borderRadius: 1,
+                border: 1,
+                borderColor: "divider",
+                p: 1,
+            }}
+        >
             <div>
-                <p className="text-xs text-slate-900">Date selection</p>
+                <Typography sx={{ fontSize: "0.75rem", color: "text.primary" }}>
+                    Date selection
+                </Typography>
                 <ToggleButtonGroup
                     color="primary"
                     exclusive
                     onChange={handleDatePresetChangeACB}
                     size="small"
                     value={selectedDatePreset}
+                    sx={{ mt: 1 }}
                 >
-                    <div className="flex flex-wrap gap-0.5 mt-1">
-                        {DatePresets.map(getPresetButtonCB)}
-                    </div>
+                    {DatePresets.map(getPresetButtonCB)}
                 </ToggleButtonGroup>
             </div>
 
@@ -76,21 +87,22 @@ export function DepartureDelayControls({
 
             <div className="flex flex-col gap-2 pt-1">
                 <div>
-                    <p className="text-xs text-slate-900">Event type</p>
+                    <Typography sx={{ fontSize: "0.75rem", color: "text.primary" }}>
+                        Event type
+                    </Typography>
                     <ToggleButtonGroup
                         color="primary"
                         exclusive
                         onChange={handleEventTypeChangeACB}
                         size="small"
                         value={selectedEventType}
+                        className="mt-1"
                     >
-                        <div className="flex flex-wrap gap-1 mt-1">
-                            <ToggleButton value="departure">Departure</ToggleButton>
-                            <ToggleButton value="arrival">Arrival</ToggleButton>
-                        </div>
+                        <ToggleButton value="departure">Departure</ToggleButton>
+                        <ToggleButton value="arrival">Arrival</ToggleButton>
                     </ToggleButtonGroup>
                 </div>
             </div>
-        </div>
+        </Box>
     );
 }

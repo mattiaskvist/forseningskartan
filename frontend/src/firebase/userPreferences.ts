@@ -1,12 +1,12 @@
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { defaultUserPreferencesState, UserPreferencesState } from "../store/userPreferencesSlice";
-import { mapStyles, MapStyle } from "../types/map";
+import { appStyles, AppStyle } from "../types/appStyle";
 import { db } from "./firestore";
 
 const USER_PREFERENCES_COLLECTION = "userPreferences";
 
-function isMapStyle(candidate: unknown): candidate is MapStyle {
-    return typeof candidate === "string" && (mapStyles as readonly string[]).includes(candidate);
+function isAppStyle(candidate: unknown): candidate is AppStyle {
+    return typeof candidate === "string" && (appStyles as readonly string[]).includes(candidate);
 }
 
 export function sanitizeUserPreferences(candidate: unknown): UserPreferencesState {
@@ -19,18 +19,18 @@ export function sanitizeUserPreferences(candidate: unknown): UserPreferencesStat
     }
 
     const parsedCandidate = candidate as {
-        mapStyle?: unknown;
+        appStyle?: unknown;
         favoriteSiteIds?: unknown;
     };
-    const mapStyle = isMapStyle(parsedCandidate.mapStyle)
-        ? parsedCandidate.mapStyle
-        : defaultUserPreferencesState.mapStyle;
+    const appStyle = isAppStyle(parsedCandidate.appStyle)
+        ? parsedCandidate.appStyle
+        : defaultUserPreferencesState.appStyle;
     const favoriteSiteIds = Array.isArray(parsedCandidate.favoriteSiteIds)
         ? parsedCandidate.favoriteSiteIds.filter(isIntegerSiteIdCB)
         : [];
 
     return {
-        mapStyle,
+        appStyle,
         favoriteSiteIds,
     };
 }

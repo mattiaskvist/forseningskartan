@@ -1,7 +1,8 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { AuthUserState } from "../store/authSlice";
 import { SidebarView } from "./sidebarView";
+import { renderWithTheme } from "../test/renderWithTheme";
 
 // simulate a logged in user
 const mockUser: AuthUserState = {
@@ -17,19 +18,21 @@ describe("SidebarView favorites", () => {
         const onSelectFavoriteStop = vi.fn();
 
         // render component with logged-in user and sample data
-        render(
+        renderWithTheme(
             <SidebarView
                 isOpen
                 currentPath="/"
                 user={mockUser}
                 favoriteStops={[
-                    { id: 10, name: "Odenplan" },
-                    { id: 20, name: "Fridhemsplan" },
+                    { id: 10, name: "Odenplan", gid: 10, lat: 0, lon: 0 },
+                    { id: 20, name: "Fridhemsplan", gid: 20, lat: 0, lon: 0 },
                 ]}
                 onToggle={vi.fn()}
                 onNavigate={vi.fn()}
                 onLogout={vi.fn()}
                 onSelectFavoriteStop={onSelectFavoriteStop}
+                appStyle="Dark"
+                onAppStyleChange={vi.fn()}
             />
         );
 
@@ -44,16 +47,18 @@ describe("SidebarView favorites", () => {
     });
 
     it("shows login prompt when no user is logged in", () => {
-        render(
+        renderWithTheme(
             <SidebarView
                 isOpen
                 currentPath="/"
                 user={null}
-                favoriteStops={[{ id: 10, name: "Odenplan" }]}
+                favoriteStops={[{ id: 10, name: "Odenplan", gid: 10, lat: 0, lon: 0 }]}
                 onToggle={vi.fn()}
                 onNavigate={vi.fn()}
                 onLogout={vi.fn()}
                 onSelectFavoriteStop={vi.fn()}
+                appStyle="Dark"
+                onAppStyleChange={vi.fn()}
             />
         );
 
@@ -62,7 +67,7 @@ describe("SidebarView favorites", () => {
     });
 
     it("shows guidance when user has no favorite stops", () => {
-        render(
+        renderWithTheme(
             <SidebarView
                 isOpen
                 currentPath="/"
@@ -72,10 +77,34 @@ describe("SidebarView favorites", () => {
                 onNavigate={vi.fn()}
                 onLogout={vi.fn()}
                 onSelectFavoriteStop={vi.fn()}
+                appStyle="Dark"
+                onAppStyleChange={vi.fn()}
             />
         );
 
         expect(screen.getByText("Favorite stops")).toBeInTheDocument();
         expect(screen.getByText("Select a stop to favorite it")).toBeInTheDocument();
+    });
+
+    it("lets users change app style in the sidebar", () => {
+        const onAppStyleChange = vi.fn();
+
+        renderWithTheme(
+            <SidebarView
+                isOpen
+                currentPath="/"
+                user={mockUser}
+                favoriteStops={[]}
+                onToggle={vi.fn()}
+                onNavigate={vi.fn()}
+                onLogout={vi.fn()}
+                onSelectFavoriteStop={vi.fn()}
+                appStyle="Dark"
+                onAppStyleChange={onAppStyleChange}
+            />
+        );
+
+        fireEvent.click(screen.getByRole("button", { name: "Light" }));
+        expect(onAppStyleChange).toHaveBeenCalledWith("Light");
     });
 });

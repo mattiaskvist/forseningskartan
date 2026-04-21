@@ -1,6 +1,7 @@
 import MapIcon from "@mui/icons-material/Map";
 import TimelineIcon from "@mui/icons-material/Timeline";
 import InfoIcon from "@mui/icons-material/Info";
+import { Box, Paper, Typography } from "@mui/material";
 import { MapPresenter } from "./presenters/mapPresenter";
 import { RouteDelayPresenter } from "./presenters/RouteDelayPresenter";
 
@@ -25,14 +26,38 @@ export const ROUTES: RouteConfig[] = [
         icon: <InfoIcon fontSize="small" />,
         element: (
             // TODO: placeholder, use presenter and view
-            <div className="flex h-screen w-full items-start justify-center overflow-y-auto bg-slate-50 p-8 pt-20">
-                <section className="overlay-panel w-full max-w-3xl">
-                    <h2 className="overlay-panel-title">About</h2>
-                    <p className="text-sm text-slate-600">
+            <Box
+                sx={{
+                    display: "flex",
+                    height: "100vh",
+                    width: "100%",
+                    alignItems: "flex-start",
+                    justifyContent: "center",
+                    overflowY: "auto",
+                    p: 4,
+                    pt: 10,
+                    bgcolor: "background.default",
+                    color: "text.primary",
+                }}
+            >
+                <Paper
+                    variant="outlined"
+                    sx={{
+                        width: "100%",
+                        maxWidth: "48rem",
+                        p: 3,
+                        borderRadius: 2,
+                        backdropFilter: "blur(4px)",
+                    }}
+                >
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                        About
+                    </Typography>
+                    <Typography sx={{ fontSize: "0.875rem", color: "text.secondary" }}>
                         Förseningskartan - a transit delay visualization tool.
-                    </p>
-                </section>
-            </div>
+                    </Typography>
+                </Paper>
+            </Box>
         ),
     },
 ];
