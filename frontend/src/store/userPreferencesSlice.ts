@@ -57,7 +57,7 @@ export function clearStoredRecentSearchSiteIds() {
 
 export type UserPreferencesState = {
     favoriteSiteIds: number[];
-    recentSearchSiteIds?: number[];
+    recentSearchSiteIds: number[];
     appStyle: AppStyle;
 };
 

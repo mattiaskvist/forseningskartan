@@ -65,7 +65,7 @@ export function MapPresenter() {
     const handleSelectSiteCB = useCallback(
         (siteId: number | null) => {
             selectSiteCB({ dispatch, siteId });
-            if (siteId) {
+            if (siteId !== null) {
                 dispatch(recordRecentSearchSiteId(siteId));
             }
         },
