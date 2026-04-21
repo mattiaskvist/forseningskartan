@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - "gtfsAggregation/postgres_schema.sql"
+      - "gtfsAggregation/postgres_static_schema.sql"
+      - "docker-compose.yml"
 
 jobs:
   rebuild:

@@ -11,6 +11,7 @@ services:
     volumes:
       - gtfs_postgres_data:/var/lib/postgresql/data
       - ./gtfsAggregation/postgres_schema.sql:/docker-entrypoint-initdb.d/001_schema.sql:ro
+      - ./gtfsAggregation/postgres_static_schema.sql:/docker-entrypoint-initdb.d/002_static_schema.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d forseningskartan"]
       interval: 10s
