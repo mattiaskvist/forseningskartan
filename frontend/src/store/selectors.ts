@@ -179,6 +179,10 @@ function getMapTransportationModeFilterCB(state: RootState) {
     return state.userPreferences.mapTransportationModeFilter;
 }
 
+function getHideStopsWithoutDeparturesCB(state: RootState) {
+    return state.userPreferences.hideStopsWithoutDepartures;
+}
+
 // use createSelector for computationally expensive selectors
 // to memoize results and avoid unnecessary recalculations
 const getSelectedDelayDatesCB = createSelector(
@@ -264,6 +268,7 @@ export {
     getAppStylePreferenceCB,
     getRecentSearchSiteIdsCB,
     getMapTransportationModeFilterCB,
+    getHideStopsWithoutDeparturesCB,
     getFavoriteSitesCB,
     getSelectedDelayDates,
     getSelectedDelayDatesCB,

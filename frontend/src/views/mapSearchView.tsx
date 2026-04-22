@@ -1,4 +1,4 @@
-import { Paper } from "@mui/material";
+import { Checkbox, FormControlLabel, Paper } from "@mui/material";
 import { SearchBar } from "../components/SearchBar";
 import { Site, TransportationMode } from "../types/sl";
 import { FilterToggleButtonGroup } from "../components/FilterToggleButtonGroup";
@@ -12,6 +12,8 @@ type MapSearchViewProps = {
     selectedTransportationMode: TransportationMode | null;
     transportationModeOptions: TransportationMode[];
     onTransportationModeChange: (filter: TransportationMode | null) => void;
+    hideStopsWithoutDepartures: boolean;
+    onHideStopsWithoutDeparturesChange: (value: boolean) => void;
 };
 
 export function MapSearchView({
@@ -22,6 +24,8 @@ export function MapSearchView({
     selectedTransportationMode,
     transportationModeOptions,
     onTransportationModeChange,
+    hideStopsWithoutDepartures,
+    onHideStopsWithoutDeparturesChange,
 }: MapSearchViewProps) {
     return (
         <Paper
@@ -40,6 +44,17 @@ export function MapSearchView({
                 backdropFilter: "blur(4px)",
             }}
         >
+            <FormControlLabel
+                sx={{ mt: -1, mb: -1 }}
+                label="Hide stops without departures"
+                control={
+                    <Checkbox
+                        size="small"
+                        checked={hideStopsWithoutDepartures}
+                        onChange={(e) => onHideStopsWithoutDeparturesChange(e.target.checked)}
+                    />
+                }
+            />
             <FilterToggleButtonGroup
                 options={transportationModeOptions}
                 selectedValue={selectedTransportationMode}

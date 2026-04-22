@@ -18,6 +18,8 @@ type MapViewProps = {
     selectedTransportationMode: TransportationMode | null;
     transportationModeOptions: TransportationMode[];
     onTransportationModeChange: (filter: TransportationMode | null) => void;
+    hideStopsWithoutDepartures: boolean;
+    onHideStopsWithoutDeparturesChange: (value: boolean) => void;
 };
 
 export function MapView({
@@ -31,6 +33,8 @@ export function MapView({
     selectedTransportationMode,
     transportationModeOptions,
     onTransportationModeChange,
+    hideStopsWithoutDepartures,
+    onHideStopsWithoutDeparturesChange,
 }: MapViewProps) {
     return (
         <div className="relative h-full w-full">
@@ -80,6 +84,8 @@ export function MapView({
                 selectedTransportationMode={selectedTransportationMode}
                 transportationModeOptions={transportationModeOptions}
                 onTransportationModeChange={onTransportationModeChange}
+                hideStopsWithoutDepartures={hideStopsWithoutDepartures}
+                onHideStopsWithoutDeparturesChange={onHideStopsWithoutDeparturesChange}
             />
         </div>
     );

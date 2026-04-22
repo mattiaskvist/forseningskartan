@@ -24,6 +24,7 @@ import {
     getRoutesByStopPointCB,
     getStopPointRoutesErrorCB,
     getMapTransportationModeFilterCB,
+    getHideStopsWithoutDeparturesCB,
 } from "../store/selectors";
 import { selectSiteCB } from "../store/selection";
 import {
@@ -39,6 +40,7 @@ import { DepartureViewProps } from "../views/departureView";
 import {
     recordRecentSearchSiteId,
     setAppStylePreference,
+    setHideStopsWithoutDepartures,
     setMapTransportationModeFilter,
     toggleFavoriteSiteId,
 } from "../store/userPreferencesSlice";
@@ -75,6 +77,7 @@ export function MapPresenter() {
     const routesByStopPoint = useAppSelector(getRoutesByStopPointCB);
     const routesByStopPointError = useAppSelector(getStopPointRoutesErrorCB);
     const selectedTransportationMode = useAppSelector(getMapTransportationModeFilterCB);
+    const hideStopsWithoutDepartures = useAppSelector(getHideStopsWithoutDeparturesCB);
 
     const transportationModeOptions = useMemo(() => {
         function getRouteTypeCB(route: RouteMeta): RouteType {
@@ -173,6 +176,10 @@ export function MapPresenter() {
         dispatch(setMapTransportationModeFilter(filter));
     }
 
+    function handleHideStopsWithoutDeparturesChangeACB(value: boolean) {
+        dispatch(setHideStopsWithoutDepartures(value));
+    }
+
     const departures = departureResponse?.departures ?? [];
     const upcomingDepartures = getUpcomingDepartures(departures);
 
@@ -211,6 +218,8 @@ export function MapPresenter() {
             selectedTransportationMode={selectedTransportationMode}
             transportationModeOptions={transportationModeOptions}
             onTransportationModeChange={handleTransportationModeChangeACB}
+            hideStopsWithoutDepartures={hideStopsWithoutDepartures}
+            onHideStopsWithoutDeparturesChange={handleHideStopsWithoutDeparturesChangeACB}
         />
     );
 }

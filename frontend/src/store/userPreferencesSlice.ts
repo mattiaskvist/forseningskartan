@@ -91,6 +91,7 @@ export type UserPreferencesState = {
     recentSearchSiteIds: number[];
     appStyle: AppStyle;
     mapTransportationModeFilter: TransportationMode | null;
+    hideStopsWithoutDepartures: boolean;
 };
 
 export const defaultUserPreferencesState: UserPreferencesState = {
@@ -98,6 +99,7 @@ export const defaultUserPreferencesState: UserPreferencesState = {
     recentSearchSiteIds: getStoredRecentSearchSiteIds(),
     appStyle: getStoredAppStyle(),
     mapTransportationModeFilter: null,
+    hideStopsWithoutDepartures: true,
 };
 
 function normalizeFavoriteSiteIds(favoriteSiteIds: number[]): number[] {
@@ -170,6 +172,9 @@ export const userPreferencesSlice = createSlice({
         ) => {
             state.mapTransportationModeFilter = action.payload;
         },
+        setHideStopsWithoutDepartures: (state, action: PayloadAction<boolean>) => {
+            state.hideStopsWithoutDepartures = action.payload;
+        },
     },
 });
 
@@ -180,4 +185,5 @@ export const {
     recordRecentSearchSiteId,
     clearRecentSearchSiteIds,
     setMapTransportationModeFilter,
+    setHideStopsWithoutDepartures,
 } = userPreferencesSlice.actions;
