@@ -1,11 +1,13 @@
 import { Paper, Typography } from "@mui/material";
 import { DepartureView, DepartureViewProps } from "./departureView";
+import { TranslationStrings } from "../utils/translations";
 
 type MapDeparturesPanelViewProps = {
     departureViewProps: DepartureViewProps;
+    t: TranslationStrings['mapDeparturePanel'];
 };
 
-export function MapDeparturesPanelView({ departureViewProps }: MapDeparturesPanelViewProps) {
+export function MapDeparturesPanelView({ departureViewProps, t }: MapDeparturesPanelViewProps) {
     return (
         <aside className="pointer-events-auto z-[1000] w-[min(420px,calc(100vw-2rem))]">
             <Paper
@@ -22,7 +24,7 @@ export function MapDeparturesPanelView({ departureViewProps }: MapDeparturesPane
                 }}
             >
                 <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "text.primary" }}>
-                    Departures
+                    {t.departures}
                 </Typography>
                 <DepartureView {...departureViewProps} />
             </Paper>

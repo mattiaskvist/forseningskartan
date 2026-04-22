@@ -6,6 +6,7 @@ import { DepartureHeaderView } from "./departureHeaderView";
 import { DepartureEmptyStateView } from "./departureEmptyStateView";
 import { DepartureList } from "../components/DepartureList";
 import { DepartureDetails } from "../components/DepartureDetails";
+import { TranslationStrings } from "../utils/translations";
 
 export type DepartureViewProps = {
     upcomingDepartures: Departure[];
@@ -26,6 +27,9 @@ export type DepartureViewProps = {
     isFavoriteStop: boolean;
     isUserLoggedIn: boolean;
     onToggleFavoriteStop: () => void;
+    t: TranslationStrings['departure'];
+    tHeader: TranslationStrings['departureHeader'];
+    tEmpty: TranslationStrings['departureEmpty'];
 };
 
 export function DepartureView({
@@ -47,6 +51,9 @@ export function DepartureView({
     isFavoriteStop,
     isUserLoggedIn,
     onToggleFavoriteStop,
+    t,
+    tHeader,
+    tEmpty,
 }: DepartureViewProps) {
     return (
         <div className="flex flex-col gap-2">
@@ -56,9 +63,10 @@ export function DepartureView({
                 isUserLoggedIn={isUserLoggedIn}
                 onToggleFavoriteStop={onToggleFavoriteStop}
                 onClose={onClose}
+                t={tHeader}
             />
             {isLoading ? (
-                <Suspense message="Loading departures..." />
+                <Suspense message={t.loading} />
             ) : selectedDeparture ? (
                 <DepartureDetails
                     departure={selectedDeparture}
@@ -78,7 +86,7 @@ export function DepartureView({
                     onSelectDeparture={onSelectDeparture}
                 />
             ) : (
-                <DepartureEmptyStateView />
+                <DepartureEmptyStateView t={tEmpty} />
             )}
         </div>
     );

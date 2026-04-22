@@ -1,9 +1,10 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/store";
-import { getAuthUserCB, getAuthLoadingCB } from "../store/selectors";
 import { AccountView } from "../views/accountView";
 import { Suspense } from "../components/Suspense";
+import { translations } from "../utils/translations";
+import { getCurrentLanguageCB, getAuthUserCB, getAuthLoadingCB } from "../store/selectors";
 import { showSnackbar } from "../store/snackbarSlice";
 import { deleteCurrentUser, logoutCurrentUser } from "../store/authThunks";
 
@@ -12,6 +13,7 @@ export function AccountPresenter() {
     const navigate = useNavigate();
     const user = useAppSelector(getAuthUserCB);
     const loading = useAppSelector(getAuthLoadingCB);
+    const currentLanguage = useAppSelector(getCurrentLanguageCB);
 
     useEffect(() => {
         if (!loading && !user) {
@@ -72,5 +74,7 @@ export function AccountPresenter() {
         return <Suspense fullscreen message="Loading account details..." />;
     }
 
-    return <AccountView user={user} onLogout={handleLogoutACB} onDelete={handleDeleteACB} />;
+    const t = translations[currentLanguage].account;
+
+    return <AccountView user={user} onLogout={handleLogoutACB} onDelete={handleDeleteACB} t={t} />;
 }

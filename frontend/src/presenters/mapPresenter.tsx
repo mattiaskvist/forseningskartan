@@ -11,6 +11,7 @@ import {
     getFavoriteSiteIdsCB,
     getRecentSearchSiteIdsCB,
     getAppStylePreferenceCB,
+    getCurrentLanguageCB,
     getSelectedCustomDateCB,
     getSelectedDatePresetCB,
     getSelectedDelayDatesCB,
@@ -42,6 +43,7 @@ import {
 import { showSnackbar } from "../store/snackbarSlice";
 import { Suspense } from "../components/Suspense";
 import { getSiteIdsWithNoDepartures, getUpcomingDepartures } from "../utils/departures";
+import { translations } from "../utils/translations";
 
 export function MapPresenter() {
     const dispatch = useAppDispatch();
@@ -59,6 +61,7 @@ export function MapPresenter() {
     const favoriteSiteIds = useAppSelector(getFavoriteSiteIdsCB);
     const recentSearchSiteIds = useAppSelector(getRecentSearchSiteIdsCB);
     const appStyle = useAppSelector(getAppStylePreferenceCB);
+    const currentLanguage = useAppSelector(getCurrentLanguageCB);
     const sites = useAppSelector(getSitesCB);
     const isSitesLoading = useAppSelector(getSitesLoadingCB);
     const stopPoints = useAppSelector(getStopPointsCB);
@@ -160,6 +163,9 @@ export function MapPresenter() {
               isFavoriteStop: favoriteSiteIds.includes(selectedSite.id),
               isUserLoggedIn: Boolean(user),
               onToggleFavoriteStop: toggleFavoriteStopACB,
+              t: translations[currentLanguage].departure,
+              tHeader: translations[currentLanguage].departureHeader,
+              tEmpty: translations[currentLanguage].departureEmpty,
           }
         : null;
 
@@ -173,6 +179,7 @@ export function MapPresenter() {
             departureViewProps={departureViewProps}
             appStyle={appStyle}
             onAppStyleChange={handleAppStyleChangeACB}
+            tMapDeparturePanel={translations[currentLanguage].mapDeparturePanel}
         />
     );
 }

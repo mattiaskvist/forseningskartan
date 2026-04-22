@@ -1,13 +1,15 @@
 import { Box, Paper, Typography, Avatar, Button, Divider } from "@mui/material";
 import { AuthUserState } from "../store/authSlice";
+import { TranslationStrings } from "../utils/translations";
 
 type AccountViewProps = {
     user: AuthUserState;
     onLogout: () => void;
     onDelete: () => void;
+    t: TranslationStrings['account'];
 };
 
-export function AccountView({ user, onLogout, onDelete }: AccountViewProps) {
+export function AccountView({ user, onLogout, onDelete, t }: AccountViewProps) {
     return (
         <Box
             sx={{
@@ -81,10 +83,10 @@ export function AccountView({ user, onLogout, onDelete }: AccountViewProps) {
 
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, pt: 3 }}>
                     <Button fullWidth variant="outlined" onClick={onLogout}>
-                        Sign Out
+                        {t.signOut}
                     </Button>
                     <Button fullWidth variant="outlined" color="error" onClick={onDelete}>
-                        Delete Account
+                        {t.deleteAccount}
                     </Button>
                 </Box>
             </Paper>

@@ -1,10 +1,12 @@
 import { Box, Button, Typography } from "@mui/material";
+import { TranslationStrings } from "../utils/translations";
 
 type RouteDelayRouteFallbackViewProps = {
     onBackToRoutes: () => void;
+    t: TranslationStrings['routeDelayRouteFallback'];
 };
 
-export function RouteDelayRouteFallbackView({ onBackToRoutes }: RouteDelayRouteFallbackViewProps) {
+export function RouteDelayRouteFallbackView({ onBackToRoutes, t }: RouteDelayRouteFallbackViewProps) {
     return (
         <Box
             sx={{
@@ -18,10 +20,10 @@ export function RouteDelayRouteFallbackView({ onBackToRoutes }: RouteDelayRouteF
             }}
         >
             <Typography sx={{ fontSize: "0.875rem", color: "text.primary" }}>
-                The selected route is no longer available for the current filters.
+                {t.notAvailable}
             </Typography>
             <Button variant="outlined" size="small" onClick={onBackToRoutes}>
-                Back to routes
+                {t.back}
             </Button>
         </Box>
     );

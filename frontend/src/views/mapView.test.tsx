@@ -2,6 +2,7 @@ import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { MapView } from "./mapView";
 import { renderWithTheme } from "../test/renderWithTheme";
+import { translations } from "../utils/translations";
 
 vi.mock("../components/StopMap", () => ({
     StopMap: () => <div data-testid="stop-map" />,
@@ -29,6 +30,7 @@ describe("MapView", () => {
                 siteIdsWithNoDepartures={new Set()}
                 appStyle="Dark"
                 onAppStyleChange={onAppStyleChange}
+                tMapDeparturePanel={translations.en.mapDeparturePanel}
             />
         );
 

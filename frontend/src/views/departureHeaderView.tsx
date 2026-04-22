@@ -2,6 +2,7 @@ import { Typography } from "@mui/material";
 import Button from "@mui/material/Button";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
+import { TranslationStrings } from "../utils/translations";
 
 type DepartureHeaderViewProps = {
     selectedSiteName: string;
@@ -9,6 +10,7 @@ type DepartureHeaderViewProps = {
     isUserLoggedIn: boolean;
     onToggleFavoriteStop: () => void;
     onClose: () => void;
+    t: TranslationStrings['departureHeader'];
 };
 
 export function DepartureHeaderView({
@@ -17,6 +19,7 @@ export function DepartureHeaderView({
     isUserLoggedIn,
     onToggleFavoriteStop,
     onClose,
+    t,
 }: DepartureHeaderViewProps) {
     return (
         <div className="flex items-center justify-between gap-2">
@@ -32,24 +35,24 @@ export function DepartureHeaderView({
                     aria-label={
                         isUserLoggedIn
                             ? isFavoriteStop
-                                ? "Remove stop from favorites"
-                                : "Add stop to favorites"
-                            : "Log in to save favorites"
+                                ? t.unfavorite
+                                : t.favorite
+                            : t.loginFavorite
                     }
                 >
                     {isUserLoggedIn
                         ? isFavoriteStop
-                            ? "Unfavorite"
-                            : "Favorite"
-                        : "Log in to favorite"}
+                            ? t.unfavorite
+                            : t.favorite
+                        : t.loginFavorite}
                 </Button>
                 <Button
                     variant="text"
                     size="small"
                     onClick={onClose}
-                    aria-label="Close departures view"
+                    aria-label={t.close}
                 >
-                    Close
+                    {t.close}
                 </Button>
             </div>
         </div>

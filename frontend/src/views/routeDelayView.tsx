@@ -15,6 +15,7 @@ import { RouteDelayRouteFallbackView } from "./routeDelayRouteFallbackView";
 import { RouteDetailsPage } from "../components/RouteDetailsPage";
 import { RouteDelaySectionToggleView } from "./routeDelaySectionToggleView";
 import { RouteDelayInfoView } from "./RouteDelayInfoView";
+import { TranslationStrings } from "../utils/translations";
 
 type RouteDelayViewProps = {
     selectedSection: RouteDelaySection;
@@ -46,6 +47,11 @@ type RouteDelayViewProps = {
     onBackToRoutes: () => void;
     onPageChange: (nextPage: number) => void;
     onRoutesPerPageChange: (nextPageSize: PageSizeOption) => void;
+    tRouteDelay: TranslationStrings['routeDelay'];
+    tSectionToggle: TranslationStrings['routeDelaySectionToggle'];
+    tRoutes: TranslationStrings['routeDelayRoutes'];
+    tLeaderboard: TranslationStrings['routeDelayLeaderboard'];
+    tRouteFallback: TranslationStrings['routeDelayRouteFallback'];
 };
 
 export function RouteDelayView({
@@ -78,6 +84,11 @@ export function RouteDelayView({
     onBackToRoutes,
     onPageChange,
     onRoutesPerPageChange,
+    tRouteDelay,
+    tSectionToggle,
+    tRoutes,
+    tLeaderboard,
+    tRouteFallback,
 }: RouteDelayViewProps) {
     const isRouteDetailsOpen = selectedRouteKey !== null;
 
@@ -114,13 +125,14 @@ export function RouteDelayView({
                         color: "text.primary",
                     }}
                 >
-                    Route Delays
+                    {tRouteDelay.delays}
                 </Typography>
                 <div className="flex w-full flex-col gap-4">
                     <div className="space-y-4">
                         <RouteDelaySectionToggleView
                             selectedSection={selectedSection}
                             onSelectedSectionChange={onSelectedSectionChange}
+                            t={tSectionToggle}
                         />
                         <RouteDelayControls
                             selectedSection={selectedSection}
@@ -157,12 +169,14 @@ export function RouteDelayView({
                                         onSelectRoute={onSelectRoute}
                                         onPageChange={onPageChange}
                                         onRoutesPerPageChange={onRoutesPerPageChange}
+                                        t={tRoutes}
                                     />
                                 ) : null}
 
                                 {selectedSection === "leaderboard" ? (
                                     <RouteDelayLeaderboardView
                                         leaderboardItems={leaderboardItems}
+                                        t={tLeaderboard}
                                     />
                                 ) : null}
                             </div>
@@ -175,7 +189,7 @@ export function RouteDelayView({
                                 onBackToRoutes={onBackToRoutes}
                             />
                         ) : (
-                            <RouteDelayRouteFallbackView onBackToRoutes={onBackToRoutes} />
+                            <RouteDelayRouteFallbackView onBackToRoutes={onBackToRoutes} t={tRouteFallback} />
                         )}
                     </div>
                 </div>

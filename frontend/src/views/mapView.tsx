@@ -6,6 +6,7 @@ import { MapSearchView } from "./mapSearchView";
 import { MapDeparturesPanelView } from "./mapDeparturesPanelView";
 import { StopMap } from "../components/StopMap";
 import { AppStyleSelector } from "../components/AppStyleSelector";
+import { TranslationStrings } from "../utils/translations";
 
 type MapViewProps = {
     sites: Site[];
@@ -16,6 +17,7 @@ type MapViewProps = {
     departureViewProps: DepartureViewProps | null;
     appStyle: AppStyle;
     onAppStyleChange: (style: AppStyle) => void;
+    tMapDeparturePanel: TranslationStrings['mapDeparturePanel'];
 };
 
 export function MapView({
@@ -27,6 +29,7 @@ export function MapView({
     departureViewProps,
     appStyle,
     onAppStyleChange,
+    tMapDeparturePanel,
 }: MapViewProps) {
     return (
         <div className="relative h-full w-full">
@@ -65,7 +68,7 @@ export function MapView({
                         isQuickOverlay
                     />
                     {departureViewProps && (
-                        <MapDeparturesPanelView departureViewProps={departureViewProps} />
+                        <MapDeparturesPanelView departureViewProps={departureViewProps} t={tMapDeparturePanel} />
                     )}
                 </Box>
             </Box>

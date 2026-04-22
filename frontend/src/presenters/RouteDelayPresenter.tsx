@@ -13,6 +13,7 @@ import {
     getSelectedRouteDelayDatesCB,
     getRouteDelaysCB,
     getRouteDelaysLoadingCB,
+    getCurrentLanguageCB,
 } from "../store/selectors";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import {
@@ -34,6 +35,7 @@ import { PageSizeOption, RouteDelayListItem, RouteDelaySection } from "../types/
 import { getAvgDelayMinutes, getAvgDelaySeconds } from "../utils/time";
 import { compareRouteNamesCB, getRouteDisplayName, getRouteIdentityKey } from "../utils/route";
 import { getPresetDescription } from "../types/departureDelay";
+import { translations } from "../utils/translations";
 
 function getRouteModeKey(summary: DelaySummary): string {
     return summary.route?.type ?? "unknown";
@@ -53,6 +55,7 @@ export function RouteDelayPresenter() {
     const selectedRouteKey = useAppSelector(getRouteDelaySelectedRouteKeyCB);
     const selectedRouteTrend = useAppSelector(getRouteDelayTrendPointsCB);
     const isTrendLoading = useAppSelector(getRouteDelayTrendLoadingCB);
+    const currentLanguage = useAppSelector(getCurrentLanguageCB);
     const [selectedSection, setSelectedSection] = useState<RouteDelaySection>("routes");
     const [searchQuery, setSearchQuery] = useState("");
     const [routesPerPage, setRoutesPerPage] = useState<PageSizeOption>(25);
@@ -244,6 +247,11 @@ export function RouteDelayPresenter() {
             onBackToRoutes={handleBackToRoutesACB}
             onPageChange={handlePageChangeACB}
             onRoutesPerPageChange={handleRoutesPerPageChangeACB}
+            tRouteDelay={translations[currentLanguage].routeDelay}
+            tSectionToggle={translations[currentLanguage].routeDelaySectionToggle}
+            tRoutes={translations[currentLanguage].routeDelayRoutes}
+            tLeaderboard={translations[currentLanguage].routeDelayLeaderboard}
+            tRouteFallback={translations[currentLanguage].routeDelayRouteFallback}
         />
     );
 }
