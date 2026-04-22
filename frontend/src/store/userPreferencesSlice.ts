@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AppStyle, appStyles } from "../types/appStyle";
+import { TransportationMode } from "../types/sl";
 
 const APP_STYLE_STORAGE_KEY = "appStyle";
 const RECENT_SEARCH_STORAGE_KEY = "recentSearchSiteIds";
@@ -89,12 +90,14 @@ export type UserPreferencesState = {
     favoriteSiteIds: number[];
     recentSearchSiteIds: number[];
     appStyle: AppStyle;
+    mapTransportationModeFilter: TransportationMode | null;
 };
 
 export const defaultUserPreferencesState: UserPreferencesState = {
     favoriteSiteIds: [],
     recentSearchSiteIds: getStoredRecentSearchSiteIds(),
     appStyle: getStoredAppStyle(),
+    mapTransportationModeFilter: null,
 };
 
 function normalizeFavoriteSiteIds(favoriteSiteIds: number[]): number[] {
@@ -161,6 +164,12 @@ export const userPreferencesSlice = createSlice({
             state.appStyle = action.payload.appStyle;
             storeAppStyle(action.payload.appStyle);
         },
+        setMapTransportationModeFilter: (
+            state,
+            action: PayloadAction<TransportationMode | null>
+        ) => {
+            state.mapTransportationModeFilter = action.payload;
+        },
     },
 });
 
@@ -170,4 +179,5 @@ export const {
     applyLoadedUserPreferences,
     recordRecentSearchSiteId,
     clearRecentSearchSiteIds,
+    setMapTransportationModeFilter,
 } = userPreferencesSlice.actions;

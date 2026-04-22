@@ -1,12 +1,17 @@
 import { Paper } from "@mui/material";
 import { SearchBar } from "../components/SearchBar";
-import { Site } from "../types/sl";
+import { Site, TransportationMode } from "../types/sl";
+import { FilterToggleButtonGroup } from "../components/FilterToggleButtonGroup";
+import { getTransportationModeButtonCB } from "../utils/transportationMode";
 
 type MapSearchViewProps = {
     sites: Site[];
     selectedSite: Site | null;
     handleSelectSiteCB: (siteId: number | null) => void;
     recentSearchSiteIds: number[];
+    selectedTransportationMode: TransportationMode | null;
+    transportationModeOptions: TransportationMode[];
+    onTransportationModeChange: (filter: TransportationMode | null) => void;
 };
 
 export function MapSearchView({
@@ -14,11 +19,17 @@ export function MapSearchView({
     selectedSite,
     handleSelectSiteCB,
     recentSearchSiteIds,
+    selectedTransportationMode,
+    transportationModeOptions,
+    onTransportationModeChange,
 }: MapSearchViewProps) {
     return (
         <Paper
             variant="outlined"
             sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 1,
                 position: "absolute",
                 left: 72,
                 top: 16,
@@ -29,6 +40,14 @@ export function MapSearchView({
                 backdropFilter: "blur(4px)",
             }}
         >
+            <FilterToggleButtonGroup
+                options={transportationModeOptions}
+                selectedValue={selectedTransportationMode}
+                onValueChange={onTransportationModeChange}
+                renderButtonCB={getTransportationModeButtonCB}
+                allowDeselect={true}
+                onDeselect={() => onTransportationModeChange(null)}
+            />
             <SearchBar
                 sites={sites}
                 selectedSite={selectedSite}

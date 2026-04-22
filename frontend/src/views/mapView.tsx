@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { Site } from "../types/sl";
+import { Site, TransportationMode } from "../types/sl";
 import { DepartureViewProps } from "./departureView";
 import { AppStyle } from "../types/appStyle";
 import { MapSearchView } from "./mapSearchView";
@@ -16,6 +16,9 @@ type MapViewProps = {
     departureViewProps: DepartureViewProps | null;
     appStyle: AppStyle;
     onAppStyleChange: (style: AppStyle) => void;
+    selectedTransportationMode: TransportationMode | null;
+    transportationModeOptions: TransportationMode[];
+    onTransportationModeChange: (filter: TransportationMode | null) => void;
 };
 
 export function MapView({
@@ -27,6 +30,9 @@ export function MapView({
     departureViewProps,
     appStyle,
     onAppStyleChange,
+    selectedTransportationMode,
+    transportationModeOptions,
+    onTransportationModeChange,
 }: MapViewProps) {
     return (
         <div className="relative h-full w-full">
@@ -74,6 +80,9 @@ export function MapView({
                 selectedSite={selectedSite}
                 handleSelectSiteCB={handleSelectSiteCB}
                 recentSearchSiteIds={recentSearchSiteIds}
+                selectedTransportationMode={selectedTransportationMode}
+                transportationModeOptions={transportationModeOptions}
+                onTransportationModeChange={onTransportationModeChange}
             />
         </div>
     );

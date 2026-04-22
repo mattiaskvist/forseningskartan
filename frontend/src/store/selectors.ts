@@ -171,6 +171,10 @@ function getRecentSearchSiteIdsCB(state: RootState) {
     return state.userPreferences.recentSearchSiteIds ?? [];
 }
 
+function getMapTransportationModeFilterCB(state: RootState) {
+    return state.userPreferences.mapTransportationModeFilter;
+}
+
 // use createSelector for computationally expensive selectors
 // to memoize results and avoid unnecessary recalculations
 const getSelectedDelayDatesCB = createSelector(
@@ -254,6 +258,7 @@ export {
     getFavoriteSiteIdsCB,
     getAppStylePreferenceCB,
     getRecentSearchSiteIdsCB,
+    getMapTransportationModeFilterCB,
     getFavoriteSitesCB,
     getSelectedDelayDates,
     getSelectedDelayDatesCB,

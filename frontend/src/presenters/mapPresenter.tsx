@@ -22,6 +22,7 @@ import {
     getSelectedSiteCB,
     getRoutesByStopPointCB,
     getStopPointRoutesErrorCB,
+    getMapTransportationModeFilterCB,
 } from "../store/selectors";
 import { selectSiteCB } from "../store/selection";
 import {
@@ -30,18 +31,21 @@ import {
     setSelectedDeparture,
     setSelectedSiteId,
 } from "../store/reducers";
-import { Departure } from "../types/sl";
+import { Departure, TransportationMode } from "../types/sl";
 import { DatePreset } from "../types/departureDelay";
 import { AppStyle } from "../types/appStyle";
 import { DepartureViewProps } from "../views/departureView";
 import {
     recordRecentSearchSiteId,
     setAppStylePreference,
+    setMapTransportationModeFilter,
     toggleFavoriteSiteId,
 } from "../store/userPreferencesSlice";
 import { showSnackbar } from "../store/snackbarSlice";
 import { Suspense } from "../components/Suspense";
 import { getSiteIdsWithNoDepartures, getUpcomingDepartures } from "../utils/departures";
+import { RouteMeta, RouteType } from "../types/historicalDelay";
+import { routeTypesToTransportationModes } from "../utils/transportationMode";
 
 export function MapPresenter() {
     const dispatch = useAppDispatch();
@@ -65,6 +69,8 @@ export function MapPresenter() {
     const isStopPointsLoading = useAppSelector(getStopPointsLoadingCB);
     const routesByStopPoint = useAppSelector(getRoutesByStopPointCB);
     const routesByStopPointError = useAppSelector(getStopPointRoutesErrorCB);
+    const selectedTransportationMode = useAppSelector(getMapTransportationModeFilterCB);
+
     const siteIdsWithNoDepartures = useMemo(() => {
         if (!sites || !stopPoints || routesByStopPointError) {
             return new Set<number>();
@@ -72,6 +78,14 @@ export function MapPresenter() {
 
         return getSiteIdsWithNoDepartures(sites, stopPoints, routesByStopPoint);
     }, [sites, stopPoints, routesByStopPoint]);
+
+    const transportationModeOptions = useMemo(() => {
+        function getRouteTypeCB(route: RouteMeta): RouteType {
+            return route.type;
+        }
+        const routeTypes = new Set(Object.values(routesByStopPoint).flat().map(getRouteTypeCB));
+        return routeTypesToTransportationModes(routeTypes);
+    }, [routesByStopPoint]);
 
     const handleSelectSiteCB = useCallback(
         (siteId: number | null) => {
@@ -137,6 +151,10 @@ export function MapPresenter() {
         );
     }
 
+    function handleTransportationModeChangeACB(filter: TransportationMode | null) {
+        dispatch(setMapTransportationModeFilter(filter));
+    }
+
     const departures = departureResponse?.departures ?? [];
     const upcomingDepartures = getUpcomingDepartures(departures);
 
@@ -173,6 +191,9 @@ export function MapPresenter() {
             departureViewProps={departureViewProps}
             appStyle={appStyle}
             onAppStyleChange={handleAppStyleChangeACB}
+            selectedTransportationMode={selectedTransportationMode}
+            transportationModeOptions={transportationModeOptions}
+            onTransportationModeChange={handleTransportationModeChangeACB}
         />
     );
 }
