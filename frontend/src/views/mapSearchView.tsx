@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, Paper } from "@mui/material";
+import { Box, Checkbox, FormControlLabel, Paper, Typography } from "@mui/material";
 import { SearchBar } from "../components/SearchBar";
 import { Site, TransportationMode } from "../types/sl";
 import { FilterToggleButtonGroup } from "../components/FilterToggleButtonGroup";
@@ -14,6 +14,7 @@ type MapSearchViewProps = {
     onTransportationModeChange: (filter: TransportationMode | null) => void;
     hideStopsWithoutDepartures: boolean;
     onHideStopsWithoutDeparturesChange: (value: boolean) => void;
+    totalSiteCount: number;
 };
 
 export function MapSearchView({
@@ -26,6 +27,7 @@ export function MapSearchView({
     onTransportationModeChange,
     hideStopsWithoutDepartures,
     onHideStopsWithoutDeparturesChange,
+    totalSiteCount,
 }: MapSearchViewProps) {
     return (
         <Paper
@@ -44,17 +46,27 @@ export function MapSearchView({
                 backdropFilter: "blur(4px)",
             }}
         >
-            <FormControlLabel
-                sx={{ mt: -1, mb: -1 }}
-                label="Hide stops without departures"
-                control={
-                    <Checkbox
-                        size="small"
-                        checked={hideStopsWithoutDepartures}
-                        onChange={(e) => onHideStopsWithoutDeparturesChange(e.target.checked)}
-                    />
-                }
-            />
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <FormControlLabel
+                    sx={{ mt: -1, mb: -1 }}
+                    label="Hide unused stops"
+                    control={
+                        <Checkbox
+                            size="small"
+                            checked={hideStopsWithoutDepartures}
+                            onChange={(e) => onHideStopsWithoutDeparturesChange(e.target.checked)}
+                        />
+                    }
+                />
+                <Typography
+                    sx={{
+                        fontSize: "0.75rem",
+                        color: "text.secondary",
+                    }}
+                >
+                    Showing {sites.length}/{totalSiteCount} stops
+                </Typography>
+            </Box>
             <FilterToggleButtonGroup
                 options={transportationModeOptions}
                 selectedValue={selectedTransportationMode}

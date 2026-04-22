@@ -20,6 +20,7 @@ type MapViewProps = {
     onTransportationModeChange: (filter: TransportationMode | null) => void;
     hideStopsWithoutDepartures: boolean;
     onHideStopsWithoutDeparturesChange: (value: boolean) => void;
+    totalSiteCount: number;
 };
 
 export function MapView({
@@ -35,6 +36,7 @@ export function MapView({
     onTransportationModeChange,
     hideStopsWithoutDepartures,
     onHideStopsWithoutDeparturesChange,
+    totalSiteCount,
 }: MapViewProps) {
     return (
         <div className="relative h-full w-full">
@@ -86,6 +88,7 @@ export function MapView({
                 onTransportationModeChange={onTransportationModeChange}
                 hideStopsWithoutDepartures={hideStopsWithoutDepartures}
                 onHideStopsWithoutDeparturesChange={onHideStopsWithoutDeparturesChange}
+                totalSiteCount={totalSiteCount}
             />
         </div>
     );

@@ -226,6 +226,7 @@ export function MapPresenter() {
             onTransportationModeChange={handleTransportationModeChangeACB}
             hideStopsWithoutDepartures={hideStopsWithoutDepartures}
             onHideStopsWithoutDeparturesChange={handleHideStopsWithoutDeparturesChangeACB}
+            totalSiteCount={sites.length}
         />
     );
 }
