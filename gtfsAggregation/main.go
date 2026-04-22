@@ -141,15 +141,6 @@ func runAggregations(config Config) error {
 				RecordError(err)
 				fmt.Printf("Startup job error: %v\n", err)
 			}
-
-			if config.StaticPostgresDSN != "" {
-				fmt.Println("Running initial startup static GTFS refresh...")
-				err := runStaticRefresh(config)
-				if err != nil {
-					RecordError(err)
-					fmt.Printf("Startup static job error: %v\n", err)
-				}
-			}
 		}()
 
 		// Wait for SIGINT/SIGTERM to shut down gracefully
