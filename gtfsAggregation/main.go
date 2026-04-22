@@ -115,7 +115,7 @@ func runAggregations(config Config) error {
 			log.Fatalf("Invalid cron schedule: %v", err)
 		}
 
-		if config.StaticPostgresDSN != "" {
+		if config.StaticPostgresDSN != "" && config.StaticCronSchedule != "" {
 			_, err = c.AddFunc(config.StaticCronSchedule, func() {
 				fmt.Println("Starting scheduled static GTFS refresh...")
 				err := runStaticRefresh(config)
