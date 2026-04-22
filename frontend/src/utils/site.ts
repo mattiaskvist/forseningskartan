@@ -9,7 +9,7 @@ export function getStopPointGidsForSite(site: Site, stopPoints: StopPoint[]): st
         return stopAreaIds.has(stopPoint.stop_area.id);
     }
     function getStopPointGIDCB(stopPoint: StopPoint) {
-        return stopPoint.gid.toString();
+        return stopPoint.gid;
     }
 
     const stopPointGids = stopPoints.filter(isStopPointForSiteCB).map(getStopPointGIDCB);
