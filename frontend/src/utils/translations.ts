@@ -84,6 +84,7 @@ interface routeDelayStrings {
 interface sideBarStrings {
     login: string;
     style: string;
+    language: string;
     favoriteStops: string;
     loginToFavorite: string;
     selectToFavorite: string;
@@ -279,6 +280,7 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
         sideBar: {
             login: "Log in",
             style: "App Style",
+            language: "Language",
             favoriteStops: "Favorite stops",
             loginToFavorite: "Log in to favorite stops",
             selectToFavorite: "Select a stop to favorite it",
@@ -437,6 +439,7 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
         sideBar: {
             login: "Logga in",
             style: "App-stil",
+            language: "Språk",
             favoriteStops: "Favorithållplatser",
             loginToFavorite: "Logga in för att spara favoriter",
             selectToFavorite: "Välj en hållplats för att spara den",

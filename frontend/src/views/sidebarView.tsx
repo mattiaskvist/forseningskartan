@@ -18,8 +18,6 @@ import {
     Avatar,
     Button,
     Divider,
-    ToggleButton,
-    ToggleButtonGroup,
 } from "@mui/material";
 import { AuthUserState } from "../store/authSlice";
 import { ROUTES, type RouteConfig } from "../routes";
@@ -27,6 +25,7 @@ import favicon from "/favicon.png";
 import { Site } from "../types/sl";
 import { AppStyle } from "../types/appStyle";
 import { AppStyleSelector } from "../components/AppStyleSelector";
+import { LanguageSelector } from "../components/LanguageSelector";
 import { LanguageCode, TranslationStrings } from "../utils/translations";
 
 type SidebarNavItem = Pick<RouteConfig, "label" | "path" | "icon">;
@@ -286,22 +285,17 @@ export function SidebarView({
                                 fontWeight: 600,
                                 textTransform: "uppercase",
                                 letterSpacing: "0.05em",
+                                mb: 1,
                             }}
                         >
-                            {currentLanguage === "en" ? "Language / Språk" : "Språk / Language"}
+                            {t.style}
                         </Typography>
-                        <Box sx={{ pt: 1, width: "100%", pb: 2 }}>
-                            <ToggleButtonGroup
-                                value={currentLanguage}
-                                exclusive
-                                onChange={(_, newLang) => {
-                                    if (newLang) onLanguageChange(newLang as LanguageCode);
-                                }}
-                                size="small"
-                            >
-                                <ToggleButton value="en">EN</ToggleButton>
-                                <ToggleButton value="sv">SV</ToggleButton>
-                            </ToggleButtonGroup>
+                        <Box sx={{ width: "100%", pb: 2 }}>
+                            <AppStyleSelector
+                                appStyle={appStyle}
+                                setAppStyle={onAppStyleChange}
+                                t={tAppStyleSelector}
+                            />
                         </Box>
 
                         <Typography
@@ -311,17 +305,15 @@ export function SidebarView({
                                 fontWeight: 600,
                                 textTransform: "uppercase",
                                 letterSpacing: "0.05em",
+                                mb: 1,
                             }}
                         >
-                            {t.style}
+                            {t.language}
                         </Typography>
-                        <Box sx={{ pt: 1 }}>
-                            <AppStyleSelector
-                                appStyle={appStyle}
-                                setAppStyle={onAppStyleChange}
-                                t={tAppStyleSelector}
-                            />
-                        </Box>
+                        <LanguageSelector
+                            currentLanguage={currentLanguage}
+                            onLanguageChange={onLanguageChange}
+                        />
                     </ListItem>
 
                     <ListItem sx={{ mt: 3, px: 1.5 }}>
