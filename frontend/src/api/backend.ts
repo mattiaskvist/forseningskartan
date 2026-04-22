@@ -199,15 +199,8 @@ export function fetchStopPointRoutesByDate(date: string): Promise<RoutesByStopPo
         return response.json();
     }
 
-    function catchErrorACB(error: unknown): RoutesByStopPoint {
-        console.error(error);
-        return {};
-    }
-
     const fullURL = `${backendBaseURL}/api/stop-point-routes?${params.toString()}`;
     return fetch(fullURL, {
         headers: getBackendAuthHeaders(),
-    })
-        .then(handleResponseACB)
-        .catch(catchErrorACB);
+    }).then(handleResponseACB);
 }
