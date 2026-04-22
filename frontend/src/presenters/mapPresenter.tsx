@@ -21,6 +21,7 @@ import {
     getStopPointsLoadingCB,
     getSelectedSiteCB,
     getRoutesByStopPointCB,
+    getStopPointRoutesErrorCB,
 } from "../store/selectors";
 import { selectSiteCB } from "../store/selection";
 import {
@@ -63,8 +64,9 @@ export function MapPresenter() {
     const stopPoints = useAppSelector(getStopPointsCB);
     const isStopPointsLoading = useAppSelector(getStopPointsLoadingCB);
     const routesByStopPoint = useAppSelector(getRoutesByStopPointCB);
+    const routesByStopPointError = useAppSelector(getStopPointRoutesErrorCB);
     const siteIdsWithNoDepartures = useMemo(() => {
-        if (!sites || !stopPoints) {
+        if (!sites || !stopPoints || routesByStopPointError) {
             return new Set<number>();
         }
 
