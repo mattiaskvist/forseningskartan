@@ -18,6 +18,7 @@ import {
     routeDelayUISlice,
 } from "./reducers";
 import { authSlice, setUser } from "./authSlice";
+import languageReducer from "./languageSlice";
 import { showSnackbar, snackbarSlice } from "./snackbarSlice";
 import {
     applyLoadedUserPreferences,
@@ -72,6 +73,7 @@ function mergeRecentSearchSiteIds(
 export const store = configureStore({
     reducer: {
         auth: authSlice.reducer,
+        language: languageReducer,
         sites: sitesSlice.reducer,
         departures: departuresSlice.reducer,
         stopPoints: stopPointsSlice.reducer,

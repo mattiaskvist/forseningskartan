@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { AuthUserState } from "../store/authSlice";
 import { SidebarView } from "./sidebarView";
 import { renderWithTheme } from "../test/renderWithTheme";
+import { translations } from "../utils/translations";
 
 // simulate a logged in user
 const mockUser: AuthUserState = {
@@ -33,6 +34,9 @@ describe("SidebarView favorites", () => {
                 onSelectFavoriteStop={onSelectFavoriteStop}
                 appStyle="Dark"
                 onAppStyleChange={vi.fn()}
+                currentLanguage="en"
+                onLanguageChange={vi.fn()}
+                t={translations.en.sideBar}
             />
         );
 
@@ -59,6 +63,9 @@ describe("SidebarView favorites", () => {
                 onSelectFavoriteStop={vi.fn()}
                 appStyle="Dark"
                 onAppStyleChange={vi.fn()}
+                currentLanguage="en"
+                onLanguageChange={vi.fn()}
+                t={translations.en.sideBar}
             />
         );
 
@@ -79,6 +86,9 @@ describe("SidebarView favorites", () => {
                 onSelectFavoriteStop={vi.fn()}
                 appStyle="Dark"
                 onAppStyleChange={vi.fn()}
+                currentLanguage="en"
+                onLanguageChange={vi.fn()}
+                t={translations.en.sideBar}
             />
         );
 
@@ -101,6 +111,9 @@ describe("SidebarView favorites", () => {
                 onSelectFavoriteStop={vi.fn()}
                 appStyle="Dark"
                 onAppStyleChange={onAppStyleChange}
+                currentLanguage="en"
+                onLanguageChange={vi.fn()}
+                t={translations.en.sideBar}
             />
         );
 

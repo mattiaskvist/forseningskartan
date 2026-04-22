@@ -18,6 +18,8 @@ import {
     Avatar,
     Button,
     Divider,
+    ToggleButton,
+    ToggleButtonGroup,
 } from "@mui/material";
 import { AuthUserState } from "../store/authSlice";
 import { ROUTES, type RouteConfig } from "../routes";
@@ -25,6 +27,7 @@ import favicon from "/favicon.png";
 import { Site } from "../types/sl";
 import { AppStyle } from "../types/appStyle";
 import { AppStyleSelector } from "../components/AppStyleSelector";
+import { LanguageCode, TranslationStrings } from "../utils/translations";
 
 type SidebarNavItem = Pick<RouteConfig, "label" | "path" | "icon">;
 
@@ -39,6 +42,9 @@ type SidebarViewProps = {
     onSelectFavoriteStop: (siteId: number) => void;
     appStyle: AppStyle;
     onAppStyleChange: (style: AppStyle) => void;
+    currentLanguage: LanguageCode;
+    onLanguageChange: (lang: LanguageCode) => void;
+    t: TranslationStrings['sideBar'];
 };
 
 export function SidebarView({
@@ -52,6 +58,9 @@ export function SidebarView({
     onSelectFavoriteStop,
     appStyle,
     onAppStyleChange,
+    currentLanguage,
+    onLanguageChange,
+    t,
 }: SidebarViewProps) {
     function isActiveCB(path: string): boolean {
         if (path === "/") {
@@ -181,7 +190,7 @@ export function SidebarView({
                     startIcon={<LoginIcon fontSize="small" />}
                     onClick={handleClickCB}
                 >
-                    Log In
+                    {t.login}
                 </Button>
             </ListItem>
         );
@@ -259,7 +268,32 @@ export function SidebarView({
                                 letterSpacing: "0.05em",
                             }}
                         >
-                            Style
+                            {currentLanguage === 'en' ? 'Language / Språk' : 'Språk / Language'}
+                        </Typography>
+                        <Box sx={{ pt: 1, width: "100%", pb: 2 }}>
+                            <ToggleButtonGroup
+                                value={currentLanguage}
+                                exclusive
+                                onChange={(_, newLang) => {
+                                    if (newLang) onLanguageChange(newLang as LanguageCode);
+                                }}
+                                size="small"
+                            >
+                                <ToggleButton value="en">EN</ToggleButton>
+                                <ToggleButton value="sv">SV</ToggleButton>
+                            </ToggleButtonGroup>
+                        </Box>
+
+                        <Typography
+                            sx={{
+                                color: "text.secondary",
+                                fontSize: "0.75rem",
+                                fontWeight: 600,
+                                textTransform: "uppercase",
+                                letterSpacing: "0.05em",
+                            }}
+                        >
+                            {t.style}
                         </Typography>
                         <Box sx={{ pt: 1 }}>
                             <AppStyleSelector appStyle={appStyle} setAppStyle={onAppStyleChange} />
@@ -276,20 +310,20 @@ export function SidebarView({
                                 letterSpacing: "0.05em",
                             }}
                         >
-                            Favorite stops
+                            {t.favoriteStops}
                         </Typography>
                     </ListItem>
 
                     {!user ? (
                         <ListItem sx={{ px: 1.5, py: 0.5 }}>
                             <Typography sx={{ color: "text.secondary", fontSize: "0.75rem" }}>
-                                Log in to favorite stops
+                                {t.loginToFavorite}
                             </Typography>
                         </ListItem>
                     ) : favoriteStops.length === 0 ? (
                         <ListItem sx={{ px: 1.5, py: 0.5 }}>
                             <Typography sx={{ color: "text.secondary", fontSize: "0.75rem" }}>
-                                Select a stop to favorite it
+                                {t.selectToFavorite}
                             </Typography>
                         </ListItem>
                     ) : (

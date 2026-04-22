@@ -8,6 +8,9 @@ import { selectSiteCB } from "../store/selection";
 import { logoutCurrentUser } from "../store/authThunks";
 import { AppStyle } from "../types/appStyle";
 import { setAppStylePreference } from "../store/userPreferencesSlice";
+import { getCurrentLanguageCB } from "../store/selectors";
+import { setLanguage } from "../store/languageSlice";
+import { LanguageCode, translations } from "../utils/translations";
 
 export function SidebarPresenter() {
     const [isOpen, setIsOpen] = useState(false);
@@ -17,6 +20,7 @@ export function SidebarPresenter() {
     const user = useAppSelector(getAuthUserCB);
     const favoriteSites = useAppSelector(getFavoriteSitesCB);
     const appStyle = useAppSelector(getAppStylePreferenceCB);
+    const currentLanguage = useAppSelector(getCurrentLanguageCB);
 
     function toggleSidebarCB() {
         setIsOpen(!isOpen);
@@ -47,6 +51,12 @@ export function SidebarPresenter() {
         dispatch(setAppStylePreference(style));
     }
 
+    function handleLanguageChangeACB(lang: LanguageCode) {
+        dispatch(setLanguage(lang));
+    }
+
+    const t = translations[currentLanguage].sideBar;
+
     return (
         <SidebarView
             isOpen={isOpen}
@@ -59,6 +69,9 @@ export function SidebarPresenter() {
             onSelectFavoriteStop={selectFavoriteStopACB}
             appStyle={appStyle}
             onAppStyleChange={handleAppStyleChangeACB}
+            currentLanguage={currentLanguage}
+            onLanguageChange={handleLanguageChangeACB}
+            t={t}
         />
     );
 }

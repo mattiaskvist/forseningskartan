@@ -25,6 +25,8 @@ describe("MapView", () => {
                 selectedSite={null}
                 handleSelectSiteCB={vi.fn()}
                 departureViewProps={null}
+                recentSearchSiteIds={[]}
+                siteIdsWithNoDepartures={new Set()}
                 appStyle="Dark"
                 onAppStyleChange={onAppStyleChange}
             />
