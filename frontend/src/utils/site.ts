@@ -1,3 +1,4 @@
+import { RoutesByStopPoint } from "../api/backend";
 import { Site, StopPoint } from "../types/sl";
 
 export type StopPointGidsBySiteId = Record<number, string[]>;
@@ -58,4 +59,23 @@ export function getStopPointGidsForSite(
 
     const stopPointGids = stopPoints.filter(isStopPointForSiteCB).map(getStopPointGIDCB);
     return Array.from(new Set(stopPointGids));
+}
+
+export function getSitesWithRoutes(
+    sites: Site[],
+    stopPoints: StopPoint[],
+    routesByStopPoint: RoutesByStopPoint,
+    stopPointGidsBySiteId: StopPointGidsBySiteId
+): Site[] {
+    function siteHasAnyRoutes(site: Site): boolean {
+        const stopPointGids = getStopPointGidsForSite(site, stopPoints, stopPointGidsBySiteId);
+
+        function stopPointHasAnyRoutesCB(gid: string): boolean {
+            return (routesByStopPoint[gid]?.length ?? 0) > 0;
+        }
+        return stopPointGids.some(stopPointHasAnyRoutesCB);
+    }
+
+    const f = sites.filter(siteHasAnyRoutes);
+    return f;
 }

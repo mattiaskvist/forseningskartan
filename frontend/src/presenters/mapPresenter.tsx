@@ -52,6 +52,7 @@ import {
     getSitesByTransportationMode,
     routeTypesToTransportationModes,
 } from "../utils/transportationMode";
+import { getSitesWithRoutes } from "../utils/site";
 
 export function MapPresenter() {
     const dispatch = useAppDispatch();
@@ -92,8 +93,12 @@ export function MapPresenter() {
             return [];
         }
 
+        const baseSites = hideStopsWithoutDepartures
+            ? getSitesWithRoutes(sites, stopPoints, routesByStopPoint, stopPointGidsBySiteId)
+            : sites;
+
         return getSitesByTransportationMode(
-            sites,
+            baseSites,
             selectedTransportationMode,
             routesByStopPoint,
             stopPoints,
@@ -106,6 +111,7 @@ export function MapPresenter() {
         routesByStopPointError,
         stopPoints,
         stopPointGidsBySiteId,
+        hideStopsWithoutDepartures,
     ]);
 
     const handleSelectSiteCB = useCallback(
