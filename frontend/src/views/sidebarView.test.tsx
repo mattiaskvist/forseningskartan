@@ -37,6 +37,7 @@ describe("SidebarView favorites", () => {
                 currentLanguage="en"
                 onLanguageChange={vi.fn()}
                 t={translations.en.sideBar}
+                tAppStyleSelector={translations.en.appStyleSelector}
             />
         );
 
@@ -66,6 +67,7 @@ describe("SidebarView favorites", () => {
                 currentLanguage="en"
                 onLanguageChange={vi.fn()}
                 t={translations.en.sideBar}
+                tAppStyleSelector={translations.en.appStyleSelector}
             />
         );
 
@@ -89,6 +91,7 @@ describe("SidebarView favorites", () => {
                 currentLanguage="en"
                 onLanguageChange={vi.fn()}
                 t={translations.en.sideBar}
+                tAppStyleSelector={translations.en.appStyleSelector}
             />
         );
 
@@ -114,6 +117,7 @@ describe("SidebarView favorites", () => {
                 currentLanguage="en"
                 onLanguageChange={vi.fn()}
                 t={translations.en.sideBar}
+                tAppStyleSelector={translations.en.appStyleSelector}
             />
         );
 

@@ -74,7 +74,7 @@ export function MapPresenter() {
         }
 
         return getSiteIdsWithNoDepartures(sites, stopPoints, routesByStopPoint);
-    }, [sites, stopPoints, routesByStopPoint]);
+    }, [sites, stopPoints, routesByStopPoint, routesByStopPointError]);
 
     const handleSelectSiteCB = useCallback(
         (siteId: number | null) => {
@@ -87,7 +87,7 @@ export function MapPresenter() {
     );
 
     if (isSitesLoading || !sites || isStopPointsLoading || !stopPoints) {
-        return <Suspense fullscreen message="Loading transit data and preparing the map..." />;
+        return <Suspense fullscreen message={translations[currentLanguage].map.loading} />;
     }
 
     function closeDeparturesViewACB() {
@@ -166,6 +166,12 @@ export function MapPresenter() {
               t: translations[currentLanguage].departure,
               tHeader: translations[currentLanguage].departureHeader,
               tEmpty: translations[currentLanguage].departureEmpty,
+              tList: translations[currentLanguage].departureList,
+              tHistoricalDelays: translations[currentLanguage].departureHistoricalDelays,
+              tDelayStats: translations[currentLanguage].departureDelayStats,
+              tDelayControls: translations[currentLanguage].routeDelayControls,
+              tDatePicker: translations[currentLanguage].availableDatesPicker,
+              tDetails: translations[currentLanguage].departureDetails,
           }
         : null;
 
@@ -180,6 +186,8 @@ export function MapPresenter() {
             appStyle={appStyle}
             onAppStyleChange={handleAppStyleChangeACB}
             tMapDeparturePanel={translations[currentLanguage].mapDeparturePanel}
+            tSearchBar={translations[currentLanguage].searchBar}
+            tAppStyleSelector={translations[currentLanguage].appStyleSelector}
         />
     );
 }

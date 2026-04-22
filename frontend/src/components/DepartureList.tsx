@@ -5,15 +5,17 @@ import ToggleButton from "@mui/material/ToggleButton";
 import { useMemo, useState } from "react";
 import { Box, Card, TextField, Typography } from "@mui/material";
 import { FilterToggleButtonGroup } from "./FilterToggleButtonGroup";
+import { TranslationStrings } from "../utils/translations";
 
 type DepartureListProps = {
     departures: Departure[];
     onSelectDeparture: (departure: Departure) => void;
+    t: TranslationStrings["departureList"];
 };
 
 type ModeWithOther = TransportationMode | "OTHER";
 
-export function DepartureList({ departures, onSelectDeparture }: DepartureListProps) {
+export function DepartureList({ departures, onSelectDeparture, t }: DepartureListProps) {
     function getModeLabel(mode: ModeWithOther) {
         return `${mode.charAt(0)}${mode.slice(1).toLowerCase()}`;
     }
@@ -106,10 +108,10 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
                     <Typography
                         sx={{ fontSize: "0.875rem", fontWeight: 600, color: "text.primary" }}
                     >
-                        {transportModeLabel} {line} to {destination}
+                        {transportModeLabel} {line} {t.to} {destination}
                     </Typography>
                     <Typography sx={{ fontSize: "0.875rem", color: "text.primary" }}>
-                        Planned {formatTime(departure.scheduled)} · Predicted{" "}
+                        {t.planned} {formatTime(departure.scheduled)} · {t.predicted}{" "}
                         {formatTime(departure.expected ?? departure.scheduled)}
                     </Typography>
                     <Typography
@@ -165,7 +167,7 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
     return (
         <div className="flex flex-col gap-3">
             <TextField
-                placeholder="Search by destination or line"
+                placeholder={t.searchPlaceholder}
                 variant="outlined"
                 size="small"
                 value={searchQuery}
@@ -184,7 +186,7 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
                 renderModeDepartures(selectedMode)
             ) : (
                 <Typography sx={{ fontSize: "0.875rem", color: "text.secondary" }}>
-                    No transport modes selected
+                    {t.noTransportModes}
                 </Typography>
             )}
         </div>

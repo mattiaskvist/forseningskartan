@@ -24,32 +24,28 @@ export function AccountPresenter() {
     async function handleLogoutACB() {
         try {
             await dispatch(logoutCurrentUser()).unwrap();
-            dispatch(showSnackbar({ message: "Logged out", severity: "success" }));
+            dispatch(showSnackbar({ message: t.logoutSuccess, severity: "success" }));
             navigate("/");
         } catch {
-            dispatch(showSnackbar({ message: "Failed to log out", severity: "error" }));
+            dispatch(showSnackbar({ message: t.logoutError, severity: "error" }));
         }
     }
 
     async function handleDeleteACB() {
-        if (
-            !window.confirm(
-                "Are you sure you want to delete your account? This action cannot be undone."
-            )
-        ) {
+        if (!window.confirm(t.deleteConfirm)) {
             return;
         }
 
         try {
             await dispatch(deleteCurrentUser()).unwrap();
-            dispatch(showSnackbar({ message: "Account deleted", severity: "success" }));
+            dispatch(showSnackbar({ message: t.deleteSuccess, severity: "success" }));
             navigate("/");
         } catch (error: unknown) {
             const hasErrorCode = error !== null && typeof error === "object" && "code" in error;
             if (hasErrorCode && error.code === "auth/requires-recent-login") {
                 dispatch(
                     showSnackbar({
-                        message: "Please log in again before deleting your account.",
+                        message: t.recentLoginRequired,
                         severity: "warning",
                     })
                 );
@@ -62,7 +58,7 @@ export function AccountPresenter() {
             } else {
                 dispatch(
                     showSnackbar({
-                        message: "Failed to delete account. Please try again later.",
+                        message: t.deleteError,
                         severity: "error",
                     })
                 );
@@ -71,7 +67,7 @@ export function AccountPresenter() {
     }
 
     if (loading || !user) {
-        return <Suspense fullscreen message="Loading account details..." />;
+        return <Suspense fullscreen message={translations[currentLanguage].account.loading} />;
     }
 
     const t = translations[currentLanguage].account;

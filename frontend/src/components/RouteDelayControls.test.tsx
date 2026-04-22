@@ -2,6 +2,7 @@ import { screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { RouteDelayControls } from "./RouteDelayControls";
 import { renderWithTheme } from "../test/renderWithTheme";
+import { translations } from "../utils/translations";
 
 describe("RouteDelayControls", () => {
     it("renders transportation mode labels in title case", () => {
@@ -21,6 +22,8 @@ describe("RouteDelayControls", () => {
                 onEventTypeChange={vi.fn()}
                 onTransportationModeChange={vi.fn()}
                 onSearchQueryChange={vi.fn()}
+                t={translations.en.routeDelayControls}
+                tDatePicker={translations.en.availableDatesPicker}
             />
         );
 

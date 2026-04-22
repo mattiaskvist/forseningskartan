@@ -4,15 +4,18 @@ import "firebaseui/dist/firebaseui.css";
 import { LoginView } from "../views/loginView";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/store";
-import { getAuthUserCB, getAuthLoadingCB } from "../store/selectors";
+import { getAuthUserCB, getAuthLoadingCB, getCurrentLanguageCB } from "../store/selectors";
 import { Suspense } from "../components/Suspense";
 import { getLoginAuthUI, resetLoginAuthUI } from "../store/authThunks";
+import { translations } from "../utils/translations";
 
 export function LoginPresenter() {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const user = useAppSelector(getAuthUserCB);
     const loading = useAppSelector(getAuthLoadingCB);
+    const currentLanguage = useAppSelector(getCurrentLanguageCB);
+    const t = translations[currentLanguage].login;
 
     useEffect(() => {
         if (!loading && user) {
@@ -50,7 +53,7 @@ export function LoginPresenter() {
     }, [loading, user, navigate, dispatch]);
 
     if (loading) {
-        return <Suspense fullscreen message="Loading authentication..." />;
+        return <Suspense fullscreen message={t.loading} />;
     }
 
     // Do not render if we're redirecting
@@ -58,5 +61,5 @@ export function LoginPresenter() {
         return null;
     }
 
-    return <LoginView />;
+    return <LoginView t={t} />;
 }

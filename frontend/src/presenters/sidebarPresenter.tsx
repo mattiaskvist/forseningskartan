@@ -74,6 +74,7 @@ export function SidebarPresenter() {
             currentLanguage={currentLanguage}
             onLanguageChange={handleLanguageChangeACB}
             t={t}
+            tAppStyleSelector={translations[currentLanguage].appStyleSelector}
         />
     );
 }

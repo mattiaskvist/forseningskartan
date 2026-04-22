@@ -18,6 +18,8 @@ type MapViewProps = {
     appStyle: AppStyle;
     onAppStyleChange: (style: AppStyle) => void;
     tMapDeparturePanel: TranslationStrings["mapDeparturePanel"];
+    tSearchBar: TranslationStrings["searchBar"];
+    tAppStyleSelector: TranslationStrings["appStyleSelector"];
 };
 
 export function MapView({
@@ -30,6 +32,8 @@ export function MapView({
     appStyle,
     onAppStyleChange,
     tMapDeparturePanel,
+    tSearchBar,
+    tAppStyleSelector,
 }: MapViewProps) {
     return (
         <div className="relative h-full w-full">
@@ -66,6 +70,7 @@ export function MapView({
                         appStyle={appStyle}
                         setAppStyle={onAppStyleChange}
                         isQuickOverlay
+                        t={tAppStyleSelector}
                     />
                     {departureViewProps && (
                         <MapDeparturesPanelView
@@ -80,6 +85,7 @@ export function MapView({
                 selectedSite={selectedSite}
                 handleSelectSiteCB={handleSelectSiteCB}
                 recentSearchSiteIds={recentSearchSiteIds}
+                t={tSearchBar}
             />
         </div>
     );

@@ -45,6 +45,7 @@ type SidebarViewProps = {
     currentLanguage: LanguageCode;
     onLanguageChange: (lang: LanguageCode) => void;
     t: TranslationStrings["sideBar"];
+    tAppStyleSelector: TranslationStrings["appStyleSelector"];
 };
 
 export function SidebarView({
@@ -61,6 +62,7 @@ export function SidebarView({
     currentLanguage,
     onLanguageChange,
     t,
+    tAppStyleSelector,
 }: SidebarViewProps) {
     function isActiveCB(path: string): boolean {
         if (path === "/") {
@@ -296,7 +298,11 @@ export function SidebarView({
                             {t.style}
                         </Typography>
                         <Box sx={{ pt: 1 }}>
-                            <AppStyleSelector appStyle={appStyle} setAppStyle={onAppStyleChange} />
+                            <AppStyleSelector
+                                appStyle={appStyle}
+                                setAppStyle={onAppStyleChange}
+                                t={tAppStyleSelector}
+                            />
                         </Box>
                     </ListItem>
 

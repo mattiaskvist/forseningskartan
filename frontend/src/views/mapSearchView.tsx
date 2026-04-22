@@ -1,12 +1,14 @@
 import { Paper } from "@mui/material";
 import { SearchBar } from "../components/SearchBar";
 import { Site } from "../types/sl";
+import { TranslationStrings } from "../utils/translations";
 
 type MapSearchViewProps = {
     sites: Site[];
     selectedSite: Site | null;
     handleSelectSiteCB: (siteId: number | null) => void;
     recentSearchSiteIds: number[];
+    t: TranslationStrings["searchBar"];
 };
 
 export function MapSearchView({
@@ -14,6 +16,7 @@ export function MapSearchView({
     selectedSite,
     handleSelectSiteCB,
     recentSearchSiteIds,
+    t,
 }: MapSearchViewProps) {
     return (
         <Paper
@@ -34,6 +37,7 @@ export function MapSearchView({
                 selectedSite={selectedSite}
                 handleSelectSiteCB={handleSelectSiteCB}
                 recentSearchSiteIds={recentSearchSiteIds}
+                t={t}
             />
         </Paper>
     );

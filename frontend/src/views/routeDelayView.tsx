@@ -52,6 +52,10 @@ type RouteDelayViewProps = {
     tRoutes: TranslationStrings["routeDelayRoutes"];
     tLeaderboard: TranslationStrings["routeDelayLeaderboard"];
     tRouteFallback: TranslationStrings["routeDelayRouteFallback"];
+    tControls: TranslationStrings["routeDelayControls"];
+    tDetailsPage: TranslationStrings["routeDetailsPage"];
+    tDatePicker: TranslationStrings["availableDatesPicker"];
+    tStats: TranslationStrings["departureDelayStats"];
 };
 
 export function RouteDelayView({
@@ -89,6 +93,10 @@ export function RouteDelayView({
     tRoutes,
     tLeaderboard,
     tRouteFallback,
+    tControls,
+    tDetailsPage,
+    tDatePicker,
+    tStats,
 }: RouteDelayViewProps) {
     const isRouteDetailsOpen = selectedRouteKey !== null;
 
@@ -149,6 +157,8 @@ export function RouteDelayView({
                             onEventTypeChange={onEventTypeChange}
                             onTransportationModeChange={onTransportationModeChange}
                             onSearchQueryChange={onSearchQueryChange}
+                            t={tControls}
+                            tDatePicker={tDatePicker}
                         />
                         <RouteDelayInfoView
                             selectedDateText={selectedDateText}
@@ -187,6 +197,8 @@ export function RouteDelayView({
                                 trendPoints={trendPoints}
                                 isTrendLoading={isTrendLoading}
                                 onBackToRoutes={onBackToRoutes}
+                                t={tDetailsPage}
+                                tStats={tStats}
                             />
                         ) : (
                             <RouteDelayRouteFallbackView

@@ -1,17 +1,20 @@
 import { type MouseEvent } from "react";
 import { Paper, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { AppStyle, appStyles } from "../types/appStyle";
+import { TranslationStrings } from "../utils/translations";
 
 type AppStyleSelectorProps = {
     appStyle: AppStyle;
     setAppStyle: (style: AppStyle) => void;
     isQuickOverlay?: boolean;
+    t: TranslationStrings["appStyleSelector"];
 };
 
 export function AppStyleSelector({
     appStyle,
     setAppStyle,
     isQuickOverlay = false,
+    t,
 }: AppStyleSelectorProps) {
     function handleStyleChangeACB(_: MouseEvent<HTMLElement>, nextStyle: AppStyle | null) {
         if (nextStyle) {
@@ -33,7 +36,7 @@ export function AppStyleSelector({
             exclusive
             value={appStyle}
             onChange={handleStyleChangeACB}
-            aria-label="App style selector"
+            aria-label={t.ariaLabel}
         >
             {appStyles.map(getAppStyleButtonCB)}
         </ToggleButtonGroup>

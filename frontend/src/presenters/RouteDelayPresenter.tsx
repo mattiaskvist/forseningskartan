@@ -113,10 +113,11 @@ export function RouteDelayPresenter() {
     }, [selectedDates]);
 
     const routesInfoText = useMemo(() => {
+        const t = translations[currentLanguage].routeDelay;
         return selectedSection === "routes"
-            ? `Showing ${pagedRouteItems.length} of ${totalFilteredRoutes} filtered routes`
-            : `Showing ${totalFilteredRoutes} filtered routes`;
-    }, [selectedSection, pagedRouteItems, totalFilteredRoutes]);
+            ? t.showingFilteredRoutes(pagedRouteItems.length, totalFilteredRoutes)
+            : t.showingAllFilteredRoutes(totalFilteredRoutes);
+    }, [selectedSection, pagedRouteItems, totalFilteredRoutes, currentLanguage]);
 
     const transportationModeOptions = useMemo(() => {
         const modes = new Map<RouteType, TransportationMode>();
@@ -213,7 +214,7 @@ export function RouteDelayPresenter() {
     }
 
     if (isRouteDelaysLoading || isAggregatedDatesLoading) {
-        return <Suspense message="Loading route delays..." />;
+        return <Suspense message={translations[currentLanguage].routeDelay.loading} />;
     }
 
     return (
@@ -252,6 +253,10 @@ export function RouteDelayPresenter() {
             tRoutes={translations[currentLanguage].routeDelayRoutes}
             tLeaderboard={translations[currentLanguage].routeDelayLeaderboard}
             tRouteFallback={translations[currentLanguage].routeDelayRouteFallback}
+            tControls={translations[currentLanguage].routeDelayControls}
+            tDetailsPage={translations[currentLanguage].routeDetailsPage}
+            tDatePicker={translations[currentLanguage].availableDatesPicker}
+            tStats={translations[currentLanguage].departureDelayStats}
         />
     );
 }

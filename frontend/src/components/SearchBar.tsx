@@ -6,6 +6,7 @@ import { FilterOptionsState } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import HistoryIcon from "@mui/icons-material/History";
 import { Site } from "../types/sl";
+import { TranslationStrings } from "../utils/translations";
 
 const defaultFilterOptions = createFilterOptions<Site>({
     ignoreCase: true, // case insensitive matching
@@ -18,6 +19,7 @@ type SearchBarProps = {
     selectedSite: Site | null;
     handleSelectSiteCB: (siteId: number | null) => void;
     recentSearchSiteIds?: number[];
+    t: TranslationStrings["searchBar"];
 };
 
 export function SearchBar({
@@ -25,6 +27,7 @@ export function SearchBar({
     selectedSite,
     handleSelectSiteCB,
     recentSearchSiteIds = [],
+    t,
 }: SearchBarProps) {
     function getSiteNameCB(site: Site): string {
         return site.name;
@@ -40,7 +43,7 @@ export function SearchBar({
     }
 
     function getRenderInputCB(params: AutocompleteRenderInputParams): React.ReactNode {
-        return <TextField {...params} label="Search stops" placeholder="Type a stop name" />;
+        return <TextField {...params} label={t.searchStops} placeholder={t.typeStopName} />;
     }
 
     function renderOptionCB(

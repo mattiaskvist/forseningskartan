@@ -1,6 +1,11 @@
 import { Box, Paper, Typography } from "@mui/material";
+import { TranslationStrings } from "../utils/translations";
 
-export function LoginView() {
+type LoginViewProps = {
+    t: TranslationStrings["login"];
+};
+
+export function LoginView({ t }: LoginViewProps) {
     return (
         <Box
             sx={{
@@ -35,7 +40,7 @@ export function LoginView() {
                         color: "text.primary",
                     }}
                 >
-                    Sign In
+                    {t.signIn}
                 </Typography>
                 <div id="firebaseui-auth-container" className="pt-2 pb-4"></div>
             </Paper>

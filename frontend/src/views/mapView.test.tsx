@@ -31,6 +31,8 @@ describe("MapView", () => {
                 appStyle="Dark"
                 onAppStyleChange={onAppStyleChange}
                 tMapDeparturePanel={translations.en.mapDeparturePanel}
+                tSearchBar={translations.en.searchBar}
+                tAppStyleSelector={translations.en.appStyleSelector}
             />
         );
 

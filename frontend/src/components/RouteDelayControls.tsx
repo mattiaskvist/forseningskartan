@@ -1,10 +1,11 @@
 import { Box, ToggleButton } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import { AvailableDatesPicker } from "./AvailableDatesPicker";
-import { DatePreset, EventType, DatePresets, DatePresetLabelMap } from "../types/departureDelay";
+import { DatePreset, EventType, DatePresets } from "../types/departureDelay";
 import { TransportationMode } from "../types/sl";
 import { RouteDelaySection } from "../types/routeDelays";
 import { FilterToggleButtonGroup } from "./FilterToggleButtonGroup";
+import { TranslationStrings } from "../utils/translations";
 
 type RouteDelayControlsProps = {
     selectedSection: RouteDelaySection;
@@ -21,6 +22,8 @@ type RouteDelayControlsProps = {
     onEventTypeChange: (eventType: EventType) => void;
     onTransportationModeChange: (filter: TransportationMode) => void;
     onSearchQueryChange: (query: string) => void;
+    t: TranslationStrings["routeDelayControls"];
+    tDatePicker: TranslationStrings["availableDatesPicker"];
 };
 
 export function RouteDelayControls({
@@ -38,15 +41,24 @@ export function RouteDelayControls({
     onEventTypeChange,
     onTransportationModeChange,
     onSearchQueryChange,
+    t,
+    tDatePicker,
 }: RouteDelayControlsProps) {
     function getTransportationModeLabel(mode: TransportationMode) {
         return `${mode.charAt(0)}${mode.slice(1).toLowerCase()}`;
     }
 
     function getPresetButtonCB(option: DatePreset) {
+        const labelMap: Record<DatePreset, string> = {
+            sameDayLastWeek: t.sameDayLastWeek,
+            last7Days: t.last7Days,
+            last5Weekdays: t.last5Weekdays,
+            lastWeekend: t.lastWeekend,
+            customDate: t.customDate,
+        };
         return (
             <ToggleButton key={option} value={option}>
-                {DatePresetLabelMap[option]}
+                {labelMap[option]}
             </ToggleButton>
         );
     }
@@ -54,7 +66,7 @@ export function RouteDelayControls({
     function getEventTypeButtonCB(eventType: EventType) {
         return (
             <ToggleButton key={eventType} value={eventType}>
-                {eventType === "departure" ? "Departure" : "Arrival"}
+                {eventType === "departure" ? t.departure : t.arrival}
             </ToggleButton>
         );
     }
@@ -85,7 +97,7 @@ export function RouteDelayControls({
         >
             <div>
                 <FilterToggleButtonGroup
-                    label="Date selection"
+                    label={t.dateSelection}
                     options={DatePresets}
                     selectedValue={selectedDatePreset}
                     onValueChange={onDatePresetChange}
@@ -99,6 +111,7 @@ export function RouteDelayControls({
                         availableDates={availableDates}
                         selectedDate={selectedCustomDate}
                         onSelectDate={onCustomDateChange}
+                        t={tDatePicker}
                     />
                 </div>
             )}
@@ -106,7 +119,7 @@ export function RouteDelayControls({
             <div className="flex items-center gap-20">
                 <div>
                     <FilterToggleButtonGroup
-                        label="Event type"
+                        label={t.eventType}
                         options={["departure", "arrival"] as EventType[]}
                         selectedValue={selectedEventType}
                         onValueChange={onEventTypeChange}
@@ -117,7 +130,7 @@ export function RouteDelayControls({
                 {!isRouteDetailsOpen ? (
                     <div>
                         <FilterToggleButtonGroup
-                            label="Transport Mode"
+                            label={t.transportMode}
                             options={transportationModeOptions}
                             selectedValue={selectedTransportationMode}
                             onValueChange={onTransportationModeChange}
@@ -131,7 +144,7 @@ export function RouteDelayControls({
                 <div>
                     <TextField
                         size="small"
-                        label="Search route"
+                        label={t.searchRoute}
                         value={searchQuery}
                         onChange={handleSearchChangeACB}
                     />
