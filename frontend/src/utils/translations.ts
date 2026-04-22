@@ -14,6 +14,8 @@ interface accountStrings {
     deleteError: string;
     deleteConfirm: string;
     recentLoginRequired: string;
+    title: string;
+    user: string;
 }
 
 interface departureEmptyStrings {
@@ -64,6 +66,7 @@ interface routeDelayRoutesStrings {
     unique: string;
     page: string;
     noMatch: string;
+    averageDelay: string;
 }
 
 interface routeDelaySectionToggleStrings {
@@ -84,6 +87,11 @@ interface sideBarStrings {
     favoriteStops: string;
     loginToFavorite: string;
     selectToFavorite: string;
+    navigation: string;
+    map: string;
+    routeDelays: string;
+    about: string;
+    myAccount: string;
 }
 
 // --------- components -----------
@@ -144,6 +152,7 @@ interface departureDelayStatsStrings {
 interface departureHistoricalDelaysStrings {
     title: string;
     loading: string;
+    selectedDates: (dateRange: string, hourRange?: string) => string;
 }
 
 interface availableDatesPickerStrings {
@@ -152,6 +161,14 @@ interface availableDatesPickerStrings {
 
 interface appStyleSelectorStrings {
     ariaLabel: string;
+    light: string;
+    dark: string;
+    classic: string;
+}
+
+interface aboutStrings {
+    title: string;
+    description: string;
 }
 
 export interface TranslationStrings {
@@ -178,6 +195,7 @@ export interface TranslationStrings {
     departureHistoricalDelays: departureHistoricalDelaysStrings;
     availableDatesPicker: availableDatesPickerStrings;
     appStyleSelector: appStyleSelectorStrings;
+    about: aboutStrings;
 }
 
 export const translations: Record<LanguageCode, TranslationStrings> = {
@@ -193,6 +211,8 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             deleteConfirm:
                 "Are you sure you want to delete your account? This action cannot be undone.",
             recentLoginRequired: "Please log in again before deleting your account.",
+            title: "My Account",
+            user: "User",
         },
         departureEmpty: {
             noUpcomingDepartures: "No upcoming departures",
@@ -231,6 +251,7 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             unique: "unique trips",
             page: "page",
             noMatch: "No routes match the selected filters.",
+            averageDelay: "Average delay",
         },
         routeDelaySectionToggle: {
             routes: "Routes",
@@ -249,6 +270,11 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             favoriteStops: "Favorite stops",
             loginToFavorite: "Log in to favorite stops",
             selectToFavorite: "Select a stop to favorite it",
+            navigation: "Navigation",
+            map: "Map",
+            routeDelays: "Route Delays",
+            about: "About",
+            myAccount: "My Account",
         },
         map: {
             loading: "Loading transit data and preparing the map...",
@@ -304,12 +330,21 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
         departureHistoricalDelays: {
             title: "Historical delays",
             loading: "Loading historical delay stats...",
+            selectedDates: (dateRange, hourRange) =>
+                `Selected dates: ${dateRange}${hourRange ? `, ${hourRange}` : ""}`,
         },
         availableDatesPicker: {
             selectDate: "Select delay date",
         },
         appStyleSelector: {
             ariaLabel: "App style selector",
+            light: "Light",
+            dark: "Dark",
+            classic: "Classic",
+        },
+        about: {
+            title: "About",
+            description: "Förseningskartan - a transit delay visualization tool.",
         },
     },
     sv: {
@@ -323,7 +358,9 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             deleteError: "Misslyckades med att radera kontot. Försök igen senare.",
             deleteConfirm:
                 "Är du säker på att du vill radera ditt konto? Denna åtgärd kan inte ångras.",
-            recentLoginRequired: "Vänligen logga in igen innan du raderar ditt konto.",
+            recentLoginRequired: "Logga in igen innan du raderar ditt konto.",
+            title: "Mitt konto",
+            user: "Användare",
         },
         departureEmpty: {
             noUpcomingDepartures: "Inga kommande avgångar",
@@ -362,6 +399,7 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             unique: "unika resor",
             page: "sida",
             noMatch: "Inga linjer matchar de valda filtren.",
+            averageDelay: "Genomsnittlig försening",
         },
         routeDelaySectionToggle: {
             routes: "Linjer",
@@ -380,6 +418,11 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             favoriteStops: "Favorithållplatser",
             loginToFavorite: "Logga in för att spara favoriter",
             selectToFavorite: "Välj en hållplats för att spara den",
+            navigation: "Navigering",
+            map: "Karta",
+            routeDelays: "Linjeförseningar",
+            about: "Om",
+            myAccount: "Mitt konto",
         },
         map: {
             loading: "Laddar kollektivtrafikdata och förbereder kartan...",
@@ -435,12 +478,22 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
         departureHistoricalDelays: {
             title: "Historiska förseningar",
             loading: "Laddar historisk förseningstatistik...",
+            selectedDates: (dateRange, hourRange) =>
+                `Valda datum: ${dateRange}${hourRange ? `, ${hourRange}` : ""}`,
         },
         availableDatesPicker: {
             selectDate: "Välj datum",
         },
         appStyleSelector: {
             ariaLabel: "Välj tema",
+            light: "Ljust",
+            dark: "Mörkt",
+            classic: "Klassiskt",
+        },
+        about: {
+            title: "Om",
+            description:
+                "Förseningskartan - ett verktyg för att visualisera förseningar i kollektivtrafiken.",
         },
     },
 };

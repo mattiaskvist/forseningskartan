@@ -70,7 +70,7 @@ export function RouteDelayRoutesView({
                             {label}
                         </Typography>
                         <Typography sx={{ fontSize: "0.75rem", color: "text.secondary" }}>
-                            Average delay:{" "}
+                            {t.averageDelay}:{" "}
                             <Typography
                                 component="span"
                                 sx={{

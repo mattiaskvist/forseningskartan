@@ -39,7 +39,7 @@ export function AccountView({ user, onLogout, onDelete, t }: AccountViewProps) {
                     variant="subtitle1"
                     sx={{ fontWeight: 600, mb: 1, color: "text.primary" }}
                 >
-                    My Account
+                    {t.title}
                 </Typography>
 
                 <Box
@@ -54,7 +54,7 @@ export function AccountView({ user, onLogout, onDelete, t }: AccountViewProps) {
                     {user.photoURL ? (
                         <Avatar
                             src={user.photoURL}
-                            alt={`${user.displayName || "User"}'s avatar`}
+                            alt={`${user.displayName || t.user}'s avatar`}
                             sx={{ width: 96, height: 96, boxShadow: 3 }}
                         />
                     ) : (
@@ -73,7 +73,7 @@ export function AccountView({ user, onLogout, onDelete, t }: AccountViewProps) {
 
                     <Box sx={{ textAlign: "center" }}>
                         <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                            {user.displayName || "User"}
+                            {user.displayName || t.user}
                         </Typography>
                         <Typography color="text.secondary">{user.email}</Typography>
                     </Box>

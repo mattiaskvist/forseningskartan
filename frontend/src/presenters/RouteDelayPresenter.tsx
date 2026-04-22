@@ -34,7 +34,7 @@ import {
 import { PageSizeOption, RouteDelayListItem, RouteDelaySection } from "../types/routeDelays";
 import { getAvgDelayMinutes, getAvgDelaySeconds } from "../utils/time";
 import { compareRouteNamesCB, getRouteDisplayName, getRouteIdentityKey } from "../utils/route";
-import { getPresetDescription } from "../types/departureDelay";
+import { getDateRangeText } from "../types/departureDelay";
 import { translations } from "../utils/translations";
 
 function getRouteModeKey(summary: DelaySummary): string {
@@ -109,8 +109,9 @@ export function RouteDelayPresenter() {
     }, [pagedRoutes, selectedEventType]);
 
     const selectedDateText = useMemo(() => {
-        return getPresetDescription(selectedDates);
-    }, [selectedDates]);
+        const t = translations[currentLanguage].departureHistoricalDelays;
+        return t.selectedDates(getDateRangeText(selectedDates));
+    }, [selectedDates, currentLanguage]);
 
     const routesInfoText = useMemo(() => {
         const t = translations[currentLanguage].routeDelay;

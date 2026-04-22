@@ -82,6 +82,11 @@ export function SidebarView({
             onNavigate(item.path);
         }
 
+        let label = item.label;
+        if (item.path === "/") label = t.map;
+        else if (item.path === "/route-delays") label = t.routeDelays;
+        else if (item.path === "/about") label = t.about;
+
         return (
             <ListItem key={item.path} disablePadding>
                 <ListItemButton
@@ -100,7 +105,7 @@ export function SidebarView({
                 >
                     <ListItemIcon sx={{ minWidth: 36, color: "inherit" }}>{item.icon}</ListItemIcon>
                     <ListItemText
-                        primary={item.label}
+                        primary={label}
                         primaryTypographyProps={{ fontSize: "0.875rem", fontWeight: 500 }}
                     />
                 </ListItemButton>
@@ -142,7 +147,7 @@ export function SidebarView({
                             fontWeight: 500,
                         }}
                     >
-                        {user.displayName || user.email || "Account"}
+                        {user.displayName || user.email || t.myAccount}
                     </Typography>
 
                     <IconButton size="small" onClick={navigateToAccountACB}>
@@ -256,6 +261,19 @@ export function SidebarView({
                 </Box>
 
                 <List sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 0.5, p: 1.5 }}>
+                    <ListItem sx={{ px: 1.5, mb: 0.5 }}>
+                        <Typography
+                            sx={{
+                                color: "text.secondary",
+                                fontSize: "0.75rem",
+                                fontWeight: 600,
+                                textTransform: "uppercase",
+                                letterSpacing: "0.05em",
+                            }}
+                        >
+                            {t.navigation}
+                        </Typography>
+                    </ListItem>
                     {ROUTES.map(renderNavItemCB)}
 
                     <ListItem

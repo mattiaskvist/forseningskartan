@@ -3,7 +3,7 @@ import utc from "dayjs/plugin/utc";
 
 dayjs.extend(utc);
 
-function formatHourRangeLocal(hourUTC: number): string {
+export function formatHourRangeLocal(hourUTC: number): string {
     // create a UTC time at the given hour
     const start = dayjs.utc().hour(hourUTC).minute(0).second(0);
 
@@ -14,7 +14,7 @@ function formatHourRangeLocal(hourUTC: number): string {
     return `${localStart.format("HH:mm")}-${localEnd.format("HH:mm")}`;
 }
 
-function getDateRangeText(selectedDates: string[]): string {
+export function getDateRangeText(selectedDates: string[]): string {
     const sortedDates = [...selectedDates].sort();
     const fromDate = sortedDates[0];
     const toDate = sortedDates[sortedDates.length - 1];

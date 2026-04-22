@@ -23,9 +23,15 @@ export function AppStyleSelector({
     }
 
     function getAppStyleButtonCB(style: AppStyle) {
+        const labelMap: Record<AppStyle, string> = {
+            Light: t.light,
+            Dark: t.dark,
+            Classic: t.classic,
+        };
+
         return (
             <ToggleButton key={style} value={style}>
-                {style}
+                {labelMap[style]}
             </ToggleButton>
         );
     }
