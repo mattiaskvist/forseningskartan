@@ -8,6 +8,7 @@ import { StopMap } from "../components/StopMap";
 import { AppStyleSelector } from "../components/AppStyleSelector";
 
 type MapViewProps = {
+    allSites: Site[];
     sites: Site[];
     selectedSite: Site | null;
     handleSelectSiteCB: (siteId: number | null) => void;
@@ -24,6 +25,7 @@ type MapViewProps = {
 };
 
 export function MapView({
+    allSites,
     sites,
     selectedSite,
     handleSelectSiteCB,
@@ -41,6 +43,7 @@ export function MapView({
     return (
         <div className="relative h-full w-full">
             <StopMap
+                allSites={allSites}
                 sites={sites}
                 selectedSite={selectedSite}
                 handleSelectSiteCB={handleSelectSiteCB}
