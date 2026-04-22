@@ -18,6 +18,7 @@ import {
     getSitesCB,
     getSitesLoadingCB,
     getStopPointsCB,
+    getStopPointGidsBySiteIdCB,
     getStopPointsLoadingCB,
     getSelectedSiteCB,
     getRoutesByStopPointCB,
@@ -45,7 +46,10 @@ import { showSnackbar } from "../store/snackbarSlice";
 import { Suspense } from "../components/Suspense";
 import { getSiteIdsWithNoDepartures, getUpcomingDepartures } from "../utils/departures";
 import { RouteMeta, RouteType } from "../types/historicalDelay";
-import { routeTypesToTransportationModes } from "../utils/transportationMode";
+import {
+    getSitesByTransportationMode,
+    routeTypesToTransportationModes,
+} from "../utils/transportationMode";
 
 export function MapPresenter() {
     const dispatch = useAppDispatch();
@@ -66,6 +70,7 @@ export function MapPresenter() {
     const sites = useAppSelector(getSitesCB);
     const isSitesLoading = useAppSelector(getSitesLoadingCB);
     const stopPoints = useAppSelector(getStopPointsCB);
+    const stopPointGidsBySiteId = useAppSelector(getStopPointGidsBySiteIdCB);
     const isStopPointsLoading = useAppSelector(getStopPointsLoadingCB);
     const routesByStopPoint = useAppSelector(getRoutesByStopPointCB);
     const routesByStopPointError = useAppSelector(getStopPointRoutesErrorCB);
@@ -76,8 +81,13 @@ export function MapPresenter() {
             return new Set<number>();
         }
 
-        return getSiteIdsWithNoDepartures(sites, stopPoints, routesByStopPoint);
-    }, [sites, stopPoints, routesByStopPoint]);
+        return getSiteIdsWithNoDepartures(
+            sites,
+            stopPoints,
+            routesByStopPoint,
+            stopPointGidsBySiteId
+        );
+    }, [sites, stopPoints, routesByStopPoint, routesByStopPointError, stopPointGidsBySiteId]);
 
     const transportationModeOptions = useMemo(() => {
         function getRouteTypeCB(route: RouteMeta): RouteType {
@@ -86,6 +96,27 @@ export function MapPresenter() {
         const routeTypes = new Set(Object.values(routesByStopPoint).flat().map(getRouteTypeCB));
         return routeTypesToTransportationModes(routeTypes);
     }, [routesByStopPoint]);
+
+    const filteredSites = useMemo(() => {
+        if (!sites || !stopPoints || routesByStopPointError) {
+            return [];
+        }
+
+        return getSitesByTransportationMode(
+            sites,
+            selectedTransportationMode,
+            routesByStopPoint,
+            stopPoints,
+            stopPointGidsBySiteId
+        );
+    }, [
+        sites,
+        selectedTransportationMode,
+        routesByStopPoint,
+        routesByStopPointError,
+        stopPoints,
+        stopPointGidsBySiteId,
+    ]);
 
     const handleSelectSiteCB = useCallback(
         (siteId: number | null) => {
@@ -183,7 +214,7 @@ export function MapPresenter() {
 
     return (
         <MapView
-            sites={sites}
+            sites={filteredSites}
             selectedSite={selectedSite}
             handleSelectSiteCB={handleSelectSiteCB}
             recentSearchSiteIds={recentSearchSiteIds}

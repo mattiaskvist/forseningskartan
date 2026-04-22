@@ -1,6 +1,6 @@
 import { RoutesByStopPoint } from "../api/backend";
 import { Departure, Site, StopPoint } from "../types/sl";
-import { getStopPointGidsForSite } from "./site";
+import { getStopPointGidsForSite, StopPointGidsBySiteId } from "./site";
 
 const nonUpcomingStates = new Set([
     "DEPARTED",
@@ -49,12 +49,13 @@ export function getUpcomingDepartures(departures: Departure[]): Departure[] {
 export function getSiteIdsWithNoDepartures(
     sites: Site[],
     stopPoints: StopPoint[],
-    routesByStopPoint: RoutesByStopPoint
+    routesByStopPoint: RoutesByStopPoint,
+    stopPointGidsBySiteId: StopPointGidsBySiteId
 ): Set<number> {
     const noDepartureSiteIds = new Set<number>();
 
     function collectNoDepartureSiteIdsForSiteCB(site: Site): void {
-        const stopPointGIDs = getStopPointGidsForSite(site, stopPoints);
+        const stopPointGIDs = getStopPointGidsForSite(site, stopPoints, stopPointGidsBySiteId);
         function hasAnyRoutesCB(stopPointGID: string): boolean {
             return (routesByStopPoint[stopPointGID]?.length ?? 0) > 0;
         }

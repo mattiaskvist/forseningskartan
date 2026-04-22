@@ -1,6 +1,50 @@
 import { Site, StopPoint } from "../types/sl";
 
-export function getStopPointGidsForSite(site: Site, stopPoints: StopPoint[]): string[] {
+export type StopPointGidsBySiteId = Record<number, string[]>;
+
+export function buildStopPointGidsBySiteId(
+    sites: Site[],
+    stopPoints: StopPoint[]
+): StopPointGidsBySiteId {
+    // stop area id -> stop point gids
+    const stopPointGidsByStopAreaId = new Map<number, Set<string>>();
+    for (const stopPoint of stopPoints) {
+        const stopAreaId = stopPoint.stop_area.id;
+        const stopPointGids = stopPointGidsByStopAreaId.get(stopAreaId) ?? new Set<string>();
+        stopPointGids.add(stopPoint.gid);
+        stopPointGidsByStopAreaId.set(stopAreaId, stopPointGids);
+    }
+
+    // site id -> stop point gids
+    const stopPointGidsBySiteId: StopPointGidsBySiteId = {};
+    for (const site of sites) {
+        const stopPointGids = new Set<string>();
+
+        // for each stop area of site, get stop point gids and add to set
+        for (const stopAreaId of site.stop_areas ?? []) {
+            const gidsForStopArea = stopPointGidsByStopAreaId.get(stopAreaId);
+
+            for (const stopPointGid of gidsForStopArea ?? []) {
+                stopPointGids.add(stopPointGid);
+            }
+        }
+
+        stopPointGidsBySiteId[site.id] = Array.from(stopPointGids);
+    }
+
+    return stopPointGidsBySiteId;
+}
+
+export function getStopPointGidsForSite(
+    site: Site,
+    stopPoints: StopPoint[],
+    stopPointGidsBySiteId: StopPointGidsBySiteId
+): string[] {
+    const cachedStopPointGids = stopPointGidsBySiteId[site.id];
+    if (cachedStopPointGids !== undefined) {
+        return cachedStopPointGids;
+    }
+
     // area ids for the selected site
     // we want all stop points that belong to any of these areas
     const stopAreaIds = new Set(site.stop_areas ?? []);

@@ -14,6 +14,7 @@ import { Departure, DepartureResponse, Site, StopPoint, TransportationMode } fro
 import { DelaySummary } from "../types/historicalDelay";
 import { DatePreset, EventType } from "../types/departureDelay";
 import { RouteDelayTrendPoint } from "../types/routeDelays";
+import { StopPointGidsBySiteId } from "../utils/site";
 
 type SitesState = {
     data: Site[] | null;
@@ -39,6 +40,10 @@ type StopPointRoutesState = {
     data: RoutesByStopPoint;
     isLoading: boolean;
     error: Error | null;
+};
+
+type SiteStopPointGidsState = {
+    bySiteId: StopPointGidsBySiteId;
 };
 
 type DepartureHistoricalDelayState = {
@@ -172,6 +177,18 @@ export const stopPointsSlice = createSlice({
             });
     },
 });
+
+export const siteStopPointGidsSlice = createSlice({
+    name: "siteStopPointGids",
+    initialState: { bySiteId: {} } as SiteStopPointGidsState,
+    reducers: {
+        setStopPointGidsBySiteId: (state, action: { payload: StopPointGidsBySiteId }) => {
+            state.bySiteId = action.payload;
+        },
+    },
+});
+
+export const { setStopPointGidsBySiteId } = siteStopPointGidsSlice.actions;
 
 export const stopPointRoutesSlice = createSlice({
     name: "stopPointRoutes",

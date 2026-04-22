@@ -59,6 +59,10 @@ function getStopPointsCB(state: RootState) {
     return state.stopPoints.data;
 }
 
+function getStopPointGidsBySiteIdCB(state: RootState) {
+    return state.siteStopPointGids.bySiteId;
+}
+
 function getStopPointsLoadingCB(state: RootState) {
     return state.stopPoints.isLoading;
 }
@@ -230,6 +234,7 @@ export {
     getSelectedSiteIdCB,
     getSelectedSiteCB,
     getStopPointsCB,
+    getStopPointGidsBySiteIdCB,
     getStopPointsLoadingCB,
     getRoutesByStopPointCB,
     getStopPointRoutesLoadingCB,
