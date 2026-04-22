@@ -258,6 +258,7 @@ export function RouteDelayPresenter() {
             tDetailsPage={translations[currentLanguage].routeDetailsPage}
             tDatePicker={translations[currentLanguage].availableDatesPicker}
             tStats={translations[currentLanguage].departureDelayStats}
+            tTransportModes={translations[currentLanguage].transportModes}
         />
     );
 }

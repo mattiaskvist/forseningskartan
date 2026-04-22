@@ -56,6 +56,7 @@ type RouteDelayViewProps = {
     tDetailsPage: TranslationStrings["routeDetailsPage"];
     tDatePicker: TranslationStrings["availableDatesPicker"];
     tStats: TranslationStrings["departureDelayStats"];
+    tTransportModes: TranslationStrings["transportModes"];
 };
 
 export function RouteDelayView({
@@ -97,6 +98,7 @@ export function RouteDelayView({
     tDetailsPage,
     tDatePicker,
     tStats,
+    tTransportModes,
 }: RouteDelayViewProps) {
     const isRouteDetailsOpen = selectedRouteKey !== null;
 
@@ -159,6 +161,7 @@ export function RouteDelayView({
                             onSearchQueryChange={onSearchQueryChange}
                             t={tControls}
                             tDatePicker={tDatePicker}
+                            tTransportModes={tTransportModes}
                         />
                         <RouteDelayInfoView
                             selectedDateText={selectedDateText}

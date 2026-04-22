@@ -24,6 +24,7 @@ describe("RouteDelayControls", () => {
                 onSearchQueryChange={vi.fn()}
                 t={translations.en.routeDelayControls}
                 tDatePicker={translations.en.availableDatesPicker}
+                tTransportModes={translations.en.transportModes}
             />
         );
 

@@ -11,13 +11,29 @@ type DepartureListProps = {
     departures: Departure[];
     onSelectDeparture: (departure: Departure) => void;
     t: TranslationStrings["departureList"];
+    tTransportModes: TranslationStrings["transportModes"];
 };
 
 type ModeWithOther = TransportationMode | "OTHER";
 
-export function DepartureList({ departures, onSelectDeparture, t }: DepartureListProps) {
+export function DepartureList({
+    departures,
+    onSelectDeparture,
+    t,
+    tTransportModes,
+}: DepartureListProps) {
     function getModeLabel(mode: ModeWithOther) {
-        return `${mode.charAt(0)}${mode.slice(1).toLowerCase()}`;
+        const labelMap: Record<ModeWithOther, string> = {
+            BUS: tTransportModes.bus,
+            TRAM: tTransportModes.tram,
+            METRO: tTransportModes.metro,
+            TRAIN: tTransportModes.train,
+            FERRY: tTransportModes.ferry,
+            SHIP: tTransportModes.ship,
+            TAXI: tTransportModes.taxi,
+            OTHER: tTransportModes.other,
+        };
+        return labelMap[mode];
     }
 
     const uniqueModes = useMemo(() => {

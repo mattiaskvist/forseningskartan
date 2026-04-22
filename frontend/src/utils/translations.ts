@@ -171,6 +171,17 @@ interface aboutStrings {
     description: string;
 }
 
+interface transportModesStrings {
+    bus: string;
+    tram: string;
+    metro: string;
+    train: string;
+    ferry: string;
+    ship: string;
+    taxi: string;
+    other: string;
+}
+
 export interface TranslationStrings {
     account: accountStrings;
     departureEmpty: departureEmptyStrings;
@@ -196,6 +207,7 @@ export interface TranslationStrings {
     availableDatesPicker: availableDatesPickerStrings;
     appStyleSelector: appStyleSelectorStrings;
     about: aboutStrings;
+    transportModes: transportModesStrings;
 }
 
 export const translations: Record<LanguageCode, TranslationStrings> = {
@@ -346,6 +358,16 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             title: "About",
             description: "Förseningskartan - a transit delay visualization tool.",
         },
+        transportModes: {
+            bus: "Bus",
+            tram: "Tram",
+            metro: "Metro",
+            train: "Train",
+            ferry: "Ferry",
+            ship: "Ship",
+            taxi: "Taxi",
+            other: "Other",
+        },
     },
     sv: {
         account: {
@@ -494,6 +516,16 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             title: "Om",
             description:
                 "Förseningskartan - ett verktyg för att visualisera förseningar i kollektivtrafiken.",
+        },
+        transportModes: {
+            bus: "Buss",
+            tram: "Spårvagn",
+            metro: "Tunnelbana",
+            train: "Tåg",
+            ferry: "Färja",
+            ship: "Fartyg",
+            taxi: "Taxi",
+            other: "Övrigt",
         },
     },
 };

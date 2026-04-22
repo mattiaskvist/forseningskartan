@@ -36,6 +36,7 @@ export type DepartureViewProps = {
     tDelayControls: TranslationStrings["routeDelayControls"];
     tDatePicker: TranslationStrings["availableDatesPicker"];
     tDetails: TranslationStrings["departureDetails"];
+    tTransportModes: TranslationStrings["transportModes"];
 };
 
 export function DepartureView({
@@ -66,6 +67,7 @@ export function DepartureView({
     tDelayControls,
     tDatePicker,
     tDetails,
+    tTransportModes,
 }: DepartureViewProps) {
     return (
         <div className="flex flex-col gap-2">
@@ -102,6 +104,7 @@ export function DepartureView({
                     departures={upcomingDepartures}
                     onSelectDeparture={onSelectDeparture}
                     t={tList}
+                    tTransportModes={tTransportModes}
                 />
             ) : (
                 <DepartureEmptyStateView t={tEmpty} />

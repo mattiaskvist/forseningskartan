@@ -36,6 +36,7 @@ describe("DepartureList", () => {
                 departures={mockDepartures}
                 onSelectDeparture={vi.fn()}
                 t={translations.en.departureList}
+                tTransportModes={translations.en.transportModes}
             />
         );
 
@@ -53,6 +54,7 @@ describe("DepartureList", () => {
                 departures={mockDepartures}
                 onSelectDeparture={vi.fn()}
                 t={translations.en.departureList}
+                tTransportModes={translations.en.transportModes}
             />
         );
 

@@ -24,6 +24,7 @@ type RouteDelayControlsProps = {
     onSearchQueryChange: (query: string) => void;
     t: TranslationStrings["routeDelayControls"];
     tDatePicker: TranslationStrings["availableDatesPicker"];
+    tTransportModes: TranslationStrings["transportModes"];
 };
 
 export function RouteDelayControls({
@@ -43,9 +44,19 @@ export function RouteDelayControls({
     onSearchQueryChange,
     t,
     tDatePicker,
+    tTransportModes,
 }: RouteDelayControlsProps) {
     function getTransportationModeLabel(mode: TransportationMode) {
-        return `${mode.charAt(0)}${mode.slice(1).toLowerCase()}`;
+        const labelMap: Record<TransportationMode, string> = {
+            BUS: tTransportModes.bus,
+            TRAM: tTransportModes.tram,
+            METRO: tTransportModes.metro,
+            TRAIN: tTransportModes.train,
+            FERRY: tTransportModes.ferry,
+            SHIP: tTransportModes.ship,
+            TAXI: tTransportModes.taxi,
+        };
+        return labelMap[mode];
     }
 
     function getPresetButtonCB(option: DatePreset) {

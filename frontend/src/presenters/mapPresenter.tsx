@@ -172,6 +172,7 @@ export function MapPresenter() {
               tDelayControls: translations[currentLanguage].routeDelayControls,
               tDatePicker: translations[currentLanguage].availableDatesPicker,
               tDetails: translations[currentLanguage].departureDetails,
+              tTransportModes: translations[currentLanguage].transportModes,
           }
         : null;
 
