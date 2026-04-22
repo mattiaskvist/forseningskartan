@@ -127,7 +127,7 @@ type DepartureResponse = {
 
 type StopPoint = {
     id: number;
-    gid: number;
+    gid: string;
     name?: string;
     sname?: string; // short name
     designation?: string;

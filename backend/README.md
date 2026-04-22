@@ -16,7 +16,11 @@ docker compose up -d db
 
 ```bash
 cd backend
-go run . -postgres-dsn "postgres://postgres:postgres@localhost:5432/forseningskartan?sslmode=disable" -port 8081 -api-key "<api-key>"
+go run . \
+  -postgres-dsn "postgres://postgres:postgres@localhost:5432/forseningskartan?sslmode=disable" \
+  -static-postgres-dsn "postgres://postgres:postgres@localhost:5432/forseningskartan_static?sslmode=disable" \
+  -port 8081 \
+  -api-key "<api-key>"
 ```
 
 The API runs on `http://localhost:8081` by default.
@@ -131,6 +135,36 @@ curl -G "http://localhost:8081/api/route-delays" \
  -H "X-API-Key: <api-key>" \
  --data-urlencode "dates=2026-03-20" \
  --data-urlencode "dates=2026-03-21"
+```
+
+`GET /api/stop-point-routes`
+
+Returns a map keyed by `stopPointGID` where each value is an array of route metadata for routes that depart from that stop point on the requested service date.
+
+Query parameters:
+
+- `date`: single date in `YYYY-MM-DD` (required)
+
+Example request:
+
+```bash
+curl -G "http://localhost:8081/api/stop-point-routes" \
+  -H "X-API-Key: <api-key>" \
+  --data-urlencode "date=2026-03-20"
+```
+
+Example response:
+
+```json
+{
+  "9022001090101001": [
+    {
+      "shortName": "901",
+      "longName": "",
+      "type": "700"
+    }
+  ]
+}
 ```
 
 Response:

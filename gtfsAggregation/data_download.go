@@ -80,6 +80,35 @@ func getInputFiles(config Config) (Files, error) {
 	return files, nil
 }
 
+func getStaticFeedFiles(staticApiKey string) (Files, error) {
+	tmpDir, err := os.MkdirTemp("", "gtfsStatic-*")
+	if err != nil {
+		return Files{}, fmt.Errorf("create temp dir: %w", err)
+	}
+
+	files := Files{
+		cleanup: func() {
+			_ = os.RemoveAll(tmpDir)
+		},
+	}
+
+	staticArchivePath := filepath.Join(tmpDir, "sl-static.zip")
+	staticExtractDir := filepath.Join(tmpDir, "static")
+	staticURL := fmt.Sprintf("https://opendata.samtrafiken.se/gtfs/sl/sl.zip?key=%s", url.QueryEscape(staticApiKey))
+
+	if err := downloadFile(staticURL, staticArchivePath); err != nil {
+		files.Cleanup()
+		return Files{}, fmt.Errorf("download static feed archive: %w", err)
+	}
+	if err := extractArchive(staticArchivePath, staticExtractDir); err != nil {
+		files.Cleanup()
+		return Files{}, fmt.Errorf("extract static feed archive: %w", err)
+	}
+
+	files.StaticPath = staticExtractDir
+	return files, nil
+}
+
 func downloadFile(fileURL string, destPath string) error {
 	resp, err := http.Get(fileURL)
 	if err != nil {

@@ -13,25 +13,25 @@ describe("getStopPointGidsForSite", () => {
         const stopPoints: StopPoint[] = [
             {
                 id: 1,
-                gid: 5001,
+                gid: "5001",
                 name: "Centralen A",
                 stop_area: { id: 100, name: "Centralen" },
             } as StopPoint,
             {
                 id: 2,
-                gid: 5002,
+                gid: "5002",
                 name: "Centralen B",
                 stop_area: { id: 200, name: "Centralen" },
             } as StopPoint,
             {
                 id: 3,
-                gid: 5002,
+                gid: "5002",
                 name: "Centralen B duplicate",
                 stop_area: { id: 200, name: "Centralen" },
             } as StopPoint,
             {
                 id: 4,
-                gid: 9999,
+                gid: "9999",
                 name: "Other stop",
                 stop_area: { id: 300, name: "Other" },
             } as StopPoint,

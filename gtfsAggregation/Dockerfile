@@ -35,6 +35,8 @@ RUN chmod +x /entrypoint.sh
 
 # Environment variables injected at runtime by docker compose / CI
 ENV API_KEY=""
+ENV STATIC_API_KEY=""
 ENV POSTGRES_DSN=""
+ENV STATIC_POSTGRES_DSN=""
 
 ENTRYPOINT ["/entrypoint.sh"]

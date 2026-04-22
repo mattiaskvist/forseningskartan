@@ -61,11 +61,11 @@ func initMetrics() {
 	)
 }
 
-func registerDBMetrics(db *sql.DB) {
+func registerDBMetrics(db *sql.DB, dbName string) {
 	if db == nil {
 		return
 	}
-	reg.MustRegister(collectors.NewDBStatsCollector(db, "postgres"))
+	reg.MustRegister(collectors.NewDBStatsCollector(db, dbName))
 }
 
 func metricsHandler(w http.ResponseWriter, r *http.Request) {

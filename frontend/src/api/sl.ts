@@ -5,7 +5,7 @@ const BASE_URL = "https://transport.integration.sl.se/v1";
 
 function handleResponseACB(response: Response) {
     if (!response.ok) {
-        throw new Error("expected reponse code to be 200. was " + response.status);
+        throw new Error("expected response code to be 200. was " + response.status);
     }
     return response.json();
 }
@@ -40,6 +40,20 @@ export function fetchDeparturesACB(siteId: number): Promise<DepartureResponse> {
         .catch(throwErrorACB);
 }
 
+function handleResponseWithGIDParseACB(response: Response) {
+    if (!response.ok) {
+        throw new Error("expected response code to be 200. was " + response.status);
+    }
+
+    // custom parsing to treat gid as string to avoid integer overflow issues
+    function parseResponseACB(raw: string) {
+        const patched = raw.replace(/("gid":\s*)(\d+)/g, '$1"$2"');
+        return JSON.parse(patched);
+    }
+
+    return response.text().then(parseResponseACB);
+}
+
 function isStopPointCB(stopPoint: unknown): stopPoint is StopPoint {
     if (typeof stopPoint !== "object" || stopPoint === null) {
         return false;
@@ -58,7 +72,7 @@ export function fetchStopPointsACB(): Promise<StopPoint[]> {
     return fetch(`${backendBaseURL}/api/sl/stop-points`, {
         headers: getBackendAuthHeaders(),
     })
-        .then(handleResponseACB)
+        .then(handleResponseWithGIDParseACB)
         .then(filterStopPointsACB)
         .catch(throwErrorACB);
 }

@@ -13,7 +13,8 @@ import (
 )
 
 type server struct {
-	db *sql.DB
+	db       *sql.DB
+	staticDB *sql.DB
 }
 
 const slBaseURL = "https://transport.integration.sl.se/v1"
@@ -158,4 +159,37 @@ func (s *server) handleRouteDelays(w http.ResponseWriter, r *http.Request) {
 		summaries = []*delaySummary{} // return empty list instead of null
 	}
 	_ = json.NewEncoder(w).Encode(summaries)
+}
+
+func (s *server) handleStopPointRoutes(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	date := strings.TrimSpace(r.URL.Query().Get("date"))
+	if date == "" {
+		http.Error(w, "missing date parameter", http.StatusBadRequest)
+		return
+	}
+	if _, err := time.Parse("2006-01-02", date); err != nil {
+		http.Error(w, "invalid date format (expected YYYY-MM-DD)", http.StatusBadRequest)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
+	defer cancel()
+
+	stopPointRoutes, err := s.queryStopPointRoutes(ctx, date)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("query failed: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	if stopPointRoutes == nil {
+		stopPointRoutes = map[string][]*routeMeta{}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(stopPointRoutes)
 }

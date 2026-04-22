@@ -18,7 +18,8 @@ var allowedOrigins = map[string]struct{}{
 }
 
 func main() {
-	postgresDSNFlag := flag.String("postgres-dsn", "", "Postgres DSN, for example postgres://user:pass@host:5432/dbname?sslmode=disable")
+	postgresDSNFlag := flag.String("postgres-dsn", "", "Postgres DSN for historical GTFS database")
+	staticPostgresDSNFlag := flag.String("static-postgres-dsn", "", "Postgres DSN for static GTFS database")
 	portFlag := flag.String("port", "8081", "HTTP server port")
 	apiKeyFlag := flag.String("api-key", "", "API key for authentication")
 	flag.Parse()
@@ -26,6 +27,11 @@ func main() {
 	postgresDSN := strings.TrimSpace(*postgresDSNFlag)
 	if postgresDSN == "" {
 		log.Fatal("missing required -postgres-dsn flag")
+	}
+
+	staticPostgresDSN := strings.TrimSpace(*staticPostgresDSNFlag)
+	if staticPostgresDSN == "" {
+		log.Fatal("missing required -static-postgres-dsn flag")
 	}
 
 	apiKey := strings.TrimSpace(*apiKeyFlag)
@@ -46,7 +52,14 @@ func main() {
 	}
 	defer db.Close() // nolint: errcheck
 
-	registerDBMetrics(db)
+	staticDB, err := sql.Open("pgx", staticPostgresDSN)
+	if err != nil {
+		log.Fatalf("open static postgres connection: %v", err)
+	}
+	defer staticDB.Close() // nolint: errcheck
+
+	registerDBMetrics(db, "postgres")
+	registerDBMetrics(staticDB, "postgres_static")
 	go startMetricsServer()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -54,12 +67,16 @@ func main() {
 	if err := db.PingContext(ctx); err != nil {
 		log.Fatalf("ping postgres: %v", err)
 	}
+	if err := staticDB.PingContext(ctx); err != nil {
+		log.Fatalf("ping static postgres: %v", err)
+	}
 
-	srv := &server{db: db}
+	srv := &server{db: db, staticDB: staticDB}
 	apiMux := http.NewServeMux()
 	apiMux.HandleFunc("/api/departure-historical-delay", srv.handleDepartureHistoricalDelay)
 	apiMux.HandleFunc("/api/available-dates", srv.handleAvailableDates)
 	apiMux.HandleFunc("/api/route-delays", srv.handleRouteDelays)
+	apiMux.HandleFunc("/api/stop-point-routes", srv.handleStopPointRoutes)
 	apiMux.HandleFunc("/api/sl/stop-points", srv.handleSLStopPoints)
 
 	rootMux := http.NewServeMux()

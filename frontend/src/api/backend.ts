@@ -1,4 +1,4 @@
-import { DelaySummary } from "../types/historicalDelay";
+import { DelaySummary, RouteMeta } from "../types/historicalDelay";
 import { EventType } from "../types/departureDelay";
 import { RouteDelayTrendPoint } from "../types/routeDelays";
 import { getAvgDelayMinutes } from "../utils/time";
@@ -17,6 +17,8 @@ export type RouteDelayTrendParams = {
     routeType: string;
     eventType: EventType;
 };
+
+export type RoutesByStopPoint = Record<string, RouteMeta[]>;
 
 export const backendBaseURL = import.meta.env.VITE_BACKEND_API_URL ?? "http://localhost:8081";
 const backendAPIKey = import.meta.env.VITE_BACKEND_API_KEY ?? "";
@@ -180,4 +182,25 @@ export function fetchRouteDelayTrend({
     }
 
     return Promise.all(datePromises).then(sortResultsACB).catch(catchErrorACB);
+}
+
+export function fetchStopPointRoutesByDate(date: string): Promise<RoutesByStopPoint> {
+    if (date.trim() === "") {
+        return Promise.resolve({});
+    }
+
+    const params = new URLSearchParams();
+    params.set("date", date);
+
+    function handleResponseACB(response: Response): Promise<RoutesByStopPoint> {
+        if (!response.ok) {
+            throw new Error(`Failed to fetch stop point routes: ${response.status}`);
+        }
+        return response.json();
+    }
+
+    const fullURL = `${backendBaseURL}/api/stop-point-routes?${params.toString()}`;
+    return fetch(fullURL, {
+        headers: getBackendAuthHeaders(),
+    }).then(handleResponseACB);
 }

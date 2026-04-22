@@ -48,7 +48,32 @@ var (
 		Name:      "errors_total",
 		Help:      "Total number of aggregation errors",
 	})
-	startTime time.Time
+	staticRefreshDurationSeconds = prometheus.NewGauge(prometheus.GaugeOpts{
+		Namespace: "gtfs",
+		Subsystem: "static_refresh",
+		Name:      "duration_seconds",
+		Help:      "Duration of the latest static GTFS refresh run in seconds",
+	})
+	staticRefreshStopPoints = prometheus.NewGauge(prometheus.GaugeOpts{
+		Namespace: "gtfs",
+		Subsystem: "static_refresh",
+		Name:      "stop_points",
+		Help:      "Number of stop points stored in the latest successful static GTFS refresh",
+	})
+	staticRefreshRoutes = prometheus.NewGauge(prometheus.GaugeOpts{
+		Namespace: "gtfs",
+		Subsystem: "static_refresh",
+		Name:      "routes",
+		Help:      "Number of routes stored in the latest successful static GTFS refresh",
+	})
+	staticRefreshStopPointRoutes = prometheus.NewGauge(prometheus.GaugeOpts{
+		Namespace: "gtfs",
+		Subsystem: "static_refresh",
+		Name:      "stop_point_routes",
+		Help:      "Number of stop-point-route mappings stored in the latest successful static GTFS refresh",
+	})
+	startTime              time.Time
+	staticRefreshStartTime time.Time
 )
 
 func initMetrics() {
@@ -62,6 +87,10 @@ func initMetrics() {
 		stopsFound,
 		durationSeconds,
 		errorsTotal,
+		staticRefreshDurationSeconds,
+		staticRefreshStopPoints,
+		staticRefreshRoutes,
+		staticRefreshStopPointRoutes,
 	)
 }
 
@@ -90,4 +119,15 @@ func RecordError(err error) {
 	errorsTotal.Inc()
 	fmt.Printf("aggregation error: %v\n", err)
 	aggregationRunning.Set(0)
+}
+
+func StartStaticRefresh() {
+	staticRefreshStartTime = time.Now()
+}
+
+func RecordStaticRefreshComplete(stopPoints int, routes int, stopPointRoutes int) {
+	staticRefreshDurationSeconds.Set(time.Since(staticRefreshStartTime).Seconds())
+	staticRefreshStopPoints.Set(float64(stopPoints))
+	staticRefreshRoutes.Set(float64(routes))
+	staticRefreshStopPointRoutes.Set(float64(stopPointRoutes))
 }
