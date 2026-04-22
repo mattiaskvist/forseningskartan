@@ -50,10 +50,7 @@ describe("userPreferencesSlice", () => {
     });
 
     it("sets language preference", () => {
-        const updatedState = userPreferencesSlice.reducer(
-            undefined,
-            setLanguagePreference("sv")
-        );
+        const updatedState = userPreferencesSlice.reducer(undefined, setLanguagePreference("sv"));
 
         expect(updatedState.language).toBe("sv");
     });

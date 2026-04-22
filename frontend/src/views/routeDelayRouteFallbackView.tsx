@@ -3,10 +3,13 @@ import { TranslationStrings } from "../utils/translations";
 
 type RouteDelayRouteFallbackViewProps = {
     onBackToRoutes: () => void;
-    t: TranslationStrings['routeDelayRouteFallback'];
+    t: TranslationStrings["routeDelayRouteFallback"];
 };
 
-export function RouteDelayRouteFallbackView({ onBackToRoutes, t }: RouteDelayRouteFallbackViewProps) {
+export function RouteDelayRouteFallbackView({
+    onBackToRoutes,
+    t,
+}: RouteDelayRouteFallbackViewProps) {
     return (
         <Box
             sx={{

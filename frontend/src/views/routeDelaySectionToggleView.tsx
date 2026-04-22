@@ -5,7 +5,7 @@ import { TranslationStrings } from "../utils/translations";
 type RouteDelaySectionToggleViewProps = {
     selectedSection: RouteDelaySection;
     onSelectedSectionChange: (section: RouteDelaySection) => void;
-    t: TranslationStrings['routeDelaySectionToggle'];
+    t: TranslationStrings["routeDelaySectionToggle"];
 };
 
 export function RouteDelaySectionToggleView({

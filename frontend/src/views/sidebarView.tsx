@@ -44,7 +44,7 @@ type SidebarViewProps = {
     onAppStyleChange: (style: AppStyle) => void;
     currentLanguage: LanguageCode;
     onLanguageChange: (lang: LanguageCode) => void;
-    t: TranslationStrings['sideBar'];
+    t: TranslationStrings["sideBar"];
 };
 
 export function SidebarView({
@@ -268,7 +268,7 @@ export function SidebarView({
                                 letterSpacing: "0.05em",
                             }}
                         >
-                            {currentLanguage === 'en' ? 'Language / Språk' : 'Språk / Language'}
+                            {currentLanguage === "en" ? "Language / Språk" : "Språk / Language"}
                         </Typography>
                         <Box sx={{ pt: 1, width: "100%", pb: 2 }}>
                             <ToggleButtonGroup

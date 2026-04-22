@@ -27,9 +27,9 @@ export type DepartureViewProps = {
     isFavoriteStop: boolean;
     isUserLoggedIn: boolean;
     onToggleFavoriteStop: () => void;
-    t: TranslationStrings['departure'];
-    tHeader: TranslationStrings['departureHeader'];
-    tEmpty: TranslationStrings['departureEmpty'];
+    t: TranslationStrings["departure"];
+    tHeader: TranslationStrings["departureHeader"];
+    tEmpty: TranslationStrings["departureEmpty"];
 };
 
 export function DepartureView({

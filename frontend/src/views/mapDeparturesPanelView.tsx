@@ -4,7 +4,7 @@ import { TranslationStrings } from "../utils/translations";
 
 type MapDeparturesPanelViewProps = {
     departureViewProps: DepartureViewProps;
-    t: TranslationStrings['mapDeparturePanel'];
+    t: TranslationStrings["mapDeparturePanel"];
 };
 
 export function MapDeparturesPanelView({ departureViewProps, t }: MapDeparturesPanelViewProps) {

@@ -4,7 +4,7 @@ import { TranslationStrings } from "../utils/translations";
 
 type RouteDelayLeaderboardViewProps = {
     leaderboardItems: RouteDelayListItem[];
-    t: TranslationStrings['routeDelayLeaderboard'];
+    t: TranslationStrings["routeDelayLeaderboard"];
 };
 
 export function RouteDelayLeaderboardView({ leaderboardItems, t }: RouteDelayLeaderboardViewProps) {
@@ -29,7 +29,9 @@ export function RouteDelayLeaderboardView({ leaderboardItems, t }: RouteDelayLea
                     <span>{label}</span>
                 </span>
                 <span className="flex font-medium tabular-nums">
-                    <span className="text-right">{avgDelayMinutes} {t.min}</span>
+                    <span className="text-right">
+                        {avgDelayMinutes} {t.min}
+                    </span>
                     <span className="w-24 text-right">{uniqueTrips}</span>
                 </span>
             </li>

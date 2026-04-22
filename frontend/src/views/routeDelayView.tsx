@@ -47,11 +47,11 @@ type RouteDelayViewProps = {
     onBackToRoutes: () => void;
     onPageChange: (nextPage: number) => void;
     onRoutesPerPageChange: (nextPageSize: PageSizeOption) => void;
-    tRouteDelay: TranslationStrings['routeDelay'];
-    tSectionToggle: TranslationStrings['routeDelaySectionToggle'];
-    tRoutes: TranslationStrings['routeDelayRoutes'];
-    tLeaderboard: TranslationStrings['routeDelayLeaderboard'];
-    tRouteFallback: TranslationStrings['routeDelayRouteFallback'];
+    tRouteDelay: TranslationStrings["routeDelay"];
+    tSectionToggle: TranslationStrings["routeDelaySectionToggle"];
+    tRoutes: TranslationStrings["routeDelayRoutes"];
+    tLeaderboard: TranslationStrings["routeDelayLeaderboard"];
+    tRouteFallback: TranslationStrings["routeDelayRouteFallback"];
 };
 
 export function RouteDelayView({
@@ -189,7 +189,10 @@ export function RouteDelayView({
                                 onBackToRoutes={onBackToRoutes}
                             />
                         ) : (
-                            <RouteDelayRouteFallbackView onBackToRoutes={onBackToRoutes} t={tRouteFallback} />
+                            <RouteDelayRouteFallbackView
+                                onBackToRoutes={onBackToRoutes}
+                                t={tRouteFallback}
+                            />
                         )}
                     </div>
                 </div>

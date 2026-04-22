@@ -21,7 +21,7 @@ type RouteDelayRoutesViewProps = {
     onSelectRoute: (routeKey: string) => void;
     onPageChange: (nextPage: number) => void;
     onRoutesPerPageChange: (nextPageSize: PageSizeOption) => void;
-    t: TranslationStrings['routeDelayRoutes'];
+    t: TranslationStrings["routeDelayRoutes"];
 };
 
 export function RouteDelayRoutesView({

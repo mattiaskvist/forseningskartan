@@ -167,7 +167,6 @@ function getAppStylePreferenceCB(state: RootState) {
     return state.userPreferences.appStyle;
 }
 
-
 function getCurrentLanguageCB(state: RootState) {
     return state.userPreferences.language;
 }

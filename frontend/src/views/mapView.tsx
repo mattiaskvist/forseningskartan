@@ -17,7 +17,7 @@ type MapViewProps = {
     departureViewProps: DepartureViewProps | null;
     appStyle: AppStyle;
     onAppStyleChange: (style: AppStyle) => void;
-    tMapDeparturePanel: TranslationStrings['mapDeparturePanel'];
+    tMapDeparturePanel: TranslationStrings["mapDeparturePanel"];
 };
 
 export function MapView({
@@ -68,7 +68,10 @@ export function MapView({
                         isQuickOverlay
                     />
                     {departureViewProps && (
-                        <MapDeparturesPanelView departureViewProps={departureViewProps} t={tMapDeparturePanel} />
+                        <MapDeparturesPanelView
+                            departureViewProps={departureViewProps}
+                            t={tMapDeparturePanel}
+                        />
                     )}
                 </Box>
             </Box>

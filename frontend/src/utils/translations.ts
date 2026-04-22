@@ -10,7 +10,7 @@ interface accountStrings {
 }
 
 interface departureEmptyStrings {
-    noUpcomingDepartures: string
+    noUpcomingDepartures: string;
 }
 
 interface departureHeaderStrings {
@@ -68,9 +68,6 @@ interface sideBarStrings {
 
 // TODO: components & routes
 
-
-
-
 export interface TranslationStrings {
     account: accountStrings;
     departureEmpty: departureEmptyStrings;
@@ -104,7 +101,7 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             loading: "Loading departures...",
         },
         mapDeparturePanel: {
-            departures: "Departures"
+            departures: "Departures",
         },
         routeDelayLeaderboard: {
             min: "min",
@@ -120,11 +117,11 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             min: "min",
             unique: "unique trips",
             page: "page",
-            noMatch: "No routes match the selected filters."
+            noMatch: "No routes match the selected filters.",
         },
         routeDelaySectionToggle: {
             routes: "Routes",
-            leaderboard: "Delay Leaderboard"
+            leaderboard: "Delay Leaderboard",
         },
         routeDelay: {
             delays: "Route Delays",
@@ -144,7 +141,7 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             deleteAccount: "Radera Konto",
         },
         departureEmpty: {
-            noUpcomingDepartures: "Inga kommande avgångar"
+            noUpcomingDepartures: "Inga kommande avgångar",
         },
         departureHeader: {
             unfavorite: "Ta bort från favoriter",
@@ -156,7 +153,7 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             loading: "Laddar in avgångar...",
         },
         mapDeparturePanel: {
-            departures: "Avgångar"
+            departures: "Avgångar",
         },
         routeDelayLeaderboard: {
             min: "min",
@@ -172,11 +169,11 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             min: "min",
             unique: "unika resor",
             page: "sida",
-            noMatch: "Inga linjer matchar de valda filtren."
+            noMatch: "Inga linjer matchar de valda filtren.",
         },
         routeDelaySectionToggle: {
             routes: "Linjer",
-            leaderboard: "Förseningstopplista"
+            leaderboard: "Förseningstopplista",
         },
         routeDelay: {
             delays: "Linjeförseningar",
@@ -189,5 +186,5 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             loginToFavorite: "Logga in för att spara favoriter",
             selectToFavorite: "Välj en hållplats för att göra det till en favorit",
         },
-    }
-}
+    },
+};

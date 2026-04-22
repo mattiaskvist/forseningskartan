@@ -10,7 +10,7 @@ type DepartureHeaderViewProps = {
     isUserLoggedIn: boolean;
     onToggleFavoriteStop: () => void;
     onClose: () => void;
-    t: TranslationStrings['departureHeader'];
+    t: TranslationStrings["departureHeader"];
 };
 
 export function DepartureHeaderView({
@@ -46,12 +46,7 @@ export function DepartureHeaderView({
                             : t.favorite
                         : t.loginFavorite}
                 </Button>
-                <Button
-                    variant="text"
-                    size="small"
-                    onClick={onClose}
-                    aria-label={t.close}
-                >
+                <Button variant="text" size="small" onClick={onClose} aria-label={t.close}>
                     {t.close}
                 </Button>
             </div>

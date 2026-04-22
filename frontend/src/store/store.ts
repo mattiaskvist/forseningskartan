@@ -179,7 +179,12 @@ listenerMiddleware.startListening({
 
 // user preferences
 listenerMiddleware.startListening({
-    matcher: isAnyOf(toggleFavoriteSiteId, setAppStylePreference, setLanguagePreference, recordRecentSearchSiteId),
+    matcher: isAnyOf(
+        toggleFavoriteSiteId,
+        setAppStylePreference,
+        setLanguagePreference,
+        recordRecentSearchSiteId
+    ),
     effect: async (_, listenerApi) => {
         const state = listenerApi.getState() as RootState;
         const user = state.auth.user;

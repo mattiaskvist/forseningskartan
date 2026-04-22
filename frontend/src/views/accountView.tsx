@@ -6,7 +6,7 @@ type AccountViewProps = {
     user: AuthUserState;
     onLogout: () => void;
     onDelete: () => void;
-    t: TranslationStrings['account'];
+    t: TranslationStrings["account"];
 };
 
 export function AccountView({ user, onLogout, onDelete, t }: AccountViewProps) {
