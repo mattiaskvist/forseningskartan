@@ -16,7 +16,6 @@ type StopMapProps = {
     sites: Site[];
     selectedSite: Site | null;
     handleSelectSiteCB: (siteId: number | null) => void;
-    siteIdsWithNoDepartures: Set<number>;
     appStyle: AppStyle;
 };
 
@@ -67,39 +66,11 @@ function getUnselectedMarkerStyle(appStyle: AppStyle): CircleMarkerOptions {
     };
 }
 
-function getNoDeparturesMarkerStyle(): CircleMarkerOptions {
-    return {
-        radius: 4,
-        color: "#f97316",
-        fillColor: "#f97316",
-        fillOpacity: 0.85,
-        weight: 1,
-    };
+function setMarkerSelectedStyle(marker: CircleMarker, isSelected: boolean, appStyle: AppStyle) {
+    marker.setStyle(isSelected ? SELECTED_MARKER_STYLE : getUnselectedMarkerStyle(appStyle));
 }
 
-function setMarkerStyle(
-    marker: CircleMarker,
-    isSelected: boolean,
-    appStyle: AppStyle,
-    hasNoDeparturesToday: boolean
-) {
-    if (isSelected) {
-        marker.setStyle(SELECTED_MARKER_STYLE);
-        return;
-    }
-
-    marker.setStyle(
-        hasNoDeparturesToday ? getNoDeparturesMarkerStyle() : getUnselectedMarkerStyle(appStyle)
-    );
-}
-
-export function StopMap({
-    sites,
-    selectedSite,
-    handleSelectSiteCB,
-    siteIdsWithNoDepartures,
-    appStyle,
-}: StopMapProps) {
+export function StopMap({ sites, selectedSite, handleSelectSiteCB, appStyle }: StopMapProps) {
     const mapContainerRef = useRef<HTMLDivElement | null>(null);
     const mapRef = useRef<LeafletMap | null>(null);
     const tileLayerRef = useRef<TileLayer | null>(null);
@@ -185,9 +156,7 @@ export function StopMap({
         function addSiteMarkerCB(site: Site) {
             const marker = new CircleMarker(
                 [site.lat, site.lon],
-                siteIdsWithNoDepartures.has(site.id)
-                    ? getNoDeparturesMarkerStyle()
-                    : getUnselectedMarkerStyle(mapStyleRef.current)
+                getUnselectedMarkerStyle(mapStyleRef.current)
             );
             marker.bindTooltip(site.name);
 
@@ -203,51 +172,38 @@ export function StopMap({
         }
 
         sites.forEach(addSiteMarkerCB);
-    }, [sites, handleSelectSiteCB, siteIdsWithNoDepartures]);
+    }, [sites, handleSelectSiteCB]);
 
     // Update marker styles when map style changes
     useEffect(() => {
         const selectedSiteId = selectedSiteIdRef.current;
         function setMarkerStyleCB(marker: CircleMarker, siteId: number) {
-            setMarkerStyle(
-                marker,
-                siteId === selectedSiteId,
-                appStyle,
-                siteIdsWithNoDepartures.has(siteId)
-            );
+            setMarkerSelectedStyle(marker, siteId === selectedSiteId, appStyle);
         }
         markersBySiteIdRef.current.forEach(setMarkerStyleCB);
-    }, [appStyle, siteIdsWithNoDepartures]);
+    }, [appStyle]);
 
     useEffect(() => {
         if (!mapRef.current) {
             return;
         }
-        const previousSelectedSiteId = selectedSiteIdRef.current;
         selectedSiteIdRef.current = selectedSite?.id ?? null;
 
         if (selectedMarkerRef.current) {
-            setMarkerStyle(
-                selectedMarkerRef.current,
-                false,
-                mapStyleRef.current,
-                previousSelectedSiteId !== null
-                    ? siteIdsWithNoDepartures.has(previousSelectedSiteId)
-                    : false
-            );
+            setMarkerSelectedStyle(selectedMarkerRef.current, false, mapStyleRef.current);
         }
 
         if (selectedSite) {
             const selectedMarker = markersBySiteIdRef.current.get(selectedSite.id) ?? null;
             if (selectedMarker) {
-                setMarkerStyle(selectedMarker, true, mapStyleRef.current, false);
+                setMarkerSelectedStyle(selectedMarker, true, mapStyleRef.current);
             }
             selectedMarkerRef.current = selectedMarker;
             return;
         }
 
         selectedMarkerRef.current = null;
-    }, [selectedSite, sites, siteIdsWithNoDepartures]);
+    }, [selectedSite, sites]);
 
     useEffect(() => {
         const map = mapRef.current;

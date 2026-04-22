@@ -12,7 +12,6 @@ type MapViewProps = {
     selectedSite: Site | null;
     handleSelectSiteCB: (siteId: number | null) => void;
     recentSearchSiteIds: number[];
-    siteIdsWithNoDepartures: Set<number>;
     departureViewProps: DepartureViewProps | null;
     appStyle: AppStyle;
     onAppStyleChange: (style: AppStyle) => void;
@@ -26,7 +25,6 @@ export function MapView({
     selectedSite,
     handleSelectSiteCB,
     recentSearchSiteIds,
-    siteIdsWithNoDepartures,
     departureViewProps,
     appStyle,
     onAppStyleChange,
@@ -40,7 +38,6 @@ export function MapView({
                 sites={sites}
                 selectedSite={selectedSite}
                 handleSelectSiteCB={handleSelectSiteCB}
-                siteIdsWithNoDepartures={siteIdsWithNoDepartures}
                 appStyle={appStyle}
             />
             <Box

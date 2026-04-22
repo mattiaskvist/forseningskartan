@@ -44,7 +44,7 @@ import {
 } from "../store/userPreferencesSlice";
 import { showSnackbar } from "../store/snackbarSlice";
 import { Suspense } from "../components/Suspense";
-import { getSiteIdsWithNoDepartures, getUpcomingDepartures } from "../utils/departures";
+import { getUpcomingDepartures } from "../utils/departures";
 import { RouteMeta, RouteType } from "../types/historicalDelay";
 import {
     getSitesByTransportationMode,
@@ -75,19 +75,6 @@ export function MapPresenter() {
     const routesByStopPoint = useAppSelector(getRoutesByStopPointCB);
     const routesByStopPointError = useAppSelector(getStopPointRoutesErrorCB);
     const selectedTransportationMode = useAppSelector(getMapTransportationModeFilterCB);
-
-    const siteIdsWithNoDepartures = useMemo(() => {
-        if (!sites || !stopPoints || routesByStopPointError) {
-            return new Set<number>();
-        }
-
-        return getSiteIdsWithNoDepartures(
-            sites,
-            stopPoints,
-            routesByStopPoint,
-            stopPointGidsBySiteId
-        );
-    }, [sites, stopPoints, routesByStopPoint, routesByStopPointError, stopPointGidsBySiteId]);
 
     const transportationModeOptions = useMemo(() => {
         function getRouteTypeCB(route: RouteMeta): RouteType {
@@ -218,7 +205,6 @@ export function MapPresenter() {
             selectedSite={selectedSite}
             handleSelectSiteCB={handleSelectSiteCB}
             recentSearchSiteIds={recentSearchSiteIds}
-            siteIdsWithNoDepartures={siteIdsWithNoDepartures}
             departureViewProps={departureViewProps}
             appStyle={appStyle}
             onAppStyleChange={handleAppStyleChangeACB}

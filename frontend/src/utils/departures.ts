@@ -1,6 +1,4 @@
-import { RoutesByStopPoint } from "../api/backend";
-import { Departure, Site, StopPoint } from "../types/sl";
-import { getStopPointGidsForSite, StopPointGidsBySiteId } from "./site";
+import { Departure } from "../types/sl";
 
 const nonUpcomingStates = new Set([
     "DEPARTED",
@@ -44,28 +42,4 @@ function compareDeparturesCB(a: Departure, b: Departure) {
 
 export function getUpcomingDepartures(departures: Departure[]): Departure[] {
     return departures.filter(isUpcomingDepartureCB).sort(compareDeparturesCB);
-}
-
-export function getSiteIdsWithNoDepartures(
-    sites: Site[],
-    stopPoints: StopPoint[],
-    routesByStopPoint: RoutesByStopPoint,
-    stopPointGidsBySiteId: StopPointGidsBySiteId
-): Set<number> {
-    const noDepartureSiteIds = new Set<number>();
-
-    function collectNoDepartureSiteIdsForSiteCB(site: Site): void {
-        const stopPointGIDs = getStopPointGidsForSite(site, stopPoints, stopPointGidsBySiteId);
-        function hasAnyRoutesCB(stopPointGID: string): boolean {
-            return (routesByStopPoint[stopPointGID]?.length ?? 0) > 0;
-        }
-
-        const hasAnyDepartures = stopPointGIDs.some(hasAnyRoutesCB);
-        if (!hasAnyDepartures) {
-            noDepartureSiteIds.add(site.id);
-        }
-    }
-
-    sites.forEach(collectNoDepartureSiteIdsForSiteCB);
-    return noDepartureSiteIds;
 }
