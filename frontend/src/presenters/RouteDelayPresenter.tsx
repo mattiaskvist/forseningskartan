@@ -25,18 +25,15 @@ import {
 import { Suspense } from "../components/Suspense";
 import { DelaySummary, RouteType } from "../types/historicalDelay";
 import { DatePreset, EventType } from "../types/departureDelay";
-import {
-    TransportationMode,
-    transportationModes,
-    transportationModeToRouteType,
-} from "../types/sl";
+import { TransportationMode, transportationModeToRouteType } from "../types/sl";
 import { PageSizeOption, RouteDelayListItem, RouteDelaySection } from "../types/routeDelays";
 import { getAvgDelayMinutes, getAvgDelaySeconds } from "../utils/time";
 import { compareRouteNamesCB, getRouteDisplayName, getRouteIdentityKey } from "../utils/route";
 import { getPresetDescription } from "../types/departureDelay";
+import { routeTypesToTransportationModes } from "../utils/transportationMode";
 
-function getRouteModeKey(summary: DelaySummary): string {
-    return summary.route?.type ?? "unknown";
+function getRouteModeKey(summary: DelaySummary): RouteType | null {
+    return summary.route?.type ?? null;
 }
 
 export function RouteDelayPresenter() {
@@ -116,17 +113,14 @@ export function RouteDelayPresenter() {
     }, [selectedSection, pagedRouteItems, totalFilteredRoutes]);
 
     const transportationModeOptions = useMemo(() => {
-        const modes = new Map<RouteType, TransportationMode>();
-
-        const availableRouteTypes = new Set(routeDelays.map(getRouteModeKey));
-
-        for (const [mode, routeType] of transportationModes) {
-            if (availableRouteTypes.has(routeType) && !modes.has(routeType)) {
-                modes.set(routeType, mode);
-            }
+        function isNonNullRouteTypeCB(type: RouteType | null): type is RouteType {
+            return type !== null;
         }
+        const availableRouteTypes = new Set(
+            routeDelays.map(getRouteModeKey).filter(isNonNullRouteTypeCB)
+        );
 
-        return Array.from(modes.values());
+        return routeTypesToTransportationModes(availableRouteTypes);
     }, [routeDelays]);
 
     const leaderboardItems = useMemo((): RouteDelayListItem[] => {

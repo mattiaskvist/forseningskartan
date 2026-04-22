@@ -1,5 +1,5 @@
 import { ToggleButton } from "@mui/material";
-import { ModeWithOther } from "../types/sl";
+import { ModeWithOther, TransportationMode, transportationModes } from "../types/sl";
 import DirectionsBusIcon from "@mui/icons-material/DirectionsBus";
 import TramIcon from "@mui/icons-material/Tram";
 import DirectionsSubwayIcon from "@mui/icons-material/DirectionsSubway";
@@ -7,6 +7,7 @@ import TrainIcon from "@mui/icons-material/Train";
 import DirectionsBoatIcon from "@mui/icons-material/DirectionsBoat";
 import LocalTaxiIcon from "@mui/icons-material/LocalTaxi";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutlineOutlined";
+import { RouteType } from "../types/historicalDelay";
 
 export const modeIcons: Record<ModeWithOther, React.ReactNode> = {
     BUS: <DirectionsBusIcon fontSize="small" />,
@@ -32,4 +33,16 @@ export function getTransportationModeButtonCB(mode: ModeWithOther) {
             </span>
         </ToggleButton>
     );
+}
+
+export function routeTypesToTransportationModes(routeTypes: Set<RouteType>): TransportationMode[] {
+    const modes = new Map<RouteType, TransportationMode>();
+
+    for (const [mode, routeType] of transportationModes) {
+        if (routeTypes.has(routeType) && !modes.has(routeType)) {
+            modes.set(routeType, mode);
+        }
+    }
+
+    return Array.from(modes.values());
 }
