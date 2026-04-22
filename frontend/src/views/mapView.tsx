@@ -82,6 +82,7 @@ export function MapView({
                 </Box>
             </Box>
             <MapSearchView
+                allSites={allSites}
                 sites={sites}
                 selectedSite={selectedSite}
                 handleSelectSiteCB={handleSelectSiteCB}

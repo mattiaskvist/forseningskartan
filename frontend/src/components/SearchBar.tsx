@@ -5,6 +5,7 @@ import Autocomplete, {
 import { FilterOptionsState } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import HistoryIcon from "@mui/icons-material/History";
+import { useMemo } from "react";
 import { Site } from "../types/sl";
 
 const defaultFilterOptions = createFilterOptions<Site>({
@@ -14,6 +15,7 @@ const defaultFilterOptions = createFilterOptions<Site>({
 });
 
 type SearchBarProps = {
+    allSites: Site[];
     sites: Site[];
     selectedSite: Site | null;
     handleSelectSiteCB: (siteId: number | null) => void;
@@ -21,11 +23,28 @@ type SearchBarProps = {
 };
 
 export function SearchBar({
+    allSites,
     sites,
     selectedSite,
     handleSelectSiteCB,
     recentSearchSiteIds = [],
 }: SearchBarProps) {
+    // useMemo to avoid unnecessary recalculations on every render
+    const visibleSiteIds = useMemo(() => new Set(sites.map((site) => site.id)), [sites]);
+    const allSitesById = useMemo(() => {
+        function getSiteIdPairCB(site: Site) {
+            return [site.id, site] as const;
+        }
+        return new Map(allSites.map(getSiteIdPairCB));
+    }, [allSites]);
+    const recentVisibleSites = useMemo(
+        () =>
+            recentSearchSiteIds
+                .map((siteId) => allSitesById.get(siteId))
+                .filter((site): site is Site => !!site && visibleSiteIds.has(site.id)),
+        [recentSearchSiteIds, allSitesById, visibleSiteIds]
+    );
+
     function getSiteNameCB(site: Site): string {
         return site.name;
     }
@@ -79,15 +98,14 @@ export function SearchBar({
     // otherwise it uses the default filter options function to show matching sites based on the user input
     // but bubbles up matching recent search sites for a nice user experience
     function customFilterOptionsCB(options: Site[], state: FilterOptionsState<Site>) {
-        const defaultOptions = defaultFilterOptions(options, state);
+        const visibleOptions = options.filter((site) => visibleSiteIds.has(site.id));
+        const defaultOptions = defaultFilterOptions(visibleOptions, state);
 
         if (state.inputValue.trim() === "" && recentSearchSiteIds.length > 0) {
-            const recentSites = recentSearchSiteIds
-                .map((siteId) => options.find((site) => site.id === siteId))
-                .filter((site): site is Site => !!site);
-
-            const remainingSites = defaultOptions.filter((site) => !recentSites.includes(site)); // avoid duplicates
-            return [...recentSites, ...remainingSites].slice(0, defaultOptions.length); // keep the total number of options within the default limit
+            const remainingSites = defaultOptions.filter(
+                (site) => !recentVisibleSites.includes(site)
+            ); // avoid duplicates
+            return [...recentVisibleSites, ...remainingSites].slice(0, defaultOptions.length); // keep the total number of options within the default limit
         }
 
         // bubble up recent searches
@@ -103,7 +121,7 @@ export function SearchBar({
             noOptionsText="No stops found"
             onChange={handleChangeCB}
             openOnFocus
-            options={sites}
+            options={allSites}
             renderInput={getRenderInputCB}
             renderOption={renderOptionCB}
             value={selectedSite}

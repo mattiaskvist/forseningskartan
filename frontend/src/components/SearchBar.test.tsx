@@ -14,6 +14,7 @@ describe("SearchBar", () => {
     it("sorts recent searches first and displays history icons", async () => {
         renderWithTheme(
             <SearchBar
+                allSites={sites}
                 sites={sites}
                 selectedSite={null}
                 handleSelectSiteCB={() => {}}
@@ -39,6 +40,7 @@ describe("SearchBar", () => {
     it("bubbles recent matches to the top when filtering by input", async () => {
         renderWithTheme(
             <SearchBar
+                allSites={sites}
                 sites={sites}
                 selectedSite={null}
                 handleSelectSiteCB={() => {}}

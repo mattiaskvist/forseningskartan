@@ -5,6 +5,7 @@ import { FilterToggleButtonGroup } from "../components/FilterToggleButtonGroup";
 import { getTransportationModeButtonCB } from "../utils/transportationMode";
 
 type MapSearchViewProps = {
+    allSites: Site[];
     sites: Site[];
     selectedSite: Site | null;
     handleSelectSiteCB: (siteId: number | null) => void;
@@ -18,6 +19,7 @@ type MapSearchViewProps = {
 };
 
 export function MapSearchView({
+    allSites,
     sites,
     selectedSite,
     handleSelectSiteCB,
@@ -76,6 +78,7 @@ export function MapSearchView({
                 onDeselect={() => onTransportationModeChange(null)}
             />
             <SearchBar
+                allSites={allSites}
                 sites={sites}
                 selectedSite={selectedSite}
                 handleSelectSiteCB={handleSelectSiteCB}
