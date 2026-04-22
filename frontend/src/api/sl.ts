@@ -5,7 +5,7 @@ const BASE_URL = "https://transport.integration.sl.se/v1";
 
 function handleResponseACB(response: Response) {
     if (!response.ok) {
-        throw new Error("expected reponse code to be 200. was " + response.status);
+        throw new Error("expected response code to be 200. was " + response.status);
     }
     return response.json();
 }
@@ -42,7 +42,7 @@ export function fetchDeparturesACB(siteId: number): Promise<DepartureResponse> {
 
 function handleResponseWithGIDParseACB(response: Response) {
     if (!response.ok) {
-        throw new Error("expected reponse code to be 200. was " + response.status);
+        throw new Error("expected response code to be 200. was " + response.status);
     }
 
     // custom parsing to treat gid as string to avoid integer overflow issues
