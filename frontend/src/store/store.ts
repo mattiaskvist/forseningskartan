@@ -29,6 +29,8 @@ import {
     toggleFavoriteSiteId,
     userPreferencesSlice,
     recordRecentSearchSiteId,
+    setMapTransportationModeFilter,
+    setHideStopsWithoutDepartures,
 } from "./userPreferencesSlice";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -200,7 +202,13 @@ listenerMiddleware.startListening({
 
 // user preferences
 listenerMiddleware.startListening({
-    matcher: isAnyOf(toggleFavoriteSiteId, setAppStylePreference, recordRecentSearchSiteId),
+    matcher: isAnyOf(
+        toggleFavoriteSiteId,
+        setAppStylePreference,
+        recordRecentSearchSiteId,
+        setMapTransportationModeFilter,
+        setHideStopsWithoutDepartures
+    ),
     effect: async (_, listenerApi) => {
         const state = listenerApi.getState() as RootState;
         const user = state.auth.user;

@@ -164,6 +164,8 @@ export const userPreferencesSlice = createSlice({
                 action.payload.recentSearchSiteIds
             );
             state.appStyle = action.payload.appStyle;
+            state.mapTransportationModeFilter = action.payload.mapTransportationModeFilter;
+            state.hideStopsWithoutDepartures = action.payload.hideStopsWithoutDepartures;
             storeAppStyle(action.payload.appStyle);
         },
         setMapTransportationModeFilter: (

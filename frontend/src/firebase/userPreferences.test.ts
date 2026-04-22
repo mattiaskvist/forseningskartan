@@ -7,6 +7,8 @@ describe("sanitizeUserPreferences", () => {
             favoriteSiteIds: [],
             recentSearchSiteIds: [],
             appStyle: "Dark",
+            mapTransportationModeFilter: null,
+            hideStopsWithoutDepartures: true,
         });
     });
 
