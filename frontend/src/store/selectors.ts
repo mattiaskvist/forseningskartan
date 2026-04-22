@@ -167,8 +167,9 @@ function getAppStylePreferenceCB(state: RootState) {
     return state.userPreferences.appStyle;
 }
 
+
 function getCurrentLanguageCB(state: RootState) {
-    return state.language.currentLanguage;
+    return state.userPreferences.language;
 }
 
 function getRecentSearchSiteIdsCB(state: RootState) {

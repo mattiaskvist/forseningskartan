@@ -7,6 +7,7 @@ describe("sanitizeUserPreferences", () => {
             favoriteSiteIds: [],
             recentSearchSiteIds: [],
             appStyle: "Dark",
+            language: "en",
         });
     });
 
@@ -19,6 +20,7 @@ describe("sanitizeUserPreferences", () => {
 
         expect(sanitized.favoriteSiteIds).toEqual([4, 4, 7, 7]);
         expect(sanitized.recentSearchSiteIds).toEqual([1, 1, 5, 5]);
+        expect(sanitized.language).toBe("en");
     });
 
     it("falls back to default app style for invalid value", () => {
@@ -29,6 +31,7 @@ describe("sanitizeUserPreferences", () => {
         });
 
         expect(sanitized.appStyle).toBe("Dark");
+        expect(sanitized.language).toBe("en");
     });
 
     it("sets appStyle correctly", () => {
@@ -39,5 +42,14 @@ describe("sanitizeUserPreferences", () => {
         });
 
         expect(sanitized.appStyle).toBe("Classic");
+        expect(sanitized.language).toBe("en");
+    });
+
+    it("sets language correctly", () => {
+        const sanitized = sanitizeUserPreferences({
+            language: "sv",
+        });
+
+        expect(sanitized.language).toBe("sv");
     });
 });

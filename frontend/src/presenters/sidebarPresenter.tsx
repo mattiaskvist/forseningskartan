@@ -9,7 +9,7 @@ import { logoutCurrentUser } from "../store/authThunks";
 import { AppStyle } from "../types/appStyle";
 import { setAppStylePreference } from "../store/userPreferencesSlice";
 import { getCurrentLanguageCB } from "../store/selectors";
-import { setLanguage } from "../store/languageSlice";
+import { setLanguagePreference } from "../store/userPreferencesSlice";
 import { LanguageCode, translations } from "../utils/translations";
 
 export function SidebarPresenter() {
@@ -51,8 +51,10 @@ export function SidebarPresenter() {
         dispatch(setAppStylePreference(style));
     }
 
-    function handleLanguageChangeACB(lang: LanguageCode) {
-        dispatch(setLanguage(lang));
+    function handleLanguageChangeACB(nextLanguage: LanguageCode) {
+        if (nextLanguage) {
+            dispatch(setLanguagePreference(nextLanguage));
+        }
     }
 
     const t = translations[currentLanguage].sideBar;

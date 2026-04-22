@@ -1,6 +1,7 @@
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { defaultUserPreferencesState, UserPreferencesState } from "../store/userPreferencesSlice";
 import { appStyles, AppStyle } from "../types/appStyle";
+import { isLanguageCode } from "../utils/translations";
 import { db } from "./firestore";
 
 const USER_PREFERENCES_COLLECTION = "userPreferences";
@@ -22,6 +23,7 @@ export function sanitizeUserPreferences(candidate: unknown): UserPreferencesStat
         appStyle?: unknown;
         favoriteSiteIds?: unknown;
         recentSearchSiteIds?: unknown;
+        language?: unknown;
     };
     const appStyle = isAppStyle(parsedCandidate.appStyle)
         ? parsedCandidate.appStyle
@@ -34,10 +36,15 @@ export function sanitizeUserPreferences(candidate: unknown): UserPreferencesStat
               .filter(isIntegerSiteIdCB) // keep only integers
               .slice(0, 5) // keep only the 5 most recent
         : [];
+    const language = isLanguageCode(parsedCandidate.language)
+        ? parsedCandidate.language
+        : defaultUserPreferencesState.language;
+
     return {
         appStyle,
         favoriteSiteIds,
         recentSearchSiteIds,
+        language,
     };
 }
 

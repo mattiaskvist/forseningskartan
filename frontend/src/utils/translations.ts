@@ -1,4 +1,7 @@
-export type LanguageCode = 'en' | 'sv';
+export type LanguageCode = "en" | "sv";
+
+export const isLanguageCode = (candidate: unknown): candidate is LanguageCode =>
+    typeof candidate === "string" && (candidate === "en" || candidate === "sv");
 
 // --------- views -----------
 interface accountStrings {

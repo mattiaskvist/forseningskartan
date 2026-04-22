@@ -1,8 +1,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AppStyle, appStyles } from "../types/appStyle";
+import { LanguageCode, isLanguageCode } from "../utils/translations";
 
 const APP_STYLE_STORAGE_KEY = "appStyle";
 const RECENT_SEARCH_STORAGE_KEY = "recentSearchSiteIds";
+const LANGUAGE_STORAGE_KEY = "language";
 
 function getStoredAppStyle(): AppStyle {
     try {
@@ -21,6 +23,26 @@ function storeAppStyle(style: AppStyle) {
         localStorage.setItem(APP_STYLE_STORAGE_KEY, style);
     } catch {
         // ignore — test environments
+    }
+}
+
+function getStoredLanguage(): LanguageCode {
+    try {
+        const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+        if (stored && isLanguageCode(stored)) {
+            return stored;
+        }
+    } catch {
+        // ignore
+    }
+    return "en";
+}
+
+function storeLanguage(language: LanguageCode) {
+    try {
+        localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+    } catch {
+        // ignore
     }
 }
 
@@ -89,12 +111,14 @@ export type UserPreferencesState = {
     favoriteSiteIds: number[];
     recentSearchSiteIds: number[];
     appStyle: AppStyle;
+    language: LanguageCode;
 };
 
 export const defaultUserPreferencesState: UserPreferencesState = {
     favoriteSiteIds: [],
     recentSearchSiteIds: getStoredRecentSearchSiteIds(),
     appStyle: getStoredAppStyle(),
+    language: getStoredLanguage(),
 };
 
 function normalizeFavoriteSiteIds(favoriteSiteIds: number[]): number[] {
@@ -153,6 +177,10 @@ export const userPreferencesSlice = createSlice({
             state.appStyle = action.payload;
             storeAppStyle(action.payload);
         },
+        setLanguagePreference: (state, action: PayloadAction<LanguageCode>) => {
+            state.language = action.payload;
+            storeLanguage(action.payload);
+        },
         applyLoadedUserPreferences: (state, action: PayloadAction<UserPreferencesState>) => {
             state.favoriteSiteIds = normalizeFavoriteSiteIds(action.payload.favoriteSiteIds);
             state.recentSearchSiteIds = normalizeRecentSearchSiteIds(
@@ -160,6 +188,8 @@ export const userPreferencesSlice = createSlice({
             );
             state.appStyle = action.payload.appStyle;
             storeAppStyle(action.payload.appStyle);
+            state.language = action.payload.language;
+            storeLanguage(action.payload.language);
         },
     },
 });
@@ -167,6 +197,7 @@ export const userPreferencesSlice = createSlice({
 export const {
     toggleFavoriteSiteId,
     setAppStylePreference,
+    setLanguagePreference,
     applyLoadedUserPreferences,
     recordRecentSearchSiteId,
     clearRecentSearchSiteIds,

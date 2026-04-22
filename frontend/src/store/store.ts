@@ -18,13 +18,13 @@ import {
     routeDelayUISlice,
 } from "./reducers";
 import { authSlice, setUser } from "./authSlice";
-import languageReducer from "./languageSlice";
 import { showSnackbar, snackbarSlice } from "./snackbarSlice";
 import {
     applyLoadedUserPreferences,
     clearRecentSearchSiteIds,
     clearStoredRecentSearchSiteIds,
     setAppStylePreference,
+    setLanguagePreference,
     storeRecentSearchSiteIds,
     toggleFavoriteSiteId,
     userPreferencesSlice,
@@ -73,7 +73,6 @@ function mergeRecentSearchSiteIds(
 export const store = configureStore({
     reducer: {
         auth: authSlice.reducer,
-        language: languageReducer,
         sites: sitesSlice.reducer,
         departures: departuresSlice.reducer,
         stopPoints: stopPointsSlice.reducer,
@@ -180,7 +179,7 @@ listenerMiddleware.startListening({
 
 // user preferences
 listenerMiddleware.startListening({
-    matcher: isAnyOf(toggleFavoriteSiteId, setAppStylePreference, recordRecentSearchSiteId),
+    matcher: isAnyOf(toggleFavoriteSiteId, setAppStylePreference, setLanguagePreference, recordRecentSearchSiteId),
     effect: async (_, listenerApi) => {
         const state = listenerApi.getState() as RootState;
         const user = state.auth.user;
