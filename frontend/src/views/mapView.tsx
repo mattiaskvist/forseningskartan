@@ -20,6 +20,7 @@ type MapViewProps = {
     transportationModeOptions: TransportationMode[];
     onTransportationModeChange: (filter: TransportationMode | null) => void;
     hideStopsWithoutDepartures: boolean;
+    isHideStopsWithoutDeparturesBoxHidden: boolean;
     onHideStopsWithoutDeparturesChange: (value: boolean) => void;
     totalSiteCount: number;
 };
@@ -37,6 +38,7 @@ export function MapView({
     transportationModeOptions,
     onTransportationModeChange,
     hideStopsWithoutDepartures,
+    isHideStopsWithoutDeparturesBoxHidden,
     onHideStopsWithoutDeparturesChange,
     totalSiteCount,
 }: MapViewProps) {
@@ -91,6 +93,7 @@ export function MapView({
                 transportationModeOptions={transportationModeOptions}
                 onTransportationModeChange={onTransportationModeChange}
                 hideStopsWithoutDepartures={hideStopsWithoutDepartures}
+                isHideStopsWithoutDeparturesBoxHidden={isHideStopsWithoutDeparturesBoxHidden}
                 onHideStopsWithoutDeparturesChange={onHideStopsWithoutDeparturesChange}
                 totalSiteCount={totalSiteCount}
             />

@@ -14,6 +14,7 @@ type MapSearchViewProps = {
     transportationModeOptions: TransportationMode[];
     onTransportationModeChange: (filter: TransportationMode | null) => void;
     hideStopsWithoutDepartures: boolean;
+    isHideStopsWithoutDeparturesBoxHidden: boolean;
     onHideStopsWithoutDeparturesChange: (value: boolean) => void;
     totalSiteCount: number;
 };
@@ -28,6 +29,7 @@ export function MapSearchView({
     transportationModeOptions,
     onTransportationModeChange,
     hideStopsWithoutDepartures,
+    isHideStopsWithoutDeparturesBoxHidden,
     onHideStopsWithoutDeparturesChange,
     totalSiteCount,
 }: MapSearchViewProps) {
@@ -37,7 +39,7 @@ export function MapSearchView({
             sx={{
                 display: "flex",
                 flexDirection: "column",
-                gap: 1,
+                gap: 0.5,
                 position: "absolute",
                 left: 72,
                 top: 16,
@@ -48,7 +50,13 @@ export function MapSearchView({
                 backdropFilter: "blur(4px)",
             }}
         >
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <Box
+                sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                }}
+            >
                 <FormControlLabel
                     sx={{ mt: -1, mb: -1 }}
                     label="Hide unused stops"
@@ -59,6 +67,7 @@ export function MapSearchView({
                             onChange={(e) => onHideStopsWithoutDeparturesChange(e.target.checked)}
                         />
                     }
+                    hidden={isHideStopsWithoutDeparturesBoxHidden}
                 />
                 <Typography
                     sx={{

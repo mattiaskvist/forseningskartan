@@ -80,7 +80,12 @@ export function MapPresenter() {
     const selectedTransportationMode = useAppSelector(getMapTransportationModeFilterCB);
     const hideStopsWithoutDepartures = useAppSelector(getHideStopsWithoutDeparturesCB);
 
+    const routesByStopPointsUnavailable = routesByStopPointError !== null || !routesByStopPoint;
     const transportationModeOptions = useMemo(() => {
+        if (routesByStopPointsUnavailable || !routesByStopPoint) {
+            return [];
+        }
+
         function getRouteTypeCB(route: RouteMeta): RouteType {
             return route.type;
         }
@@ -89,8 +94,12 @@ export function MapPresenter() {
     }, [routesByStopPoint]);
 
     const filteredSites = useMemo(() => {
-        if (!sites || !stopPoints || routesByStopPointError) {
+        if (!sites || !stopPoints) {
             return [];
+        }
+
+        if (routesByStopPointsUnavailable) {
+            return sites;
         }
 
         const baseSites = hideStopsWithoutDepartures
@@ -226,6 +235,7 @@ export function MapPresenter() {
             transportationModeOptions={transportationModeOptions}
             onTransportationModeChange={handleTransportationModeChangeACB}
             hideStopsWithoutDepartures={hideStopsWithoutDepartures}
+            isHideStopsWithoutDeparturesBoxHidden={routesByStopPointsUnavailable}
             onHideStopsWithoutDeparturesChange={handleHideStopsWithoutDeparturesChangeACB}
             totalSiteCount={sites.length}
         />

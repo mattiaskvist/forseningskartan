@@ -37,7 +37,7 @@ type StopPointsState = {
 };
 
 type StopPointRoutesState = {
-    data: RoutesByStopPoint;
+    data: RoutesByStopPoint | null;
     isLoading: boolean;
     error: Error | null;
 };
@@ -192,7 +192,7 @@ export const { setStopPointGidsBySiteId } = siteStopPointGidsSlice.actions;
 
 export const stopPointRoutesSlice = createSlice({
     name: "stopPointRoutes",
-    initialState: { data: {}, isLoading: false, error: null } as StopPointRoutesState,
+    initialState: { data: null, isLoading: false, error: null } as StopPointRoutesState,
     reducers: {},
     extraReducers: (builder) => {
         builder
