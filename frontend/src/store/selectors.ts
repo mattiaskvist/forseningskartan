@@ -41,6 +41,14 @@ function getSelectedSiteIdCB(state: RootState) {
     return state.sites.selectedSiteId;
 }
 
+function getUserLocationCB(state: RootState) {
+    return state.sites.userLocation;
+}
+
+function getMapCenterOnUserRequestedAtCB(state: RootState) {
+    return state.sites.mapCenterOnUserRequestedAt;
+}
+
 function getSelectedSiteCB(state: RootState) {
     const selectedSiteId = state.sites.selectedSiteId;
 
@@ -255,6 +263,8 @@ export {
     getAppStylePreferenceCB,
     getRecentSearchSiteIdsCB,
     getFavoriteSitesCB,
+    getUserLocationCB,
+    getMapCenterOnUserRequestedAtCB,
     getSelectedDelayDates,
     getSelectedDelayDatesCB,
     getSelectedRouteDelayDatesCB,

@@ -18,6 +18,8 @@ type StopMapProps = {
     handleSelectSiteCB: (siteId: number | null) => void;
     siteIdsWithNoDepartures: Set<number>;
     appStyle: AppStyle;
+    userLocation: { lat: number; lon: number } | null;
+    mapCenterOnUserRequestedAt: number;
 };
 
 const STOCKHOLM_CENTER: [number, number] = [59.3293, 18.0686];
@@ -99,6 +101,8 @@ export function StopMap({
     handleSelectSiteCB,
     siteIdsWithNoDepartures,
     appStyle,
+    userLocation,
+    mapCenterOnUserRequestedAt,
 }: StopMapProps) {
     const mapContainerRef = useRef<HTMLDivElement | null>(null);
     const mapRef = useRef<LeafletMap | null>(null);
@@ -108,6 +112,7 @@ export function StopMap({
     const selectedMarkerRef = useRef<CircleMarker | null>(null);
     const selectedSiteIdRef = useRef<number | null>(null);
     const mapStyleRef = useRef(appStyle);
+    const userMarkerRef = useRef<CircleMarker | null>(null);
 
     useEffect(() => {
         mapStyleRef.current = appStyle;
@@ -145,6 +150,7 @@ export function StopMap({
             markersBySiteId.clear();
             selectedMarkerRef.current = null;
             selectedSiteIdRef.current = null;
+            userMarkerRef.current = null;
         };
     }, []);
 
@@ -262,6 +268,45 @@ export function StopMap({
             });
         }
     }, [selectedSite]);
+
+    // Fly to user location when trigger changes
+    useEffect(() => {
+        const map = mapRef.current;
+        if (!map || !userLocation || mapCenterOnUserRequestedAt === 0) {
+            return;
+        }
+
+        map.flyTo([userLocation.lat, userLocation.lon], SELECTED_SITE_ZOOM, {
+            animate: true,
+            duration: 0.6,
+        });
+    }, [mapCenterOnUserRequestedAt, userLocation]);
+
+    // Update user marker when location changes
+    useEffect(() => {
+        const map = mapRef.current;
+        if (!map || !userLocation) {
+            if (userMarkerRef.current) {
+                userMarkerRef.current.remove();
+                userMarkerRef.current = null;
+            }
+            return;
+        }
+
+        if (userMarkerRef.current) {
+            userMarkerRef.current.setLatLng([userLocation.lat, userLocation.lon]);
+        } else {
+            userMarkerRef.current = new CircleMarker([userLocation.lat, userLocation.lon], {
+                radius: 7,
+                color: "#ffffff",
+                fillColor: "#3b82f6",
+                fillOpacity: 1,
+                weight: 2,
+            })
+                .bindTooltip("You are here")
+                .addTo(map);
+        }
+    }, [userLocation]);
 
     return <div ref={mapContainerRef} className="h-full w-full" aria-label="Stockholm stop map" />;
 }

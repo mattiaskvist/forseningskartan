@@ -18,6 +18,8 @@ import { RouteDelayTrendPoint } from "../types/routeDelays";
 type SitesState = {
     data: Site[] | null;
     selectedSiteId: number | null;
+    userLocation: { lat: number; lon: number } | null;
+    mapCenterOnUserRequestedAt: number;
     isLoading: boolean;
     error: Error | null;
 };
@@ -84,10 +86,26 @@ type RouteDelayUIState = {
 
 export const sitesSlice = createSlice({
     name: "sites",
-    initialState: { data: null, selectedSiteId: null, isLoading: false, error: null } as SitesState,
+    initialState: {
+        data: null,
+        selectedSiteId: null,
+        userLocation: null,
+        mapCenterOnUserRequestedAt: 0,
+        isLoading: false,
+        error: null,
+    } as SitesState,
     reducers: {
         setSelectedSiteId: (state: SitesState, action: { payload: number | null }) => {
             state.selectedSiteId = action.payload;
+        },
+        setUserLocation: (
+            state: SitesState,
+            action: { payload: { lat: number; lon: number } | null }
+        ) => {
+            state.userLocation = action.payload;
+        },
+        requestMapCenterOnUser: (state: SitesState) => {
+            state.mapCenterOnUserRequestedAt = Date.now();
         },
     },
     extraReducers: (builder) => {
@@ -109,7 +127,7 @@ export const sitesSlice = createSlice({
     },
 });
 
-export const { setSelectedSiteId } = sitesSlice.actions;
+export const { setSelectedSiteId, setUserLocation, requestMapCenterOnUser } = sitesSlice.actions;
 
 export const departuresSlice = createSlice({
     name: "departures",
