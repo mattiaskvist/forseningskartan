@@ -1,6 +1,16 @@
 import { describe, expect, it } from "vitest";
+import type { RoutesByStopPoint } from "../api/backend";
+import type { RouteMeta } from "../types/historicalDelay";
 import { getStopPointGidsForSite, StopPointGidsBySiteId } from "./site";
 import { Site, StopPoint } from "../types/sl";
+
+function makeRoute(type: RouteMeta["type"]): RouteMeta {
+    return {
+        shortName: "1",
+        longName: "Route 1",
+        type,
+    };
+}
 
 describe("buildStopPointGidsBySiteId", () => {
     it("builds site -> unique stop point gids map across all site stop areas", async () => {
@@ -108,10 +118,10 @@ describe("getSitesWithRoutes", () => {
             { id: 3, gid: "C1", stop_area: { id: 30, name: "Area 30" } } as StopPoint,
         ];
 
-        const routesByStopPoint = {
-            A1: [{ type: "bus" }],
+        const routesByStopPoint: RoutesByStopPoint = {
+            A1: [makeRoute("700")],
             B1: [],
-        } as any;
+        };
 
         const stopPointGidsBySiteId = {
             1: ["A1"],
@@ -142,9 +152,9 @@ describe("getSitesWithRoutes", () => {
             { id: 2, gid: "M1", stop_area: { id: 110, name: "Area 110" } } as StopPoint,
         ];
 
-        const routesByStopPoint = {
+        const routesByStopPoint: RoutesByStopPoint = {
             E1: [],
-        } as any;
+        };
 
         const stopPointGidsBySiteId = {
             10: ["E1"],
@@ -171,9 +181,9 @@ describe("getSitesWithRoutes", () => {
             { id: 1, gid: "UNRELATED", stop_area: { id: 999, name: "Other" } } as StopPoint,
         ];
 
-        const routesByStopPoint = {
-            CACHED_GID: [{ type: "tram" }],
-        } as any;
+        const routesByStopPoint: RoutesByStopPoint = {
+            CACHED_GID: [makeRoute("900")],
+        };
 
         const stopPointGidsBySiteId = {
             1000: ["CACHED_GID"],
@@ -198,7 +208,7 @@ describe("getSitesWithRoutes", () => {
             { id: 1, gid: "G1", stop_area: { id: 10, name: "Area 10" } } as StopPoint,
         ];
 
-        const routesByStopPoint = {} as any;
+        const routesByStopPoint: RoutesByStopPoint = {};
         const stopPointGidsBySiteId = { 1: ["G1"] };
 
         const result = getSitesWithRoutes(

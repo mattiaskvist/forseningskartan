@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import type { RoutesByStopPoint } from "../api/backend";
+import type { RouteMeta, RouteType } from "../types/historicalDelay";
 import type { Site, StopPoint, TransportationMode } from "../types/sl";
 import { transportationModes, transportationModeToRouteType } from "../types/sl";
 import {
@@ -23,6 +24,14 @@ function makeStopPoint(gid: string, stopAreaId: number): StopPoint {
         gid,
         stop_area: { id: stopAreaId },
     } as StopPoint;
+}
+
+function makeRoute(type: RouteType): RouteMeta {
+    return {
+        shortName: "1",
+        longName: "Route 1",
+        type,
+    };
 }
 
 function getTwoModesWithDifferentRouteTypes(): {
@@ -56,9 +65,9 @@ describe("getTransportationModeButtonCB", () => {
 
 describe("routeTypesToTransportationModes", () => {
     it("maps route types to transportation modes in source order", () => {
-        const seen = new Set<number | string>();
+        const seen = new Set<RouteType>();
         const selectedModes: TransportationMode[] = [];
-        const selectedRouteTypes = new Set<number | string>();
+        const selectedRouteTypes = new Set<RouteType>();
 
         for (const [mode, routeType] of transportationModes) {
             if (!seen.has(routeType)) {
@@ -69,7 +78,7 @@ describe("routeTypesToTransportationModes", () => {
             if (selectedModes.length >= 3) break;
         }
 
-        const result = routeTypesToTransportationModes(selectedRouteTypes as Set<any>);
+        const result = routeTypesToTransportationModes(selectedRouteTypes);
         expect(result).toEqual(selectedModes);
     });
 
@@ -83,9 +92,9 @@ describe("getSitesByTransportationMode", () => {
         const sites = [makeSite(1, 10), makeSite(2, 20)];
         const stopPoints = [makeStopPoint("A", 10), makeStopPoint("B", 20)];
         const routesByStopPoint: RoutesByStopPoint = {
-            A: [{ type: transportationModeToRouteType.BUS }] as any,
-            B: [{ type: transportationModeToRouteType.TRAIN }] as any,
-        } as RoutesByStopPoint;
+            A: [makeRoute(transportationModeToRouteType.BUS)],
+            B: [makeRoute(transportationModeToRouteType.TRAIN)],
+        };
 
         const result = getSitesByTransportationMode(sites, null, routesByStopPoint, stopPoints, {});
 
@@ -100,9 +109,9 @@ describe("getSitesByTransportationMode", () => {
         const sites = [makeSite(1, 10), makeSite(2, 20)];
         const stopPoints = [makeStopPoint("A", 10), makeStopPoint("B", 20)];
         const routesByStopPoint: RoutesByStopPoint = {
-            A: [{ type: targetRouteType }] as any,
-            B: [{ type: otherRouteType }] as any,
-        } as RoutesByStopPoint;
+            A: [makeRoute(targetRouteType)],
+            B: [makeRoute(otherRouteType)],
+        };
 
         const result = getSitesByTransportationMode(
             sites,
@@ -143,8 +152,8 @@ describe("getSitesByTransportationMode", () => {
         const sites = [makeSite(1, 10)];
         const unrelatedStopPoints = [makeStopPoint("UNRELATED", 999)];
         const routesByStopPoint: RoutesByStopPoint = {
-            CACHED_GID: [{ type: targetRouteType }] as any,
-        } as RoutesByStopPoint;
+            CACHED_GID: [makeRoute(targetRouteType)],
+        };
 
         const result = getSitesByTransportationMode(
             sites,

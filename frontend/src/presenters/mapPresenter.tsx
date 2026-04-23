@@ -91,7 +91,7 @@ export function MapPresenter() {
         }
         const routeTypes = new Set(Object.values(routesByStopPoint).flat().map(getRouteTypeCB));
         return routeTypesToTransportationModes(routeTypes);
-    }, [routesByStopPoint]);
+    }, [routesByStopPointsUnavailable, routesByStopPoint]);
 
     const filteredSites = useMemo(() => {
         if (!sites || !stopPoints) {
@@ -116,8 +116,8 @@ export function MapPresenter() {
     }, [
         sites,
         selectedTransportationMode,
+        routesByStopPointsUnavailable,
         routesByStopPoint,
-        routesByStopPointError,
         stopPoints,
         stopPointGidsBySiteId,
         hideStopsWithoutDepartures,
