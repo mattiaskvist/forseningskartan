@@ -10,6 +10,8 @@ describe("sitesSlice", () => {
             selectedSiteId: null,
             isLoading: false,
             error: null,
+            mapCenterOnUserRequestedAt: 0,
+            userLocation: null,
         });
     });
 

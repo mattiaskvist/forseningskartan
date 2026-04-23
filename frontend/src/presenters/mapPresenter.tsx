@@ -132,8 +132,7 @@ export function MapPresenter() {
         if (!window.isSecureContext) {
             dispatch(
                 showSnackbar({
-                    message:
-                        "Location access requires a secure connection. Please check your URL.",
+                    message: "Location access requires a secure connection. Please check your URL.",
                     severity: "warning",
                 })
             );
