@@ -97,6 +97,9 @@ func parseArgs() (config Config, err error) {
 func runAggregations(config Config) error {
 	if config.RecentDays > 0 {
 		if config.CronSchedule == "" {
+			if err := runStaticRefresh(config); err != nil {
+				return fmt.Errorf("static GTFS refresh: %w", err)
+			}
 			return runRecentMissingAggregations(config)
 		}
 
@@ -141,6 +144,15 @@ func runAggregations(config Config) error {
 				RecordError(err)
 				fmt.Printf("Startup job error: %v\n", err)
 			}
+
+			if config.StaticPostgresDSN != "" {
+				fmt.Println("Running initial startup static GTFS refresh...")
+				err := runStaticRefresh(config)
+				if err != nil {
+					RecordError(err)
+					fmt.Printf("Startup static job error: %v\n", err)
+				}
+			}
 		}()
 
 		// Wait for SIGINT/SIGTERM to shut down gracefully
@@ -160,12 +172,6 @@ func runAggregations(config Config) error {
 }
 
 func runRecentMissingAggregations(config Config) error {
-	if config.StaticPostgresDSN != "" {
-		if err := runStaticRefresh(config); err != nil {
-			return fmt.Errorf("static GTFS refresh: %w", err)
-		}
-	}
-
 	ctx := context.Background()
 	existingDates, err := listProcessedServiceDates(ctx, config.PostgresDSN)
 	if err != nil {
