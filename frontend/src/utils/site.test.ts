@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getStopPointGidsForSite } from "./site";
+import { getStopPointGidsForSite, StopPointGidsBySiteId } from "./site";
 import { Site, StopPoint } from "../types/sl";
 
 describe("buildStopPointGidsBySiteId", () => {
@@ -85,6 +85,129 @@ describe("getStopPointGidsForSite", () => {
             } as StopPoint,
         ];
 
-        expect(getStopPointGidsForSite(site, stopPoints, [])).toEqual(["5001", "5002"]);
+        expect(getStopPointGidsForSite(site, stopPoints, {} as StopPointGidsBySiteId)).toEqual([
+            "5001",
+            "5002",
+        ]);
+    });
+});
+
+describe("getSitesWithRoutes", () => {
+    it("includes only sites where at least one stop point has routes", async () => {
+        const { getSitesWithRoutes } = await import("./site");
+
+        const sites: Site[] = [
+            { id: 1, name: "Site A", stop_areas: [10] } as Site,
+            { id: 2, name: "Site B", stop_areas: [20] } as Site,
+            { id: 3, name: "Site C", stop_areas: [30] } as Site,
+        ];
+
+        const stopPoints: StopPoint[] = [
+            { id: 1, gid: "A1", stop_area: { id: 10, name: "Area 10" } } as StopPoint,
+            { id: 2, gid: "B1", stop_area: { id: 20, name: "Area 20" } } as StopPoint,
+            { id: 3, gid: "C1", stop_area: { id: 30, name: "Area 30" } } as StopPoint,
+        ];
+
+        const routesByStopPoint = {
+            A1: [{ type: "bus" }],
+            B1: [],
+        } as any;
+
+        const stopPointGidsBySiteId = {
+            1: ["A1"],
+            2: ["B1"],
+            3: ["C1"],
+        };
+
+        const result = getSitesWithRoutes(
+            sites,
+            stopPoints,
+            routesByStopPoint,
+            stopPointGidsBySiteId
+        );
+
+        expect(result.map((s) => s.id)).toEqual([1]);
+    });
+
+    it("treats empty and missing stop point routes as no routes", async () => {
+        const { getSitesWithRoutes } = await import("./site");
+
+        const sites: Site[] = [
+            { id: 10, name: "No routes (empty array)", stop_areas: [100] } as Site,
+            { id: 11, name: "No routes (missing key)", stop_areas: [110] } as Site,
+        ];
+
+        const stopPoints: StopPoint[] = [
+            { id: 1, gid: "E1", stop_area: { id: 100, name: "Area 100" } } as StopPoint,
+            { id: 2, gid: "M1", stop_area: { id: 110, name: "Area 110" } } as StopPoint,
+        ];
+
+        const routesByStopPoint = {
+            E1: [],
+        } as any;
+
+        const stopPointGidsBySiteId = {
+            10: ["E1"],
+            11: ["M1"],
+        };
+
+        const result = getSitesWithRoutes(
+            sites,
+            stopPoints,
+            routesByStopPoint,
+            stopPointGidsBySiteId
+        );
+
+        expect(result).toEqual([]);
+    });
+
+    it("uses cached stop point gids when available for a site", async () => {
+        const { getSitesWithRoutes } = await import("./site");
+
+        const sites: Site[] = [{ id: 1000, name: "Cached Site", stop_areas: [1] } as Site];
+
+        // Intentionally unrelated stopPoints so cached gids must be used
+        const stopPoints: StopPoint[] = [
+            { id: 1, gid: "UNRELATED", stop_area: { id: 999, name: "Other" } } as StopPoint,
+        ];
+
+        const routesByStopPoint = {
+            CACHED_GID: [{ type: "tram" }],
+        } as any;
+
+        const stopPointGidsBySiteId = {
+            1000: ["CACHED_GID"],
+        };
+
+        const result = getSitesWithRoutes(
+            sites,
+            stopPoints,
+            routesByStopPoint,
+            stopPointGidsBySiteId
+        );
+
+        expect(result.map((s) => s.id)).toEqual([1000]);
+    });
+
+    it("returns empty array when routesByStopPoint is an empty object", async () => {
+        const { getSitesWithRoutes } = await import("./site");
+
+        const sites: Site[] = [{ id: 1, name: "Site 1", stop_areas: [10] } as Site];
+
+        const stopPoints: StopPoint[] = [
+            { id: 1, gid: "G1", stop_area: { id: 10, name: "Area 10" } } as StopPoint,
+        ];
+
+        const routesByStopPoint = {} as any;
+        const stopPointGidsBySiteId = { 1: ["G1"] };
+
+        const result = getSitesWithRoutes(
+            sites,
+            stopPoints,
+            routesByStopPoint,
+            stopPointGidsBySiteId
+        );
+
+        expect(result).toEqual([]);
     });
 });

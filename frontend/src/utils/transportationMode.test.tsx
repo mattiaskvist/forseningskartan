@@ -1,0 +1,159 @@
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+import type { RoutesByStopPoint } from "../api/backend";
+import type { Site, StopPoint, TransportationMode } from "../types/sl";
+import { transportationModes, transportationModeToRouteType } from "../types/sl";
+import {
+    getSitesByTransportationMode,
+    getTransportationModeButtonCB,
+    getTransportationModeLabel,
+    routeTypesToTransportationModes,
+} from "./transportationMode";
+
+function makeSite(id: number, stopAreaId: number): Site {
+    return {
+        id,
+        name: `Site ${id}`,
+        stop_areas: [stopAreaId],
+    } as Site;
+}
+
+function makeStopPoint(gid: string, stopAreaId: number): StopPoint {
+    return {
+        gid,
+        stop_area: { id: stopAreaId },
+    } as StopPoint;
+}
+
+function getTwoModesWithDifferentRouteTypes(): {
+    targetMode: TransportationMode;
+    otherMode: TransportationMode;
+} {
+    const [firstMode, firstRouteType] = transportationModes[0];
+
+    for (const [mode, routeType] of transportationModes) {
+        if (routeType !== firstRouteType) {
+            return { targetMode: firstMode, otherMode: mode };
+        }
+    }
+
+    throw new Error("Expected at least two transportation modes with different route types.");
+}
+
+describe("getTransportationModeLabel", () => {
+    it("formats mode names to title case", () => {
+        expect(getTransportationModeLabel("BUS")).toBe("Bus");
+        expect(getTransportationModeLabel("OTHER")).toBe("Other");
+    });
+});
+
+describe("getTransportationModeButtonCB", () => {
+    it("returns a toggle button element with the mode label", () => {
+        render(getTransportationModeButtonCB("BUS"));
+        expect(screen.getByText("Bus")).toBeInTheDocument();
+    });
+});
+
+describe("routeTypesToTransportationModes", () => {
+    it("maps route types to transportation modes in source order", () => {
+        const seen = new Set<number | string>();
+        const selectedModes: TransportationMode[] = [];
+        const selectedRouteTypes = new Set<number | string>();
+
+        for (const [mode, routeType] of transportationModes) {
+            if (!seen.has(routeType)) {
+                seen.add(routeType);
+                selectedModes.push(mode);
+                selectedRouteTypes.add(routeType);
+            }
+            if (selectedModes.length >= 3) break;
+        }
+
+        const result = routeTypesToTransportationModes(selectedRouteTypes as Set<any>);
+        expect(result).toEqual(selectedModes);
+    });
+
+    it("returns an empty array for an empty route type set", () => {
+        expect(routeTypesToTransportationModes(new Set())).toEqual([]);
+    });
+});
+
+describe("getSitesByTransportationMode", () => {
+    it("returns the original sites array when transportationMode is null", () => {
+        const sites = [makeSite(1, 10), makeSite(2, 20)];
+        const stopPoints = [makeStopPoint("A", 10), makeStopPoint("B", 20)];
+        const routesByStopPoint: RoutesByStopPoint = {
+            A: [{ type: transportationModeToRouteType.BUS }] as any,
+            B: [{ type: transportationModeToRouteType.TRAIN }] as any,
+        } as RoutesByStopPoint;
+
+        const result = getSitesByTransportationMode(sites, null, routesByStopPoint, stopPoints, {});
+
+        expect(result).toBe(sites);
+    });
+
+    it("keeps only sites that have at least one route of the selected mode type", () => {
+        const { targetMode, otherMode } = getTwoModesWithDifferentRouteTypes();
+        const targetRouteType = transportationModeToRouteType[targetMode];
+        const otherRouteType = transportationModeToRouteType[otherMode];
+
+        const sites = [makeSite(1, 10), makeSite(2, 20)];
+        const stopPoints = [makeStopPoint("A", 10), makeStopPoint("B", 20)];
+        const routesByStopPoint: RoutesByStopPoint = {
+            A: [{ type: targetRouteType }] as any,
+            B: [{ type: otherRouteType }] as any,
+        } as RoutesByStopPoint;
+
+        const result = getSitesByTransportationMode(
+            sites,
+            targetMode,
+            routesByStopPoint,
+            stopPoints,
+            {}
+        );
+
+        expect(result.map((s) => s.id)).toEqual([1]);
+    });
+
+    it("excludes sites when routes are missing or empty for their stop points", () => {
+        const { targetMode } = getTwoModesWithDifferentRouteTypes();
+
+        const sites = [makeSite(1, 10), makeSite(2, 20)];
+        const stopPoints = [makeStopPoint("A", 10), makeStopPoint("B", 20)];
+        const routesByStopPoint: RoutesByStopPoint = {
+            A: [],
+            // B intentionally missing
+        } as RoutesByStopPoint;
+
+        const result = getSitesByTransportationMode(
+            sites,
+            targetMode,
+            routesByStopPoint,
+            stopPoints,
+            {}
+        );
+
+        expect(result).toEqual([]);
+    });
+
+    it("uses cached stopPointGidsBySiteId when available", () => {
+        const { targetMode } = getTwoModesWithDifferentRouteTypes();
+        const targetRouteType = transportationModeToRouteType[targetMode];
+
+        const sites = [makeSite(1, 10)];
+        const unrelatedStopPoints = [makeStopPoint("UNRELATED", 999)];
+        const routesByStopPoint: RoutesByStopPoint = {
+            CACHED_GID: [{ type: targetRouteType }] as any,
+        } as RoutesByStopPoint;
+
+        const result = getSitesByTransportationMode(
+            sites,
+            targetMode,
+            routesByStopPoint,
+            unrelatedStopPoints,
+            { 1: ["CACHED_GID"] }
+        );
+
+        expect(result.map((s) => s.id)).toEqual([1]);
+    });
+});
