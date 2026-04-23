@@ -4,6 +4,7 @@ import { LanguageCode } from "../utils/translations";
 type LanguageSelectorProps = {
     currentLanguage: LanguageCode;
     onLanguageChange: (lang: LanguageCode) => void;
+    ariaLabel?: string;
 };
 
 const LANGUAGE_OPTIONS: Array<{
@@ -16,7 +17,11 @@ const LANGUAGE_OPTIONS: Array<{
     { code: "sv", flag: "🇸🇪", label: "SV", ariaLabel: "Svenska" },
 ];
 
-export function LanguageSelector({ currentLanguage, onLanguageChange }: LanguageSelectorProps) {
+export function LanguageSelector({
+    currentLanguage,
+    onLanguageChange,
+    ariaLabel = "Select language",
+}: LanguageSelectorProps) {
     return (
         <Box sx={{ width: "100%" }}>
             <ToggleButtonGroup
@@ -27,7 +32,7 @@ export function LanguageSelector({ currentLanguage, onLanguageChange }: Language
                 }}
                 size="small"
                 fullWidth
-                aria-label="Select language"
+                aria-label={ariaLabel}
             >
                 {LANGUAGE_OPTIONS.map(({ code, flag, label, ariaLabel }) => (
                     <ToggleButton

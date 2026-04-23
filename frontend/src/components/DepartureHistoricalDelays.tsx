@@ -72,12 +72,14 @@ export function DepartureHistoricalDelays({
                 }}
             >
                 <Typography sx={{ fontSize: "0.75rem", color: "text.secondary" }}>
-                    {t.selectedDates(
-                        getDateRangeText(selectedDelayDates),
-                        selectedDepartureHourUTC !== undefined
-                            ? formatHourRangeLocal(selectedDepartureHourUTC)
-                            : undefined
-                    )}
+                    {selectedDelayDates.length === 0
+                        ? t.selectedDates("")
+                        : t.selectedDates(
+                              getDateRangeText(selectedDelayDates),
+                              selectedDepartureHourUTC !== undefined
+                                  ? formatHourRangeLocal(selectedDepartureHourUTC)
+                                  : undefined
+                          )}
                 </Typography>
                 {isLoadingData ? (
                     <Suspense message={t.loading} />

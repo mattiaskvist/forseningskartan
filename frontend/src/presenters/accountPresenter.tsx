@@ -14,6 +14,7 @@ export function AccountPresenter() {
     const user = useAppSelector(getAuthUserCB);
     const loading = useAppSelector(getAuthLoadingCB);
     const currentLanguage = useAppSelector(getCurrentLanguageCB);
+    const t = translations[currentLanguage].account;
 
     useEffect(() => {
         if (!loading && !user) {
@@ -69,8 +70,6 @@ export function AccountPresenter() {
     if (loading || !user) {
         return <Suspense fullscreen message={translations[currentLanguage].account.loading} />;
     }
-
-    const t = translations[currentLanguage].account;
 
     return <AccountView user={user} onLogout={handleLogoutACB} onDelete={handleDeleteACB} t={t} />;
 }

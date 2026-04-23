@@ -51,9 +51,11 @@ interface mapStrings {
 
 interface routeDelayLeaderboardStrings {
     rank: string;
+    route: string;
     avgDelay: string;
     uniqueTrips: string;
     min: string;
+    noData: string;
 }
 
 interface routeDelayRouteFallbackStrings {
@@ -252,8 +254,10 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
         routeDelayLeaderboard: {
             min: "min",
             rank: "Rank",
+            route: "Route",
             avgDelay: "Avg delay",
             uniqueTrips: "Unique trips",
+            noData: "No leaderboard data available.",
         },
         routeDelayRouteFallback: {
             notAvailable: "The selected route is no longer available for the current filters.",
@@ -411,8 +415,10 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
         routeDelayLeaderboard: {
             min: "min",
             rank: "Placering",
+            route: "Linje",
             avgDelay: "Genomsnittlig försening",
             uniqueTrips: "Unika resor",
+            noData: "Ingen data för förseningstopplistan.",
         },
         routeDelayRouteFallback: {
             notAvailable: "Den valda linjen är inte längre tillgänglig för de valda filtren.",

@@ -110,6 +110,9 @@ export function RouteDelayPresenter() {
 
     const selectedDateText = useMemo(() => {
         const t = translations[currentLanguage].departureHistoricalDelays;
+        if (selectedDates.length === 0) {
+            return t.selectedDates("");
+        }
         return t.selectedDates(getDateRangeText(selectedDates));
     }, [selectedDates, currentLanguage]);
 
