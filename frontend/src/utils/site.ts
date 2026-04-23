@@ -76,6 +76,5 @@ export function getSitesWithRoutes(
         return stopPointGids.some(stopPointHasAnyRoutesCB);
     }
 
-    const f = sites.filter(siteHasAnyRoutes);
-    return f;
+    return sites.filter(siteHasAnyRoutes);
 }
