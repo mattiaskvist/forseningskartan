@@ -28,7 +28,7 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
         return Array.from(modes).sort();
     }, [departures]);
 
-    const [selectedMode, setSelectedMode] = useState<ModeWithOther>(uniqueModes[0] ?? null);
+    const [selectedMode, setSelectedMode] = useState<ModeWithOther | null>(uniqueModes[0] ?? null);
     const [searchQuery, setSearchQuery] = useState("");
 
     const departuresByMode = useMemo(() => {
