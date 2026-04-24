@@ -1,9 +1,8 @@
-import { Departure, TransportationMode } from "../types/sl";
+import { Departure, ModeWithOther } from "../types/sl";
 import { formatDelay, formatTime, getDelayMinutes, getDelayColorToken } from "../utils/time";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import ToggleButton from "@mui/material/ToggleButton";
 import { useMemo, useState } from "react";
-import { Box, Card, TextField, Typography } from "@mui/material";
+import { Box, Card, TextField, ToggleButton, Typography } from "@mui/material";
 import { FilterToggleButtonGroup } from "./FilterToggleButtonGroup";
 import { TranslationStrings } from "../utils/translations";
 
@@ -13,8 +12,6 @@ type DepartureListProps = {
     t: TranslationStrings["departureList"];
     tTransportModes: TranslationStrings["transportModes"];
 };
-
-type ModeWithOther = TransportationMode | "OTHER";
 
 export function DepartureList({
     departures,
@@ -36,6 +33,9 @@ export function DepartureList({
         return labelMap[mode];
     }
 
+    function getTransportationModeButtonCB(mode: ModeWithOther) {
+        return <ToggleButton key={mode} value={mode}>{getModeLabel(mode)}</ToggleButton>;
+    }
     const uniqueModes = useMemo(() => {
         const modes = new Set<ModeWithOther>();
 
@@ -49,7 +49,7 @@ export function DepartureList({
         return Array.from(modes).sort();
     }, [departures]);
 
-    const [selectedMode, setSelectedMode] = useState<ModeWithOther>(uniqueModes[0] ?? null);
+    const [selectedMode, setSelectedMode] = useState<ModeWithOther | null>(uniqueModes[0] ?? null);
     const [searchQuery, setSearchQuery] = useState("");
 
     const departuresByMode = useMemo(() => {
@@ -168,14 +168,6 @@ export function DepartureList({
         );
     }
 
-    function renderModeButtonCB(mode: ModeWithOther) {
-        return (
-            <ToggleButton key={mode} value={mode}>
-                {getModeLabel(mode)}
-            </ToggleButton>
-        );
-    }
-
     function handleSearchChangeACB(e: React.ChangeEvent<HTMLInputElement>) {
         setSearchQuery(e.target.value);
     }
@@ -194,7 +186,7 @@ export function DepartureList({
                     options={uniqueModes}
                     selectedValue={selectedMode}
                     onValueChange={setSelectedMode}
-                    renderButtonCB={renderModeButtonCB}
+                    renderButtonCB={getTransportationModeButtonCB}
                 />
             ) : null}
 

@@ -8,6 +8,8 @@ describe("sanitizeUserPreferences", () => {
             recentSearchSiteIds: [],
             appStyle: "Dark",
             language: "en",
+            mapTransportationModeFilter: null,
+            hideStopsWithoutDepartures: true,
         });
     });
 
@@ -21,6 +23,8 @@ describe("sanitizeUserPreferences", () => {
         expect(sanitized.favoriteSiteIds).toEqual([4, 4, 7, 7]);
         expect(sanitized.recentSearchSiteIds).toEqual([1, 1, 5, 5]);
         expect(sanitized.language).toBe("en");
+        expect(sanitized.mapTransportationModeFilter).toBeNull();
+        expect(sanitized.hideStopsWithoutDepartures).toBe(true);
     });
 
     it("falls back to default app style for invalid value", () => {
@@ -32,6 +36,7 @@ describe("sanitizeUserPreferences", () => {
 
         expect(sanitized.appStyle).toBe("Dark");
         expect(sanitized.language).toBe("en");
+        expect(sanitized.mapTransportationModeFilter).toBeNull();
     });
 
     it("sets appStyle correctly", () => {
@@ -43,6 +48,7 @@ describe("sanitizeUserPreferences", () => {
 
         expect(sanitized.appStyle).toBe("Classic");
         expect(sanitized.language).toBe("en");
+        expect(sanitized.hideStopsWithoutDepartures).toBe(true);
     });
 
     it("sets language correctly", () => {
@@ -51,5 +57,15 @@ describe("sanitizeUserPreferences", () => {
         });
 
         expect(sanitized.language).toBe("sv");
+    });
+
+    it("sets map filters correctly", () => {
+        const sanitized = sanitizeUserPreferences({
+            mapTransportationModeFilter: "BUS",
+            hideStopsWithoutDepartures: false,
+        });
+
+        expect(sanitized.mapTransportationModeFilter).toBe("BUS");
+        expect(sanitized.hideStopsWithoutDepartures).toBe(false);
     });
 });

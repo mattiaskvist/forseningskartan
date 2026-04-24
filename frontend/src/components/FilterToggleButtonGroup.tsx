@@ -4,9 +4,11 @@ import React from "react";
 type FilterToggleButtonGroupProps<T> = {
     label?: string;
     options: T[];
-    selectedValue: T;
+    selectedValue: T | null;
     onValueChange: (value: T) => void;
     renderButtonCB: (option: T) => React.ReactNode;
+    allowDeselect?: boolean;
+    onDeselect?: () => void;
 };
 
 export function FilterToggleButtonGroup<T>({
@@ -15,11 +17,17 @@ export function FilterToggleButtonGroup<T>({
     selectedValue,
     onValueChange,
     renderButtonCB,
+    allowDeselect = false,
+    onDeselect,
 }: FilterToggleButtonGroupProps<T>) {
     function handleChangeACB(_: React.MouseEvent<HTMLElement>, nextValue: T | null) {
-        if (nextValue !== null) {
-            onValueChange(nextValue);
+        if (nextValue === null) {
+            if (allowDeselect && onDeselect) {
+                onDeselect();
+            }
+            return;
         }
+        onValueChange(nextValue);
     }
 
     return (
@@ -33,7 +41,6 @@ export function FilterToggleButtonGroup<T>({
                 exclusive
                 value={selectedValue}
                 onChange={handleChangeACB}
-                sx={{ mt: 1 }}
             >
                 {options.map(renderButtonCB)}
             </ToggleButtonGroup>

@@ -22,17 +22,26 @@ describe("MapView", () => {
 
         renderWithTheme(
             <MapView
-                sites={[]}
+                allSites={[]}
+                filteredSites={[]}
                 selectedSite={null}
                 handleSelectSiteCB={vi.fn()}
-                departureViewProps={null}
                 recentSearchSiteIds={[]}
-                siteIdsWithNoDepartures={new Set()}
+                departureViewProps={null}
                 appStyle="Dark"
                 onAppStyleChange={onAppStyleChange}
                 tMapDeparturePanel={translations.en.mapDeparturePanel}
                 tSearchBar={translations.en.searchBar}
+                tMapSearch={translations.en.mapSearch}
                 tAppStyleSelector={translations.en.appStyleSelector}
+                selectedTransportationMode={null}
+                transportationModeOptions={[]}
+                onTransportationModeChange={vi.fn()}
+                hideStopsWithoutDepartures={false}
+                isHideStopsWithoutDeparturesBoxHidden={false}
+                onHideStopsWithoutDeparturesChange={vi.fn()}
+                totalSiteCount={0}
+                tTransportModes={translations.en.transportModes}
             />
         );
 

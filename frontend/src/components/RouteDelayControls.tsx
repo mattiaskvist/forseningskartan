@@ -59,6 +59,9 @@ export function RouteDelayControls({
         return labelMap[mode];
     }
 
+    function getTransportationModeButtonCB(mode: TransportationMode) {
+        return <ToggleButton key={mode} value={mode}>{getTransportationModeLabel(mode)}</ToggleButton>;
+    }
     function getPresetButtonCB(option: DatePreset) {
         const labelMap: Record<DatePreset, string> = {
             sameDayLastWeek: t.sameDayLastWeek,
@@ -78,14 +81,6 @@ export function RouteDelayControls({
         return (
             <ToggleButton key={eventType} value={eventType}>
                 {eventType === "departure" ? t.departure : t.arrival}
-            </ToggleButton>
-        );
-    }
-
-    function getTransportationModeButtonCB(mode: TransportationMode) {
-        return (
-            <ToggleButton key={mode} value={mode}>
-                {getTransportationModeLabel(mode)}
             </ToggleButton>
         );
     }

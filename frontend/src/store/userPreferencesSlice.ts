@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AppStyle, appStyles } from "../types/appStyle";
 import { LanguageCode, isLanguageCode } from "../utils/translations";
+import { TransportationMode } from "../types/sl";
 
 const APP_STYLE_STORAGE_KEY = "appStyle";
 const RECENT_SEARCH_STORAGE_KEY = "recentSearchSiteIds";
@@ -112,6 +113,8 @@ export type UserPreferencesState = {
     recentSearchSiteIds: number[];
     appStyle: AppStyle;
     language: LanguageCode;
+    mapTransportationModeFilter: TransportationMode | null;
+    hideStopsWithoutDepartures: boolean;
 };
 
 export const defaultUserPreferencesState: UserPreferencesState = {
@@ -119,6 +122,8 @@ export const defaultUserPreferencesState: UserPreferencesState = {
     recentSearchSiteIds: getStoredRecentSearchSiteIds(),
     appStyle: getStoredAppStyle(),
     language: getStoredLanguage(),
+    mapTransportationModeFilter: null,
+    hideStopsWithoutDepartures: true,
 };
 
 function normalizeFavoriteSiteIds(favoriteSiteIds: number[]): number[] {
@@ -187,9 +192,20 @@ export const userPreferencesSlice = createSlice({
                 action.payload.recentSearchSiteIds
             );
             state.appStyle = action.payload.appStyle;
+            state.mapTransportationModeFilter = action.payload.mapTransportationModeFilter;
+            state.hideStopsWithoutDepartures = action.payload.hideStopsWithoutDepartures;
             storeAppStyle(action.payload.appStyle);
             state.language = action.payload.language;
             storeLanguage(action.payload.language);
+        },
+        setMapTransportationModeFilter: (
+            state,
+            action: PayloadAction<TransportationMode | null>
+        ) => {
+            state.mapTransportationModeFilter = action.payload;
+        },
+        setHideStopsWithoutDepartures: (state, action: PayloadAction<boolean>) => {
+            state.hideStopsWithoutDepartures = action.payload;
         },
     },
 });
@@ -201,4 +217,6 @@ export const {
     applyLoadedUserPreferences,
     recordRecentSearchSiteId,
     clearRecentSearchSiteIds,
+    setMapTransportationModeFilter,
+    setHideStopsWithoutDepartures,
 } = userPreferencesSlice.actions;

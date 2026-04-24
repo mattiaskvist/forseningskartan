@@ -3,11 +3,18 @@ import { defaultUserPreferencesState, UserPreferencesState } from "../store/user
 import { appStyles, AppStyle } from "../types/appStyle";
 import { isLanguageCode } from "../utils/translations";
 import { db } from "./firestore";
+import { TransportationMode, transportationModes } from "../types/sl";
 
 const USER_PREFERENCES_COLLECTION = "userPreferences";
 
 function isAppStyle(candidate: unknown): candidate is AppStyle {
     return typeof candidate === "string" && (appStyles as readonly string[]).includes(candidate);
+}
+
+function isTransportationMode(candidate: unknown): candidate is TransportationMode {
+    return (
+        typeof candidate === "string" && transportationModes.some(([mode]) => mode === candidate)
+    );
 }
 
 function isIntegerSiteIdCB(siteId: unknown): siteId is number {
@@ -24,6 +31,8 @@ export function sanitizeUserPreferences(candidate: unknown): UserPreferencesStat
         favoriteSiteIds?: unknown;
         recentSearchSiteIds?: unknown;
         language?: unknown;
+        mapTransportationModeFilter?: unknown;
+        hideStopsWithoutDepartures?: unknown;
     };
     const appStyle = isAppStyle(parsedCandidate.appStyle)
         ? parsedCandidate.appStyle
@@ -39,12 +48,23 @@ export function sanitizeUserPreferences(candidate: unknown): UserPreferencesStat
     const language = isLanguageCode(parsedCandidate.language)
         ? parsedCandidate.language
         : defaultUserPreferencesState.language;
-
+    const mapTransportationModeFilter =
+        parsedCandidate.mapTransportationModeFilter === null
+            ? null
+            : isTransportationMode(parsedCandidate.mapTransportationModeFilter)
+              ? parsedCandidate.mapTransportationModeFilter
+              : defaultUserPreferencesState.mapTransportationModeFilter;
+    const hideStopsWithoutDepartures =
+        typeof parsedCandidate.hideStopsWithoutDepartures === "boolean"
+            ? parsedCandidate.hideStopsWithoutDepartures
+            : defaultUserPreferencesState.hideStopsWithoutDepartures;
     return {
         appStyle,
         favoriteSiteIds,
         recentSearchSiteIds,
         language,
+        mapTransportationModeFilter,
+        hideStopsWithoutDepartures,
     };
 }
 

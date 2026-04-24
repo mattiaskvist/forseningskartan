@@ -1,27 +1,76 @@
-import { Paper } from "@mui/material";
+import {
+    Box,
+    Checkbox,
+    FormControlLabel,
+    Paper,
+    ToggleButton,
+    Typography,
+} from "@mui/material";
 import { SearchBar } from "../components/SearchBar";
-import { Site } from "../types/sl";
+import { FilterToggleButtonGroup } from "../components/FilterToggleButtonGroup";
+import { Site, TransportationMode } from "../types/sl";
 import { TranslationStrings } from "../utils/translations";
 
 type MapSearchViewProps = {
-    sites: Site[];
+    allSites: Site[];
+    filteredSites: Site[];
     selectedSite: Site | null;
     handleSelectSiteCB: (siteId: number | null) => void;
     recentSearchSiteIds: number[];
     t: TranslationStrings["searchBar"];
+    tMapSearch: TranslationStrings["mapSearch"];
+    tTransportModes: TranslationStrings["transportModes"];
+    selectedTransportationMode: TransportationMode | null;
+    transportationModeOptions: TransportationMode[];
+    onTransportationModeChange: (filter: TransportationMode | null) => void;
+    hideStopsWithoutDepartures: boolean;
+    isHideStopsWithoutDeparturesBoxHidden: boolean;
+    onHideStopsWithoutDeparturesChange: (value: boolean) => void;
+    totalSiteCount: number;
 };
 
 export function MapSearchView({
-    sites,
+    allSites,
+    filteredSites,
     selectedSite,
     handleSelectSiteCB,
     recentSearchSiteIds,
     t,
+    tMapSearch,
+    tTransportModes,
+    selectedTransportationMode,
+    transportationModeOptions,
+    onTransportationModeChange,
+    hideStopsWithoutDepartures,
+    isHideStopsWithoutDeparturesBoxHidden,
+    onHideStopsWithoutDeparturesChange,
+    totalSiteCount,
 }: MapSearchViewProps) {
+    function getTransportationModeLabel(mode: TransportationMode) {
+        const labelMap: Record<TransportationMode, string> = {
+            BUS: tTransportModes.bus,
+            TRAM: tTransportModes.tram,
+            METRO: tTransportModes.metro,
+            TRAIN: tTransportModes.train,
+            FERRY: tTransportModes.ferry,
+            SHIP: tTransportModes.ship,
+            TAXI: tTransportModes.taxi,
+        };
+
+        return labelMap[mode];
+    }
+
+    function getTransportationModeButtonCB(mode: TransportationMode) {
+        return <ToggleButton key={mode} value={mode}>{getTransportationModeLabel(mode)}</ToggleButton>;
+    }
+
     return (
         <Paper
             variant="outlined"
             sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 0.5,
                 position: "absolute",
                 left: 72,
                 top: 16,
@@ -32,8 +81,45 @@ export function MapSearchView({
                 backdropFilter: "blur(4px)",
             }}
         >
+            <Box
+                sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                }}
+            >
+                <FormControlLabel
+                    sx={{ mt: -1, mb: -1 }}
+                    label={tMapSearch.hideUnusedStops}
+                    control={
+                        <Checkbox
+                            size="small"
+                            checked={hideStopsWithoutDepartures}
+                            onChange={(e) => onHideStopsWithoutDeparturesChange(e.target.checked)}
+                        />
+                    }
+                    hidden={isHideStopsWithoutDeparturesBoxHidden}
+                />
+                <Typography
+                    sx={{
+                        fontSize: "0.75rem",
+                        color: "text.secondary",
+                    }}
+                >
+                    {tMapSearch.showingStops(filteredSites.length, totalSiteCount)}
+                </Typography>
+            </Box>
+            <FilterToggleButtonGroup
+                options={transportationModeOptions}
+                selectedValue={selectedTransportationMode}
+                onValueChange={onTransportationModeChange}
+                renderButtonCB={getTransportationModeButtonCB}
+                allowDeselect={true}
+                onDeselect={() => onTransportationModeChange(null)}
+            />
             <SearchBar
-                sites={sites}
+                allSites={allSites}
+                filteredSites={filteredSites}
                 selectedSite={selectedSite}
                 handleSelectSiteCB={handleSelectSiteCB}
                 recentSearchSiteIds={recentSearchSiteIds}

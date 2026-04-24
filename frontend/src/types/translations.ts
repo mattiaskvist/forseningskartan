@@ -48,6 +48,11 @@ export interface MapStrings {
     loading: string;
 }
 
+export interface MapSearchStrings {
+    hideUnusedStops: string;
+    showingStops: (showing: number, total: number) => string;
+}
+
 export interface RouteDelayLeaderboardStrings {
     rank: string;
     route: string;
@@ -207,6 +212,7 @@ export interface TranslationStrings {
     routeDelay: RouteDelayStrings;
     sideBar: SideBarStrings;
     map: MapStrings;
+    mapSearch: MapSearchStrings;
     login: LoginStrings;
     searchBar: SearchBarStrings;
     departureList: DepartureListStrings;

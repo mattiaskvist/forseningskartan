@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { Site } from "../types/sl";
+import { Site, TransportationMode } from "../types/sl";
 import { DepartureViewProps } from "./departureView";
 import { AppStyle } from "../types/appStyle";
 import { MapSearchView } from "./mapSearchView";
@@ -9,39 +9,57 @@ import { AppStyleSelector } from "../components/AppStyleSelector";
 import { TranslationStrings } from "../utils/translations";
 
 type MapViewProps = {
-    sites: Site[];
+    allSites: Site[];
+    filteredSites: Site[];
     selectedSite: Site | null;
     handleSelectSiteCB: (siteId: number | null) => void;
     recentSearchSiteIds: number[];
-    siteIdsWithNoDepartures: Set<number>;
     departureViewProps: DepartureViewProps | null;
     appStyle: AppStyle;
     onAppStyleChange: (style: AppStyle) => void;
     tMapDeparturePanel: TranslationStrings["mapDeparturePanel"];
     tSearchBar: TranslationStrings["searchBar"];
+    tMapSearch: TranslationStrings["mapSearch"];
     tAppStyleSelector: TranslationStrings["appStyleSelector"];
+    selectedTransportationMode: TransportationMode | null;
+    transportationModeOptions: TransportationMode[];
+    onTransportationModeChange: (filter: TransportationMode | null) => void;
+    hideStopsWithoutDepartures: boolean;
+    isHideStopsWithoutDeparturesBoxHidden: boolean;
+    onHideStopsWithoutDeparturesChange: (value: boolean) => void;
+    totalSiteCount: number;
+    tTransportModes: TranslationStrings["transportModes"];
 };
 
 export function MapView({
-    sites,
+    allSites,
+    filteredSites,
     selectedSite,
     handleSelectSiteCB,
     recentSearchSiteIds,
-    siteIdsWithNoDepartures,
     departureViewProps,
     appStyle,
     onAppStyleChange,
     tMapDeparturePanel,
     tSearchBar,
+    tMapSearch,
     tAppStyleSelector,
+    selectedTransportationMode,
+    transportationModeOptions,
+    onTransportationModeChange,
+    hideStopsWithoutDepartures,
+    isHideStopsWithoutDeparturesBoxHidden,
+    onHideStopsWithoutDeparturesChange,
+    totalSiteCount,
+    tTransportModes,
 }: MapViewProps) {
     return (
         <div className="relative h-full w-full">
             <StopMap
-                sites={sites}
+                allSites={allSites}
+                filteredSites={filteredSites}
                 selectedSite={selectedSite}
                 handleSelectSiteCB={handleSelectSiteCB}
-                siteIdsWithNoDepartures={siteIdsWithNoDepartures}
                 appStyle={appStyle}
             />
             <Box
@@ -51,7 +69,7 @@ export function MapView({
                     top: 16,
                     zIndex: 1000,
                     maxWidth: "calc(100vw - 2rem)",
-                    pointerEvents: "none", // allow clicks to pass through invisible overlay wrapper
+                    pointerEvents: "none",
                 }}
             >
                 <Box
@@ -60,7 +78,6 @@ export function MapView({
                         alignItems: { xs: "flex-end", md: "flex-start" },
                         gap: 1.5,
                         flexDirection: { xs: "column-reverse", md: "row" },
-                        // ensure child components can receive pointer events
                         "& > *": {
                             pointerEvents: "auto",
                         },
@@ -81,11 +98,21 @@ export function MapView({
                 </Box>
             </Box>
             <MapSearchView
-                sites={sites}
+                allSites={allSites}
+                filteredSites={filteredSites}
                 selectedSite={selectedSite}
                 handleSelectSiteCB={handleSelectSiteCB}
                 recentSearchSiteIds={recentSearchSiteIds}
                 t={tSearchBar}
+                tMapSearch={tMapSearch}
+                tTransportModes={tTransportModes}
+                selectedTransportationMode={selectedTransportationMode}
+                transportationModeOptions={transportationModeOptions}
+                onTransportationModeChange={onTransportationModeChange}
+                hideStopsWithoutDepartures={hideStopsWithoutDepartures}
+                isHideStopsWithoutDeparturesBoxHidden={isHideStopsWithoutDeparturesBoxHidden}
+                onHideStopsWithoutDeparturesChange={onHideStopsWithoutDeparturesChange}
+                totalSiteCount={totalSiteCount}
             />
         </div>
     );

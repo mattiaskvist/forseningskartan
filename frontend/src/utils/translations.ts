@@ -92,6 +92,10 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
         map: {
             loading: "Loading transit data and preparing the map...",
         },
+        mapSearch: {
+            hideUnusedStops: "Hide unused stops",
+            showingStops: (showing, total) => `Showing ${showing}/${total} stops`,
+        },
         login: {
             signIn: "Sign In",
             loading: "Loading authentication...",
@@ -257,6 +261,10 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
         },
         map: {
             loading: "Laddar kollektivtrafikdata och förbereder kartan...",
+        },
+        mapSearch: {
+            hideUnusedStops: "Dolj oanvanda hallplatser",
+            showingStops: (showing, total) => `Visar ${showing}/${total} hallplatser`,
         },
         login: {
             signIn: "Logga in",
