@@ -74,6 +74,7 @@ export function fetchSelectedDepartureStopDelays(): AppThunk {
         const selectedSite = state.sites.data?.find(isSelectedSiteCB) ?? null;
         const selectedDeparture = state.departureUI.selectedDeparture;
         const stopPoints = state.stopPoints.data ?? [];
+        const stopPointGidsBySiteId = state.siteStopPointGids.bySiteId;
         if (!selectedSite || !selectedDeparture || stopPoints.length === 0) {
             return;
         }
@@ -87,7 +88,11 @@ export function fetchSelectedDepartureStopDelays(): AppThunk {
             return;
         }
 
-        const stopPointGIDs = getStopPointGidsForSite(selectedSite, stopPoints);
+        const stopPointGIDs = getStopPointGidsForSite(
+            selectedSite,
+            stopPoints,
+            stopPointGidsBySiteId
+        );
         const routeShortName =
             selectedDeparture.line.designation ?? selectedDeparture.line.id.toString();
         const routeType = selectedDeparture.line.transport_mode

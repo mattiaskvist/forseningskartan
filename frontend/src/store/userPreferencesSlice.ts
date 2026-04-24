@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AppStyle, appStyles } from "../types/appStyle";
+import { TransportationMode } from "../types/sl";
 
 const APP_STYLE_STORAGE_KEY = "appStyle";
 const RECENT_SEARCH_STORAGE_KEY = "recentSearchSiteIds";
@@ -89,12 +90,16 @@ export type UserPreferencesState = {
     favoriteSiteIds: number[];
     recentSearchSiteIds: number[];
     appStyle: AppStyle;
+    mapTransportationModeFilter: TransportationMode | null;
+    hideStopsWithoutDepartures: boolean;
 };
 
 export const defaultUserPreferencesState: UserPreferencesState = {
     favoriteSiteIds: [],
     recentSearchSiteIds: getStoredRecentSearchSiteIds(),
     appStyle: getStoredAppStyle(),
+    mapTransportationModeFilter: null,
+    hideStopsWithoutDepartures: true,
 };
 
 function normalizeFavoriteSiteIds(favoriteSiteIds: number[]): number[] {
@@ -159,7 +164,18 @@ export const userPreferencesSlice = createSlice({
                 action.payload.recentSearchSiteIds
             );
             state.appStyle = action.payload.appStyle;
+            state.mapTransportationModeFilter = action.payload.mapTransportationModeFilter;
+            state.hideStopsWithoutDepartures = action.payload.hideStopsWithoutDepartures;
             storeAppStyle(action.payload.appStyle);
+        },
+        setMapTransportationModeFilter: (
+            state,
+            action: PayloadAction<TransportationMode | null>
+        ) => {
+            state.mapTransportationModeFilter = action.payload;
+        },
+        setHideStopsWithoutDepartures: (state, action: PayloadAction<boolean>) => {
+            state.hideStopsWithoutDepartures = action.payload;
         },
     },
 });
@@ -170,4 +186,6 @@ export const {
     applyLoadedUserPreferences,
     recordRecentSearchSiteId,
     clearRecentSearchSiteIds,
+    setMapTransportationModeFilter,
+    setHideStopsWithoutDepartures,
 } = userPreferencesSlice.actions;

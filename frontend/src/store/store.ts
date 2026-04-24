@@ -9,6 +9,7 @@ import {
     sitesSlice,
     departuresSlice,
     stopPointsSlice,
+    siteStopPointGidsSlice,
     stopPointRoutesSlice,
     departureHistoricalDelaySlice,
     aggregatedDatesSlice,
@@ -28,12 +29,16 @@ import {
     toggleFavoriteSiteId,
     userPreferencesSlice,
     recordRecentSearchSiteId,
+    setMapTransportationModeFilter,
+    setHideStopsWithoutDepartures,
 } from "./userPreferencesSlice";
 import { useDispatch, useSelector } from "react-redux";
 import {
     fetchSelectedDepartureStopDelays,
     fetchSelectedRouteDelays,
     fetchSelectedRouteTrend,
+    getSites,
+    getStopPoints,
     getAggregatedDates,
     getRouteDelays,
 } from "./actions";
@@ -44,9 +49,11 @@ import {
     setRouteDelayDatePreset,
     setRouteDelayCustomDate,
     setRouteDelaySelectedRouteKey,
+    setStopPointGidsBySiteId,
 } from "./reducers";
 import { fetchUserPreferences, saveUserPreferences } from "../firebase/userPreferences";
 import { deleteCurrentUser, logoutCurrentUser } from "./authThunks";
+import { buildStopPointGidsBySiteId } from "../utils/site";
 const listenerMiddleware = createListenerMiddleware();
 
 function mergeRecentSearchSiteIds(
@@ -75,6 +82,7 @@ export const store = configureStore({
         sites: sitesSlice.reducer,
         departures: departuresSlice.reducer,
         stopPoints: stopPointsSlice.reducer,
+        siteStopPointGids: siteStopPointGidsSlice.reducer,
         stopPointRoutes: stopPointRoutesSlice.reducer,
         departureHistoricalDelay: departureHistoricalDelaySlice.reducer,
         routeDelays: routeDelaysSlice.reducer,
@@ -97,6 +105,22 @@ listenerMiddleware.startListening({
 
         const dispatch = listenerApi.dispatch as AppDispatch;
         dispatch(fetchSelectedDepartureStopDelays());
+    },
+});
+
+listenerMiddleware.startListening({
+    matcher: isAnyOf(getSites.fulfilled, getStopPoints.fulfilled),
+    effect: (_, listenerApi) => {
+        const state = listenerApi.getState() as RootState;
+        const sites = state.sites.data;
+        const stopPoints = state.stopPoints.data;
+
+        if (!sites || !stopPoints) {
+            return;
+        }
+
+        const dispatch = listenerApi.dispatch as AppDispatch;
+        dispatch(setStopPointGidsBySiteId(buildStopPointGidsBySiteId(sites, stopPoints)));
     },
 });
 
@@ -178,7 +202,13 @@ listenerMiddleware.startListening({
 
 // user preferences
 listenerMiddleware.startListening({
-    matcher: isAnyOf(toggleFavoriteSiteId, setAppStylePreference, recordRecentSearchSiteId),
+    matcher: isAnyOf(
+        toggleFavoriteSiteId,
+        setAppStylePreference,
+        recordRecentSearchSiteId,
+        setMapTransportationModeFilter,
+        setHideStopsWithoutDepartures
+    ),
     effect: async (_, listenerApi) => {
         const state = listenerApi.getState() as RootState;
         const user = state.auth.user;

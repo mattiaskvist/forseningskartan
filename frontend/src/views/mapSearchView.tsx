@@ -1,24 +1,45 @@
-import { Paper } from "@mui/material";
+import { Box, Checkbox, FormControlLabel, Paper, Typography } from "@mui/material";
 import { SearchBar } from "../components/SearchBar";
-import { Site } from "../types/sl";
+import { Site, TransportationMode } from "../types/sl";
+import { FilterToggleButtonGroup } from "../components/FilterToggleButtonGroup";
+import { getTransportationModeButtonCB } from "../utils/transportationMode";
 
 type MapSearchViewProps = {
-    sites: Site[];
+    allSites: Site[];
+    filteredSites: Site[];
     selectedSite: Site | null;
     handleSelectSiteCB: (siteId: number | null) => void;
     recentSearchSiteIds: number[];
+    selectedTransportationMode: TransportationMode | null;
+    transportationModeOptions: TransportationMode[];
+    onTransportationModeChange: (filter: TransportationMode | null) => void;
+    hideStopsWithoutDepartures: boolean;
+    isHideStopsWithoutDeparturesBoxHidden: boolean;
+    onHideStopsWithoutDeparturesChange: (value: boolean) => void;
+    totalSiteCount: number;
 };
 
 export function MapSearchView({
-    sites,
+    allSites,
+    filteredSites,
     selectedSite,
     handleSelectSiteCB,
     recentSearchSiteIds,
+    selectedTransportationMode,
+    transportationModeOptions,
+    onTransportationModeChange,
+    hideStopsWithoutDepartures,
+    isHideStopsWithoutDeparturesBoxHidden,
+    onHideStopsWithoutDeparturesChange,
+    totalSiteCount,
 }: MapSearchViewProps) {
     return (
         <Paper
             variant="outlined"
             sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 0.5,
                 position: "absolute",
                 left: 72,
                 top: 16,
@@ -29,8 +50,45 @@ export function MapSearchView({
                 backdropFilter: "blur(4px)",
             }}
         >
+            <Box
+                sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                }}
+            >
+                <FormControlLabel
+                    sx={{ mt: -1, mb: -1 }}
+                    label="Hide unused stops"
+                    control={
+                        <Checkbox
+                            size="small"
+                            checked={hideStopsWithoutDepartures}
+                            onChange={(e) => onHideStopsWithoutDeparturesChange(e.target.checked)}
+                        />
+                    }
+                    hidden={isHideStopsWithoutDeparturesBoxHidden}
+                />
+                <Typography
+                    sx={{
+                        fontSize: "0.75rem",
+                        color: "text.secondary",
+                    }}
+                >
+                    Showing {filteredSites.length}/{totalSiteCount} stops
+                </Typography>
+            </Box>
+            <FilterToggleButtonGroup
+                options={transportationModeOptions}
+                selectedValue={selectedTransportationMode}
+                onValueChange={onTransportationModeChange}
+                renderButtonCB={getTransportationModeButtonCB}
+                allowDeselect={true}
+                onDeselect={() => onTransportationModeChange(null)}
+            />
             <SearchBar
-                sites={sites}
+                allSites={allSites}
+                filteredSites={filteredSites}
                 selectedSite={selectedSite}
                 handleSelectSiteCB={handleSelectSiteCB}
                 recentSearchSiteIds={recentSearchSiteIds}

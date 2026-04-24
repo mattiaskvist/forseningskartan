@@ -97,6 +97,7 @@ type Departure = {
 };
 
 type TransportationMode = "BUS" | "TRAM" | "METRO" | "TRAIN" | "FERRY" | "SHIP" | "TAXI";
+type ModeWithOther = TransportationMode | "OTHER";
 
 export const transportationModeToRouteType: { [K in TransportationMode]: RouteType } = {
     BUS: "700",
@@ -147,4 +148,4 @@ type StopPoint = {
     stop_area: StopArea;
 };
 
-export type { Site, DepartureResponse, Departure, StopPoint, TransportationMode };
+export type { Site, DepartureResponse, Departure, StopPoint, TransportationMode, ModeWithOther };

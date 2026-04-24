@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import {
     CircleMarker,
     Control,
@@ -13,10 +13,10 @@ import type { Site } from "../types/sl";
 import { AppStyle } from "../types/appStyle";
 
 type StopMapProps = {
-    sites: Site[];
+    allSites: Site[];
+    filteredSites: Site[];
     selectedSite: Site | null;
     handleSelectSiteCB: (siteId: number | null) => void;
-    siteIdsWithNoDepartures: Set<number>;
     appStyle: AppStyle;
 };
 
@@ -67,44 +67,24 @@ function getUnselectedMarkerStyle(appStyle: AppStyle): CircleMarkerOptions {
     };
 }
 
-function getNoDeparturesMarkerStyle(): CircleMarkerOptions {
-    return {
-        radius: 4,
-        color: "#f97316",
-        fillColor: "#f97316",
-        fillOpacity: 0.85,
-        weight: 1,
-    };
-}
-
-function setMarkerStyle(
-    marker: CircleMarker,
-    isSelected: boolean,
-    appStyle: AppStyle,
-    hasNoDeparturesToday: boolean
-) {
-    if (isSelected) {
-        marker.setStyle(SELECTED_MARKER_STYLE);
-        return;
-    }
-
-    marker.setStyle(
-        hasNoDeparturesToday ? getNoDeparturesMarkerStyle() : getUnselectedMarkerStyle(appStyle)
-    );
+function setMarkerSelectedStyle(marker: CircleMarker, isSelected: boolean, appStyle: AppStyle) {
+    marker.setStyle(isSelected ? SELECTED_MARKER_STYLE : getUnselectedMarkerStyle(appStyle));
 }
 
 export function StopMap({
-    sites,
+    allSites,
+    filteredSites,
     selectedSite,
     handleSelectSiteCB,
-    siteIdsWithNoDepartures,
     appStyle,
 }: StopMapProps) {
     const mapContainerRef = useRef<HTMLDivElement | null>(null);
     const mapRef = useRef<LeafletMap | null>(null);
     const tileLayerRef = useRef<TileLayer | null>(null);
     const markersLayerRef = useRef<LayerGroup | null>(null);
-    const markersBySiteIdRef = useRef<Map<number, CircleMarker>>(new Map());
+    const allMarkersBySiteIdRef = useRef<Map<number, CircleMarker>>(new Map());
+    const allSitesByIdRef = useRef<Map<number, Site>>(new Map());
+    const visibleSiteIdsRef = useRef<Set<number>>(new Set());
     const selectedMarkerRef = useRef<CircleMarker | null>(null);
     const selectedSiteIdRef = useRef<number | null>(null);
     const mapStyleRef = useRef(appStyle);
@@ -135,14 +115,18 @@ export function StopMap({
 
         mapRef.current = map;
         markersLayerRef.current = new LayerGroup().addTo(map);
-        const markersBySiteId = markersBySiteIdRef.current;
+        const allMarkersBySiteId = allMarkersBySiteIdRef.current;
+        const allSitesById = allSitesByIdRef.current;
+        const visibleSiteIds = visibleSiteIdsRef.current;
 
         return () => {
             map.remove();
             mapRef.current = null;
             tileLayerRef.current = null;
             markersLayerRef.current = null;
-            markersBySiteId.clear();
+            allMarkersBySiteId.clear();
+            allSitesById.clear();
+            visibleSiteIds.clear();
             selectedMarkerRef.current = null;
             selectedSiteIdRef.current = null;
         };
@@ -169,25 +153,11 @@ export function StopMap({
         tileLayerRef.current = tileLayer;
     }, [appStyle]);
 
-    // Update markers when sites change
-    useEffect(() => {
-        const markersLayer = markersLayerRef.current;
-        if (!markersLayer) {
-            return;
-        }
-        const currentMarkersLayer = markersLayer;
-
-        markersLayer.clearLayers();
-        const markersBySiteId = markersBySiteIdRef.current;
-        markersBySiteId.clear();
-        selectedMarkerRef.current = null;
-
-        function addSiteMarkerCB(site: Site) {
+    const createSiteMarker = useCallback(
+        (site: Site): CircleMarker => {
             const marker = new CircleMarker(
                 [site.lat, site.lon],
-                siteIdsWithNoDepartures.has(site.id)
-                    ? getNoDeparturesMarkerStyle()
-                    : getUnselectedMarkerStyle(mapStyleRef.current)
+                getUnselectedMarkerStyle(mapStyleRef.current)
             );
             marker.bindTooltip(site.name);
 
@@ -198,56 +168,135 @@ export function StopMap({
             }
             marker.on("click", handleSiteMarkerClickACB);
 
-            marker.addTo(currentMarkersLayer);
-            markersBySiteId.set(site.id, marker);
+            return marker;
+        },
+        [handleSelectSiteCB]
+    );
+
+    // Build and cache markers once for all sites, then reuse them across filter changes
+    useEffect(() => {
+        if (!markersLayerRef.current) {
+            return;
         }
 
-        sites.forEach(addSiteMarkerCB);
-    }, [sites, handleSelectSiteCB, siteIdsWithNoDepartures]);
+        const allMarkersBySiteId = allMarkersBySiteIdRef.current;
+        const allSitesById = allSitesByIdRef.current;
+        const nextSiteIds = new Set<number>();
+
+        // Build markers for all sites
+        function addSiteMarkerCB(site: Site) {
+            nextSiteIds.add(site.id);
+            allSitesById.set(site.id, site);
+
+            if (allMarkersBySiteId.has(site.id)) {
+                return;
+            }
+
+            const marker = createSiteMarker(site);
+
+            allMarkersBySiteId.set(site.id, marker);
+        }
+        allSites.forEach(addSiteMarkerCB);
+
+        // Remove markers for sites that are no longer present in allSites
+        function removeStaleSiteCB(marker: CircleMarker, siteId: number) {
+            if (nextSiteIds.has(siteId)) {
+                return;
+            }
+            markersLayerRef.current?.removeLayer(marker);
+            allMarkersBySiteId.delete(siteId);
+            allSitesById.delete(siteId);
+            visibleSiteIdsRef.current.delete(siteId);
+        }
+        allMarkersBySiteId.forEach(removeStaleSiteCB);
+
+        // If the currently selected site is no longer in the list of all sites, deselect it
+        if (selectedSiteIdRef.current !== null && !nextSiteIds.has(selectedSiteIdRef.current)) {
+            selectedMarkerRef.current = null;
+            selectedSiteIdRef.current = null;
+        }
+    }, [allSites, handleSelectSiteCB, createSiteMarker]);
+
+    // Update markers when sites change
+    useEffect(() => {
+        const markersLayer = markersLayerRef.current;
+        if (!markersLayer) {
+            return;
+        }
+        const currentMarkersLayer = markersLayer;
+
+        const allMarkersBySiteId = allMarkersBySiteIdRef.current;
+        const allSitesById = allSitesByIdRef.current;
+        const visibleSiteIds = visibleSiteIdsRef.current;
+        const nextVisibleSiteIds = new Set<number>(filteredSites.map((site) => site.id));
+
+        // Remove markers for sites that are no longer visible
+        function hideNoLongerVisibleSiteCB(siteId: number) {
+            if (nextVisibleSiteIds.has(siteId)) {
+                return;
+            }
+            const marker = allMarkersBySiteId.get(siteId);
+            if (marker) {
+                currentMarkersLayer.removeLayer(marker);
+            }
+            visibleSiteIds.delete(siteId);
+        }
+        Array.from(visibleSiteIds).forEach(hideNoLongerVisibleSiteCB);
+
+        // Add markers for newly visible sites
+        function showNewlyVisibleSiteCB(siteId: number) {
+            if (visibleSiteIds.has(siteId)) {
+                return;
+            }
+
+            let marker = allMarkersBySiteId.get(siteId);
+            if (!marker) {
+                const site = allSitesById.get(siteId);
+                if (!site) {
+                    return;
+                }
+
+                marker = createSiteMarker(site);
+
+                allMarkersBySiteId.set(siteId, marker);
+            }
+
+            marker.addTo(currentMarkersLayer);
+            visibleSiteIds.add(siteId);
+        }
+        nextVisibleSiteIds.forEach(showNewlyVisibleSiteCB);
+    }, [filteredSites, handleSelectSiteCB, createSiteMarker]);
 
     // Update marker styles when map style changes
     useEffect(() => {
         const selectedSiteId = selectedSiteIdRef.current;
         function setMarkerStyleCB(marker: CircleMarker, siteId: number) {
-            setMarkerStyle(
-                marker,
-                siteId === selectedSiteId,
-                appStyle,
-                siteIdsWithNoDepartures.has(siteId)
-            );
+            setMarkerSelectedStyle(marker, siteId === selectedSiteId, appStyle);
         }
-        markersBySiteIdRef.current.forEach(setMarkerStyleCB);
-    }, [appStyle, siteIdsWithNoDepartures]);
+        allMarkersBySiteIdRef.current.forEach(setMarkerStyleCB);
+    }, [appStyle]);
 
     useEffect(() => {
         if (!mapRef.current) {
             return;
         }
-        const previousSelectedSiteId = selectedSiteIdRef.current;
         selectedSiteIdRef.current = selectedSite?.id ?? null;
 
         if (selectedMarkerRef.current) {
-            setMarkerStyle(
-                selectedMarkerRef.current,
-                false,
-                mapStyleRef.current,
-                previousSelectedSiteId !== null
-                    ? siteIdsWithNoDepartures.has(previousSelectedSiteId)
-                    : false
-            );
+            setMarkerSelectedStyle(selectedMarkerRef.current, false, mapStyleRef.current);
         }
 
         if (selectedSite) {
-            const selectedMarker = markersBySiteIdRef.current.get(selectedSite.id) ?? null;
+            const selectedMarker = allMarkersBySiteIdRef.current.get(selectedSite.id) ?? null;
             if (selectedMarker) {
-                setMarkerStyle(selectedMarker, true, mapStyleRef.current, false);
+                setMarkerSelectedStyle(selectedMarker, true, mapStyleRef.current);
             }
             selectedMarkerRef.current = selectedMarker;
             return;
         }
 
         selectedMarkerRef.current = null;
-    }, [selectedSite, sites, siteIdsWithNoDepartures]);
+    }, [selectedSite]);
 
     useEffect(() => {
         const map = mapRef.current;

@@ -18,10 +18,13 @@ import {
     getSitesCB,
     getSitesLoadingCB,
     getStopPointsCB,
+    getStopPointGidsBySiteIdCB,
     getStopPointsLoadingCB,
     getSelectedSiteCB,
     getRoutesByStopPointCB,
     getStopPointRoutesErrorCB,
+    getMapTransportationModeFilterCB,
+    getHideStopsWithoutDeparturesCB,
 } from "../store/selectors";
 import { selectSiteCB } from "../store/selection";
 import {
@@ -30,18 +33,26 @@ import {
     setSelectedDeparture,
     setSelectedSiteId,
 } from "../store/reducers";
-import { Departure } from "../types/sl";
+import { Departure, TransportationMode } from "../types/sl";
 import { DatePreset } from "../types/departureDelay";
 import { AppStyle } from "../types/appStyle";
 import { DepartureViewProps } from "../views/departureView";
 import {
     recordRecentSearchSiteId,
     setAppStylePreference,
+    setHideStopsWithoutDepartures,
+    setMapTransportationModeFilter,
     toggleFavoriteSiteId,
 } from "../store/userPreferencesSlice";
 import { showSnackbar } from "../store/snackbarSlice";
 import { Suspense } from "../components/Suspense";
-import { getSiteIdsWithNoDepartures, getUpcomingDepartures } from "../utils/departures";
+import { getUpcomingDepartures } from "../utils/departures";
+import { RouteMeta, RouteType } from "../types/historicalDelay";
+import {
+    getSitesByTransportationMode,
+    routeTypesToTransportationModes,
+} from "../utils/transportationMode";
+import { getSitesWithRoutes } from "../utils/site";
 
 export function MapPresenter() {
     const dispatch = useAppDispatch();
@@ -62,16 +73,55 @@ export function MapPresenter() {
     const sites = useAppSelector(getSitesCB);
     const isSitesLoading = useAppSelector(getSitesLoadingCB);
     const stopPoints = useAppSelector(getStopPointsCB);
+    const stopPointGidsBySiteId = useAppSelector(getStopPointGidsBySiteIdCB);
     const isStopPointsLoading = useAppSelector(getStopPointsLoadingCB);
     const routesByStopPoint = useAppSelector(getRoutesByStopPointCB);
     const routesByStopPointError = useAppSelector(getStopPointRoutesErrorCB);
-    const siteIdsWithNoDepartures = useMemo(() => {
-        if (!sites || !stopPoints || routesByStopPointError) {
-            return new Set<number>();
+    const selectedTransportationMode = useAppSelector(getMapTransportationModeFilterCB);
+    const hideStopsWithoutDepartures = useAppSelector(getHideStopsWithoutDeparturesCB);
+
+    const routesByStopPointsUnavailable = routesByStopPointError !== null || !routesByStopPoint;
+    const transportationModeOptions = useMemo(() => {
+        if (routesByStopPointsUnavailable || !routesByStopPoint) {
+            return [];
         }
 
-        return getSiteIdsWithNoDepartures(sites, stopPoints, routesByStopPoint);
-    }, [sites, stopPoints, routesByStopPoint]);
+        function getRouteTypeCB(route: RouteMeta): RouteType {
+            return route.type;
+        }
+        const routeTypes = new Set(Object.values(routesByStopPoint).flat().map(getRouteTypeCB));
+        return routeTypesToTransportationModes(routeTypes);
+    }, [routesByStopPointsUnavailable, routesByStopPoint]);
+
+    const filteredSites = useMemo(() => {
+        if (!sites || !stopPoints) {
+            return [];
+        }
+
+        if (routesByStopPointsUnavailable) {
+            return sites;
+        }
+
+        const baseSites = hideStopsWithoutDepartures
+            ? getSitesWithRoutes(sites, stopPoints, routesByStopPoint, stopPointGidsBySiteId)
+            : sites;
+
+        return getSitesByTransportationMode(
+            baseSites,
+            selectedTransportationMode,
+            routesByStopPoint,
+            stopPoints,
+            stopPointGidsBySiteId
+        );
+    }, [
+        sites,
+        selectedTransportationMode,
+        routesByStopPointsUnavailable,
+        routesByStopPoint,
+        stopPoints,
+        stopPointGidsBySiteId,
+        hideStopsWithoutDepartures,
+    ]);
 
     const handleSelectSiteCB = useCallback(
         (siteId: number | null) => {
@@ -137,6 +187,14 @@ export function MapPresenter() {
         );
     }
 
+    function handleTransportationModeChangeACB(filter: TransportationMode | null) {
+        dispatch(setMapTransportationModeFilter(filter));
+    }
+
+    function handleHideStopsWithoutDeparturesChangeACB(value: boolean) {
+        dispatch(setHideStopsWithoutDepartures(value));
+    }
+
     const departures = departureResponse?.departures ?? [];
     const upcomingDepartures = getUpcomingDepartures(departures);
 
@@ -165,14 +223,21 @@ export function MapPresenter() {
 
     return (
         <MapView
-            sites={sites}
+            allSites={sites}
+            filteredSites={filteredSites}
             selectedSite={selectedSite}
             handleSelectSiteCB={handleSelectSiteCB}
             recentSearchSiteIds={recentSearchSiteIds}
-            siteIdsWithNoDepartures={siteIdsWithNoDepartures}
             departureViewProps={departureViewProps}
             appStyle={appStyle}
             onAppStyleChange={handleAppStyleChangeACB}
+            selectedTransportationMode={selectedTransportationMode}
+            transportationModeOptions={transportationModeOptions}
+            onTransportationModeChange={handleTransportationModeChangeACB}
+            hideStopsWithoutDepartures={hideStopsWithoutDepartures}
+            isHideStopsWithoutDeparturesBoxHidden={routesByStopPointsUnavailable}
+            onHideStopsWithoutDeparturesChange={handleHideStopsWithoutDeparturesChangeACB}
+            totalSiteCount={sites.length}
         />
     );
 }
