@@ -15,7 +15,7 @@ describe("SearchBar", () => {
         renderWithTheme(
             <SearchBar
                 allSites={sites}
-                sites={sites}
+                filteredSites={sites}
                 selectedSite={null}
                 handleSelectSiteCB={() => {}}
                 recentSearchSiteIds={[3, 1]}
@@ -41,7 +41,7 @@ describe("SearchBar", () => {
         renderWithTheme(
             <SearchBar
                 allSites={sites}
-                sites={sites}
+                filteredSites={sites}
                 selectedSite={null}
                 handleSelectSiteCB={() => {}}
                 recentSearchSiteIds={[2]}

@@ -14,7 +14,7 @@ import { AppStyle } from "../types/appStyle";
 
 type StopMapProps = {
     allSites: Site[];
-    sites: Site[];
+    filteredSites: Site[];
     selectedSite: Site | null;
     handleSelectSiteCB: (siteId: number | null) => void;
     appStyle: AppStyle;
@@ -73,7 +73,7 @@ function setMarkerSelectedStyle(marker: CircleMarker, isSelected: boolean, appSt
 
 export function StopMap({
     allSites,
-    sites,
+    filteredSites,
     selectedSite,
     handleSelectSiteCB,
     appStyle,
@@ -228,7 +228,7 @@ export function StopMap({
         const allMarkersBySiteId = allMarkersBySiteIdRef.current;
         const allSitesById = allSitesByIdRef.current;
         const visibleSiteIds = visibleSiteIdsRef.current;
-        const nextVisibleSiteIds = new Set<number>(sites.map((site) => site.id));
+        const nextVisibleSiteIds = new Set<number>(filteredSites.map((site) => site.id));
 
         // Remove markers for sites that are no longer visible
         function hideNoLongerVisibleSiteCB(siteId: number) {
@@ -265,7 +265,7 @@ export function StopMap({
             visibleSiteIds.add(siteId);
         }
         nextVisibleSiteIds.forEach(showNewlyVisibleSiteCB);
-    }, [sites, handleSelectSiteCB, createSiteMarker]);
+    }, [filteredSites, handleSelectSiteCB, createSiteMarker]);
 
     // Update marker styles when map style changes
     useEffect(() => {

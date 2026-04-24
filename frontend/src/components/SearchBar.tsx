@@ -16,7 +16,7 @@ const defaultFilterOptions = createFilterOptions<Site>({
 
 type SearchBarProps = {
     allSites: Site[];
-    sites: Site[];
+    filteredSites: Site[];
     selectedSite: Site | null;
     handleSelectSiteCB: (siteId: number | null) => void;
     recentSearchSiteIds?: number[];
@@ -24,13 +24,16 @@ type SearchBarProps = {
 
 export function SearchBar({
     allSites,
-    sites,
+    filteredSites,
     selectedSite,
     handleSelectSiteCB,
     recentSearchSiteIds = [],
 }: SearchBarProps) {
     // useMemo to avoid unnecessary recalculations on every render
-    const visibleSiteIds = useMemo(() => new Set(sites.map((site) => site.id)), [sites]);
+    const visibleSiteIds = useMemo(
+        () => new Set(filteredSites.map((site) => site.id)),
+        [filteredSites]
+    );
     const allSitesById = useMemo(() => {
         function getSiteIdPairCB(site: Site) {
             return [site.id, site] as const;

@@ -6,7 +6,7 @@ import { getTransportationModeButtonCB } from "../utils/transportationMode";
 
 type MapSearchViewProps = {
     allSites: Site[];
-    sites: Site[];
+    filteredSites: Site[];
     selectedSite: Site | null;
     handleSelectSiteCB: (siteId: number | null) => void;
     recentSearchSiteIds: number[];
@@ -21,7 +21,7 @@ type MapSearchViewProps = {
 
 export function MapSearchView({
     allSites,
-    sites,
+    filteredSites,
     selectedSite,
     handleSelectSiteCB,
     recentSearchSiteIds,
@@ -75,7 +75,7 @@ export function MapSearchView({
                         color: "text.secondary",
                     }}
                 >
-                    Showing {sites.length}/{totalSiteCount} stops
+                    Showing {filteredSites.length}/{totalSiteCount} stops
                 </Typography>
             </Box>
             <FilterToggleButtonGroup
@@ -88,7 +88,7 @@ export function MapSearchView({
             />
             <SearchBar
                 allSites={allSites}
-                sites={sites}
+                filteredSites={filteredSites}
                 selectedSite={selectedSite}
                 handleSelectSiteCB={handleSelectSiteCB}
                 recentSearchSiteIds={recentSearchSiteIds}

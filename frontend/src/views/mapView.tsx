@@ -9,7 +9,7 @@ import { AppStyleSelector } from "../components/AppStyleSelector";
 
 type MapViewProps = {
     allSites: Site[];
-    sites: Site[];
+    filteredSites: Site[];
     selectedSite: Site | null;
     handleSelectSiteCB: (siteId: number | null) => void;
     recentSearchSiteIds: number[];
@@ -27,7 +27,7 @@ type MapViewProps = {
 
 export function MapView({
     allSites,
-    sites,
+    filteredSites,
     selectedSite,
     handleSelectSiteCB,
     recentSearchSiteIds,
@@ -46,7 +46,7 @@ export function MapView({
         <div className="relative h-full w-full">
             <StopMap
                 allSites={allSites}
-                sites={sites}
+                filteredSites={filteredSites}
                 selectedSite={selectedSite}
                 handleSelectSiteCB={handleSelectSiteCB}
                 appStyle={appStyle}
@@ -85,7 +85,7 @@ export function MapView({
             </Box>
             <MapSearchView
                 allSites={allSites}
-                sites={sites}
+                filteredSites={filteredSites}
                 selectedSite={selectedSite}
                 handleSelectSiteCB={handleSelectSiteCB}
                 recentSearchSiteIds={recentSearchSiteIds}

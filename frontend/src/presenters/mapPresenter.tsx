@@ -224,7 +224,7 @@ export function MapPresenter() {
     return (
         <MapView
             allSites={sites}
-            sites={filteredSites}
+            filteredSites={filteredSites}
             selectedSite={selectedSite}
             handleSelectSiteCB={handleSelectSiteCB}
             recentSearchSiteIds={recentSearchSiteIds}
