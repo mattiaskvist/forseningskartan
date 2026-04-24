@@ -60,7 +60,11 @@ export function RouteDelayControls({
     }
 
     function getTransportationModeButtonCB(mode: TransportationMode) {
-        return <ToggleButton key={mode} value={mode}>{getTransportationModeLabel(mode)}</ToggleButton>;
+        return (
+            <ToggleButton key={mode} value={mode}>
+                {getTransportationModeLabel(mode)}
+            </ToggleButton>
+        );
     }
     function getPresetButtonCB(option: DatePreset) {
         const labelMap: Record<DatePreset, string> = {

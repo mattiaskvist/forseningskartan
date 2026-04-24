@@ -34,7 +34,11 @@ export function DepartureList({
     }
 
     function getTransportationModeButtonCB(mode: ModeWithOther) {
-        return <ToggleButton key={mode} value={mode}>{getModeLabel(mode)}</ToggleButton>;
+        return (
+            <ToggleButton key={mode} value={mode}>
+                {getModeLabel(mode)}
+            </ToggleButton>
+        );
     }
     const uniqueModes = useMemo(() => {
         const modes = new Set<ModeWithOther>();

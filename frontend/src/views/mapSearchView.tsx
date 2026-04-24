@@ -1,11 +1,4 @@
-import {
-    Box,
-    Checkbox,
-    FormControlLabel,
-    Paper,
-    ToggleButton,
-    Typography,
-} from "@mui/material";
+import { Box, Checkbox, FormControlLabel, Paper, ToggleButton, Typography } from "@mui/material";
 import { SearchBar } from "../components/SearchBar";
 import { FilterToggleButtonGroup } from "../components/FilterToggleButtonGroup";
 import { Site, TransportationMode } from "../types/sl";
@@ -61,7 +54,11 @@ export function MapSearchView({
     }
 
     function getTransportationModeButtonCB(mode: TransportationMode) {
-        return <ToggleButton key={mode} value={mode}>{getTransportationModeLabel(mode)}</ToggleButton>;
+        return (
+            <ToggleButton key={mode} value={mode}>
+                {getTransportationModeLabel(mode)}
+            </ToggleButton>
+        );
     }
 
     return (
