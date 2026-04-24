@@ -25,6 +25,7 @@ import favicon from "/favicon.png";
 import { Site } from "../types/sl";
 import { AppStyle } from "../types/appStyle";
 import { AppStyleSelector } from "../components/AppStyleSelector";
+import { Suspense } from "../components/Suspense";
 
 type SidebarNavItem = Pick<RouteConfig, "label" | "path" | "icon">;
 
@@ -33,6 +34,7 @@ type SidebarViewProps = {
     currentPath: string;
     user: AuthUserState | null;
     favoriteStops: Site[];
+    isFavoriteStopsLoading: boolean;
     onToggle: () => void;
     onNavigate: (path: string) => void;
     onLogout: () => void;
@@ -46,6 +48,7 @@ export function SidebarView({
     currentPath,
     user,
     favoriteStops,
+    isFavoriteStopsLoading,
     onToggle,
     onNavigate,
     onLogout,
@@ -280,7 +283,11 @@ export function SidebarView({
                         </Typography>
                     </ListItem>
 
-                    {!user ? (
+                    {isFavoriteStopsLoading ? (
+                        <ListItem sx={{ px: 1.5, py: 0.5 }}>
+                            <Suspense message="Loading favorite stops..." />
+                        </ListItem>
+                    ) : !user ? (
                         <ListItem sx={{ px: 1.5, py: 0.5 }}>
                             <Typography sx={{ color: "text.secondary", fontSize: "0.75rem" }}>
                                 Log in to favorite stops

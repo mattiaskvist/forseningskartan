@@ -21,6 +21,7 @@ describe("userPreferencesSlice", () => {
             appStyle: "Dark",
             mapTransportationModeFilter: null,
             hideStopsWithoutDepartures: true,
+            isLoadingSavedPreferences: false,
         });
     });
 
@@ -71,6 +72,7 @@ describe("userPreferencesSlice", () => {
             appStyle: "Classic",
             mapTransportationModeFilter: null,
             hideStopsWithoutDepartures: true,
+            isLoadingSavedPreferences: false,
         });
     });
 

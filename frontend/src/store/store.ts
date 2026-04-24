@@ -25,6 +25,7 @@ import {
     clearRecentSearchSiteIds,
     clearStoredRecentSearchSiteIds,
     setAppStylePreference,
+    setUserPreferencesLoading,
     storeRecentSearchSiteIds,
     toggleFavoriteSiteId,
     userPreferencesSlice,
@@ -155,8 +156,11 @@ listenerMiddleware.startListening({
         const user = action.payload;
 
         if (!user) {
+            dispatch(setUserPreferencesLoading(false));
             return;
         }
+
+        dispatch(setUserPreferencesLoading(true));
 
         try {
             const loadedPreferences = await fetchUserPreferences(user.uid);
@@ -179,8 +183,10 @@ listenerMiddleware.startListening({
             }
 
             await saveUserPreferences(user.uid, localPreferences);
+            dispatch(setUserPreferencesLoading(false));
             clearStoredRecentSearchSiteIds();
         } catch (error) {
+            dispatch(setUserPreferencesLoading(false));
             console.error("Failed to load user preferences:", error);
             dispatch(
                 showSnackbar({
