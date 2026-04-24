@@ -106,9 +106,7 @@ export function RouteDelayPresenter() {
 
     const selectedDateText = useMemo(() => {
         const t = translations[currentLanguage].departureHistoricalDelays;
-        return getPresetDescription(selectedDates, t.selectedDatesLabel, {
-            noAvailableDatesLabel: t.noAvailableDates,
-        });
+        return getPresetDescription(selectedDates, t.selectedDatesLabel, t.noAvailableDates);
     }, [selectedDates, currentLanguage]);
 
     const routesInfoText = useMemo(() => {

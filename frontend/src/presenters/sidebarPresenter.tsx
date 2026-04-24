@@ -4,7 +4,7 @@ import { SidebarView } from "../views/sidebarView";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import { getAppStylePreferenceCB, getAuthUserCB, getFavoriteSitesCB } from "../store/selectors";
 import { showSnackbar } from "../store/snackbarSlice";
-import { selectSiteCB } from "../store/selection";
+import { selectSite } from "../store/selection";
 import { logoutCurrentUser } from "../store/authThunks";
 import { AppStyle } from "../types/appStyle";
 import { setAppStylePreference } from "../store/userPreferencesSlice";
@@ -32,7 +32,7 @@ export function SidebarPresenter() {
     }
 
     function selectFavoriteStopACB(siteId: number) {
-        selectSiteCB({ dispatch, siteId });
+        selectSite({ dispatch, siteId });
         navigate("/");
         setIsOpen(false);
     }

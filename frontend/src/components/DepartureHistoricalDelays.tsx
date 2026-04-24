@@ -67,10 +67,12 @@ export function DepartureHistoricalDelays({
                 }}
             >
                 <Typography sx={{ fontSize: "0.75rem", color: "text.secondary" }}>
-                    {getPresetDescription(selectedDelayDates, t.selectedDatesLabel, {
-                        selectedHourUTC: selectedDepartureHourUTC,
-                        noAvailableDatesLabel: t.noAvailableDates,
-                    })}
+                    {getPresetDescription(
+                        selectedDelayDates,
+                        t.selectedDatesLabel,
+                        t.noAvailableDates,
+                        selectedDepartureHourUTC
+                    )}
                 </Typography>
                 {isLoadingData ? (
                     <Suspense message={t.loading} />

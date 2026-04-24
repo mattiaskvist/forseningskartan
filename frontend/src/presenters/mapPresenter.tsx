@@ -27,7 +27,7 @@ import {
     getStopPointsCB,
     getStopPointsLoadingCB,
 } from "../store/selectors";
-import { selectSiteCB } from "../store/selection";
+import { selectSite } from "../store/selection";
 import {
     setSelectedCustomDate,
     setSelectedDatePreset,
@@ -129,7 +129,7 @@ export function MapPresenter() {
 
     const handleSelectSiteCB = useCallback(
         (siteId: number | null) => {
-            selectSiteCB({ dispatch, siteId });
+            selectSite({ dispatch, siteId });
             if (siteId !== null) {
                 dispatch(recordRecentSearchSiteId(siteId));
             }

@@ -6,6 +6,7 @@ import { TransportationMode } from "../types/sl";
 import { RouteDelaySection } from "../types/routeDelays";
 import { FilterToggleButtonGroup } from "./FilterToggleButtonGroup";
 import { TranslationStrings } from "../utils/translations";
+import { getTransportationModeButton } from "../utils/transportationMode";
 
 type RouteDelayControlsProps = {
     selectedSection: RouteDelaySection;
@@ -46,26 +47,6 @@ export function RouteDelayControls({
     tDatePicker,
     tTransportModes,
 }: RouteDelayControlsProps) {
-    function getTransportationModeLabel(mode: TransportationMode) {
-        const labelMap: Record<TransportationMode, string> = {
-            BUS: tTransportModes.bus,
-            TRAM: tTransportModes.tram,
-            METRO: tTransportModes.metro,
-            TRAIN: tTransportModes.train,
-            FERRY: tTransportModes.ferry,
-            SHIP: tTransportModes.ship,
-            TAXI: tTransportModes.taxi,
-        };
-        return labelMap[mode];
-    }
-
-    function getTransportationModeButtonCB(mode: TransportationMode) {
-        return (
-            <ToggleButton key={mode} value={mode}>
-                {getTransportationModeLabel(mode)}
-            </ToggleButton>
-        );
-    }
     function getPresetButtonCB(option: DatePreset) {
         const labelMap: Record<DatePreset, string> = {
             sameDayLastWeek: t.sameDayLastWeek,
@@ -144,7 +125,9 @@ export function RouteDelayControls({
                             options={transportationModeOptions}
                             selectedValue={selectedTransportationMode}
                             onValueChange={onTransportationModeChange}
-                            renderButtonCB={getTransportationModeButtonCB}
+                            renderButtonCB={(mode) =>
+                                getTransportationModeButton(mode, tTransportModes)
+                            }
                         />
                     </div>
                 ) : null}

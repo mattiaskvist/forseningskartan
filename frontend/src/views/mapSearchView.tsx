@@ -1,8 +1,9 @@
-import { Box, Checkbox, FormControlLabel, Paper, ToggleButton, Typography } from "@mui/material";
+import { Box, Checkbox, FormControlLabel, Paper, Typography } from "@mui/material";
 import { SearchBar } from "../components/SearchBar";
 import { FilterToggleButtonGroup } from "../components/FilterToggleButtonGroup";
 import { Site, TransportationMode } from "../types/sl";
 import { TranslationStrings } from "../utils/translations";
+import { getTransportationModeButton } from "../utils/transportationMode";
 
 type MapSearchViewProps = {
     allSites: Site[];
@@ -39,28 +40,6 @@ export function MapSearchView({
     onHideStopsWithoutDeparturesChange,
     totalSiteCount,
 }: MapSearchViewProps) {
-    function getTransportationModeLabel(mode: TransportationMode) {
-        const labelMap: Record<TransportationMode, string> = {
-            BUS: tTransportModes.bus,
-            TRAM: tTransportModes.tram,
-            METRO: tTransportModes.metro,
-            TRAIN: tTransportModes.train,
-            FERRY: tTransportModes.ferry,
-            SHIP: tTransportModes.ship,
-            TAXI: tTransportModes.taxi,
-        };
-
-        return labelMap[mode];
-    }
-
-    function getTransportationModeButtonCB(mode: TransportationMode) {
-        return (
-            <ToggleButton key={mode} value={mode}>
-                {getTransportationModeLabel(mode)}
-            </ToggleButton>
-        );
-    }
-
     return (
         <Paper
             variant="outlined"
@@ -110,7 +89,7 @@ export function MapSearchView({
                 options={transportationModeOptions}
                 selectedValue={selectedTransportationMode}
                 onValueChange={onTransportationModeChange}
-                renderButtonCB={getTransportationModeButtonCB}
+                renderButtonCB={(mode) => getTransportationModeButton(mode, tTransportModes)}
                 allowDeselect={true}
                 onDeselect={() => onTransportationModeChange(null)}
             />

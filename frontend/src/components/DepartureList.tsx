@@ -2,9 +2,13 @@ import { Departure, ModeWithOther } from "../types/sl";
 import { formatDelay, formatTime, getDelayMinutes, getDelayColorToken } from "../utils/time";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { useMemo, useState } from "react";
-import { Box, Card, TextField, ToggleButton, Typography } from "@mui/material";
+import { Box, Card, TextField, Typography } from "@mui/material";
 import { FilterToggleButtonGroup } from "./FilterToggleButtonGroup";
 import { TranslationStrings } from "../utils/translations";
+import {
+    getTransportationModeButton,
+    getTransportationModeLabel,
+} from "../utils/transportationMode";
 
 type DepartureListProps = {
     departures: Departure[];
@@ -19,27 +23,6 @@ export function DepartureList({
     t,
     tTransportModes,
 }: DepartureListProps) {
-    function getModeLabel(mode: ModeWithOther) {
-        const labelMap: Record<ModeWithOther, string> = {
-            BUS: tTransportModes.bus,
-            TRAM: tTransportModes.tram,
-            METRO: tTransportModes.metro,
-            TRAIN: tTransportModes.train,
-            FERRY: tTransportModes.ferry,
-            SHIP: tTransportModes.ship,
-            TAXI: tTransportModes.taxi,
-            OTHER: tTransportModes.other,
-        };
-        return labelMap[mode];
-    }
-
-    function getTransportationModeButtonCB(mode: ModeWithOther) {
-        return (
-            <ToggleButton key={mode} value={mode}>
-                {getModeLabel(mode)}
-            </ToggleButton>
-        );
-    }
     const uniqueModes = useMemo(() => {
         const modes = new Set<ModeWithOther>();
 
@@ -93,7 +76,9 @@ export function DepartureList({
 
         const destination = departure.destination ?? departure.direction;
         const transportMode = departure.line.transport_mode;
-        const transportModeLabel = transportMode ? getModeLabel(transportMode) : "-";
+        const transportModeLabel = transportMode
+            ? getTransportationModeLabel(transportMode, tTransportModes)
+            : "-";
         const line = departure.line.designation ?? `${departure.line.id}`;
         const departureKey = `${departure.journey.id}-${departure.scheduled}-${departure.stop_point.id}`;
         const delayMinutes = getDelayMinutes(departure);
@@ -165,7 +150,7 @@ export function DepartureList({
                         color: "text.primary",
                     }}
                 >
-                    {getModeLabel(mode)}
+                    {getTransportationModeLabel(mode, tTransportModes)}
                 </Box>
                 {modeDepartures.map(renderDepartureCB)}
             </Card>
@@ -190,7 +175,7 @@ export function DepartureList({
                     options={uniqueModes}
                     selectedValue={selectedMode}
                     onValueChange={setSelectedMode}
-                    renderButtonCB={getTransportationModeButtonCB}
+                    renderButtonCB={(mode) => getTransportationModeButton(mode, tTransportModes)}
                 />
             ) : null}
 

@@ -28,8 +28,6 @@ import { AppStyleSelector } from "../components/AppStyleSelector";
 import { LanguageSelector } from "../components/LanguageSelector";
 import { LanguageCode, TranslationStrings } from "../utils/translations";
 
-type SidebarNavItem = Pick<RouteConfig, "path" | "icon" | "sidebarLabelKey">;
-
 type SidebarViewProps = {
     isOpen: boolean;
     currentPath: string;
@@ -63,7 +61,7 @@ export function SidebarView({
     t,
     tAppStyleSelector,
 }: SidebarViewProps) {
-    function isActiveCB(path: string): boolean {
+    function isActive(path: string): boolean {
         if (path === "/") {
             return currentPath === "/" || currentPath === "";
         }
@@ -74,8 +72,8 @@ export function SidebarView({
         onNavigate("/account");
     }
 
-    function renderNavItemCB(item: SidebarNavItem) {
-        const active = isActiveCB(item.path);
+    function renderNavItemCB(item: RouteConfig) {
+        const active = isActive(item.path);
 
         function handleClickCB() {
             onNavigate(item.path);

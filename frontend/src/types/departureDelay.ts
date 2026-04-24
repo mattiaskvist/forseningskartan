@@ -32,18 +32,15 @@ export function getDateRangeText(selectedDates: string[]): string {
 export function getPresetDescription(
     selectedDates: string[],
     selectedDatesLabel: string,
-    options: {
-        selectedHourUTC?: number;
-        noAvailableDatesLabel: string;
-    }
+    noAvailableDatesLabel: string,
+    selectedHourUTC?: number
 ): string {
     if (selectedDates.length === 0) {
-        return options.noAvailableDatesLabel;
+        return noAvailableDatesLabel;
     }
 
     const dateRange = getDateRangeText(selectedDates);
-    const hourRange =
-        options.selectedHourUTC !== undefined ? formatHourRangeLocal(options.selectedHourUTC) : "";
+    const hourRange = selectedHourUTC !== undefined ? formatHourRangeLocal(selectedHourUTC) : "";
 
     return `${selectedDatesLabel}: ${dateRange}${hourRange ? `, ${hourRange}` : ""}`;
 }
