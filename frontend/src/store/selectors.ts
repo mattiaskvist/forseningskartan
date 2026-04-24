@@ -67,6 +67,10 @@ function getStopPointsCB(state: RootState) {
     return state.stopPoints.data;
 }
 
+function getStopPointGidsBySiteIdCB(state: RootState) {
+    return state.siteStopPointGids.bySiteId;
+}
+
 function getStopPointsLoadingCB(state: RootState) {
     return state.stopPoints.isLoading;
 }
@@ -179,6 +183,14 @@ function getRecentSearchSiteIdsCB(state: RootState) {
     return state.userPreferences.recentSearchSiteIds ?? [];
 }
 
+function getMapTransportationModeFilterCB(state: RootState) {
+    return state.userPreferences.mapTransportationModeFilter;
+}
+
+function getHideStopsWithoutDeparturesCB(state: RootState) {
+    return state.userPreferences.hideStopsWithoutDepartures;
+}
+
 // use createSelector for computationally expensive selectors
 // to memoize results and avoid unnecessary recalculations
 const getSelectedDelayDatesCB = createSelector(
@@ -234,6 +246,7 @@ export {
     getSelectedSiteIdCB,
     getSelectedSiteCB,
     getStopPointsCB,
+    getStopPointGidsBySiteIdCB,
     getStopPointsLoadingCB,
     getRoutesByStopPointCB,
     getStopPointRoutesLoadingCB,
@@ -262,6 +275,8 @@ export {
     getFavoriteSiteIdsCB,
     getAppStylePreferenceCB,
     getRecentSearchSiteIdsCB,
+    getMapTransportationModeFilterCB,
+    getHideStopsWithoutDeparturesCB,
     getFavoriteSitesCB,
     getUserLocationCB,
     getMapCenterOnUserRequestedAtCB,

@@ -5,6 +5,7 @@ import { DatePreset, EventType, DatePresets, DatePresetLabelMap } from "../types
 import { TransportationMode } from "../types/sl";
 import { RouteDelaySection } from "../types/routeDelays";
 import { FilterToggleButtonGroup } from "./FilterToggleButtonGroup";
+import { getTransportationModeButtonCB } from "../utils/transportationMode";
 
 type RouteDelayControlsProps = {
     selectedSection: RouteDelaySection;
@@ -39,10 +40,6 @@ export function RouteDelayControls({
     onTransportationModeChange,
     onSearchQueryChange,
 }: RouteDelayControlsProps) {
-    function getTransportationModeLabel(mode: TransportationMode) {
-        return `${mode.charAt(0)}${mode.slice(1).toLowerCase()}`;
-    }
-
     function getPresetButtonCB(option: DatePreset) {
         return (
             <ToggleButton key={option} value={option}>
@@ -55,14 +52,6 @@ export function RouteDelayControls({
         return (
             <ToggleButton key={eventType} value={eventType}>
                 {eventType === "departure" ? "Departure" : "Arrival"}
-            </ToggleButton>
-        );
-    }
-
-    function getTransportationModeButtonCB(mode: TransportationMode) {
-        return (
-            <ToggleButton key={mode} value={mode}>
-                {getTransportationModeLabel(mode)}
             </ToggleButton>
         );
     }

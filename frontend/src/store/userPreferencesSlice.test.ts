@@ -19,6 +19,8 @@ describe("userPreferencesSlice", () => {
             favoriteSiteIds: [],
             recentSearchSiteIds: [],
             appStyle: "Dark",
+            mapTransportationModeFilter: null,
+            hideStopsWithoutDepartures: true,
         });
     });
 
@@ -57,6 +59,8 @@ describe("userPreferencesSlice", () => {
                 favoriteSiteIds: [2, 9],
                 recentSearchSiteIds: [1, 3, 5],
                 appStyle: "Classic",
+                mapTransportationModeFilter: null,
+                hideStopsWithoutDepartures: true,
             })
         );
 
@@ -65,6 +69,8 @@ describe("userPreferencesSlice", () => {
             favoriteSiteIds: [2, 9],
             recentSearchSiteIds: [1, 3, 5],
             appStyle: "Classic",
+            mapTransportationModeFilter: null,
+            hideStopsWithoutDepartures: true,
         });
     });
 

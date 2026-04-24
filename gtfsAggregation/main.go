@@ -97,6 +97,9 @@ func parseArgs() (config Config, err error) {
 func runAggregations(config Config) error {
 	if config.RecentDays > 0 {
 		if config.CronSchedule == "" {
+			if err := runStaticRefresh(config); err != nil {
+				return fmt.Errorf("static GTFS refresh: %w", err)
+			}
 			return runRecentMissingAggregations(config)
 		}
 
@@ -169,12 +172,6 @@ func runAggregations(config Config) error {
 }
 
 func runRecentMissingAggregations(config Config) error {
-	if config.StaticPostgresDSN != "" {
-		if err := runStaticRefresh(config); err != nil {
-			return fmt.Errorf("static GTFS refresh: %w", err)
-		}
-	}
-
 	ctx := context.Background()
 	existingDates, err := listProcessedServiceDates(ctx, config.PostgresDSN)
 	if err != nil {

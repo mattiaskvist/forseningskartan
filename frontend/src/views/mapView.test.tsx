@@ -21,12 +21,20 @@ describe("MapView", () => {
 
         renderWithTheme(
             <MapView
+                allSites={[]}
                 sites={[]}
                 selectedSite={null}
                 handleSelectSiteCB={vi.fn()}
+                recentSearchSiteIds={[]}
                 departureViewProps={null}
                 appStyle="Dark"
                 onAppStyleChange={onAppStyleChange}
+                selectedTransportationMode={null}
+                transportationModeOptions={[]}
+                onTransportationModeChange={vi.fn()}
+                hideStopsWithoutDepartures={false}
+                onHideStopsWithoutDeparturesChange={vi.fn()}
+                totalSiteCount={0}
             />
         );
 

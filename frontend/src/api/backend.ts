@@ -184,9 +184,9 @@ export function fetchRouteDelayTrend({
     return Promise.all(datePromises).then(sortResultsACB).catch(catchErrorACB);
 }
 
-export function fetchStopPointRoutesByDate(date: string): Promise<RoutesByStopPoint> {
+export function fetchStopPointRoutesByDate(date: string): Promise<RoutesByStopPoint | null> {
     if (date.trim() === "") {
-        return Promise.resolve({});
+        return Promise.resolve(null);
     }
 
     const params = new URLSearchParams();
