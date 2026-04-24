@@ -45,9 +45,9 @@ import {
 import {
     setSelectedDeparture,
     setSelectedDatePreset,
-    setSelectedCustomDate,
+    setSelectedCustomDateRange,
     setRouteDelayDatePreset,
-    setRouteDelayCustomDate,
+    setRouteDelayCustomDateRange,
     setRouteDelaySelectedRouteKey,
     setStopPointGidsBySiteId,
 } from "./reducers";
@@ -98,7 +98,7 @@ export const store = configureStore({
 });
 
 listenerMiddleware.startListening({
-    matcher: isAnyOf(setSelectedDeparture, setSelectedDatePreset, setSelectedCustomDate),
+    matcher: isAnyOf(setSelectedDeparture, setSelectedDatePreset, setSelectedCustomDateRange),
     effect: (_, listenerApi) => {
         // avoid rapid updates triggering multiple fetches, only the latest matters
         listenerApi.cancelActiveListeners();
@@ -127,7 +127,7 @@ listenerMiddleware.startListening({
 listenerMiddleware.startListening({
     matcher: isAnyOf(
         setRouteDelayDatePreset,
-        setRouteDelayCustomDate,
+        setRouteDelayCustomDateRange,
         getAggregatedDates.fulfilled
     ),
     effect: (_, listenerApi) => {

@@ -1,7 +1,13 @@
 import { Box, ToggleButton } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import { AvailableDatesPicker } from "./AvailableDatesPicker";
-import { DatePreset, EventType, DatePresets, DatePresetLabelMap } from "../types/departureDelay";
+import {
+    CustomDateRange,
+    DatePreset,
+    EventType,
+    DatePresets,
+    DatePresetLabelMap,
+} from "../types/departureDelay";
 import { TransportationMode } from "../types/sl";
 import { RouteDelaySection } from "../types/routeDelays";
 import { FilterToggleButtonGroup } from "./FilterToggleButtonGroup";
@@ -12,13 +18,13 @@ type RouteDelayControlsProps = {
     isRouteDetailsOpen: boolean;
     availableDates: string[];
     selectedDatePreset: DatePreset;
-    selectedCustomDate: string | null;
+    selectedCustomDateRange: CustomDateRange | null;
     selectedEventType: EventType;
     selectedTransportationMode: TransportationMode;
     searchQuery: string;
     transportationModeOptions: TransportationMode[];
     onDatePresetChange: (preset: DatePreset) => void;
-    onCustomDateChange: (date: string) => void;
+    onCustomDateRangeChange: (dateRange: CustomDateRange | null) => void;
     onEventTypeChange: (eventType: EventType) => void;
     onTransportationModeChange: (filter: TransportationMode) => void;
     onSearchQueryChange: (query: string) => void;
@@ -29,13 +35,13 @@ export function RouteDelayControls({
     isRouteDetailsOpen,
     availableDates,
     selectedDatePreset,
-    selectedCustomDate,
+    selectedCustomDateRange,
     selectedEventType,
     selectedTransportationMode,
     searchQuery,
     transportationModeOptions,
     onDatePresetChange,
-    onCustomDateChange,
+    onCustomDateRangeChange,
     onEventTypeChange,
     onTransportationModeChange,
     onSearchQueryChange,
@@ -86,8 +92,8 @@ export function RouteDelayControls({
                 <div>
                     <AvailableDatesPicker
                         availableDates={availableDates}
-                        selectedDate={selectedCustomDate}
-                        onSelectDate={onCustomDateChange}
+                        selectedDateRange={selectedCustomDateRange}
+                        onSelectDateRange={onCustomDateRangeChange}
                     />
                 </div>
             )}

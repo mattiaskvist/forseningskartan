@@ -5,7 +5,7 @@ import utc from "dayjs/plugin/utc";
 import { Departure } from "../types/sl";
 import { formatDelay, formatTime, getDelayMinutes } from "../utils/time";
 import { DepartureHistoricalDelays } from "./DepartureHistoricalDelays";
-import { DatePreset, EventType } from "../types/departureDelay";
+import { CustomDateRange, DatePreset, EventType } from "../types/departureDelay";
 import { DelaySummary } from "../types/historicalDelay";
 
 dayjs.extend(utc);
@@ -27,9 +27,9 @@ type DepartureDetailsProps = {
     selectedDepartureDelaySummary: DelaySummary | null;
     isDepartureHistoricalDelayLoading: boolean;
     selectedDatePreset: DatePreset;
-    selectedCustomDate: string | null;
+    selectedCustomDateRange: CustomDateRange | null;
     onDatePresetChange: (preset: DatePreset) => void;
-    onCustomDateChange: (date: string) => void;
+    onCustomDateRangeChange: (dateRange: CustomDateRange | null) => void;
 };
 
 export function DepartureDetails({
@@ -40,9 +40,9 @@ export function DepartureDetails({
     selectedDepartureDelaySummary,
     isDepartureHistoricalDelayLoading,
     selectedDatePreset,
-    selectedCustomDate,
+    selectedCustomDateRange,
     onDatePresetChange,
-    onCustomDateChange,
+    onCustomDateRangeChange,
 }: DepartureDetailsProps) {
     const [selectedEventType, setSelectedEventType] = useState<EventType>("departure");
 
@@ -93,10 +93,10 @@ export function DepartureDetails({
                 selectedDelayDates={selectedDelayDates}
                 selectedDepartureHourUTC={selectedDepartureHourUTC}
                 selectedDatePreset={selectedDatePreset}
-                selectedCustomDate={selectedCustomDate}
+                selectedCustomDateRange={selectedCustomDateRange}
                 selectedEventType={selectedEventType}
                 onDatePresetChange={onDatePresetChange}
-                onCustomDateChange={onCustomDateChange}
+                onCustomDateRangeChange={onCustomDateRangeChange}
                 onEventTypeChange={setSelectedEventType}
                 isLoadingData={isDepartureHistoricalDelayLoading}
                 routeSummary={selectedDepartureDelaySummary}

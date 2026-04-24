@@ -11,7 +11,7 @@ import {
     getFavoriteSiteIdsCB,
     getRecentSearchSiteIdsCB,
     getAppStylePreferenceCB,
-    getSelectedCustomDateCB,
+    getSelectedCustomDateRangeCB,
     getSelectedDatePresetCB,
     getSelectedDelayDatesCB,
     getSelectedDepartureCB,
@@ -28,13 +28,13 @@ import {
 } from "../store/selectors";
 import { selectSiteCB } from "../store/selection";
 import {
-    setSelectedCustomDate,
+    setSelectedCustomDateRange,
     setSelectedDatePreset,
     setSelectedDeparture,
     setSelectedSiteId,
 } from "../store/reducers";
 import { Departure, TransportationMode } from "../types/sl";
-import { DatePreset } from "../types/departureDelay";
+import { CustomDateRange, DatePreset } from "../types/departureDelay";
 import { AppStyle } from "../types/appStyle";
 import { DepartureViewProps } from "../views/departureView";
 import {
@@ -62,7 +62,7 @@ export function MapPresenter() {
     const availableDates = useAppSelector(getAggregatedDatesCB);
     const selectedDeparture = useAppSelector(getSelectedDepartureCB);
     const selectedDatePreset = useAppSelector(getSelectedDatePresetCB);
-    const selectedCustomDate = useAppSelector(getSelectedCustomDateCB);
+    const selectedCustomDateRange = useAppSelector(getSelectedCustomDateRangeCB);
     const selectedDelayDates = useAppSelector(getSelectedDelayDatesCB);
     const selectedDepartureDelaySummary = useAppSelector(getDepartureHistoricalDelaySummaryCB);
     const isDepartureHistoricalDelayLoading = useAppSelector(getDepartureHistoricalDelayLoadingCB);
@@ -154,8 +154,8 @@ export function MapPresenter() {
         dispatch(setSelectedDatePreset(preset));
     }
 
-    function setSelectedCustomDateACB(date: string) {
-        dispatch(setSelectedCustomDate(date));
+    function setSelectedCustomDateRangeACB(dateRange: CustomDateRange | null) {
+        dispatch(setSelectedCustomDateRange(dateRange));
     }
 
     function handleAppStyleChangeACB(style: AppStyle) {
@@ -212,9 +212,9 @@ export function MapPresenter() {
               selectedDepartureDelaySummary,
               isDepartureHistoricalDelayLoading,
               selectedDatePreset,
-              selectedCustomDate,
+              selectedCustomDateRange,
               onDatePresetChange: setSelectedDatePresetACB,
-              onCustomDateChange: setSelectedCustomDateACB,
+              onCustomDateRangeChange: setSelectedCustomDateRangeACB,
               isFavoriteStop: favoriteSiteIds.includes(selectedSite.id),
               isUserLoggedIn: Boolean(user),
               onToggleFavoriteStop: toggleFavoriteStopACB,

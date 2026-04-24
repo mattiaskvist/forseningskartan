@@ -1,24 +1,30 @@
 import { Box, Typography, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { AvailableDatesPicker } from "./AvailableDatesPicker";
-import { DatePreset, EventType, DatePresets, DatePresetLabelMap } from "../types/departureDelay";
+import {
+    CustomDateRange,
+    DatePreset,
+    EventType,
+    DatePresets,
+    DatePresetLabelMap,
+} from "../types/departureDelay";
 
 type DepartureDelayControlsProps = {
     availableDates: string[];
     selectedDatePreset: DatePreset;
-    selectedCustomDate: string | null;
+    selectedCustomDateRange: CustomDateRange | null;
     selectedEventType: EventType;
     onDatePresetChange: (preset: DatePreset) => void;
-    onCustomDateChange: (date: string) => void;
+    onCustomDateRangeChange: (dateRange: CustomDateRange | null) => void;
     onEventTypeChange: (eventType: EventType) => void;
 };
 
 export function DepartureDelayControls({
     availableDates,
     selectedDatePreset,
-    selectedCustomDate,
+    selectedCustomDateRange,
     selectedEventType,
     onDatePresetChange,
-    onCustomDateChange,
+    onCustomDateRangeChange,
     onEventTypeChange,
 }: DepartureDelayControlsProps) {
     function handleDatePresetChangeACB(
@@ -79,8 +85,8 @@ export function DepartureDelayControls({
                 <div className="pt-2">
                     <AvailableDatesPicker
                         availableDates={availableDates}
-                        selectedDate={selectedCustomDate}
-                        onSelectDate={onCustomDateChange}
+                        selectedDateRange={selectedCustomDateRange}
+                        onSelectDateRange={onCustomDateRangeChange}
                     />
                 </div>
             )}

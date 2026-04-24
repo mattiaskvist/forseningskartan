@@ -3,6 +3,11 @@ import utc from "dayjs/plugin/utc";
 
 dayjs.extend(utc);
 
+export type CustomDateRange = {
+    startDate: string | null;
+    endDate: string | null;
+};
+
 function formatHourRangeLocal(hourUTC: number): string {
     // create a UTC time at the given hour
     const start = dayjs.utc().hour(hourUTC).minute(0).second(0);
@@ -41,7 +46,7 @@ export const DatePresetLabelMap: Record<DatePreset, string> = {
     last7Days: "Last 7 days",
     last5Weekdays: "Last 5 weekdays",
     lastWeekend: "Last weekend",
-    customDate: "Custom date",
+    customDate: "Custom date range",
 };
 export const DatePresets: DatePreset[] = Object.keys(DatePresetLabelMap) as DatePreset[];
 

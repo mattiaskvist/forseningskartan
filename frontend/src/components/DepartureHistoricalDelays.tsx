@@ -1,6 +1,11 @@
 import { Box, Typography } from "@mui/material";
 import { DelaySummary } from "../types/historicalDelay";
-import { DatePreset, EventType, getPresetDescription } from "../types/departureDelay";
+import {
+    CustomDateRange,
+    DatePreset,
+    EventType,
+    getPresetDescription,
+} from "../types/departureDelay";
 import { DepartureDelayControls } from "./DepartureDelayControls";
 import { DepartureDelayStats } from "./DepartureDelayStats";
 import { Suspense } from "./Suspense";
@@ -10,10 +15,10 @@ type DepartureHistoricalDelaysProps = {
     selectedDelayDates: string[];
     selectedDepartureHourUTC: number;
     selectedDatePreset: DatePreset;
-    selectedCustomDate: string | null;
+    selectedCustomDateRange: CustomDateRange | null;
     selectedEventType: EventType;
     onDatePresetChange: (preset: DatePreset) => void;
-    onCustomDateChange: (date: string) => void;
+    onCustomDateRangeChange: (dateRange: CustomDateRange | null) => void;
     onEventTypeChange: (eventType: EventType) => void;
     isLoadingData: boolean;
     routeSummary: DelaySummary | null;
@@ -24,10 +29,10 @@ export function DepartureHistoricalDelays({
     selectedDelayDates,
     selectedDepartureHourUTC,
     selectedDatePreset,
-    selectedCustomDate,
+    selectedCustomDateRange,
     selectedEventType,
     onDatePresetChange,
-    onCustomDateChange,
+    onCustomDateRangeChange,
     onEventTypeChange,
     isLoadingData,
     routeSummary,
@@ -40,10 +45,10 @@ export function DepartureHistoricalDelays({
             <DepartureDelayControls
                 availableDates={availableDates}
                 selectedDatePreset={selectedDatePreset}
-                selectedCustomDate={selectedCustomDate}
+                selectedCustomDateRange={selectedCustomDateRange}
                 selectedEventType={selectedEventType}
                 onDatePresetChange={onDatePresetChange}
-                onCustomDateChange={onCustomDateChange}
+                onCustomDateRangeChange={onCustomDateRangeChange}
                 onEventTypeChange={onEventTypeChange}
             />
 
