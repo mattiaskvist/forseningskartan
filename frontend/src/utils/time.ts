@@ -142,17 +142,17 @@ export function getDatesForPreset(
         case "customDate": {
             const effectiveCustomDateRange = getEffectiveCustomDateRange();
 
-        if (!effectiveCustomDateRange) {
-            return [];
-        }
+            if (!effectiveCustomDateRange) {
+                return [];
+            }
 
-        const { startDate, endDate } = effectiveCustomDateRange;
+            const { startDate, endDate } = effectiveCustomDateRange;
 
-        function isDateWithinCustomRangeCB(date: string): boolean {
-            // keep only available dates that fall inside the inclusive custom range.
-            return (
-                (dayjs(date).isAfter(dayjs(startDate), "day") ||
-                    dayjs(date).isSame(dayjs(startDate), "day")) &&
+            function isDateWithinCustomRangeCB(date: string): boolean {
+                // keep only available dates that fall inside the inclusive custom range.
+                return (
+                    (dayjs(date).isAfter(dayjs(startDate), "day") ||
+                        dayjs(date).isSame(dayjs(startDate), "day")) &&
                     (dayjs(date).isBefore(dayjs(endDate), "day") ||
                         dayjs(date).isSame(dayjs(endDate), "day"))
                 );
