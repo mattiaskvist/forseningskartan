@@ -82,6 +82,7 @@ export function MapView({
                                 width: 44,
                                 height: 44,
                             }}
+                            aria-label="center map on user's location"
                         >
                             <MyLocationIcon />
                         </IconButton>
