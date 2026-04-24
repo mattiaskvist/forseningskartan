@@ -38,14 +38,14 @@ describe("sitesSlice", () => {
 
     it("updates mapCenterOnUserRequestedAt with the provided payload", () => {
         const mockTimestamp = 1700000000000;
-        const action = { 
-            type: requestMapCenterOnUser.type, 
-            payload: mockTimestamp 
+        const action = {
+            type: requestMapCenterOnUser.type,
+            payload: mockTimestamp,
         };
         const state = sitesSlice.reducer(undefined, action);
         expect(state.mapCenterOnUserRequestedAt).toBe(mockTimestamp);
     });
-    
+
     it("handles the full action flow correctly", () => {
         const mockTimestamp = 1700000000000;
         vi.spyOn(Date, "now").mockReturnValue(mockTimestamp);
