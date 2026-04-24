@@ -28,7 +28,7 @@ import { AppStyleSelector } from "../components/AppStyleSelector";
 import { LanguageSelector } from "../components/LanguageSelector";
 import { LanguageCode, TranslationStrings } from "../utils/translations";
 
-type SidebarNavItem = Pick<RouteConfig, "label" | "path" | "icon">;
+type SidebarNavItem = Pick<RouteConfig, "path" | "icon" | "sidebarLabelKey">;
 
 type SidebarViewProps = {
     isOpen: boolean;
@@ -81,11 +81,6 @@ export function SidebarView({
             onNavigate(item.path);
         }
 
-        let label = item.label;
-        if (item.path === "/") label = t.map;
-        else if (item.path === "/route-delays") label = t.routeDelays;
-        else if (item.path === "/about") label = t.about;
-
         return (
             <ListItem key={item.path} disablePadding>
                 <ListItemButton
@@ -104,7 +99,7 @@ export function SidebarView({
                 >
                     <ListItemIcon sx={{ minWidth: 36, color: "inherit" }}>{item.icon}</ListItemIcon>
                     <ListItemText
-                        primary={label}
+                        primary={t[item.sidebarLabelKey]}
                         primaryTypographyProps={{ fontSize: "0.875rem", fontWeight: 500 }}
                     />
                 </ListItemButton>
@@ -313,6 +308,7 @@ export function SidebarView({
                         <LanguageSelector
                             currentLanguage={currentLanguage}
                             onLanguageChange={onLanguageChange}
+                            t={t.languageSelector}
                         />
                     </ListItem>
 

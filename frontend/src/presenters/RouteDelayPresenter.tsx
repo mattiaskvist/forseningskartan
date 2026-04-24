@@ -25,7 +25,7 @@ import {
 } from "../store/reducers";
 import { Suspense } from "../components/Suspense";
 import { DelaySummary, RouteType } from "../types/historicalDelay";
-import { DatePreset, EventType } from "../types/departureDelay";
+import { DatePreset, EventType, getPresetDescription } from "../types/departureDelay";
 import {
     TransportationMode,
     transportationModes,
@@ -34,7 +34,6 @@ import {
 import { PageSizeOption, RouteDelayListItem, RouteDelaySection } from "../types/routeDelays";
 import { getAvgDelayMinutes, getAvgDelaySeconds } from "../utils/time";
 import { compareRouteNamesCB, getRouteDisplayName, getRouteIdentityKey } from "../utils/route";
-import { getDateRangeText } from "../types/departureDelay";
 import { translations } from "../utils/translations";
 
 function getRouteModeKey(summary: DelaySummary): string {
@@ -110,10 +109,9 @@ export function RouteDelayPresenter() {
 
     const selectedDateText = useMemo(() => {
         const t = translations[currentLanguage].departureHistoricalDelays;
-        if (selectedDates.length === 0) {
-            return t.selectedDates("");
-        }
-        return t.selectedDates(getDateRangeText(selectedDates));
+        return getPresetDescription(selectedDates, t.selectedDatesLabel, {
+            noAvailableDatesLabel: t.noAvailableDates,
+        });
     }, [selectedDates, currentLanguage]);
 
     const routesInfoText = useMemo(() => {

@@ -1,44 +1,41 @@
 import { ToggleButton, ToggleButtonGroup, Box } from "@mui/material";
-import { LanguageCode } from "../utils/translations";
+import { LanguageCode, isLanguageCode, TranslationStrings } from "../utils/translations";
 
 type LanguageSelectorProps = {
     currentLanguage: LanguageCode;
     onLanguageChange: (lang: LanguageCode) => void;
-    ariaLabel?: string;
+    t: TranslationStrings["sideBar"]["languageSelector"];
 };
 
 const LANGUAGE_OPTIONS: Array<{
     code: LanguageCode;
     flag: string;
     label: string;
-    ariaLabel: string;
 }> = [
-    { code: "en", flag: "🇬🇧", label: "EN", ariaLabel: "English" },
-    { code: "sv", flag: "🇸🇪", label: "SV", ariaLabel: "Svenska" },
+    { code: "en", flag: "🇬🇧", label: "EN" },
+    { code: "sv", flag: "🇸🇪", label: "SV" },
 ];
 
-export function LanguageSelector({
-    currentLanguage,
-    onLanguageChange,
-    ariaLabel = "Select language",
-}: LanguageSelectorProps) {
+export function LanguageSelector({ currentLanguage, onLanguageChange, t }: LanguageSelectorProps) {
     return (
         <Box sx={{ width: "100%" }}>
             <ToggleButtonGroup
                 value={currentLanguage}
                 exclusive
                 onChange={(_, newLang) => {
-                    if (newLang) onLanguageChange(newLang as LanguageCode);
+                    if (isLanguageCode(newLang)) {
+                        onLanguageChange(newLang);
+                    }
                 }}
                 size="small"
                 fullWidth
-                aria-label={ariaLabel}
+                aria-label={t.ariaLabel}
             >
-                {LANGUAGE_OPTIONS.map(({ code, flag, label, ariaLabel }) => (
+                {LANGUAGE_OPTIONS.map(({ code, flag, label }) => (
                     <ToggleButton
                         key={code}
                         value={code}
-                        aria-label={ariaLabel}
+                        aria-label={code === "en" ? t.english : t.swedish}
                         sx={{
                             flex: 1,
                             py: 1,

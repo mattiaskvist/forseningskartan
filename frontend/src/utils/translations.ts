@@ -1,217 +1,7 @@
-export type LanguageCode = "en" | "sv";
+import type { LanguageCode, TranslationStrings } from "../types/translations";
 
-export const isLanguageCode = (candidate: unknown): candidate is LanguageCode =>
-    typeof candidate === "string" && (candidate === "en" || candidate === "sv");
-
-// --------- views -----------
-interface accountStrings {
-    signOut: string;
-    deleteAccount: string;
-    loading: string;
-    logoutSuccess: string;
-    logoutError: string;
-    deleteSuccess: string;
-    deleteError: string;
-    deleteConfirm: string;
-    recentLoginRequired: string;
-    title: string;
-    user: string;
-}
-
-interface departureEmptyStrings {
-    noUpcomingDepartures: string;
-}
-
-interface departureHeaderStrings {
-    unfavorite: string;
-    favorite: string;
-    loginFavorite: string;
-    close: string;
-}
-
-interface departureDetailsStrings {
-    back: string;
-    plannedDeparture: string;
-    expectedDeparture: string;
-    delay: string;
-    stop: string;
-}
-
-interface departureStrings {
-    loading: string;
-}
-
-interface mapDeparturesPanelStrings {
-    departures: string;
-}
-
-interface mapStrings {
-    loading: string;
-}
-
-interface routeDelayLeaderboardStrings {
-    rank: string;
-    route: string;
-    avgDelay: string;
-    uniqueTrips: string;
-    min: string;
-    noData: string;
-}
-
-interface routeDelayRouteFallbackStrings {
-    notAvailable: string;
-    back: string;
-}
-
-interface routeDelayRoutesStrings {
-    min: string;
-    unique: string;
-    page: string;
-    noMatch: string;
-    averageDelay: string;
-}
-
-interface routeDelaySectionToggleStrings {
-    routes: string;
-    leaderboard: string;
-}
-
-interface routeDelayStrings {
-    delays: string;
-    loading: string;
-    showingFilteredRoutes: (showing: number, total: number) => string;
-    showingAllFilteredRoutes: (total: number) => string;
-}
-
-interface sideBarStrings {
-    login: string;
-    style: string;
-    language: string;
-    favoriteStops: string;
-    loginToFavorite: string;
-    selectToFavorite: string;
-    navigation: string;
-    map: string;
-    routeDelays: string;
-    about: string;
-    myAccount: string;
-}
-
-// --------- components -----------
-interface loginStrings {
-    signIn: string;
-    loading: string;
-}
-
-interface searchBarStrings {
-    searchStops: string;
-    typeStopName: string;
-}
-
-interface departureListStrings {
-    searchPlaceholder: string;
-    noTransportModes: string;
-    planned: string;
-    predicted: string;
-    to: string;
-}
-
-interface routeDetailsPageStrings {
-    back: string;
-    uniqueTrips: string;
-    loadingTrend: string;
-    departureDelayTrend: string;
-    arrivalDelayTrend: string;
-}
-
-interface routeDelayControlsStrings {
-    dateSelection: string;
-    eventType: string;
-    transportMode: string;
-    searchRoute: string;
-    departure: string;
-    arrival: string;
-    sameDayLastWeek: string;
-    last7Days: string;
-    last5Weekdays: string;
-    lastWeekend: string;
-    customDate: string;
-}
-
-interface departureDelayStatsStrings {
-    noData: string;
-    departures: string;
-    arrivals: string;
-    onTime: string;
-    delayed: string;
-    onAverageBy: string;
-    ahead: string;
-    minute: string;
-    minutes: string;
-    time: string;
-    times: string;
-}
-
-interface departureHistoricalDelaysStrings {
-    title: string;
-    loading: string;
-    selectedDates: (dateRange: string, hourRange?: string) => string;
-}
-
-interface availableDatesPickerStrings {
-    selectDate: string;
-}
-
-interface appStyleSelectorStrings {
-    ariaLabel: string;
-    light: string;
-    dark: string;
-    classic: string;
-}
-
-interface aboutStrings {
-    title: string;
-    description: string;
-}
-
-interface transportModesStrings {
-    bus: string;
-    tram: string;
-    metro: string;
-    train: string;
-    ferry: string;
-    ship: string;
-    taxi: string;
-    other: string;
-}
-
-export interface TranslationStrings {
-    account: accountStrings;
-    departureEmpty: departureEmptyStrings;
-    departureHeader: departureHeaderStrings;
-    departureDetails: departureDetailsStrings;
-    departure: departureStrings;
-    mapDeparturePanel: mapDeparturesPanelStrings;
-    routeDelayLeaderboard: routeDelayLeaderboardStrings;
-    routeDelayRouteFallback: routeDelayRouteFallbackStrings;
-    routeDelayRoutes: routeDelayRoutesStrings;
-    routeDelaySectionToggle: routeDelaySectionToggleStrings;
-    routeDelay: routeDelayStrings;
-    sideBar: sideBarStrings;
-    map: mapStrings;
-
-    login: loginStrings;
-    searchBar: searchBarStrings;
-    departureList: departureListStrings;
-    routeDetailsPage: routeDetailsPageStrings;
-    routeDelayControls: routeDelayControlsStrings;
-    departureDelayStats: departureDelayStatsStrings;
-    departureHistoricalDelays: departureHistoricalDelaysStrings;
-    availableDatesPicker: availableDatesPickerStrings;
-    appStyleSelector: appStyleSelectorStrings;
-    about: aboutStrings;
-    transportModes: transportModesStrings;
-}
+export { isLanguageCode } from "../types/translations";
+export type { LanguageCode, TranslationStrings } from "../types/translations";
 
 export const translations: Record<LanguageCode, TranslationStrings> = {
     en: {
@@ -293,6 +83,11 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             routeDelays: "Route Delays",
             about: "About",
             myAccount: "My Account",
+            languageSelector: {
+                ariaLabel: "Select language",
+                english: "English",
+                swedish: "Swedish",
+            },
         },
         map: {
             loading: "Loading transit data and preparing the map...",
@@ -348,8 +143,8 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
         departureHistoricalDelays: {
             title: "Historical delays",
             loading: "Loading historical delay stats...",
-            selectedDates: (dateRange, hourRange) =>
-                `Selected dates: ${dateRange}${hourRange ? `, ${hourRange}` : ""}`,
+            selectedDatesLabel: "Selected dates",
+            noAvailableDates: "No available dates for this preset",
         },
         availableDatesPicker: {
             selectDate: "Select delay date",
@@ -454,6 +249,11 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             routeDelays: "Linjeförseningar",
             about: "Om",
             myAccount: "Mitt konto",
+            languageSelector: {
+                ariaLabel: "Välj språk",
+                english: "Engelska",
+                swedish: "Svenska",
+            },
         },
         map: {
             loading: "Laddar kollektivtrafikdata och förbereder kartan...",
@@ -509,8 +309,8 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
         departureHistoricalDelays: {
             title: "Historiska förseningar",
             loading: "Laddar historisk förseningstatistik...",
-            selectedDates: (dateRange, hourRange) =>
-                `Valda datum: ${dateRange}${hourRange ? `, ${hourRange}` : ""}`,
+            selectedDatesLabel: "Valda datum",
+            noAvailableDates: "Inga tillgängliga datum för detta val",
         },
         availableDatesPicker: {
             selectDate: "Välj datum",

@@ -1,11 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import { DelaySummary } from "../types/historicalDelay";
-import {
-    DatePreset,
-    EventType,
-    getDateRangeText,
-    formatHourRangeLocal,
-} from "../types/departureDelay";
+import { DatePreset, EventType, getPresetDescription } from "../types/departureDelay";
 import { DepartureDelayControls } from "./DepartureDelayControls";
 import { DepartureDelayStats } from "./DepartureDelayStats";
 import { Suspense } from "./Suspense";
@@ -72,14 +67,10 @@ export function DepartureHistoricalDelays({
                 }}
             >
                 <Typography sx={{ fontSize: "0.75rem", color: "text.secondary" }}>
-                    {selectedDelayDates.length === 0
-                        ? t.selectedDates("")
-                        : t.selectedDates(
-                              getDateRangeText(selectedDelayDates),
-                              selectedDepartureHourUTC !== undefined
-                                  ? formatHourRangeLocal(selectedDepartureHourUTC)
-                                  : undefined
-                          )}
+                    {getPresetDescription(selectedDelayDates, t.selectedDatesLabel, {
+                        selectedHourUTC: selectedDepartureHourUTC,
+                        noAvailableDatesLabel: t.noAvailableDates,
+                    })}
                 </Typography>
                 {isLoadingData ? (
                     <Suspense message={t.loading} />

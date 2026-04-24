@@ -15,6 +15,10 @@ export function formatHourRangeLocal(hourUTC: number): string {
 }
 
 export function getDateRangeText(selectedDates: string[]): string {
+    if (selectedDates.length === 0) {
+        return "";
+    }
+
     const sortedDates = [...selectedDates].sort();
     const fromDate = sortedDates[0];
     const toDate = sortedDates[sortedDates.length - 1];
@@ -25,15 +29,23 @@ export function getDateRangeText(selectedDates: string[]): string {
     return `${fromDate} - ${toDate}`;
 }
 
-export function getPresetDescription(selectedDates: string[], selectedHourUTC?: number): string {
+export function getPresetDescription(
+    selectedDates: string[],
+    selectedDatesLabel: string,
+    options: {
+        selectedHourUTC?: number;
+        noAvailableDatesLabel: string;
+    }
+): string {
     if (selectedDates.length === 0) {
-        return "No available dates for this preset";
+        return options.noAvailableDatesLabel;
     }
 
     const dateRange = getDateRangeText(selectedDates);
-    const hourRange = selectedHourUTC !== undefined ? formatHourRangeLocal(selectedHourUTC) : "";
+    const hourRange =
+        options.selectedHourUTC !== undefined ? formatHourRangeLocal(options.selectedHourUTC) : "";
 
-    return `Selected dates: ${dateRange}${hourRange ? `, ${hourRange}` : ""}`;
+    return `${selectedDatesLabel}: ${dateRange}${hourRange ? `, ${hourRange}` : ""}`;
 }
 
 export const DatePresetLabelMap: Record<DatePreset, string> = {
