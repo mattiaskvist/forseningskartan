@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
     getSites,
     getDepartures,
@@ -104,8 +104,15 @@ export const sitesSlice = createSlice({
         ) => {
             state.userLocation = action.payload;
         },
-        requestMapCenterOnUser: (state: SitesState) => {
-            state.mapCenterOnUserRequestedAt = Date.now();
+        requestMapCenterOnUser: {
+            // reducers should be pure functions, so we can't use Date.now() inside the reducer.
+            // instead we use a prepare function to generate a unique timestamp for each action.
+            prepare: () => {
+                return { payload: Date.now() };
+            },
+            reducer: (state: SitesState, action: PayloadAction<number>) => {
+                state.mapCenterOnUserRequestedAt = action.payload;
+            },
         },
     },
     extraReducers: (builder) => {
