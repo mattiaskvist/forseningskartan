@@ -1,11 +1,11 @@
 import { Box, Paper, Typography } from "@mui/material";
 import { TranslationStrings } from "../utils/translations";
 
-type LoginViewProps = {
-    t: TranslationStrings["login"];
+type AboutViewProps = {
+    t: TranslationStrings["about"];
 };
 
-export function LoginView({ t }: LoginViewProps) {
+export function AboutView({ t }: AboutViewProps) {
     return (
         <Box
             sx={{
@@ -25,24 +25,18 @@ export function LoginView({ t }: LoginViewProps) {
                 variant="outlined"
                 sx={{
                     width: "100%",
-                    maxWidth: "28rem",
+                    maxWidth: "48rem",
                     p: 3,
                     borderRadius: 2,
                     backdropFilter: "blur(4px)",
                 }}
             >
-                <Typography
-                    variant="h5"
-                    sx={{
-                        fontWeight: 600,
-                        textAlign: "center",
-                        mb: 3,
-                        color: "text.primary",
-                    }}
-                >
-                    {t.signIn}
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                    {t.title}
                 </Typography>
-                <div id="firebaseui-auth-container" className="pt-2 pb-4"></div>
+                <Typography sx={{ fontSize: "0.875rem", color: "text.secondary" }}>
+                    {t.description}
+                </Typography>
             </Paper>
         </Box>
     );

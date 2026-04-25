@@ -4,17 +4,25 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { useMemo, useState } from "react";
 import { Box, Card, TextField, Typography } from "@mui/material";
 import { FilterToggleButtonGroup } from "./FilterToggleButtonGroup";
+import { TranslationStrings } from "../utils/translations";
 import {
-    getTransportationModeButtonCB,
+    getTransportationModeButton,
     getTransportationModeLabel,
 } from "../utils/transportationMode";
 
 type DepartureListProps = {
     departures: Departure[];
     onSelectDeparture: (departure: Departure) => void;
+    t: TranslationStrings["departureList"];
+    tTransportModes: TranslationStrings["transportModes"];
 };
 
-export function DepartureList({ departures, onSelectDeparture }: DepartureListProps) {
+export function DepartureList({
+    departures,
+    onSelectDeparture,
+    t,
+    tTransportModes,
+}: DepartureListProps) {
     const uniqueModes = useMemo(() => {
         const modes = new Set<ModeWithOther>();
 
@@ -68,7 +76,9 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
 
         const destination = departure.destination ?? departure.direction;
         const transportMode = departure.line.transport_mode;
-        const transportModeLabel = transportMode ? getTransportationModeLabel(transportMode) : "-";
+        const transportModeLabel = transportMode
+            ? getTransportationModeLabel(transportMode, tTransportModes)
+            : "-";
         const line = departure.line.designation ?? `${departure.line.id}`;
         const departureKey = `${departure.journey.id}-${departure.scheduled}-${departure.stop_point.id}`;
         const delayMinutes = getDelayMinutes(departure);
@@ -103,10 +113,10 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
                     <Typography
                         sx={{ fontSize: "0.875rem", fontWeight: 600, color: "text.primary" }}
                     >
-                        {transportModeLabel} {line} to {destination}
+                        {transportModeLabel} {line} {t.to} {destination}
                     </Typography>
                     <Typography sx={{ fontSize: "0.875rem", color: "text.primary" }}>
-                        Planned {formatTime(departure.scheduled)} · Predicted{" "}
+                        {t.planned} {formatTime(departure.scheduled)} · {t.predicted}{" "}
                         {formatTime(departure.expected ?? departure.scheduled)}
                     </Typography>
                     <Typography
@@ -140,7 +150,7 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
                         color: "text.primary",
                     }}
                 >
-                    {getTransportationModeLabel(mode)}
+                    {getTransportationModeLabel(mode, tTransportModes)}
                 </Box>
                 {modeDepartures.map(renderDepartureCB)}
             </Card>
@@ -154,7 +164,7 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
     return (
         <div className="flex flex-col gap-3">
             <TextField
-                placeholder="Search by destination or line"
+                placeholder={t.searchPlaceholder}
                 variant="outlined"
                 size="small"
                 value={searchQuery}
@@ -165,7 +175,7 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
                     options={uniqueModes}
                     selectedValue={selectedMode}
                     onValueChange={setSelectedMode}
-                    renderButtonCB={getTransportationModeButtonCB}
+                    renderButtonCB={(mode) => getTransportationModeButton(mode, tTransportModes)}
                 />
             ) : null}
 
@@ -173,7 +183,7 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
                 renderModeDepartures(selectedMode)
             ) : (
                 <Typography sx={{ fontSize: "0.875rem", color: "text.secondary" }}>
-                    No transport modes selected
+                    {t.noTransportModes}
                 </Typography>
             )}
         </div>

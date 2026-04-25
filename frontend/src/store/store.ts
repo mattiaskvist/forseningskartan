@@ -25,6 +25,7 @@ import {
     clearRecentSearchSiteIds,
     clearStoredRecentSearchSiteIds,
     setAppStylePreference,
+    setLanguagePreference,
     storeRecentSearchSiteIds,
     toggleFavoriteSiteId,
     userPreferencesSlice,
@@ -205,6 +206,7 @@ listenerMiddleware.startListening({
     matcher: isAnyOf(
         toggleFavoriteSiteId,
         setAppStylePreference,
+        setLanguagePreference,
         recordRecentSearchSiteId,
         setMapTransportationModeFilter,
         setHideStopsWithoutDepartures

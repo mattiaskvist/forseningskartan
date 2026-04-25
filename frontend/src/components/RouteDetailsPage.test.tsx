@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { RouteDetailsPage } from "./RouteDetailsPage";
 import { DelaySummary } from "../types/historicalDelay";
 import { renderWithTheme } from "../test/renderWithTheme";
+import { translations } from "../utils/translations";
 
 const routeSummaryFixture: DelaySummary = {
     key: "route-1",
@@ -29,6 +30,8 @@ describe("RouteDetailsPage", () => {
                 trendPoints={[]}
                 isTrendLoading={false}
                 onBackToRoutes={vi.fn()}
+                t={translations.en.routeDetailsPage}
+                tStats={translations.en.departureDelayStats}
             />
         );
 

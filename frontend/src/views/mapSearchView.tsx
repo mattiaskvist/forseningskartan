@@ -1,8 +1,9 @@
 import { Box, Checkbox, FormControlLabel, Paper, Typography } from "@mui/material";
 import { SearchBar } from "../components/SearchBar";
-import { Site, TransportationMode } from "../types/sl";
 import { FilterToggleButtonGroup } from "../components/FilterToggleButtonGroup";
-import { getTransportationModeButtonCB } from "../utils/transportationMode";
+import { Site, TransportationMode } from "../types/sl";
+import { TranslationStrings } from "../utils/translations";
+import { getTransportationModeButton } from "../utils/transportationMode";
 
 type MapSearchViewProps = {
     allSites: Site[];
@@ -10,6 +11,9 @@ type MapSearchViewProps = {
     selectedSite: Site | null;
     handleSelectSiteCB: (siteId: number | null) => void;
     recentSearchSiteIds: number[];
+    t: TranslationStrings["searchBar"];
+    tMapSearch: TranslationStrings["mapSearch"];
+    tTransportModes: TranslationStrings["transportModes"];
     selectedTransportationMode: TransportationMode | null;
     transportationModeOptions: TransportationMode[];
     onTransportationModeChange: (filter: TransportationMode | null) => void;
@@ -25,6 +29,9 @@ export function MapSearchView({
     selectedSite,
     handleSelectSiteCB,
     recentSearchSiteIds,
+    t,
+    tMapSearch,
+    tTransportModes,
     selectedTransportationMode,
     transportationModeOptions,
     onTransportationModeChange,
@@ -59,7 +66,7 @@ export function MapSearchView({
             >
                 <FormControlLabel
                     sx={{ mt: -1, mb: -1 }}
-                    label="Hide unused stops"
+                    label={tMapSearch.hideUnusedStops}
                     control={
                         <Checkbox
                             size="small"
@@ -75,14 +82,14 @@ export function MapSearchView({
                         color: "text.secondary",
                     }}
                 >
-                    Showing {filteredSites.length}/{totalSiteCount} stops
+                    {tMapSearch.showingStops(filteredSites.length, totalSiteCount)}
                 </Typography>
             </Box>
             <FilterToggleButtonGroup
                 options={transportationModeOptions}
                 selectedValue={selectedTransportationMode}
                 onValueChange={onTransportationModeChange}
-                renderButtonCB={getTransportationModeButtonCB}
+                renderButtonCB={(mode) => getTransportationModeButton(mode, tTransportModes)}
                 allowDeselect={true}
                 onDeselect={() => onTransportationModeChange(null)}
             />
@@ -92,6 +99,7 @@ export function MapSearchView({
                 selectedSite={selectedSite}
                 handleSelectSiteCB={handleSelectSiteCB}
                 recentSearchSiteIds={recentSearchSiteIds}
+                t={t}
             />
         </Paper>
     );

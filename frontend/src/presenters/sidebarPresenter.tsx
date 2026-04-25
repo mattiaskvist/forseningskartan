@@ -4,10 +4,13 @@ import { SidebarView } from "../views/sidebarView";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import { getAppStylePreferenceCB, getAuthUserCB, getFavoriteSitesCB } from "../store/selectors";
 import { showSnackbar } from "../store/snackbarSlice";
-import { selectSiteCB } from "../store/selection";
+import { selectSite } from "../store/selection";
 import { logoutCurrentUser } from "../store/authThunks";
 import { AppStyle } from "../types/appStyle";
 import { setAppStylePreference } from "../store/userPreferencesSlice";
+import { getCurrentLanguageCB } from "../store/selectors";
+import { setLanguagePreference } from "../store/userPreferencesSlice";
+import { LanguageCode, translations } from "../utils/translations";
 
 export function SidebarPresenter() {
     const [isOpen, setIsOpen] = useState(false);
@@ -17,6 +20,7 @@ export function SidebarPresenter() {
     const user = useAppSelector(getAuthUserCB);
     const favoriteSites = useAppSelector(getFavoriteSitesCB);
     const appStyle = useAppSelector(getAppStylePreferenceCB);
+    const currentLanguage = useAppSelector(getCurrentLanguageCB);
 
     function toggleSidebarCB() {
         setIsOpen(!isOpen);
@@ -28,7 +32,7 @@ export function SidebarPresenter() {
     }
 
     function selectFavoriteStopACB(siteId: number) {
-        selectSiteCB({ dispatch, siteId });
+        selectSite({ dispatch, siteId });
         navigate("/");
         setIsOpen(false);
     }
@@ -47,6 +51,14 @@ export function SidebarPresenter() {
         dispatch(setAppStylePreference(style));
     }
 
+    function handleLanguageChangeACB(nextLanguage: LanguageCode) {
+        if (nextLanguage) {
+            dispatch(setLanguagePreference(nextLanguage));
+        }
+    }
+
+    const t = translations[currentLanguage].sideBar;
+
     return (
         <SidebarView
             isOpen={isOpen}
@@ -59,6 +71,10 @@ export function SidebarPresenter() {
             onSelectFavoriteStop={selectFavoriteStopACB}
             appStyle={appStyle}
             onAppStyleChange={handleAppStyleChangeACB}
+            currentLanguage={currentLanguage}
+            onLanguageChange={handleLanguageChangeACB}
+            t={t}
+            tAppStyleSelector={translations[currentLanguage].appStyleSelector}
         />
     );
 }

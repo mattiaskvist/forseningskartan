@@ -2,6 +2,7 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import minMax from "dayjs/plugin/minMax";
+import { TranslationStrings } from "../utils/translations";
 
 dayjs.extend(minMax);
 
@@ -9,12 +10,14 @@ type AvailableDatesPickerProps = {
     availableDates: string[];
     selectedDate: string | null;
     onSelectDate: (date: string) => void;
+    t: TranslationStrings["availableDatesPicker"];
 };
 
 export function AvailableDatesPicker({
     availableDates,
     selectedDate,
     onSelectDate,
+    t,
 }: AvailableDatesPickerProps) {
     function getDayjsDateCB(date: string): Dayjs {
         return dayjs(date);
@@ -39,7 +42,7 @@ export function AvailableDatesPicker({
             <DatePicker
                 disabled={availableDates.length === 0}
                 format="YYYY-MM-DD"
-                label={"Select delay date"}
+                label={t.selectDate}
                 minDate={minDate}
                 maxDate={maxDate}
                 onChange={handleDateChangeACB}
