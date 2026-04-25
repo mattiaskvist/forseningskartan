@@ -59,6 +59,7 @@ export function sanitizeUserPreferences(candidate: unknown): UserPreferencesStat
         recentSearchSiteIds,
         mapTransportationModeFilter,
         hideStopsWithoutDepartures,
+        hasSeenAppIntro: defaultUserPreferencesState.hasSeenAppIntro,
     };
 }
 
@@ -75,10 +76,22 @@ export async function fetchUserPreferences(uid: string): Promise<UserPreferences
 
 export async function saveUserPreferences(uid: string, preferences: UserPreferencesState) {
     const userPreferencesRef = doc(db, USER_PREFERENCES_COLLECTION, uid);
+    const {
+        favoriteSiteIds,
+        recentSearchSiteIds,
+        appStyle,
+        mapTransportationModeFilter,
+        hideStopsWithoutDepartures,
+    } = preferences;
+
     await setDoc(
         userPreferencesRef,
         {
-            ...preferences,
+            favoriteSiteIds,
+            recentSearchSiteIds,
+            appStyle,
+            mapTransportationModeFilter,
+            hideStopsWithoutDepartures,
             updatedAt: serverTimestamp(),
         },
         { merge: true }

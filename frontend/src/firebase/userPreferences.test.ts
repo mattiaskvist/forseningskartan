@@ -9,6 +9,7 @@ describe("sanitizeUserPreferences", () => {
             appStyle: "Dark",
             mapTransportationModeFilter: null,
             hideStopsWithoutDepartures: true,
+            hasSeenAppIntro: false,
         });
     });
 

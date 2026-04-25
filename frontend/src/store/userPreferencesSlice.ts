@@ -4,6 +4,7 @@ import { TransportationMode } from "../types/sl";
 
 const APP_STYLE_STORAGE_KEY = "appStyle";
 const RECENT_SEARCH_STORAGE_KEY = "recentSearchSiteIds";
+const APP_INTRO_SEEN_STORAGE_KEY = "hasSeenIntro";
 
 function getStoredAppStyle(): AppStyle {
     try {
@@ -20,6 +21,23 @@ function getStoredAppStyle(): AppStyle {
 function storeAppStyle(style: AppStyle) {
     try {
         localStorage.setItem(APP_STYLE_STORAGE_KEY, style);
+    } catch {
+        // ignore — test environments
+    }
+}
+
+function getStoredHasSeenAppIntro(): boolean {
+    try {
+        return localStorage.getItem(APP_INTRO_SEEN_STORAGE_KEY) === "true";
+    } catch {
+        // localStorage unavailable at module init in test environments
+    }
+    return false;
+}
+
+function storeHasSeenAppIntro(hasSeenAppIntro: boolean) {
+    try {
+        localStorage.setItem(APP_INTRO_SEEN_STORAGE_KEY, String(hasSeenAppIntro));
     } catch {
         // ignore — test environments
     }
@@ -92,6 +110,7 @@ export type UserPreferencesState = {
     appStyle: AppStyle;
     mapTransportationModeFilter: TransportationMode | null;
     hideStopsWithoutDepartures: boolean;
+    hasSeenAppIntro: boolean;
 };
 
 export const defaultUserPreferencesState: UserPreferencesState = {
@@ -100,6 +119,7 @@ export const defaultUserPreferencesState: UserPreferencesState = {
     appStyle: getStoredAppStyle(),
     mapTransportationModeFilter: null,
     hideStopsWithoutDepartures: true,
+    hasSeenAppIntro: getStoredHasSeenAppIntro(),
 };
 
 function normalizeFavoriteSiteIds(favoriteSiteIds: number[]): number[] {
@@ -168,6 +188,10 @@ export const userPreferencesSlice = createSlice({
             state.hideStopsWithoutDepartures = action.payload.hideStopsWithoutDepartures;
             storeAppStyle(action.payload.appStyle);
         },
+        setHasSeenAppIntro: (state, action: PayloadAction<boolean>) => {
+            state.hasSeenAppIntro = action.payload;
+            storeHasSeenAppIntro(action.payload);
+        },
         setMapTransportationModeFilter: (
             state,
             action: PayloadAction<TransportationMode | null>
@@ -186,6 +210,7 @@ export const {
     applyLoadedUserPreferences,
     recordRecentSearchSiteId,
     clearRecentSearchSiteIds,
+    setHasSeenAppIntro,
     setMapTransportationModeFilter,
     setHideStopsWithoutDepartures,
 } = userPreferencesSlice.actions;

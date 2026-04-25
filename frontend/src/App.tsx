@@ -12,6 +12,7 @@ import { useAppDispatch, useAppSelector } from "./store/store";
 import { SidebarPresenter } from "./presenters/sidebarPresenter";
 import { AccountPresenter } from "./presenters/accountPresenter";
 import { LoginPresenter } from "./presenters/loginPresenter";
+import { AppIntroPresenter } from "./presenters/appIntroPresenter";
 import { initializeAuthSync } from "./store/authThunks";
 import { GlobalSnackbarPresenter } from "./presenters/globalSnackbarPresenter";
 import { ROUTES, type RouteConfig } from "./routes";
@@ -53,6 +54,7 @@ function App() {
                     <Route path="/login" element={<LoginPresenter />} />
                     <Route path="/account" element={<AccountPresenter />} />
                 </Routes>
+                <AppIntroPresenter />
                 <GlobalSnackbarPresenter />
             </Box>
         </ThemeProvider>
