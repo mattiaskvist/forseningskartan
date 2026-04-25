@@ -15,6 +15,8 @@ export type DepartureViewProps = {
     onSelectDeparture: (departure: Departure) => void;
     onBackToList: () => void;
     isLoading: boolean;
+    lastUpdatedText: string | null;
+    onRefreshDepartures: () => void;
     availableDates: string[];
     selectedDelayDates: string[];
     selectedDepartureDelaySummary: DelaySummary | null;
@@ -36,6 +38,8 @@ export function DepartureView({
     onSelectDeparture,
     onBackToList,
     isLoading,
+    lastUpdatedText,
+    onRefreshDepartures,
     availableDates,
     selectedDelayDates,
     selectedDepartureDelaySummary,
@@ -55,6 +59,9 @@ export function DepartureView({
                 isFavoriteStop={isFavoriteStop}
                 isUserLoggedIn={isUserLoggedIn}
                 onToggleFavoriteStop={onToggleFavoriteStop}
+                isLoading={isLoading}
+                lastUpdatedText={lastUpdatedText}
+                onRefreshDepartures={onRefreshDepartures}
                 onClose={onClose}
             />
             {isLoading ? (

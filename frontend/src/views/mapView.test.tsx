@@ -22,7 +22,7 @@ describe("MapView", () => {
         renderWithTheme(
             <MapView
                 allSites={[]}
-                sites={[]}
+                filteredSites={[]}
                 selectedSite={null}
                 handleSelectSiteCB={vi.fn()}
                 recentSearchSiteIds={[]}
@@ -33,6 +33,7 @@ describe("MapView", () => {
                 transportationModeOptions={[]}
                 onTransportationModeChange={vi.fn()}
                 hideStopsWithoutDepartures={false}
+                isHideStopsWithoutDeparturesBoxHidden={false}
                 onHideStopsWithoutDeparturesChange={vi.fn()}
                 totalSiteCount={0}
             />
