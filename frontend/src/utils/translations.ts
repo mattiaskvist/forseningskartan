@@ -176,8 +176,8 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
     },
     sv: {
         account: {
-            signOut: "Logga Ut",
-            deleteAccount: "Radera Konto",
+            signOut: "Logga ut",
+            deleteAccount: "Radera konto",
             loading: "Laddar kontouppgifter...",
             logoutSuccess: "Utloggad",
             logoutError: "Misslyckades med att logga ut",
@@ -263,8 +263,8 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             loading: "Laddar kollektivtrafikdata och förbereder kartan...",
         },
         mapSearch: {
-            hideUnusedStops: "Dolj oanvanda hallplatser",
-            showingStops: (showing, total) => `Visar ${showing}/${total} hallplatser`,
+            hideUnusedStops: "Dölj oanvända hållplatser",
+            showingStops: (showing, total) => `Visar ${showing}/${total} hållplatser`,
         },
         login: {
             signIn: "Logga in",
