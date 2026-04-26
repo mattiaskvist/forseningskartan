@@ -87,6 +87,7 @@ export function RouteDetailsPage({
                                 ? t.departureDelayTrend
                                 : t.arrivalDelayTrend
                         }`}
+                        t={t}
                     />
                 )}
             </div>

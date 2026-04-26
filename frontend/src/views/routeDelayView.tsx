@@ -1,6 +1,6 @@
 import { Box, Paper, Typography } from "@mui/material";
 import { RouteDelayControls } from "../components/RouteDelayControls";
-import { DatePreset, EventType } from "../types/departureDelay";
+import { CustomDateRange, DatePreset, EventType } from "../types/departureDelay";
 import { TransportationMode } from "../types/sl";
 import { RouteDelaySection } from "../types/routeDelays";
 import { RouteDelaySectionToggleView } from "./routeDelaySectionToggleView";
@@ -13,7 +13,7 @@ type RouteDelayViewProps = {
     selectedDateText: string;
     routesInfoText: string;
     selectedDatePreset: DatePreset;
-    selectedCustomDate: string | null;
+    selectedCustomDateRange: CustomDateRange | null;
     selectedEventType: EventType;
     selectedTransportationMode: TransportationMode;
     searchQuery: string;
@@ -22,7 +22,7 @@ type RouteDelayViewProps = {
     transportationModeOptions: TransportationMode[];
     availableDates: string[];
     onDatePresetChange: (preset: DatePreset) => void;
-    onCustomDateChange: (date: string) => void;
+    onCustomDateRangeChange: (dateRange: CustomDateRange | null) => void;
     onEventTypeChange: (eventType: EventType) => void;
     onTransportationModeChange: (filter: TransportationMode) => void;
     onSearchQueryChange: (query: string) => void;
@@ -39,7 +39,7 @@ export function RouteDelayView({
     selectedDateText,
     routesInfoText,
     selectedDatePreset,
-    selectedCustomDate,
+    selectedCustomDateRange,
     selectedEventType,
     selectedTransportationMode,
     searchQuery,
@@ -48,7 +48,7 @@ export function RouteDelayView({
     transportationModeOptions,
     availableDates,
     onDatePresetChange,
-    onCustomDateChange,
+    onCustomDateRangeChange,
     onEventTypeChange,
     onTransportationModeChange,
     onSearchQueryChange,
@@ -106,13 +106,13 @@ export function RouteDelayView({
                             isRouteDetailsOpen={isRouteDetailsOpen}
                             availableDates={availableDates}
                             selectedDatePreset={selectedDatePreset}
-                            selectedCustomDate={selectedCustomDate}
+                            selectedCustomDateRange={selectedCustomDateRange}
                             selectedEventType={selectedEventType}
                             selectedTransportationMode={selectedTransportationMode}
                             searchQuery={searchQuery}
                             transportationModeOptions={transportationModeOptions}
                             onDatePresetChange={onDatePresetChange}
-                            onCustomDateChange={onCustomDateChange}
+                            onCustomDateRangeChange={onCustomDateRangeChange}
                             onEventTypeChange={onEventTypeChange}
                             onTransportationModeChange={onTransportationModeChange}
                             onSearchQueryChange={onSearchQueryChange}

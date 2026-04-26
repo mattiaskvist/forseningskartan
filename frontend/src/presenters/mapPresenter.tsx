@@ -14,8 +14,8 @@ import {
     getHideStopsWithoutDeparturesCB,
     getMapTransportationModeFilterCB,
     getRecentSearchSiteIdsCB,
+    getSelectedCustomDateRangeCB,
     getRoutesByStopPointCB,
-    getSelectedCustomDateCB,
     getSelectedDatePresetCB,
     getSelectedDelayDatesCB,
     getSelectedDepartureCB,
@@ -24,18 +24,22 @@ import {
     getSitesLoadingCB,
     getStopPointGidsBySiteIdCB,
     getStopPointRoutesErrorCB,
+    getUserLocationCB,
+    getMapCenterOnUserRequestedAtCB,
     getStopPointsCB,
     getStopPointsLoadingCB,
 } from "../store/selectors";
 import { selectSite } from "../store/selection";
 import {
-    setSelectedCustomDate,
+    setSelectedCustomDateRange,
     setSelectedDatePreset,
     setSelectedDeparture,
     setSelectedSiteId,
+    setUserLocation,
+    requestMapCenterOnUser,
 } from "../store/reducers";
 import { Departure, TransportationMode } from "../types/sl";
-import { DatePreset } from "../types/departureDelay";
+import { CustomDateRange, DatePreset } from "../types/departureDelay";
 import { AppStyle } from "../types/appStyle";
 import { DepartureViewProps } from "../views/departureView";
 import { DepartureEmptyStateView } from "../views/departureEmptyStateView";
@@ -46,7 +50,7 @@ import {
     setMapTransportationModeFilter,
     toggleFavoriteSiteId,
 } from "../store/userPreferencesSlice";
-import { showSnackbar } from "../store/snackbarSlice";
+import { showSnackbar, hideSnackbar } from "../store/snackbarSlice";
 import { Suspense } from "../components/Suspense";
 import { getUpcomingDepartures } from "../utils/departures";
 import { RouteMeta, RouteType } from "../types/historicalDelay";
@@ -67,7 +71,7 @@ export function MapPresenter() {
     const availableDates = useAppSelector(getAggregatedDatesCB);
     const selectedDeparture = useAppSelector(getSelectedDepartureCB);
     const selectedDatePreset = useAppSelector(getSelectedDatePresetCB);
-    const selectedCustomDate = useAppSelector(getSelectedCustomDateCB);
+    const selectedCustomDateRange = useAppSelector(getSelectedCustomDateRangeCB);
     const selectedDelayDates = useAppSelector(getSelectedDelayDatesCB);
     const selectedDepartureDelaySummary = useAppSelector(getDepartureHistoricalDelaySummaryCB);
     const isDepartureHistoricalDelayLoading = useAppSelector(getDepartureHistoricalDelayLoadingCB);
@@ -83,8 +87,11 @@ export function MapPresenter() {
     const isStopPointsLoading = useAppSelector(getStopPointsLoadingCB);
     const routesByStopPoint = useAppSelector(getRoutesByStopPointCB);
     const routesByStopPointError = useAppSelector(getStopPointRoutesErrorCB);
+    const userLocation = useAppSelector(getUserLocationCB);
+    const mapCenterOnUserRequestedAt = useAppSelector(getMapCenterOnUserRequestedAtCB);
     const selectedTransportationMode = useAppSelector(getMapTransportationModeFilterCB);
     const hideStopsWithoutDepartures = useAppSelector(getHideStopsWithoutDeparturesCB);
+    const tMap = translations[currentLanguage].map;
 
     const routesByStopPointsUnavailable = routesByStopPointError !== null || !routesByStopPoint;
     const transportationModeOptions = useMemo(() => {
@@ -141,7 +148,7 @@ export function MapPresenter() {
     );
 
     if (isSitesLoading || !sites || isStopPointsLoading || !stopPoints) {
-        return <Suspense fullscreen message={translations[currentLanguage].map.loading} />;
+        return <Suspense fullscreen message={tMap.loading} />;
     }
 
     function closeDeparturesViewACB() {
@@ -161,12 +168,90 @@ export function MapPresenter() {
         dispatch(setSelectedDatePreset(preset));
     }
 
-    function setSelectedCustomDateACB(date: string) {
-        dispatch(setSelectedCustomDate(date));
+    function setSelectedCustomDateRangeACB(dateRange: CustomDateRange | null) {
+        dispatch(setSelectedCustomDateRange(dateRange));
     }
 
     function handleAppStyleChangeACB(style: AppStyle) {
         dispatch(setAppStylePreference(style));
+    }
+
+    function handleRequestMapCenterOnUserACB() {
+        if (!navigator.geolocation) {
+            dispatch(
+                showSnackbar({
+                    message: tMap.geolocationUnsupported,
+                    severity: "error",
+                })
+            );
+            return;
+        }
+
+        if (!window.isSecureContext) {
+            dispatch(
+                showSnackbar({
+                    message: tMap.locationSecureConnectionRequired,
+                    severity: "warning",
+                })
+            );
+            return;
+        }
+
+        function successCallback(position: GeolocationPosition) {
+            dispatch(hideSnackbar());
+            dispatch(
+                setUserLocation({
+                    lat: position.coords.latitude,
+                    lon: position.coords.longitude,
+                })
+            );
+            dispatch(requestMapCenterOnUser());
+        }
+
+        function errorCallback(error: GeolocationPositionError) {
+            // If high accuracy failed, try one more time with low accuracy
+            if (error.code === error.POSITION_UNAVAILABLE || error.code === error.TIMEOUT) {
+                navigator.geolocation.getCurrentPosition(successCallback, finalErrorCallback, {
+                    enableHighAccuracy: false,
+                    timeout: 15000,
+                    maximumAge: 300000, // 5 minutes
+                });
+                return;
+            }
+            finalErrorCallback(error);
+        }
+
+        function finalErrorCallback(error: GeolocationPositionError) {
+            let message = tMap.locationLookupFailed;
+            if (error.code === error.PERMISSION_DENIED) {
+                message = tMap.locationPermissionDenied;
+            } else if (error.code === error.POSITION_UNAVAILABLE) {
+                message = tMap.locationUnavailable;
+            } else if (error.code === error.TIMEOUT) {
+                message = tMap.locationTimeout;
+            }
+
+            dispatch(
+                showSnackbar({
+                    message,
+                    severity: "error",
+                })
+            );
+        }
+
+        dispatch(
+            showSnackbar({
+                message: tMap.findingLocation,
+                severity: "info",
+            })
+        );
+
+        // Start with high accuracy request
+        navigator.geolocation.getCurrentPosition(successCallback, errorCallback, {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 60000, // Allow 1 minute old cached position
+        });
     }
 
     function toggleFavoriteStopACB() {
@@ -177,7 +262,7 @@ export function MapPresenter() {
         if (!user) {
             dispatch(
                 showSnackbar({
-                    message: "Log in to save favorite stops.",
+                    message: tMap.loginToSaveFavoriteStops,
                     severity: "info",
                 })
             );
@@ -188,7 +273,7 @@ export function MapPresenter() {
         dispatch(toggleFavoriteSiteId(selectedSite.id));
         dispatch(
             showSnackbar({
-                message: isFavorite ? "Removed stop from favorites." : "Added stop to favorites.",
+                message: isFavorite ? tMap.stopRemovedFromFavorites : tMap.stopAddedToFavorites,
                 severity: "success",
             })
         );
@@ -224,9 +309,9 @@ export function MapPresenter() {
                       selectedDepartureDelaySummary={selectedDepartureDelaySummary}
                       isDepartureHistoricalDelayLoading={isDepartureHistoricalDelayLoading}
                       selectedDatePreset={selectedDatePreset}
-                      selectedCustomDate={selectedCustomDate}
+                      selectedCustomDateRange={selectedCustomDateRange}
                       onDatePresetChange={setSelectedDatePresetACB}
-                      onCustomDateChange={setSelectedCustomDateACB}
+                      onCustomDateRangeChange={setSelectedCustomDateRangeACB}
                       t={translations[currentLanguage].departureDetails}
                       tHistoricalDelays={translations[currentLanguage].departureHistoricalDelays}
                       tDelayStats={translations[currentLanguage].departureDelayStats}
@@ -256,7 +341,11 @@ export function MapPresenter() {
             departureViewProps={departureViewProps}
             appStyle={appStyle}
             onAppStyleChange={handleAppStyleChangeACB}
+            userLocation={userLocation}
+            mapCenterOnUserRequestedAt={mapCenterOnUserRequestedAt}
+            onRequestMapCenterOnUser={handleRequestMapCenterOnUserACB}
             tMapDeparturePanel={translations[currentLanguage].mapDeparturePanel}
+            tMap={tMap}
             tSearchBar={translations[currentLanguage].searchBar}
             tMapSearch={translations[currentLanguage].mapSearch}
             tAppStyleSelector={translations[currentLanguage].appStyleSelector}

@@ -124,7 +124,7 @@ export function SearchBar({
             filterOptions={customFilterOptionsCB}
             getOptionLabel={getSiteNameCB}
             isOptionEqualToValue={isOptionEqualToValueCB}
-            noOptionsText="No stops found"
+            noOptionsText={t.noStopsFound}
             onChange={handleChangeCB}
             openOnFocus
             options={allSites}

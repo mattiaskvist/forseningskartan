@@ -3,7 +3,7 @@ import { RouteDelayView } from "../views/routeDelayView";
 import {
     getAggregatedDatesCB,
     getAggregatedDatesLoadingCB,
-    getRouteDelaySelectedCustomDateCB,
+    getRouteDelaySelectedCustomDateRangeCB,
     getRouteDelaySelectedDatePresetCB,
     getRouteDelaySelectedEventTypeCB,
     getRouteDelaySelectedRouteKeyCB,
@@ -17,7 +17,7 @@ import {
 } from "../store/selectors";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import {
-    setRouteDelayCustomDate,
+    setRouteDelayCustomDateRange,
     setRouteDelayDatePreset,
     setRouteDelayEventType,
     setRouteDelaySelectedRouteKey,
@@ -25,7 +25,12 @@ import {
 } from "../store/reducers";
 import { Suspense } from "../components/Suspense";
 import { DelaySummary, RouteType } from "../types/historicalDelay";
-import { DatePreset, EventType, getPresetDescription } from "../types/departureDelay";
+import {
+    CustomDateRange,
+    DatePreset,
+    EventType,
+    getPresetDescription,
+} from "../types/departureDelay";
 import { translations } from "../utils/translations";
 import { TransportationMode, transportationModeToRouteType } from "../types/sl";
 import { PageSizeOption, RouteDelayListItem, RouteDelaySection } from "../types/routeDelays";
@@ -49,7 +54,7 @@ export function RouteDelayPresenter() {
     const isRouteDelaysLoading = useAppSelector(getRouteDelaysLoadingCB);
     const isAggregatedDatesLoading = useAppSelector(getAggregatedDatesLoadingCB);
     const selectedDatePreset = useAppSelector(getRouteDelaySelectedDatePresetCB);
-    const selectedCustomDate = useAppSelector(getRouteDelaySelectedCustomDateCB);
+    const selectedCustomDateRange = useAppSelector(getRouteDelaySelectedCustomDateRangeCB);
     const selectedEventType = useAppSelector(getRouteDelaySelectedEventTypeCB);
     const selectedTransportationMode = useAppSelector(getRouteDelaySelectedTransportationModeCB);
     const selectedRouteKey = useAppSelector(getRouteDelaySelectedRouteKeyCB);
@@ -169,9 +174,9 @@ export function RouteDelayPresenter() {
         dispatch(setRouteDelayDatePreset(preset));
     }
 
-    function handleCustomDateChangeACB(date: string) {
+    function handleCustomDateRangeChangeACB(dateRange: CustomDateRange | null) {
         setCurrentPage(1);
-        dispatch(setRouteDelayCustomDate(date));
+        dispatch(setRouteDelayCustomDateRange(dateRange));
     }
 
     function handleEventTypeChangeACB(eventType: EventType) {
@@ -211,7 +216,8 @@ export function RouteDelayPresenter() {
         setCurrentPage(1);
     }
 
-    if (isRouteDelaysLoading || isAggregatedDatesLoading) {
+    // avoid suspense after first load
+    if (isAggregatedDatesLoading || (isRouteDelaysLoading && routeDelays.length === 0)) {
         return <Suspense message={translations[currentLanguage].routeDelay.loading} />;
     }
 
@@ -262,7 +268,7 @@ export function RouteDelayPresenter() {
             selectedDateText={selectedDateText}
             routesInfoText={routesInfoText}
             selectedDatePreset={selectedDatePreset}
-            selectedCustomDate={selectedCustomDate}
+            selectedCustomDateRange={selectedCustomDateRange}
             selectedEventType={selectedEventType}
             selectedTransportationMode={selectedTransportationMode}
             searchQuery={searchQuery}
@@ -271,7 +277,7 @@ export function RouteDelayPresenter() {
             transportationModeOptions={transportationModeOptions}
             availableDates={availableDates}
             onDatePresetChange={handleDatePresetChangeACB}
-            onCustomDateChange={handleCustomDateChangeACB}
+            onCustomDateRangeChange={handleCustomDateRangeChangeACB}
             onEventTypeChange={handleEventTypeChangeACB}
             onTransportationModeChange={handleTransportationModeChangeACB}
             onSearchQueryChange={handleSearchQueryChangeACB}

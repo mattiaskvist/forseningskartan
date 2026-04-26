@@ -91,6 +91,20 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
         },
         map: {
             loading: "Loading transit data and preparing the map...",
+            centerOnMyLocation: "Center on my location",
+            centerOnMyLocationAriaLabel: "center map on user's location",
+            geolocationUnsupported: "Geolocation is not supported by your browser.",
+            locationSecureConnectionRequired:
+                "Location access requires a secure connection. Please check your URL.",
+            locationLookupFailed: "Failed to get your location.",
+            locationPermissionDenied:
+                "Location permission denied. Please click the lock icon in your browser's address bar to reset permissions.",
+            locationUnavailable: "Location information is unavailable on your device.",
+            locationTimeout: "Location request timed out. Please try again.",
+            findingLocation: "Finding your location...",
+            loginToSaveFavoriteStops: "Log in to save favorite stops.",
+            stopRemovedFromFavorites: "Removed stop from favorites.",
+            stopAddedToFavorites: "Added stop to favorites.",
         },
         mapSearch: {
             hideUnusedStops: "Hide unused stops",
@@ -104,6 +118,7 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
         searchBar: {
             searchStops: "Search stops",
             typeStopName: "Type a stop name",
+            noStopsFound: "No stops found",
         },
         departureList: {
             searchPlaceholder: "Search by destination or line",
@@ -118,6 +133,8 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             loadingTrend: "Loading route trend...",
             departureDelayTrend: "Departure delay trend over selected dates",
             arrivalDelayTrend: "Arrival delay trend over selected dates",
+            trendChartDateAxis: "Date",
+            trendChartAvgDelayAxis: "Avg delay (min)",
         },
         routeDelayControls: {
             dateSelection: "Date selection",
@@ -130,7 +147,7 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             last7Days: "Last 7 days",
             last5Weekdays: "Last 5 weekdays",
             lastWeekend: "Last weekend",
-            customDate: "Custom date",
+            customDate: "Custom date range",
         },
         departureDelayStats: {
             noData: "No route delay data found.",
@@ -152,7 +169,8 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             noAvailableDates: "No available dates for this preset",
         },
         availableDatesPicker: {
-            selectDate: "Select delay date",
+            startDate: "From date",
+            endDate: "To date",
         },
         appStyleSelector: {
             ariaLabel: "App style selector",
@@ -262,6 +280,20 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
         },
         map: {
             loading: "Laddar kollektivtrafikdata och förbereder kartan...",
+            centerOnMyLocation: "Centrera på min plats",
+            centerOnMyLocationAriaLabel: "centrera kartan på användarens plats",
+            geolocationUnsupported: "Geolokalisering stöds inte av din webbläsare.",
+            locationSecureConnectionRequired:
+                "Åtkomst till platsinformation kräver en säker anslutning. Kontrollera din URL.",
+            locationLookupFailed: "Det gick inte att hämta din plats.",
+            locationPermissionDenied:
+                "Platsbehörighet nekades. Klicka på låsikonen i webbläsarens adressfält för att återställa behörigheter.",
+            locationUnavailable: "Platsinformation är inte tillgänglig på din enhet.",
+            locationTimeout: "Platsförfrågan tog för lång tid. Försök igen.",
+            findingLocation: "Hämtar din plats...",
+            loginToSaveFavoriteStops: "Logga in för att spara favorithållplatser.",
+            stopRemovedFromFavorites: "Hållplats borttagen från favoriter.",
+            stopAddedToFavorites: "Hållplats tillagd i favoriter.",
         },
         mapSearch: {
             hideUnusedStops: "Dölj oanvända hållplatser",
@@ -275,6 +307,7 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
         searchBar: {
             searchStops: "Sök hållplatser",
             typeStopName: "Skriv ett hållplatsnamn",
+            noStopsFound: "Inga hållplatser hittades",
         },
         departureList: {
             searchPlaceholder: "Sök på destination eller linje",
@@ -289,6 +322,8 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             loadingTrend: "Laddar trend för linje...",
             departureDelayTrend: "Avgångsförseningstrend över valda datum",
             arrivalDelayTrend: "Ankomstförseningstrend över valda datum",
+            trendChartDateAxis: "Datum",
+            trendChartAvgDelayAxis: "Genomsnittlig försening (min)",
         },
         routeDelayControls: {
             dateSelection: "Datumval",
@@ -301,7 +336,7 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             last7Days: "Senaste 7 dagarna",
             last5Weekdays: "Senaste 5 vardagarna",
             lastWeekend: "Senaste helgen",
-            customDate: "Eget datum",
+            customDate: "Eget datumintervall",
         },
         departureDelayStats: {
             noData: "Ingen försening hittades.",
@@ -323,7 +358,8 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             noAvailableDates: "Inga tillgängliga datum för detta val",
         },
         availableDatesPicker: {
-            selectDate: "Välj datum",
+            startDate: "Från datum",
+            endDate: "Till datum",
         },
         appStyleSelector: {
             ariaLabel: "Välj tema",

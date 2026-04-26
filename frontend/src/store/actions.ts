@@ -81,7 +81,7 @@ export function fetchSelectedDepartureStopDelays(): AppThunk {
 
         const selectedDates = getSelectedDelayDates({
             selectedDatePreset: state.departureUI.selectedDatePreset,
-            selectedCustomDate: state.departureUI.selectedCustomDate,
+            selectedCustomDateRange: state.departureUI.selectedCustomDateRange,
             availableDates: state.aggregatedDates.data,
         });
         if (selectedDates.length === 0) {
@@ -125,7 +125,7 @@ export function fetchSelectedRouteDelays(): AppThunk {
         const state = getState();
         const selectedDates = getSelectedDelayDates({
             selectedDatePreset: state.routeDelayUI.selectedDatePreset,
-            selectedCustomDate: state.routeDelayUI.selectedCustomDate,
+            selectedCustomDateRange: state.routeDelayUI.selectedCustomDateRange,
             availableDates: state.aggregatedDates.data,
         });
 
@@ -146,7 +146,7 @@ export function fetchSelectedRouteTrend(): AppThunk {
         const selectedRouteSummary = state.routeDelays.data?.find(isSelectedRouteSummaryCB);
         const selectedDates = getSelectedDelayDates({
             selectedDatePreset: state.routeDelayUI.selectedDatePreset,
-            selectedCustomDate: state.routeDelayUI.selectedCustomDate,
+            selectedCustomDateRange: state.routeDelayUI.selectedCustomDateRange,
             availableDates: state.aggregatedDates.data,
         });
 
