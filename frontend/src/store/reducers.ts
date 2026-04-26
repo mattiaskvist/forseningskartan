@@ -12,7 +12,7 @@ import {
 import { RoutesByStopPoint } from "../api/backend";
 import { Departure, DepartureResponse, Site, StopPoint, TransportationMode } from "../types/sl";
 import { DelaySummary } from "../types/historicalDelay";
-import { DatePreset, EventType } from "../types/departureDelay";
+import { CustomDateRange, DatePreset, EventType } from "../types/departureDelay";
 import { RouteDelayTrendPoint } from "../types/routeDelays";
 import { StopPointGidsBySiteId } from "../utils/site";
 
@@ -76,12 +76,12 @@ type RouteDelayTrendState = {
 type DepartureUIState = {
     selectedDeparture: Departure | null;
     selectedDatePreset: DatePreset;
-    selectedCustomDate: string | null;
+    selectedCustomDateRange: CustomDateRange | null;
 };
 
 type RouteDelayUIState = {
     selectedDatePreset: DatePreset;
-    selectedCustomDate: string | null;
+    selectedCustomDateRange: CustomDateRange | null;
     selectedEventType: EventType;
     selectedTransportationMode: TransportationMode;
     selectedRouteKey: string | null;
@@ -372,31 +372,31 @@ export const departureUISlice = createSlice({
     initialState: {
         selectedDeparture: null,
         selectedDatePreset: "sameDayLastWeek",
-        selectedCustomDate: null,
+        selectedCustomDateRange: null,
     } as DepartureUIState,
     reducers: {
         setSelectedDeparture: (state, action: { payload: Departure | null }) => {
             state.selectedDeparture = action.payload;
             state.selectedDatePreset = "sameDayLastWeek";
-            state.selectedCustomDate = null;
+            state.selectedCustomDateRange = null;
         },
         setSelectedDatePreset: (state, action: { payload: DatePreset }) => {
             state.selectedDatePreset = action.payload;
         },
-        setSelectedCustomDate: (state, action: { payload: string | null }) => {
-            state.selectedCustomDate = action.payload;
+        setSelectedCustomDateRange: (state, action: { payload: CustomDateRange | null }) => {
+            state.selectedCustomDateRange = action.payload;
         },
     },
 });
 
-export const { setSelectedDeparture, setSelectedDatePreset, setSelectedCustomDate } =
+export const { setSelectedDeparture, setSelectedDatePreset, setSelectedCustomDateRange } =
     departureUISlice.actions;
 
 export const routeDelayUISlice = createSlice({
     name: "routeDelayUI",
     initialState: {
         selectedDatePreset: "last7Days",
-        selectedCustomDate: null,
+        selectedCustomDateRange: null,
         selectedEventType: "departure",
         selectedTransportationMode: "BUS",
         selectedRouteKey: null,
@@ -406,11 +406,11 @@ export const routeDelayUISlice = createSlice({
             state.selectedDatePreset = action.payload;
 
             if (action.payload !== "customDate") {
-                state.selectedCustomDate = null;
+                state.selectedCustomDateRange = null;
             }
         },
-        setRouteDelayCustomDate: (state, action: { payload: string | null }) => {
-            state.selectedCustomDate = action.payload;
+        setRouteDelayCustomDateRange: (state, action: { payload: CustomDateRange | null }) => {
+            state.selectedCustomDateRange = action.payload;
         },
         setRouteDelayEventType: (state, action: { payload: EventType }) => {
             state.selectedEventType = action.payload;
@@ -427,7 +427,7 @@ export const routeDelayUISlice = createSlice({
 
 export const {
     setRouteDelayDatePreset,
-    setRouteDelayCustomDate,
+    setRouteDelayCustomDateRange,
     setRouteDelayEventType,
     setRouteDelayTransportationMode,
     setRouteDelaySelectedRouteKey,

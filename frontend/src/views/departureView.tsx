@@ -1,7 +1,7 @@
 import { Suspense } from "../components/Suspense";
 import { Departure } from "../types/sl";
 import { DelaySummary } from "../types/historicalDelay";
-import { DatePreset } from "../types/departureDelay";
+import { CustomDateRange, DatePreset } from "../types/departureDelay";
 import { DepartureHeaderView } from "./departureHeaderView";
 import { DepartureEmptyStateView } from "./departureEmptyStateView";
 import { DepartureList } from "../components/DepartureList";
@@ -21,9 +21,9 @@ export type DepartureViewProps = {
     selectedDepartureDelaySummary: DelaySummary | null;
     isDepartureHistoricalDelayLoading: boolean;
     selectedDatePreset: DatePreset;
-    selectedCustomDate: string | null;
+    selectedCustomDateRange: CustomDateRange | null;
     onDatePresetChange: (preset: DatePreset) => void;
-    onCustomDateChange: (date: string) => void;
+    onCustomDateRangeChange: (dateRange: CustomDateRange | null) => void;
     isFavoriteStop: boolean;
     isUserLoggedIn: boolean;
     onToggleFavoriteStop: () => void;
@@ -52,9 +52,9 @@ export function DepartureView({
     selectedDepartureDelaySummary,
     isDepartureHistoricalDelayLoading,
     selectedDatePreset,
-    selectedCustomDate,
+    selectedCustomDateRange,
     onDatePresetChange,
-    onCustomDateChange,
+    onCustomDateRangeChange,
     isFavoriteStop,
     isUserLoggedIn,
     onToggleFavoriteStop,
@@ -90,9 +90,9 @@ export function DepartureView({
                     selectedDepartureDelaySummary={selectedDepartureDelaySummary}
                     isDepartureHistoricalDelayLoading={isDepartureHistoricalDelayLoading}
                     selectedDatePreset={selectedDatePreset}
-                    selectedCustomDate={selectedCustomDate}
+                    selectedCustomDateRange={selectedCustomDateRange}
                     onDatePresetChange={onDatePresetChange}
-                    onCustomDateChange={onCustomDateChange}
+                    onCustomDateRangeChange={onCustomDateRangeChange}
                     t={tDetails}
                     tHistoricalDelays={tHistoricalDelays}
                     tDelayStats={tDelayStats}

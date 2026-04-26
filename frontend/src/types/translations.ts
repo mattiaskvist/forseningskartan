@@ -173,7 +173,8 @@ export interface DepartureHistoricalDelaysStrings {
 }
 
 export interface AvailableDatesPickerStrings {
-    selectDate: string;
+    startDate: string;
+    endDate: string;
 }
 
 export interface AppStyleSelectorStrings {

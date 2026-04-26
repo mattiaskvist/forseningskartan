@@ -130,7 +130,7 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             last7Days: "Last 7 days",
             last5Weekdays: "Last 5 weekdays",
             lastWeekend: "Last weekend",
-            customDate: "Custom date",
+            customDate: "Custom date range",
         },
         departureDelayStats: {
             noData: "No route delay data found.",
@@ -152,7 +152,8 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             noAvailableDates: "No available dates for this preset",
         },
         availableDatesPicker: {
-            selectDate: "Select delay date",
+            startDate: "From date",
+            endDate: "To date",
         },
         appStyleSelector: {
             ariaLabel: "App style selector",
@@ -301,7 +302,7 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             last7Days: "Senaste 7 dagarna",
             last5Weekdays: "Senaste 5 vardagarna",
             lastWeekend: "Senaste helgen",
-            customDate: "Eget datum",
+            customDate: "Eget datumintervall",
         },
         departureDelayStats: {
             noData: "Ingen försening hittades.",
@@ -323,7 +324,8 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             noAvailableDates: "Inga tillgängliga datum för detta val",
         },
         availableDatesPicker: {
-            selectDate: "Välj datum",
+            startDate: "Från datum",
+            endDate: "Till datum",
         },
         appStyleSelector: {
             ariaLabel: "Välj tema",

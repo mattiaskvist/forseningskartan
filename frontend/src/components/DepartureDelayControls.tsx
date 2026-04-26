@@ -1,16 +1,16 @@
 import { Box, ToggleButton } from "@mui/material";
 import { AvailableDatesPicker } from "./AvailableDatesPicker";
-import { DatePreset, EventType, DatePresets } from "../types/departureDelay";
 import { FilterToggleButtonGroup } from "./FilterToggleButtonGroup";
+import { CustomDateRange, DatePreset, EventType, DatePresets } from "../types/departureDelay";
 import { TranslationStrings } from "../utils/translations";
 
 type DepartureDelayControlsProps = {
     availableDates: string[];
     selectedDatePreset: DatePreset;
-    selectedCustomDate: string | null;
+    selectedCustomDateRange: CustomDateRange | null;
     selectedEventType: EventType;
     onDatePresetChange: (preset: DatePreset) => void;
-    onCustomDateChange: (date: string) => void;
+    onCustomDateRangeChange: (dateRange: CustomDateRange | null) => void;
     onEventTypeChange: (eventType: EventType) => void;
     t: TranslationStrings["routeDelayControls"];
     tDatePicker: TranslationStrings["availableDatesPicker"];
@@ -19,10 +19,10 @@ type DepartureDelayControlsProps = {
 export function DepartureDelayControls({
     availableDates,
     selectedDatePreset,
-    selectedCustomDate,
+    selectedCustomDateRange,
     selectedEventType,
     onDatePresetChange,
-    onCustomDateChange,
+    onCustomDateRangeChange,
     onEventTypeChange,
     t,
     tDatePicker,
@@ -75,12 +75,14 @@ export function DepartureDelayControls({
             />
 
             {selectedDatePreset === "customDate" && (
-                <AvailableDatesPicker
-                    availableDates={availableDates}
-                    selectedDate={selectedCustomDate}
-                    onSelectDate={onCustomDateChange}
-                    t={tDatePicker}
-                />
+                <div className="pt-2">
+                    <AvailableDatesPicker
+                        availableDates={availableDates}
+                        selectedDateRange={selectedCustomDateRange}
+                        onSelectDateRange={onCustomDateRangeChange}
+                        t={tDatePicker}
+                    />
+                </div>
             )}
 
             <FilterToggleButtonGroup
