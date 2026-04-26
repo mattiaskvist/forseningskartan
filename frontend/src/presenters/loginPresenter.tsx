@@ -6,6 +6,7 @@ import { getAuthUserCB, getAuthLoadingCB, getCurrentLanguageCB } from "../store/
 import { Suspense } from "../components/Suspense";
 import { translations } from "../utils/translations";
 import { startLoginAuthWidget } from "../firebase/loginAuthWidget";
+import { showSnackbar } from "../store/snackbarSlice";
 
 export function LoginPresenter() {
     const dispatch = useAppDispatch();
@@ -27,10 +28,11 @@ export function LoginPresenter() {
         return startLoginAuthWidget({
             dispatch,
             onSignInSuccess: () => {
+                dispatch(showSnackbar({ message: t.loginSuccess, severity: "success" }));
                 navigate("/");
             },
         });
-    }, [loading, user, navigate, dispatch]);
+    }, [loading, user, navigate, dispatch, t.loginSuccess]);
 
     if (loading) {
         return <Suspense fullscreen message={t.loading} />;
