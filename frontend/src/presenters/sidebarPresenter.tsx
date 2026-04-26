@@ -21,6 +21,7 @@ export function SidebarPresenter() {
     const favoriteSites = useAppSelector(getFavoriteSitesCB);
     const appStyle = useAppSelector(getAppStylePreferenceCB);
     const currentLanguage = useAppSelector(getCurrentLanguageCB);
+    const tAccount = translations[currentLanguage].account;
 
     function toggleSidebarCB() {
         setIsOpen(!isOpen);
@@ -40,10 +41,10 @@ export function SidebarPresenter() {
     async function handleLogoutACB() {
         try {
             await dispatch(logoutCurrentUser()).unwrap();
-            dispatch(showSnackbar({ message: "Logged out", severity: "success" }));
+            dispatch(showSnackbar({ message: tAccount.logoutSuccess, severity: "success" }));
             navigate("/");
         } catch {
-            dispatch(showSnackbar({ message: "Failed to log out", severity: "error" }));
+            dispatch(showSnackbar({ message: tAccount.logoutError, severity: "error" }));
         }
     }
 
