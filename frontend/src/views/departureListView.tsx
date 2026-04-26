@@ -3,26 +3,26 @@ import { formatDelay, formatTime, getDelayMinutes, getDelayColorToken } from "..
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { useMemo, useState } from "react";
 import { Box, Card, TextField, Typography } from "@mui/material";
-import { FilterToggleButtonGroup } from "./FilterToggleButtonGroup";
+import { FilterToggleButtonGroup } from "../components/FilterToggleButtonGroup";
 import { TranslationStrings } from "../utils/translations";
 import {
     getTransportationModeButton,
     getTransportationModeLabel,
 } from "../utils/transportationMode";
 
-type DepartureListProps = {
+type DepartureListViewProps = {
     departures: Departure[];
     onSelectDeparture: (departure: Departure) => void;
     t: TranslationStrings["departureList"];
     tTransportModes: TranslationStrings["transportModes"];
 };
 
-export function DepartureList({
+export function DepartureListView({
     departures,
     onSelectDeparture,
     t,
     tTransportModes,
-}: DepartureListProps) {
+}: DepartureListViewProps) {
     const uniqueModes = useMemo(() => {
         const modes = new Set<ModeWithOther>();
 

@@ -1,6 +1,6 @@
 import { screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { DepartureList } from "./DepartureList";
+import { DepartureListView } from "./departureListView";
 import { Departure } from "../types/sl";
 import { renderWithTheme } from "../test/renderWithTheme";
 import { translations } from "../utils/translations";
@@ -27,12 +27,12 @@ const departureFixture: Departure = {
     },
 };
 
-describe("DepartureList", () => {
+describe("DepartureListView", () => {
     it("renders departures with formatted times and translations", () => {
         const mockDepartures = [departureFixture];
 
         renderWithTheme(
-            <DepartureList
+            <DepartureListView
                 departures={mockDepartures}
                 onSelectDeparture={vi.fn()}
                 t={translations.en.departureList}
@@ -50,7 +50,7 @@ describe("DepartureList", () => {
     it("filters departures by transport mode", () => {
         const mockDepartures = [departureFixture];
         renderWithTheme(
-            <DepartureList
+            <DepartureListView
                 departures={mockDepartures}
                 onSelectDeparture={vi.fn()}
                 t={translations.en.departureList}
