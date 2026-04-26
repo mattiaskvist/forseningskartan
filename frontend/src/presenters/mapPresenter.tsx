@@ -270,9 +270,7 @@ export function MapPresenter() {
         dispatch(toggleFavoriteSiteId(selectedSite.id));
         dispatch(
             showSnackbar({
-                message: isFavorite
-                    ? tMap.stopRemovedFromFavorites
-                    : tMap.stopAddedToFavorites,
+                message: isFavorite ? tMap.stopRemovedFromFavorites : tMap.stopAddedToFavorites,
                 severity: "success",
             })
         );
