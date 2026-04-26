@@ -3,49 +3,63 @@ import { describe, expect, it, vi } from "vitest";
 import { DepartureList } from "./DepartureList";
 import { Departure } from "../types/sl";
 import { renderWithTheme } from "../test/renderWithTheme";
+import { translations } from "../utils/translations";
 
 const departureFixture: Departure = {
     direction: "Centralen",
     direction_code: 1,
-    destination: "Centralen",
+    destination: "T-Centralen",
     state: "EXPECTED",
-    scheduled: "2026-04-17T12:00:00Z",
-    expected: "2026-04-17T12:02:00Z",
-    display: "12:00",
+    scheduled: "2024-03-20T10:00:00",
+    expected: "2024-03-20T10:05:00",
+    display: "5 min",
     journey: {
-        id: 1001,
-        state: "EXPECTED",
+        id: 12345,
+        state: "NORMALPROGRESS",
     },
-    stop_area: {
-        id: 5320,
-        name: "Stockholm Odenplan",
-    },
-    stop_point: {
-        id: 2001,
-        designation: "A",
-    },
+    stop_point: { id: 1, designation: "1" },
+    stop_area: { id: 1, name: "Odenplan" },
     line: {
-        id: 4,
-        designation: "4",
-        transport_mode: "BUS",
+        id: 10,
+        designation: "10",
+        transport_mode: "METRO",
+        group_of_lines: "Blå linjen",
     },
 };
 
 describe("DepartureList", () => {
-    it("renders departure rows as clickable buttons", () => {
+    it("renders departures with formatted times and translations", () => {
+        const mockDepartures = [departureFixture];
+
         renderWithTheme(
-            <DepartureList departures={[departureFixture]} onSelectDeparture={vi.fn()} />
+            <DepartureList
+                departures={mockDepartures}
+                onSelectDeparture={vi.fn()}
+                t={translations.en.departureList}
+                tTransportModes={translations.en.transportModes}
+            />
         );
 
-        const departureRow = screen.getByRole("button", { name: /Bus 4 to Centralen/i });
-        expect(departureRow).toBeInTheDocument();
+        // check for destination and line
+        expect(screen.getByText(/Metro 10 to T-Centralen/i)).toBeInTheDocument();
+        // check for translated "Planned" and "Predicted"
+        expect(screen.getByText(/Planned 10:00/i)).toBeInTheDocument();
+        expect(screen.getByText(/Predicted 10:05/i)).toBeInTheDocument();
     });
 
-    it("renders transport mode header", () => {
+    it("filters departures by transport mode", () => {
+        const mockDepartures = [departureFixture];
         renderWithTheme(
-            <DepartureList departures={[departureFixture]} onSelectDeparture={vi.fn()} />
+            <DepartureList
+                departures={mockDepartures}
+                onSelectDeparture={vi.fn()}
+                t={translations.en.departureList}
+                tTransportModes={translations.en.transportModes}
+            />
         );
-        const modeLabels = screen.getAllByText("Bus");
-        expect(modeLabels.length).toBeGreaterThan(0);
+
+        // Metro should be a button
+        const metroButton = screen.getByRole("button", { name: "Metro" });
+        expect(metroButton).toBeInTheDocument();
     });
 });

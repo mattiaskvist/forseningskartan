@@ -7,6 +7,7 @@ import { DepartureDelayStats } from "./DepartureDelayStats";
 import { RouteDelayTrendChart } from "./RouteDelayTrendChart";
 import { Suspense } from "./Suspense";
 import { RouteDelayTrendPoint } from "../types/routeDelays";
+import { TranslationStrings } from "../utils/translations";
 
 type RouteDetailsPageProps = {
     routeSummary: DelaySummary;
@@ -14,6 +15,8 @@ type RouteDetailsPageProps = {
     trendPoints: RouteDelayTrendPoint[];
     isTrendLoading: boolean;
     onBackToRoutes: () => void;
+    t: TranslationStrings["routeDetailsPage"];
+    tStats: TranslationStrings["departureDelayStats"];
 };
 
 export function RouteDetailsPage({
@@ -22,6 +25,8 @@ export function RouteDetailsPage({
     trendPoints,
     isTrendLoading,
     onBackToRoutes,
+    t,
+    tStats,
 }: RouteDetailsPageProps) {
     return (
         <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2, backdropFilter: "blur(4px)" }}>
@@ -40,9 +45,9 @@ export function RouteDetailsPage({
                     size="small"
                     startIcon={<ArrowBackIcon fontSize="small" />}
                     onClick={onBackToRoutes}
-                    aria-label="Back to list"
+                    aria-label={t.back}
                 >
-                    Back
+                    {t.back}
                 </Button>
             </div>
 
@@ -62,23 +67,26 @@ export function RouteDetailsPage({
                     <Typography
                         sx={{ fontSize: "1.125rem", fontWeight: 600, color: "text.primary" }}
                     >
-                        {routeSummary.uniqueTrips} unique trips
+                        {routeSummary.uniqueTrips} {t.uniqueTrips}
                     </Typography>
                     <Divider />
                     <DepartureDelayStats
                         routeSummary={routeSummary}
                         selectedEventType={selectedEventType}
+                        t={tStats}
                     />
                 </Box>
 
                 {isTrendLoading ? (
-                    <Suspense message="Loading route trend..." />
+                    <Suspense message={t.loadingTrend} />
                 ) : (
                     <RouteDelayTrendChart
                         points={trendPoints}
                         title={`${
-                            selectedEventType === "departure" ? "Departure" : "Arrival"
-                        } delay trend over selected dates`}
+                            selectedEventType === "departure"
+                                ? t.departureDelayTrend
+                                : t.arrivalDelayTrend
+                        }`}
                     />
                 )}
             </div>

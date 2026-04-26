@@ -2,6 +2,7 @@ import { screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { RouteDelaySectionToggleView } from "./routeDelaySectionToggleView";
 import { renderWithTheme } from "../test/renderWithTheme";
+import { translations } from "../utils/translations";
 
 describe("RouteDelaySectionToggleView", () => {
     it("keeps section toggle on a single row", () => {
@@ -9,6 +10,7 @@ describe("RouteDelaySectionToggleView", () => {
             <RouteDelaySectionToggleView
                 selectedSection="routes"
                 onSelectedSectionChange={vi.fn()}
+                t={translations.en.routeDelaySectionToggle}
             />
         );
 
