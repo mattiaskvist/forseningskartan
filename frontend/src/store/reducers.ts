@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
     getSites,
     getDepartures,
@@ -19,6 +19,8 @@ import { StopPointGidsBySiteId } from "../utils/site";
 type SitesState = {
     data: Site[] | null;
     selectedSiteId: number | null;
+    userLocation: { lat: number; lon: number } | null;
+    mapCenterOnUserRequestedAt: number;
     isLoading: boolean;
     error: Error | null;
 };
@@ -89,10 +91,33 @@ type RouteDelayUIState = {
 
 export const sitesSlice = createSlice({
     name: "sites",
-    initialState: { data: null, selectedSiteId: null, isLoading: false, error: null } as SitesState,
+    initialState: {
+        data: null,
+        selectedSiteId: null,
+        userLocation: null,
+        mapCenterOnUserRequestedAt: 0,
+        isLoading: false,
+        error: null,
+    } as SitesState,
     reducers: {
         setSelectedSiteId: (state: SitesState, action: { payload: number | null }) => {
             state.selectedSiteId = action.payload;
+        },
+        setUserLocation: (
+            state: SitesState,
+            action: { payload: { lat: number; lon: number } | null }
+        ) => {
+            state.userLocation = action.payload;
+        },
+        requestMapCenterOnUser: {
+            // reducers should be pure functions, so we can't use Date.now() inside the reducer.
+            // instead we use a prepare function to generate a unique timestamp for each action.
+            prepare: () => {
+                return { payload: Date.now() };
+            },
+            reducer: (state: SitesState, action: PayloadAction<number>) => {
+                state.mapCenterOnUserRequestedAt = action.payload;
+            },
         },
     },
     extraReducers: (builder) => {
@@ -114,7 +139,7 @@ export const sitesSlice = createSlice({
     },
 });
 
-export const { setSelectedSiteId } = sitesSlice.actions;
+export const { setSelectedSiteId, setUserLocation, requestMapCenterOnUser } = sitesSlice.actions;
 
 export const departuresSlice = createSlice({
     name: "departures",

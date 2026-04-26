@@ -1,13 +1,15 @@
 import { Box, Typography } from "@mui/material";
 import { LineChart } from "@mui/x-charts/LineChart";
 import { RouteDelayTrendPoint } from "../types/routeDelays";
+import { TranslationStrings } from "../utils/translations";
 
 type RouteDelayTrendChartProps = {
     points: RouteDelayTrendPoint[];
     title: string;
+    t: TranslationStrings["routeDetailsPage"];
 };
 
-export function RouteDelayTrendChart({ points, title }: RouteDelayTrendChartProps) {
+export function RouteDelayTrendChart({ points, title, t }: RouteDelayTrendChartProps) {
     function getMonthDayFromDateCB(point: RouteDelayTrendPoint) {
         return point.date.slice(5);
     }
@@ -34,7 +36,7 @@ export function RouteDelayTrendChart({ points, title }: RouteDelayTrendChartProp
                     {
                         scaleType: "point",
                         data: xLabels,
-                        label: "Date",
+                        label: t.trendChartDateAxis,
                     },
                 ]}
                 yAxis={[
@@ -45,7 +47,7 @@ export function RouteDelayTrendChart({ points, title }: RouteDelayTrendChartProp
                 series={[
                     {
                         data: yValues,
-                        label: "Avg delay (min)",
+                        label: t.trendChartAvgDelayAxis,
                         connectNulls: false,
                         showMark: true,
                     },

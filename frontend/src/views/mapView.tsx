@@ -1,4 +1,5 @@
-import { Box } from "@mui/material";
+import { Box, IconButton, Tooltip } from "@mui/material";
+import MyLocationIcon from "@mui/icons-material/MyLocation";
 import { Site, TransportationMode } from "../types/sl";
 import { DepartureViewProps } from "./departureView";
 import { AppStyle } from "../types/appStyle";
@@ -17,7 +18,11 @@ type MapViewProps = {
     departureViewProps: DepartureViewProps | null;
     appStyle: AppStyle;
     onAppStyleChange: (style: AppStyle) => void;
+    userLocation: { lat: number; lon: number } | null;
+    mapCenterOnUserRequestedAt: number;
+    onRequestMapCenterOnUser: () => void;
     tMapDeparturePanel: TranslationStrings["mapDeparturePanel"];
+    tMap: TranslationStrings["map"];
     tSearchBar: TranslationStrings["searchBar"];
     tMapSearch: TranslationStrings["mapSearch"];
     tAppStyleSelector: TranslationStrings["appStyleSelector"];
@@ -40,7 +45,11 @@ export function MapView({
     departureViewProps,
     appStyle,
     onAppStyleChange,
+    userLocation,
+    mapCenterOnUserRequestedAt,
+    onRequestMapCenterOnUser,
     tMapDeparturePanel,
+    tMap,
     tSearchBar,
     tMapSearch,
     tAppStyleSelector,
@@ -61,6 +70,8 @@ export function MapView({
                 selectedSite={selectedSite}
                 handleSelectSiteCB={handleSelectSiteCB}
                 appStyle={appStyle}
+                userLocation={userLocation}
+                mapCenterOnUserRequestedAt={mapCenterOnUserRequestedAt}
             />
             <Box
                 sx={{
@@ -83,6 +94,25 @@ export function MapView({
                         },
                     }}
                 >
+                    <Tooltip title={tMap.centerOnMyLocation}>
+                        <IconButton
+                            onClick={onRequestMapCenterOnUser}
+                            sx={{
+                                backgroundColor: "background.paper",
+                                color: "primary.main",
+                                boxShadow: 2,
+                                "&:hover": {
+                                    backgroundColor: "action.hover",
+                                },
+                                // ensure consistent size with other overlay elements
+                                width: 44,
+                                height: 44,
+                            }}
+                            aria-label={tMap.centerOnMyLocationAriaLabel}
+                        >
+                            <MyLocationIcon />
+                        </IconButton>
+                    </Tooltip>
                     <AppStyleSelector
                         appStyle={appStyle}
                         setAppStyle={onAppStyleChange}

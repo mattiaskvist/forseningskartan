@@ -46,6 +46,18 @@ export interface MapDeparturesPanelStrings {
 
 export interface MapStrings {
     loading: string;
+    centerOnMyLocation: string;
+    centerOnMyLocationAriaLabel: string;
+    geolocationUnsupported: string;
+    locationSecureConnectionRequired: string;
+    locationLookupFailed: string;
+    locationPermissionDenied: string;
+    locationUnavailable: string;
+    locationTimeout: string;
+    findingLocation: string;
+    loginToSaveFavoriteStops: string;
+    stopRemovedFromFavorites: string;
+    stopAddedToFavorites: string;
 }
 
 export interface MapSearchStrings {
@@ -119,6 +131,7 @@ export interface LoginStrings {
 export interface SearchBarStrings {
     searchStops: string;
     typeStopName: string;
+    noStopsFound: string;
 }
 
 export interface DepartureListStrings {
@@ -135,6 +148,8 @@ export interface RouteDetailsPageStrings {
     loadingTrend: string;
     departureDelayTrend: string;
     arrivalDelayTrend: string;
+    trendChartDateAxis: string;
+    trendChartAvgDelayAxis: string;
 }
 
 export interface RouteDelayControlsStrings {
