@@ -99,6 +99,7 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
         login: {
             signIn: "Sign In",
             loading: "Loading authentication...",
+            loginSuccess: "Logged in",
         },
         searchBar: {
             searchStops: "Search stops",
@@ -269,6 +270,7 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
         login: {
             signIn: "Logga in",
             loading: "Laddar autentisering...",
+            loginSuccess: "Inloggad",
         },
         searchBar: {
             searchStops: "Sök hållplatser",

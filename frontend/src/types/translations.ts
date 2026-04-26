@@ -113,6 +113,7 @@ export type SidebarRouteLabelKey = keyof Pick<SideBarStrings, "map" | "routeDela
 export interface LoginStrings {
     signIn: string;
     loading: string;
+    loginSuccess: string;
 }
 
 export interface SearchBarStrings {
