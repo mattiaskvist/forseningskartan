@@ -161,6 +161,48 @@ func (s *server) handleRouteDelays(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(summaries)
 }
 
+func (s *server) handleRouteDelayTrend(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	query := r.URL.Query()
+	dates := query["dates"]
+	routeShortName := strings.TrimSpace(query.Get("routeShortName"))
+	routeType := strings.TrimSpace(query.Get("routeType"))
+
+	if len(dates) == 0 {
+		http.Error(w, "missing dates parameter", http.StatusBadRequest)
+		return
+	}
+	if routeShortName == "" {
+		http.Error(w, "missing routeShortName", http.StatusBadRequest)
+		return
+	}
+	for _, date := range dates {
+		if _, err := time.Parse("2006-01-02", date); err != nil {
+			http.Error(w, "invalid date format (expected YYYY-MM-DD)", http.StatusBadRequest)
+			return
+		}
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	defer cancel()
+
+	trend, err := s.queryRouteDelayTrend(ctx, dates, routeShortName, routeType)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("query failed: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if trend == nil {
+		trend = map[string]*delaySummary{}
+	}
+	_ = json.NewEncoder(w).Encode(trend)
+}
+
 func (s *server) handleStopPointRoutes(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
