@@ -153,7 +153,9 @@ export function fetchRouteDelayTrend({
         return response.json();
     }
 
-    function mapTrendByDateCB(trendByDate: RouteDelayTrendSummaryResponse): RouteDelayTrendPoint[] {
+    function mapTrendByDateACB(
+        trendByDate: RouteDelayTrendSummaryResponse
+    ): RouteDelayTrendPoint[] {
         function createTrendPointCB(date: string): RouteDelayTrendPoint {
             const routeSummary = trendByDate[date] ?? null;
             if (!routeSummary) {
@@ -182,7 +184,7 @@ export function fetchRouteDelayTrend({
         headers: getBackendAuthHeaders(),
     })
         .then(handleResponseACB)
-        .then(mapTrendByDateCB)
+        .then(mapTrendByDateACB)
         .catch(catchErrorACB);
 }
 
