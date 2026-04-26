@@ -22,6 +22,7 @@ type MapViewProps = {
     mapCenterOnUserRequestedAt: number;
     onRequestMapCenterOnUser: () => void;
     tMapDeparturePanel: TranslationStrings["mapDeparturePanel"];
+    tMap: TranslationStrings["map"];
     tSearchBar: TranslationStrings["searchBar"];
     tMapSearch: TranslationStrings["mapSearch"];
     tAppStyleSelector: TranslationStrings["appStyleSelector"];
@@ -48,6 +49,7 @@ export function MapView({
     mapCenterOnUserRequestedAt,
     onRequestMapCenterOnUser,
     tMapDeparturePanel,
+    tMap,
     tSearchBar,
     tMapSearch,
     tAppStyleSelector,
@@ -92,7 +94,7 @@ export function MapView({
                         },
                     }}
                 >
-                    <Tooltip title="Center on my location">
+                    <Tooltip title={tMap.centerOnMyLocation}>
                         <IconButton
                             onClick={onRequestMapCenterOnUser}
                             sx={{
@@ -106,7 +108,7 @@ export function MapView({
                                 width: 44,
                                 height: 44,
                             }}
-                            aria-label="center map on user's location"
+                            aria-label={tMap.centerOnMyLocationAriaLabel}
                         >
                             <MyLocationIcon />
                         </IconButton>

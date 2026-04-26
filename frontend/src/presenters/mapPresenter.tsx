@@ -88,6 +88,7 @@ export function MapPresenter() {
     const mapCenterOnUserRequestedAt = useAppSelector(getMapCenterOnUserRequestedAtCB);
     const selectedTransportationMode = useAppSelector(getMapTransportationModeFilterCB);
     const hideStopsWithoutDepartures = useAppSelector(getHideStopsWithoutDeparturesCB);
+    const tMap = translations[currentLanguage].map;
 
     const routesByStopPointsUnavailable = routesByStopPointError !== null || !routesByStopPoint;
     const transportationModeOptions = useMemo(() => {
@@ -144,7 +145,7 @@ export function MapPresenter() {
     );
 
     if (isSitesLoading || !sites || isStopPointsLoading || !stopPoints) {
-        return <Suspense fullscreen message={translations[currentLanguage].map.loading} />;
+        return <Suspense fullscreen message={tMap.loading} />;
     }
 
     function closeDeparturesViewACB() {
@@ -176,7 +177,7 @@ export function MapPresenter() {
         if (!navigator.geolocation) {
             dispatch(
                 showSnackbar({
-                    message: "Geolocation is not supported by your browser.",
+                    message: tMap.geolocationUnsupported,
                     severity: "error",
                 })
             );
@@ -186,7 +187,7 @@ export function MapPresenter() {
         if (!window.isSecureContext) {
             dispatch(
                 showSnackbar({
-                    message: "Location access requires a secure connection. Please check your URL.",
+                    message: tMap.locationSecureConnectionRequired,
                     severity: "warning",
                 })
             );
@@ -218,14 +219,13 @@ export function MapPresenter() {
         }
 
         function finalErrorCallback(error: GeolocationPositionError) {
-            let message = "Failed to get your location.";
+            let message = tMap.locationLookupFailed;
             if (error.code === error.PERMISSION_DENIED) {
-                message =
-                    "Location permission denied. Please click the lock icon in your browser's address bar to reset permissions.";
+                message = tMap.locationPermissionDenied;
             } else if (error.code === error.POSITION_UNAVAILABLE) {
-                message = "Location information is unavailable on your device.";
+                message = tMap.locationUnavailable;
             } else if (error.code === error.TIMEOUT) {
-                message = "Location request timed out. Please try again.";
+                message = tMap.locationTimeout;
             }
 
             dispatch(
@@ -238,7 +238,7 @@ export function MapPresenter() {
 
         dispatch(
             showSnackbar({
-                message: "Finding your location...",
+                message: tMap.findingLocation,
                 severity: "info",
             })
         );
@@ -259,7 +259,7 @@ export function MapPresenter() {
         if (!user) {
             dispatch(
                 showSnackbar({
-                    message: "Log in to save favorite stops.",
+                    message: tMap.loginToSaveFavoriteStops,
                     severity: "info",
                 })
             );
@@ -270,7 +270,9 @@ export function MapPresenter() {
         dispatch(toggleFavoriteSiteId(selectedSite.id));
         dispatch(
             showSnackbar({
-                message: isFavorite ? "Removed stop from favorites." : "Added stop to favorites.",
+                message: isFavorite
+                    ? tMap.stopRemovedFromFavorites
+                    : tMap.stopAddedToFavorites,
                 severity: "success",
             })
         );
@@ -334,6 +336,7 @@ export function MapPresenter() {
             mapCenterOnUserRequestedAt={mapCenterOnUserRequestedAt}
             onRequestMapCenterOnUser={handleRequestMapCenterOnUserACB}
             tMapDeparturePanel={translations[currentLanguage].mapDeparturePanel}
+            tMap={tMap}
             tSearchBar={translations[currentLanguage].searchBar}
             tMapSearch={translations[currentLanguage].mapSearch}
             tAppStyleSelector={translations[currentLanguage].appStyleSelector}
