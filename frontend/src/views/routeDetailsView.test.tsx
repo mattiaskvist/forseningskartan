@@ -1,6 +1,6 @@
 import { screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { RouteDetailsPage } from "./RouteDetailsPage";
+import { RouteDetailsView } from "./routeDetailsView";
 import { DelaySummary } from "../types/historicalDelay";
 import { renderWithTheme } from "../test/renderWithTheme";
 import { translations } from "../utils/translations";
@@ -21,10 +21,10 @@ const routeSummaryFixture: DelaySummary = {
     departureAheadStats: { count: 2, avgSeconds: 90 },
 };
 
-describe("RouteDetailsPage", () => {
+describe("RouteDetailsView", () => {
     it("renders unique trips count", () => {
         renderWithTheme(
-            <RouteDetailsPage
+            <RouteDetailsView
                 routeSummary={routeSummaryFixture}
                 selectedEventType="departure"
                 trendPoints={[]}

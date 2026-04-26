@@ -3,13 +3,13 @@ import { Box, Button, Divider, Paper, Typography } from "@mui/material";
 import { DelaySummary } from "../types/historicalDelay";
 import { EventType } from "../types/departureDelay";
 import { getRouteDisplayName, getRouteTypeString } from "../utils/route";
-import { DepartureDelayStats } from "./DepartureDelayStats";
-import { RouteDelayTrendChart } from "./RouteDelayTrendChart";
-import { Suspense } from "./Suspense";
+import { DepartureDelayStats } from "../components/DepartureDelayStats";
+import { RouteDelayTrendChart } from "../components/RouteDelayTrendChart";
+import { Suspense } from "../components/Suspense";
 import { RouteDelayTrendPoint } from "../types/routeDelays";
 import { TranslationStrings } from "../utils/translations";
 
-type RouteDetailsPageProps = {
+type RouteDetailsViewProps = {
     routeSummary: DelaySummary;
     selectedEventType: EventType;
     trendPoints: RouteDelayTrendPoint[];
@@ -19,7 +19,7 @@ type RouteDetailsPageProps = {
     tStats: TranslationStrings["departureDelayStats"];
 };
 
-export function RouteDetailsPage({
+export function RouteDetailsView({
     routeSummary,
     selectedEventType,
     trendPoints,
@@ -27,7 +27,7 @@ export function RouteDetailsPage({
     onBackToRoutes,
     t,
     tStats,
-}: RouteDetailsPageProps) {
+}: RouteDetailsViewProps) {
     return (
         <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2, backdropFilter: "blur(4px)" }}>
             <div className="flex items-center justify-between">

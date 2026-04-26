@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { Departure } from "../types/sl";
 import { formatDelay, formatTime, getDelayMinutes } from "../utils/time";
-import { DepartureHistoricalDelays } from "./DepartureHistoricalDelays";
+import { DepartureHistoricalDelays } from "../components/DepartureHistoricalDelays";
 import { CustomDateRange, DatePreset, EventType } from "../types/departureDelay";
 import { DelaySummary } from "../types/historicalDelay";
 import { TranslationStrings } from "../utils/translations";
@@ -20,7 +20,7 @@ function DetailRow({ label, value }: { label: string; value: string }) {
     );
 }
 
-type DepartureDetailsProps = {
+type DepartureDetailsViewProps = {
     departure: Departure;
     onBackToList: () => void;
     availableDates: string[];
@@ -38,7 +38,7 @@ type DepartureDetailsProps = {
     tDatePicker: TranslationStrings["availableDatesPicker"];
 };
 
-export function DepartureDetails({
+export function DepartureDetailsView({
     departure,
     onBackToList,
     availableDates,
@@ -54,7 +54,7 @@ export function DepartureDetails({
     tDelayStats,
     tDelayControls,
     tDatePicker,
-}: DepartureDetailsProps) {
+}: DepartureDetailsViewProps) {
     const [selectedEventType, setSelectedEventType] = useState<EventType>("departure");
 
     const selectedDepartureDate = dayjs(departure.expected ?? departure.scheduled).utc();

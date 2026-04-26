@@ -40,7 +40,7 @@ import { routeTypesToTransportationModes } from "../utils/transportationMode";
 import { RouteDelayRoutesView } from "../views/routeDelayRoutesView";
 import { RouteDelayLeaderboardView } from "../views/routeDelayLeaderboardView";
 import { RouteDelayRouteFallbackView } from "../views/routeDelayRouteFallbackView";
-import { RouteDetailsPage } from "../components/RouteDetailsPage";
+import { RouteDetailsView } from "../views/routeDetailsView";
 
 function getRouteModeKey(summary: DelaySummary): RouteType | null {
     return summary.route?.type ?? null;
@@ -246,7 +246,7 @@ export function RouteDelayPresenter() {
             ) : null}
         </div>
     ) : selectedRouteSummary ? (
-        <RouteDetailsPage
+        <RouteDetailsView
             routeSummary={selectedRouteSummary}
             selectedEventType={selectedEventType}
             trendPoints={selectedRouteTrend}

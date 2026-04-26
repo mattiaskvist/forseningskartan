@@ -60,8 +60,8 @@ import {
 } from "../utils/transportationMode";
 import { getSitesWithRoutes } from "../utils/site";
 import { translations } from "../utils/translations";
-import { DepartureDetails } from "../components/DepartureDetails";
-import { DepartureList } from "../components/DepartureList";
+import { DepartureDetailsView } from "../views/departureDetailsView";
+import { DepartureListView } from "../views/departureListView";
 
 export function MapPresenter() {
     const dispatch = useAppDispatch();
@@ -301,7 +301,7 @@ export function MapPresenter() {
               content: isDeparturesLoading ? (
                   <Suspense message={translations[currentLanguage].departure.loading} />
               ) : selectedDeparture ? (
-                  <DepartureDetails
+                  <DepartureDetailsView
                       departure={selectedDeparture}
                       onBackToList={returnToDepartureListACB}
                       availableDates={availableDates}
@@ -319,7 +319,7 @@ export function MapPresenter() {
                       tDatePicker={translations[currentLanguage].availableDatesPicker}
                   />
               ) : upcomingDepartures.length > 0 ? (
-                  <DepartureList
+                  <DepartureListView
                       departures={upcomingDepartures}
                       onSelectDeparture={selectDepartureACB}
                       t={translations[currentLanguage].departureList}
