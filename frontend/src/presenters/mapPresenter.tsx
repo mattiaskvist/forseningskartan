@@ -9,6 +9,7 @@ import {
     getDepartureHistoricalDelayLoadingCB,
     getDepartureHistoricalDelaySummaryCB,
     getDeparturesCB,
+    getDeparturesLastUpdatedCB,
     getDeparturesLoadingCB,
     getFavoriteSiteIdsCB,
     getHideStopsWithoutDeparturesCB,
@@ -59,15 +60,27 @@ import {
     routeTypesToTransportationModes,
 } from "../utils/transportationMode";
 import { getSitesWithRoutes } from "../utils/site";
+import { getDepartures } from "../store/actions";
+import { formatTime } from "../utils/time";
 import { translations } from "../utils/translations";
 import { DepartureDetailsView } from "../views/departureDetailsView";
 import { DepartureListView } from "../views/departureListView";
+
+// A refreshed departure may have changed prediction data, so match on stable trip identity.
+function isSameDepartureCB(a: Departure, b: Departure): boolean {
+    return (
+        a.journey.id === b.journey.id &&
+        a.stop_point.id === b.stop_point.id &&
+        a.scheduled === b.scheduled
+    );
+}
 
 export function MapPresenter() {
     const dispatch = useAppDispatch();
     const selectedSite = useAppSelector(getSelectedSiteCB);
     const departureResponse = useAppSelector(getDeparturesCB);
     const isDeparturesLoading = useAppSelector(getDeparturesLoadingCB);
+    const departuresLastUpdated = useAppSelector(getDeparturesLastUpdatedCB);
     const availableDates = useAppSelector(getAggregatedDatesCB);
     const selectedDeparture = useAppSelector(getSelectedDepartureCB);
     const selectedDatePreset = useAppSelector(getSelectedDatePresetCB);
@@ -287,6 +300,30 @@ export function MapPresenter() {
         dispatch(setHideStopsWithoutDepartures(value));
     }
 
+    async function refreshDeparturesACB() {
+        if (!selectedSite) {
+            return;
+        }
+
+        try {
+            const refreshedDepartureResponse = await dispatch(
+                getDepartures(selectedSite.id)
+            ).unwrap();
+            if (!selectedDeparture) {
+                return;
+            }
+
+            // keep the detail panel on the same trip after refresh, or return to the list if it disappeared.
+            const refreshedDeparture =
+                refreshedDepartureResponse.departures?.find((departure) =>
+                    isSameDepartureCB(departure, selectedDeparture)
+                ) ?? null;
+            dispatch(setSelectedDeparture(refreshedDeparture));
+        } catch {
+            dispatch(showSnackbar({ message: tMap.refreshDeparturesFailed, severity: "error" }));
+        }
+    }
+
     const departures = departureResponse?.departures ?? [];
     const upcomingDepartures = getUpcomingDepartures(departures);
 
@@ -294,6 +331,13 @@ export function MapPresenter() {
         ? {
               selectedSiteName: selectedSite.name,
               onClose: closeDeparturesViewACB,
+              isLoading: isDeparturesLoading,
+              lastUpdatedText: departuresLastUpdated
+                  ? translations[currentLanguage].departureHeader.lastUpdated(
+                        formatTime(departuresLastUpdated)
+                    )
+                  : null,
+              onRefreshDepartures: refreshDeparturesACB,
               isFavoriteStop: favoriteSiteIds.includes(selectedSite.id),
               isUserLoggedIn: Boolean(user),
               onToggleFavoriteStop: toggleFavoriteStopACB,

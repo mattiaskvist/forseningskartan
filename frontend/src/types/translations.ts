@@ -25,6 +25,8 @@ export interface DepartureHeaderStrings {
     unfavorite: string;
     favorite: string;
     loginFavorite: string;
+    refresh: string;
+    lastUpdated: (time: string) => string;
     close: string;
 }
 
@@ -58,6 +60,7 @@ export interface MapStrings {
     loginToSaveFavoriteStops: string;
     stopRemovedFromFavorites: string;
     stopAddedToFavorites: string;
+    refreshDeparturesFailed: string;
 }
 
 export interface MapSearchStrings {
