@@ -18,6 +18,8 @@ export type RouteDelayTrendParams = {
     eventType: EventType;
 };
 
+type RouteDelayTrendSummaryResponse = Record<string, DelaySummary>;
+
 export type RoutesByStopPoint = Record<string, RouteMeta[]>;
 
 export const backendBaseURL = import.meta.env.VITE_BACKEND_API_URL ?? "http://localhost:8081";
@@ -139,18 +141,22 @@ export function fetchRouteDelayTrend({
         return Promise.resolve([]);
     }
 
-    function createDatePromiseCB(date: string): Promise<RouteDelayTrendPoint> {
-        function processDailySummariesACB(
-            dailySummaries: DelaySummary[] | null
-        ): RouteDelayTrendPoint {
-            function isMatchingRouteCB(summary: DelaySummary): boolean {
-                return (
-                    summary.route?.shortName === routeShortName && summary.route?.type === routeType
-                );
-            }
-            const selectedRouteSummary = dailySummaries?.find(isMatchingRouteCB) ?? null;
+    const params = new URLSearchParams();
+    appendListParam(params, "dates", dates);
+    params.set("routeShortName", routeShortName);
+    params.set("routeType", routeType);
 
-            if (!selectedRouteSummary) {
+    function handleResponseACB(response: Response): Promise<RouteDelayTrendSummaryResponse> {
+        if (!response.ok) {
+            throw new Error(`Failed to fetch route delay trend: ${response.status}`);
+        }
+        return response.json();
+    }
+
+    function mapTrendByDateCB(trendByDate: RouteDelayTrendSummaryResponse): RouteDelayTrendPoint[] {
+        function createTrendPointCB(date: string): RouteDelayTrendPoint {
+            const routeSummary = trendByDate[date] ?? null;
+            if (!routeSummary) {
                 return {
                     date,
                     avgDelayMinutes: null,
@@ -159,21 +165,11 @@ export function fetchRouteDelayTrend({
 
             return {
                 date,
-                avgDelayMinutes: getAvgDelayMinutes(selectedRouteSummary, eventType),
+                avgDelayMinutes: getAvgDelayMinutes(routeSummary, eventType),
             };
         }
 
-        return fetchDailyRouteDelays([date]).then(processDailySummariesACB);
-    }
-
-    const datePromises = dates.map(createDatePromiseCB);
-
-    function comparePointsByDateCB(a: RouteDelayTrendPoint, b: RouteDelayTrendPoint): number {
-        return a.date.localeCompare(b.date);
-    }
-
-    function sortResultsACB(trendResults: RouteDelayTrendPoint[]): RouteDelayTrendPoint[] {
-        return [...trendResults].sort(comparePointsByDateCB);
+        return [...dates].sort().map(createTrendPointCB);
     }
 
     function catchErrorACB(error: unknown): RouteDelayTrendPoint[] {
@@ -181,7 +177,13 @@ export function fetchRouteDelayTrend({
         return [];
     }
 
-    return Promise.all(datePromises).then(sortResultsACB).catch(catchErrorACB);
+    const fullURL = `${backendBaseURL}/api/route-delay-trend?${params.toString()}`;
+    return fetch(fullURL, {
+        headers: getBackendAuthHeaders(),
+    })
+        .then(handleResponseACB)
+        .then(mapTrendByDateCB)
+        .catch(catchErrorACB);
 }
 
 export function fetchStopPointRoutesByDate(date: string): Promise<RoutesByStopPoint | null> {
