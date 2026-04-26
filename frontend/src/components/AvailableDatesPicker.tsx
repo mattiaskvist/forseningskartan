@@ -3,7 +3,8 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Box } from "@mui/material";
 import dayjs, { Dayjs } from "dayjs";
 import minMax from "dayjs/plugin/minMax";
-import { CustomDateRange } from "../types/departureDelay";
+import { CustomDateRange, CustomDateRangeLabelMap } from "../types/departureDelay";
+import { getEffectiveCustomDateRange } from "../utils/time";
 
 dayjs.extend(minMax);
 
@@ -24,12 +25,16 @@ export function AvailableDatesPicker({
     const dayjsDates = availableDates.map(getDayjsDateCB);
     const minDate = dayjs.min(dayjsDates) ?? undefined;
     const maxDate = dayjs.max(dayjsDates) ?? undefined;
-    const selectedStartDayjsDate = selectedDateRange?.startDate
-        ? getDayjsDateCB(selectedDateRange.startDate)
+    const effectiveDateRange = getEffectiveCustomDateRange(selectedDateRange, availableDates);
+    const selectedStartDayjsDate = effectiveDateRange?.startDate
+        ? getDayjsDateCB(effectiveDateRange.startDate)
         : null;
-    const selectedEndDayjsDate = selectedDateRange?.endDate
-        ? getDayjsDateCB(selectedDateRange.endDate)
+    const selectedEndDayjsDate = effectiveDateRange?.endDate
+        ? getDayjsDateCB(effectiveDateRange.endDate)
         : null;
+    // mirror the opposite boundary in each picker so invalid ranges cannot be selected in the UI.
+    const startDateMax = selectedEndDayjsDate ?? maxDate;
+    const endDateMin = selectedStartDayjsDate ?? minDate;
 
     function shouldDisableDateCB(date: Dayjs): boolean {
         return !availableDates.includes(date.format("YYYY-MM-DD"));
@@ -75,9 +80,9 @@ export function AvailableDatesPicker({
                 <DatePicker
                     disabled={availableDates.length === 0}
                     format="YYYY-MM-DD"
-                    label="From date"
+                    label={CustomDateRangeLabelMap.startDate}
                     minDate={minDate}
-                    maxDate={maxDate}
+                    maxDate={startDateMax}
                     onChange={handleStartDateChangeACB}
                     shouldDisableDate={shouldDisableDateCB}
                     value={selectedStartDayjsDate}
@@ -85,8 +90,8 @@ export function AvailableDatesPicker({
                 <DatePicker
                     disabled={availableDates.length === 0}
                     format="YYYY-MM-DD"
-                    label="To date"
-                    minDate={minDate}
+                    label={CustomDateRangeLabelMap.endDate}
+                    minDate={endDateMin}
                     maxDate={maxDate}
                     onChange={handleEndDateChangeACB}
                     shouldDisableDate={shouldDisableDateCB}

@@ -48,6 +48,12 @@ export const DatePresetLabelMap: Record<DatePreset, string> = {
     lastWeekend: "Last weekend",
     customDate: "Custom date range",
 };
+
+export const CustomDateRangeLabelMap = {
+    startDate: "From date",
+    endDate: "To date",
+} as const;
+
 export const DatePresets: DatePreset[] = Object.keys(DatePresetLabelMap) as DatePreset[];
 
 export type DatePreset =

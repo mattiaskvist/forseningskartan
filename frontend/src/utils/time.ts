@@ -86,6 +86,35 @@ export function sortDatesDescendingCB(a: string, b: string): number {
     return dayjs(b).valueOf() - dayjs(a).valueOf();
 }
 
+export function getEffectiveCustomDateRange(
+    customDateRange: CustomDateRange | null,
+    availableDates: string[]
+): CustomDateRange | null {
+    const sortedDates = [...availableDates].sort(sortDatesDescendingCB);
+    const latestDate = sortedDates[0] ?? null;
+
+    // treat a half-filled range as a single-day selection, falling back to the latest date if needed.
+    const startDate = customDateRange?.startDate ?? customDateRange?.endDate ?? latestDate ?? null;
+    const endDate = customDateRange?.endDate ?? customDateRange?.startDate ?? latestDate ?? null;
+
+    if (!startDate || !endDate) {
+        return null;
+    }
+
+    // keep the returned range ordered so callers can use it directly for filtering and UI defaults.
+    if (dayjs(startDate).isAfter(dayjs(endDate), "day")) {
+        return {
+            startDate: endDate,
+            endDate: startDate,
+        };
+    }
+
+    return {
+        startDate,
+        endDate,
+    };
+}
+
 export function getDatesForPreset(
     selectedDatePreset: DatePreset,
     customDateRange: CustomDateRange | null,
@@ -93,7 +122,6 @@ export function getDatesForPreset(
 ): string[] {
     const referenceDate = dayjs().format("YYYY-MM-DD"); // relative to todays date
     const sortedDates = [...availableDates].sort(sortDatesDescendingCB);
-    const latestDate = sortedDates[0] ?? null;
 
     function isBeforeReferenceDateFilterCB(date: string): boolean {
         return isBeforeReferenceDateCB(date, referenceDate);
@@ -106,30 +134,6 @@ export function getDatesForPreset(
     const previousDates = sortedDates.filter(isBeforeReferenceDateFilterCB);
     const lastWeekDate = dayjs(referenceDate).subtract(7, "day").format("YYYY-MM-DD");
 
-    function getEffectiveCustomDateRange(): CustomDateRange | null {
-        // treat a half-filled range as a single-day selection, falling back to the latest date if needed.
-        const startDate =
-            customDateRange?.startDate ?? customDateRange?.endDate ?? latestDate ?? null;
-        const endDate =
-            customDateRange?.endDate ?? customDateRange?.startDate ?? latestDate ?? null;
-
-        if (!startDate || !endDate) {
-            return null;
-        }
-
-        if (dayjs(startDate).isAfter(dayjs(endDate), "day")) {
-            return {
-                startDate: endDate,
-                endDate: startDate,
-            };
-        }
-
-        return {
-            startDate,
-            endDate,
-        };
-    }
-
     switch (selectedDatePreset) {
         case "sameDayLastWeek":
             return availableDates.includes(lastWeekDate) ? [lastWeekDate] : [];
@@ -140,7 +144,10 @@ export function getDatesForPreset(
         case "lastWeekend":
             return previousDates.filter(isWeekendCB).slice(0, 2);
         case "customDate": {
-            const effectiveCustomDateRange = getEffectiveCustomDateRange();
+            const effectiveCustomDateRange = getEffectiveCustomDateRange(
+                customDateRange,
+                availableDates
+            );
 
             if (!effectiveCustomDateRange) {
                 return [];
