@@ -38,6 +38,7 @@ import { Departure, TransportationMode } from "../types/sl";
 import { DatePreset } from "../types/departureDelay";
 import { AppStyle } from "../types/appStyle";
 import { DepartureViewProps } from "../views/departureView";
+import { DepartureEmptyStateView } from "../views/departureEmptyStateView";
 import {
     recordRecentSearchSiteId,
     setAppStylePreference,
@@ -55,6 +56,8 @@ import {
 } from "../utils/transportationMode";
 import { getSitesWithRoutes } from "../utils/site";
 import { translations } from "../utils/translations";
+import { DepartureDetails } from "../components/DepartureDetails";
+import { DepartureList } from "../components/DepartureList";
 
 export function MapPresenter() {
     const dispatch = useAppDispatch();
@@ -204,34 +207,42 @@ export function MapPresenter() {
 
     const departureViewProps: DepartureViewProps | null = selectedSite
         ? {
-              upcomingDepartures,
-              selectedDeparture,
               selectedSiteName: selectedSite.name,
               onClose: closeDeparturesViewACB,
-              onSelectDeparture: selectDepartureACB,
-              onBackToList: returnToDepartureListACB,
-              isLoading: isDeparturesLoading,
-              availableDates,
-              selectedDelayDates,
-              selectedDepartureDelaySummary,
-              isDepartureHistoricalDelayLoading,
-              selectedDatePreset,
-              selectedCustomDate,
-              onDatePresetChange: setSelectedDatePresetACB,
-              onCustomDateChange: setSelectedCustomDateACB,
               isFavoriteStop: favoriteSiteIds.includes(selectedSite.id),
               isUserLoggedIn: Boolean(user),
               onToggleFavoriteStop: toggleFavoriteStopACB,
-              t: translations[currentLanguage].departure,
               tHeader: translations[currentLanguage].departureHeader,
-              tEmpty: translations[currentLanguage].departureEmpty,
-              tList: translations[currentLanguage].departureList,
-              tHistoricalDelays: translations[currentLanguage].departureHistoricalDelays,
-              tDelayStats: translations[currentLanguage].departureDelayStats,
-              tDelayControls: translations[currentLanguage].routeDelayControls,
-              tDatePicker: translations[currentLanguage].availableDatesPicker,
-              tDetails: translations[currentLanguage].departureDetails,
-              tTransportModes: translations[currentLanguage].transportModes,
+              content: isDeparturesLoading ? (
+                  <Suspense message={translations[currentLanguage].departure.loading} />
+              ) : selectedDeparture ? (
+                  <DepartureDetails
+                      departure={selectedDeparture}
+                      onBackToList={returnToDepartureListACB}
+                      availableDates={availableDates}
+                      selectedDelayDates={selectedDelayDates}
+                      selectedDepartureDelaySummary={selectedDepartureDelaySummary}
+                      isDepartureHistoricalDelayLoading={isDepartureHistoricalDelayLoading}
+                      selectedDatePreset={selectedDatePreset}
+                      selectedCustomDate={selectedCustomDate}
+                      onDatePresetChange={setSelectedDatePresetACB}
+                      onCustomDateChange={setSelectedCustomDateACB}
+                      t={translations[currentLanguage].departureDetails}
+                      tHistoricalDelays={translations[currentLanguage].departureHistoricalDelays}
+                      tDelayStats={translations[currentLanguage].departureDelayStats}
+                      tDelayControls={translations[currentLanguage].routeDelayControls}
+                      tDatePicker={translations[currentLanguage].availableDatesPicker}
+                  />
+              ) : upcomingDepartures.length > 0 ? (
+                  <DepartureList
+                      departures={upcomingDepartures}
+                      onSelectDeparture={selectDepartureACB}
+                      t={translations[currentLanguage].departureList}
+                      tTransportModes={translations[currentLanguage].transportModes}
+                  />
+              ) : (
+                  <DepartureEmptyStateView t={translations[currentLanguage].departureEmpty} />
+              ),
           }
         : null;
 
