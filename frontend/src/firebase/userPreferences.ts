@@ -1,5 +1,8 @@
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
-import { defaultUserPreferencesState, UserPreferencesState } from "../store/userPreferencesSlice";
+import {
+    defaultUserPreferencesState,
+    PersistedUserPreferencesState,
+} from "../store/userPreferencesSlice";
 import { appStyles, AppStyle } from "../types/appStyle";
 import { isLanguageCode } from "../utils/translations";
 import { db } from "./firestore";
@@ -21,9 +24,16 @@ function isIntegerSiteIdCB(siteId: unknown): siteId is number {
     return Number.isInteger(siteId);
 }
 
-export function sanitizeUserPreferences(candidate: unknown): UserPreferencesState {
+export function sanitizeUserPreferences(candidate: unknown): PersistedUserPreferencesState {
     if (candidate === null || typeof candidate !== "object") {
-        return { ...defaultUserPreferencesState };
+        return {
+            favoriteSiteIds: defaultUserPreferencesState.favoriteSiteIds,
+            recentSearchSiteIds: defaultUserPreferencesState.recentSearchSiteIds,
+            appStyle: defaultUserPreferencesState.appStyle,
+            language: defaultUserPreferencesState.language,
+            mapTransportationModeFilter: defaultUserPreferencesState.mapTransportationModeFilter,
+            hideStopsWithoutDepartures: defaultUserPreferencesState.hideStopsWithoutDepartures,
+        };
     }
 
     const parsedCandidate = candidate as {
@@ -68,7 +78,9 @@ export function sanitizeUserPreferences(candidate: unknown): UserPreferencesStat
     };
 }
 
-export async function fetchUserPreferences(uid: string): Promise<UserPreferencesState | null> {
+export async function fetchUserPreferences(
+    uid: string
+): Promise<PersistedUserPreferencesState | null> {
     const userPreferencesRef = doc(db, USER_PREFERENCES_COLLECTION, uid);
     const userPreferencesSnapshot = await getDoc(userPreferencesRef);
 
@@ -79,12 +91,26 @@ export async function fetchUserPreferences(uid: string): Promise<UserPreferences
     return sanitizeUserPreferences(userPreferencesSnapshot.data());
 }
 
-export async function saveUserPreferences(uid: string, preferences: UserPreferencesState) {
+export async function saveUserPreferences(uid: string, preferences: PersistedUserPreferencesState) {
     const userPreferencesRef = doc(db, USER_PREFERENCES_COLLECTION, uid);
+    const {
+        favoriteSiteIds,
+        recentSearchSiteIds,
+        appStyle,
+        language,
+        mapTransportationModeFilter,
+        hideStopsWithoutDepartures,
+    } = preferences;
+
     await setDoc(
         userPreferencesRef,
         {
-            ...preferences,
+            favoriteSiteIds,
+            recentSearchSiteIds,
+            appStyle,
+            language,
+            mapTransportationModeFilter,
+            hideStopsWithoutDepartures,
             updatedAt: serverTimestamp(),
         },
         { merge: true }

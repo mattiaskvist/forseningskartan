@@ -23,6 +23,7 @@ describe("userPreferencesSlice", () => {
             language: "en",
             mapTransportationModeFilter: null,
             hideStopsWithoutDepartures: true,
+            isLoadingSavedPreferences: false,
         });
     });
 
@@ -81,6 +82,7 @@ describe("userPreferencesSlice", () => {
             language: "sv",
             mapTransportationModeFilter: null,
             hideStopsWithoutDepartures: true,
+            isLoadingSavedPreferences: false,
         });
     });
 

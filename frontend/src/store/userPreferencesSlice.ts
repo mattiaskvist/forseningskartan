@@ -108,13 +108,18 @@ export function clearStoredRecentSearchSiteIds() {
     }
 }
 
-export type UserPreferencesState = {
+export type PersistedUserPreferencesState = {
     favoriteSiteIds: number[];
     recentSearchSiteIds: number[];
     appStyle: AppStyle;
     language: LanguageCode;
     mapTransportationModeFilter: TransportationMode | null;
     hideStopsWithoutDepartures: boolean;
+};
+
+// no need to persist the loading state
+export type UserPreferencesState = PersistedUserPreferencesState & {
+    isLoadingSavedPreferences: boolean;
 };
 
 export const defaultUserPreferencesState: UserPreferencesState = {
@@ -124,6 +129,7 @@ export const defaultUserPreferencesState: UserPreferencesState = {
     language: getStoredLanguage(),
     mapTransportationModeFilter: null,
     hideStopsWithoutDepartures: true,
+    isLoadingSavedPreferences: false,
 };
 
 function normalizeFavoriteSiteIds(favoriteSiteIds: number[]): number[] {
@@ -186,7 +192,10 @@ export const userPreferencesSlice = createSlice({
             state.language = action.payload;
             storeLanguage(action.payload);
         },
-        applyLoadedUserPreferences: (state, action: PayloadAction<UserPreferencesState>) => {
+        applyLoadedUserPreferences: (
+            state,
+            action: PayloadAction<PersistedUserPreferencesState>
+        ) => {
             state.favoriteSiteIds = normalizeFavoriteSiteIds(action.payload.favoriteSiteIds);
             state.recentSearchSiteIds = normalizeRecentSearchSiteIds(
                 action.payload.recentSearchSiteIds
@@ -194,9 +203,13 @@ export const userPreferencesSlice = createSlice({
             state.appStyle = action.payload.appStyle;
             state.mapTransportationModeFilter = action.payload.mapTransportationModeFilter;
             state.hideStopsWithoutDepartures = action.payload.hideStopsWithoutDepartures;
+            state.isLoadingSavedPreferences = false;
             storeAppStyle(action.payload.appStyle);
             state.language = action.payload.language;
             storeLanguage(action.payload.language);
+        },
+        setUserPreferencesLoading: (state, action: PayloadAction<boolean>) => {
+            state.isLoadingSavedPreferences = action.payload;
         },
         setMapTransportationModeFilter: (
             state,
@@ -217,6 +230,7 @@ export const {
     applyLoadedUserPreferences,
     recordRecentSearchSiteId,
     clearRecentSearchSiteIds,
+    setUserPreferencesLoading,
     setMapTransportationModeFilter,
     setHideStopsWithoutDepartures,
 } = userPreferencesSlice.actions;

@@ -28,6 +28,7 @@ describe("SidebarView favorites", () => {
                     { id: 10, name: "Odenplan", gid: 10, lat: 0, lon: 0 },
                     { id: 20, name: "Fridhemsplan", gid: 20, lat: 0, lon: 0 },
                 ]}
+                isFavoriteStopsLoading={false}
                 onToggle={vi.fn()}
                 onNavigate={vi.fn()}
                 onLogout={vi.fn()}
@@ -58,6 +59,7 @@ describe("SidebarView favorites", () => {
                 currentPath="/"
                 user={null}
                 favoriteStops={[{ id: 10, name: "Odenplan", gid: 10, lat: 0, lon: 0 }]}
+                isFavoriteStopsLoading={false}
                 onToggle={vi.fn()}
                 onNavigate={vi.fn()}
                 onLogout={vi.fn()}
@@ -82,6 +84,7 @@ describe("SidebarView favorites", () => {
                 currentPath="/"
                 user={mockUser}
                 favoriteStops={[]}
+                isFavoriteStopsLoading={false}
                 onToggle={vi.fn()}
                 onNavigate={vi.fn()}
                 onLogout={vi.fn()}
@@ -108,6 +111,7 @@ describe("SidebarView favorites", () => {
                 currentPath="/"
                 user={mockUser}
                 favoriteStops={[]}
+                isFavoriteStopsLoading={false}
                 onToggle={vi.fn()}
                 onNavigate={vi.fn()}
                 onLogout={vi.fn()}
@@ -123,5 +127,30 @@ describe("SidebarView favorites", () => {
 
         fireEvent.click(screen.getByRole("button", { name: "Light" }));
         expect(onAppStyleChange).toHaveBeenCalledWith("Light");
+    });
+
+    it("shows favorite stop loading state while saved preferences load", () => {
+        renderWithTheme(
+            <SidebarView
+                isOpen
+                currentPath="/"
+                user={mockUser}
+                favoriteStops={[]}
+                isFavoriteStopsLoading
+                onToggle={vi.fn()}
+                onNavigate={vi.fn()}
+                onLogout={vi.fn()}
+                onSelectFavoriteStop={vi.fn()}
+                appStyle="Dark"
+                onAppStyleChange={vi.fn()}
+                currentLanguage="en"
+                onLanguageChange={vi.fn()}
+                t={translations.en.sideBar}
+                tAppStyleSelector={translations.en.appStyleSelector}
+            />
+        );
+
+        expect(screen.getByText("Loading favorite stops...")).toBeInTheDocument();
+        expect(screen.queryByText("Select a stop to favorite it")).not.toBeInTheDocument();
     });
 });

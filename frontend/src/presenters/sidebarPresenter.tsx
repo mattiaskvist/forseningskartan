@@ -2,7 +2,14 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { SidebarView } from "../views/sidebarView";
 import { useAppDispatch, useAppSelector } from "../store/store";
-import { getAppStylePreferenceCB, getAuthUserCB, getFavoriteSitesCB } from "../store/selectors";
+import {
+    getAppStylePreferenceCB,
+    getAuthLoadingCB,
+    getAuthUserCB,
+    getFavoriteSitesCB,
+    getSitesLoadingCB,
+    getUserPreferencesLoadingCB,
+} from "../store/selectors";
 import { showSnackbar } from "../store/snackbarSlice";
 import { selectSite } from "../store/selection";
 import { logoutCurrentUser } from "../store/authThunks";
@@ -18,8 +25,13 @@ export function SidebarPresenter() {
     const navigate = useNavigate();
     const location = useLocation();
     const user = useAppSelector(getAuthUserCB);
+    const isAuthLoading = useAppSelector(getAuthLoadingCB);
     const favoriteSites = useAppSelector(getFavoriteSitesCB);
+    const isUserPreferencesLoading = useAppSelector(getUserPreferencesLoadingCB);
+    const isSitesLoading = useAppSelector(getSitesLoadingCB);
     const appStyle = useAppSelector(getAppStylePreferenceCB);
+    const isFavoriteStopsLoading =
+        isAuthLoading || Boolean(user && (isUserPreferencesLoading || isSitesLoading));
     const currentLanguage = useAppSelector(getCurrentLanguageCB);
     const tAccount = translations[currentLanguage].account;
 
@@ -66,6 +78,7 @@ export function SidebarPresenter() {
             currentPath={location.pathname}
             user={user}
             favoriteStops={favoriteSites}
+            isFavoriteStopsLoading={isFavoriteStopsLoading}
             onToggle={toggleSidebarCB}
             onNavigate={navigateCB}
             onLogout={handleLogoutACB}

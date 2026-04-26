@@ -110,6 +110,7 @@ export interface SideBarStrings {
     style: string;
     language: string;
     favoriteStops: string;
+    loadingFavoriteStops: string;
     loginToFavorite: string;
     selectToFavorite: string;
     navigation: string;
