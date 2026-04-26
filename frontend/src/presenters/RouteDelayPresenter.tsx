@@ -25,7 +25,12 @@ import {
 } from "../store/reducers";
 import { Suspense } from "../components/Suspense";
 import { DelaySummary, RouteType } from "../types/historicalDelay";
-import { CustomDateRange, DatePreset, EventType, getPresetDescription } from "../types/departureDelay";
+import {
+    CustomDateRange,
+    DatePreset,
+    EventType,
+    getPresetDescription,
+} from "../types/departureDelay";
 import { translations } from "../utils/translations";
 import { TransportationMode, transportationModeToRouteType } from "../types/sl";
 import { PageSizeOption, RouteDelayListItem, RouteDelaySection } from "../types/routeDelays";
