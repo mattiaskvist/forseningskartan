@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
     getSites,
     getDepartures,
@@ -12,13 +12,15 @@ import {
 import { RoutesByStopPoint } from "../api/backend";
 import { Departure, DepartureResponse, Site, StopPoint, TransportationMode } from "../types/sl";
 import { DelaySummary } from "../types/historicalDelay";
-import { DatePreset, EventType } from "../types/departureDelay";
+import { CustomDateRange, DatePreset, EventType } from "../types/departureDelay";
 import { RouteDelayTrendPoint } from "../types/routeDelays";
 import { StopPointGidsBySiteId } from "../utils/site";
 
 type SitesState = {
     data: Site[] | null;
     selectedSiteId: number | null;
+    userLocation: { lat: number; lon: number } | null;
+    mapCenterOnUserRequestedAt: number;
     isLoading: boolean;
     error: Error | null;
 };
@@ -76,12 +78,12 @@ type RouteDelayTrendState = {
 type DepartureUIState = {
     selectedDeparture: Departure | null;
     selectedDatePreset: DatePreset;
-    selectedCustomDate: string | null;
+    selectedCustomDateRange: CustomDateRange | null;
 };
 
 type RouteDelayUIState = {
     selectedDatePreset: DatePreset;
-    selectedCustomDate: string | null;
+    selectedCustomDateRange: CustomDateRange | null;
     selectedEventType: EventType;
     selectedTransportationMode: TransportationMode;
     selectedRouteKey: string | null;
@@ -89,10 +91,33 @@ type RouteDelayUIState = {
 
 export const sitesSlice = createSlice({
     name: "sites",
-    initialState: { data: null, selectedSiteId: null, isLoading: false, error: null } as SitesState,
+    initialState: {
+        data: null,
+        selectedSiteId: null,
+        userLocation: null,
+        mapCenterOnUserRequestedAt: 0,
+        isLoading: false,
+        error: null,
+    } as SitesState,
     reducers: {
         setSelectedSiteId: (state: SitesState, action: { payload: number | null }) => {
             state.selectedSiteId = action.payload;
+        },
+        setUserLocation: (
+            state: SitesState,
+            action: { payload: { lat: number; lon: number } | null }
+        ) => {
+            state.userLocation = action.payload;
+        },
+        requestMapCenterOnUser: {
+            // reducers should be pure functions, so we can't use Date.now() inside the reducer.
+            // instead we use a prepare function to generate a unique timestamp for each action.
+            prepare: () => {
+                return { payload: Date.now() };
+            },
+            reducer: (state: SitesState, action: PayloadAction<number>) => {
+                state.mapCenterOnUserRequestedAt = action.payload;
+            },
         },
     },
     extraReducers: (builder) => {
@@ -114,7 +139,7 @@ export const sitesSlice = createSlice({
     },
 });
 
-export const { setSelectedSiteId } = sitesSlice.actions;
+export const { setSelectedSiteId, setUserLocation, requestMapCenterOnUser } = sitesSlice.actions;
 
 export const departuresSlice = createSlice({
     name: "departures",
@@ -372,31 +397,31 @@ export const departureUISlice = createSlice({
     initialState: {
         selectedDeparture: null,
         selectedDatePreset: "sameDayLastWeek",
-        selectedCustomDate: null,
+        selectedCustomDateRange: null,
     } as DepartureUIState,
     reducers: {
         setSelectedDeparture: (state, action: { payload: Departure | null }) => {
             state.selectedDeparture = action.payload;
             state.selectedDatePreset = "sameDayLastWeek";
-            state.selectedCustomDate = null;
+            state.selectedCustomDateRange = null;
         },
         setSelectedDatePreset: (state, action: { payload: DatePreset }) => {
             state.selectedDatePreset = action.payload;
         },
-        setSelectedCustomDate: (state, action: { payload: string | null }) => {
-            state.selectedCustomDate = action.payload;
+        setSelectedCustomDateRange: (state, action: { payload: CustomDateRange | null }) => {
+            state.selectedCustomDateRange = action.payload;
         },
     },
 });
 
-export const { setSelectedDeparture, setSelectedDatePreset, setSelectedCustomDate } =
+export const { setSelectedDeparture, setSelectedDatePreset, setSelectedCustomDateRange } =
     departureUISlice.actions;
 
 export const routeDelayUISlice = createSlice({
     name: "routeDelayUI",
     initialState: {
         selectedDatePreset: "last7Days",
-        selectedCustomDate: null,
+        selectedCustomDateRange: null,
         selectedEventType: "departure",
         selectedTransportationMode: "BUS",
         selectedRouteKey: null,
@@ -406,11 +431,11 @@ export const routeDelayUISlice = createSlice({
             state.selectedDatePreset = action.payload;
 
             if (action.payload !== "customDate") {
-                state.selectedCustomDate = null;
+                state.selectedCustomDateRange = null;
             }
         },
-        setRouteDelayCustomDate: (state, action: { payload: string | null }) => {
-            state.selectedCustomDate = action.payload;
+        setRouteDelayCustomDateRange: (state, action: { payload: CustomDateRange | null }) => {
+            state.selectedCustomDateRange = action.payload;
         },
         setRouteDelayEventType: (state, action: { payload: EventType }) => {
             state.selectedEventType = action.payload;
@@ -427,7 +452,7 @@ export const routeDelayUISlice = createSlice({
 
 export const {
     setRouteDelayDatePreset,
-    setRouteDelayCustomDate,
+    setRouteDelayCustomDateRange,
     setRouteDelayEventType,
     setRouteDelayTransportationMode,
     setRouteDelaySelectedRouteKey,

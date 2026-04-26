@@ -4,6 +4,7 @@ import {
     PersistedUserPreferencesState,
 } from "../store/userPreferencesSlice";
 import { appStyles, AppStyle } from "../types/appStyle";
+import { isLanguageCode } from "../utils/translations";
 import { db } from "./firestore";
 import { TransportationMode, transportationModes } from "../types/sl";
 
@@ -29,6 +30,7 @@ export function sanitizeUserPreferences(candidate: unknown): PersistedUserPrefer
             favoriteSiteIds: defaultUserPreferencesState.favoriteSiteIds,
             recentSearchSiteIds: defaultUserPreferencesState.recentSearchSiteIds,
             appStyle: defaultUserPreferencesState.appStyle,
+            language: defaultUserPreferencesState.language,
             mapTransportationModeFilter: defaultUserPreferencesState.mapTransportationModeFilter,
             hideStopsWithoutDepartures: defaultUserPreferencesState.hideStopsWithoutDepartures,
         };
@@ -38,6 +40,7 @@ export function sanitizeUserPreferences(candidate: unknown): PersistedUserPrefer
         appStyle?: unknown;
         favoriteSiteIds?: unknown;
         recentSearchSiteIds?: unknown;
+        language?: unknown;
         mapTransportationModeFilter?: unknown;
         hideStopsWithoutDepartures?: unknown;
     };
@@ -52,6 +55,9 @@ export function sanitizeUserPreferences(candidate: unknown): PersistedUserPrefer
               .filter(isIntegerSiteIdCB) // keep only integers
               .slice(0, 5) // keep only the 5 most recent
         : [];
+    const language = isLanguageCode(parsedCandidate.language)
+        ? parsedCandidate.language
+        : defaultUserPreferencesState.language;
     const mapTransportationModeFilter =
         parsedCandidate.mapTransportationModeFilter === null
             ? null
@@ -66,6 +72,7 @@ export function sanitizeUserPreferences(candidate: unknown): PersistedUserPrefer
         appStyle,
         favoriteSiteIds,
         recentSearchSiteIds,
+        language,
         mapTransportationModeFilter,
         hideStopsWithoutDepartures,
     };
@@ -90,6 +97,7 @@ export async function saveUserPreferences(uid: string, preferences: PersistedUse
         favoriteSiteIds,
         recentSearchSiteIds,
         appStyle,
+        language,
         mapTransportationModeFilter,
         hideStopsWithoutDepartures,
     } = preferences;
@@ -100,6 +108,7 @@ export async function saveUserPreferences(uid: string, preferences: PersistedUse
             favoriteSiteIds,
             recentSearchSiteIds,
             appStyle,
+            language,
             mapTransportationModeFilter,
             hideStopsWithoutDepartures,
             updatedAt: serverTimestamp(),

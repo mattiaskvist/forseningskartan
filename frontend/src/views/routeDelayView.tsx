@@ -1,6 +1,6 @@
 import { Box, Paper, Typography } from "@mui/material";
 import { RouteDelayControls } from "../components/RouteDelayControls";
-import { DatePreset, EventType } from "../types/departureDelay";
+import { CustomDateRange, DatePreset, EventType } from "../types/departureDelay";
 import { TransportationMode } from "../types/sl";
 import {
     PageSizeOption,
@@ -15,13 +15,14 @@ import { RouteDelayRouteFallbackView } from "./routeDelayRouteFallbackView";
 import { RouteDetailsPage } from "../components/RouteDetailsPage";
 import { RouteDelaySectionToggleView } from "./routeDelaySectionToggleView";
 import { RouteDelayInfoView } from "./RouteDelayInfoView";
+import { TranslationStrings } from "../utils/translations";
 
 type RouteDelayViewProps = {
     selectedSection: RouteDelaySection;
     selectedDateText: string;
     routesInfoText: string;
     selectedDatePreset: DatePreset;
-    selectedCustomDate: string | null;
+    selectedCustomDateRange: CustomDateRange | null;
     selectedEventType: EventType;
     selectedTransportationMode: TransportationMode;
     searchQuery: string;
@@ -37,7 +38,7 @@ type RouteDelayViewProps = {
     transportationModeOptions: TransportationMode[];
     availableDates: string[];
     onDatePresetChange: (preset: DatePreset) => void;
-    onCustomDateChange: (date: string) => void;
+    onCustomDateRangeChange: (dateRange: CustomDateRange | null) => void;
     onEventTypeChange: (eventType: EventType) => void;
     onTransportationModeChange: (filter: TransportationMode) => void;
     onSearchQueryChange: (query: string) => void;
@@ -46,6 +47,16 @@ type RouteDelayViewProps = {
     onBackToRoutes: () => void;
     onPageChange: (nextPage: number) => void;
     onRoutesPerPageChange: (nextPageSize: PageSizeOption) => void;
+    tRouteDelay: TranslationStrings["routeDelay"];
+    tSectionToggle: TranslationStrings["routeDelaySectionToggle"];
+    tRoutes: TranslationStrings["routeDelayRoutes"];
+    tLeaderboard: TranslationStrings["routeDelayLeaderboard"];
+    tRouteFallback: TranslationStrings["routeDelayRouteFallback"];
+    tControls: TranslationStrings["routeDelayControls"];
+    tDetailsPage: TranslationStrings["routeDetailsPage"];
+    tDatePicker: TranslationStrings["availableDatesPicker"];
+    tStats: TranslationStrings["departureDelayStats"];
+    tTransportModes: TranslationStrings["transportModes"];
 };
 
 export function RouteDelayView({
@@ -53,7 +64,7 @@ export function RouteDelayView({
     selectedDateText,
     routesInfoText,
     selectedDatePreset,
-    selectedCustomDate,
+    selectedCustomDateRange,
     selectedEventType,
     selectedTransportationMode,
     searchQuery,
@@ -69,7 +80,7 @@ export function RouteDelayView({
     transportationModeOptions,
     availableDates,
     onDatePresetChange,
-    onCustomDateChange,
+    onCustomDateRangeChange,
     onEventTypeChange,
     onTransportationModeChange,
     onSearchQueryChange,
@@ -78,6 +89,16 @@ export function RouteDelayView({
     onBackToRoutes,
     onPageChange,
     onRoutesPerPageChange,
+    tRouteDelay,
+    tSectionToggle,
+    tRoutes,
+    tLeaderboard,
+    tRouteFallback,
+    tControls,
+    tDetailsPage,
+    tDatePicker,
+    tStats,
+    tTransportModes,
 }: RouteDelayViewProps) {
     const isRouteDetailsOpen = selectedRouteKey !== null;
 
@@ -114,29 +135,33 @@ export function RouteDelayView({
                         color: "text.primary",
                     }}
                 >
-                    Route Delays
+                    {tRouteDelay.delays}
                 </Typography>
                 <div className="flex w-full flex-col gap-4">
                     <div className="space-y-4">
                         <RouteDelaySectionToggleView
                             selectedSection={selectedSection}
                             onSelectedSectionChange={onSelectedSectionChange}
+                            t={tSectionToggle}
                         />
                         <RouteDelayControls
                             selectedSection={selectedSection}
                             isRouteDetailsOpen={isRouteDetailsOpen}
                             availableDates={availableDates}
                             selectedDatePreset={selectedDatePreset}
-                            selectedCustomDate={selectedCustomDate}
+                            selectedCustomDateRange={selectedCustomDateRange}
                             selectedEventType={selectedEventType}
                             selectedTransportationMode={selectedTransportationMode}
                             searchQuery={searchQuery}
                             transportationModeOptions={transportationModeOptions}
                             onDatePresetChange={onDatePresetChange}
-                            onCustomDateChange={onCustomDateChange}
+                            onCustomDateRangeChange={onCustomDateRangeChange}
                             onEventTypeChange={onEventTypeChange}
                             onTransportationModeChange={onTransportationModeChange}
                             onSearchQueryChange={onSearchQueryChange}
+                            t={tControls}
+                            tDatePicker={tDatePicker}
+                            tTransportModes={tTransportModes}
                         />
                         <RouteDelayInfoView
                             selectedDateText={selectedDateText}
@@ -157,12 +182,14 @@ export function RouteDelayView({
                                         onSelectRoute={onSelectRoute}
                                         onPageChange={onPageChange}
                                         onRoutesPerPageChange={onRoutesPerPageChange}
+                                        t={tRoutes}
                                     />
                                 ) : null}
 
                                 {selectedSection === "leaderboard" ? (
                                     <RouteDelayLeaderboardView
                                         leaderboardItems={leaderboardItems}
+                                        t={tLeaderboard}
                                     />
                                 ) : null}
                             </div>
@@ -173,9 +200,14 @@ export function RouteDelayView({
                                 trendPoints={trendPoints}
                                 isTrendLoading={isTrendLoading}
                                 onBackToRoutes={onBackToRoutes}
+                                t={tDetailsPage}
+                                tStats={tStats}
                             />
                         ) : (
-                            <RouteDelayRouteFallbackView onBackToRoutes={onBackToRoutes} />
+                            <RouteDelayRouteFallbackView
+                                onBackToRoutes={onBackToRoutes}
+                                t={tRouteFallback}
+                            />
                         )}
                     </div>
                 </div>

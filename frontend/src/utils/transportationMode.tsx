@@ -17,6 +17,7 @@ import HelpOutlineIcon from "@mui/icons-material/HelpOutlineOutlined";
 import { RouteMeta, RouteType } from "../types/historicalDelay";
 import { RoutesByStopPoint } from "../api/backend";
 import { getStopPointGidsForSite, StopPointGidsBySiteId } from "./site";
+import type { TranslationStrings } from "./translations";
 
 export const modeIcons: Record<ModeWithOther, React.ReactNode> = {
     BUS: <DirectionsBusIcon fontSize="small" />,
@@ -29,16 +30,37 @@ export const modeIcons: Record<ModeWithOther, React.ReactNode> = {
     OTHER: <HelpOutlineIcon fontSize="small" />,
 };
 
-export function getTransportationModeLabel(mode: ModeWithOther) {
-    return `${mode.charAt(0)}${mode.slice(1).toLowerCase()}`;
+export function getTransportationModeLabel(
+    mode: ModeWithOther,
+    tTransportModes?: TranslationStrings["transportModes"]
+) {
+    if (!tTransportModes) {
+        return `${mode.charAt(0)}${mode.slice(1).toLowerCase()}`;
+    }
+
+    const labelMap: Record<ModeWithOther, string> = {
+        BUS: tTransportModes.bus,
+        TRAM: tTransportModes.tram,
+        METRO: tTransportModes.metro,
+        TRAIN: tTransportModes.train,
+        FERRY: tTransportModes.ferry,
+        SHIP: tTransportModes.ship,
+        TAXI: tTransportModes.taxi,
+        OTHER: tTransportModes.other,
+    };
+
+    return labelMap[mode];
 }
 
-export function getTransportationModeButtonCB(mode: ModeWithOther) {
+export function getTransportationModeButton(
+    mode: ModeWithOther,
+    tTransportModes?: TranslationStrings["transportModes"]
+) {
     return (
         <ToggleButton key={mode} value={mode}>
             <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 {modeIcons[mode]}
-                {getTransportationModeLabel(mode)}
+                {getTransportationModeLabel(mode, tTransportModes)}
             </span>
         </ToggleButton>
     );

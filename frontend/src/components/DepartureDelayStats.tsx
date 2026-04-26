@@ -1,9 +1,10 @@
 import { Typography } from "@mui/material";
 import { DelaySummary } from "../types/historicalDelay";
 import { EventType } from "../types/departureDelay";
+import { TranslationStrings } from "../utils/translations";
 
-function pluralize(count: number, word: string) {
-    return `${count} ${word}${count === 1 ? "" : "s"}`;
+function pluralize(count: number, singular: string, plural: string) {
+    return `${count} ${count === 1 ? singular : plural}`;
 }
 
 const statsMap = {
@@ -29,13 +30,18 @@ function getOnTimeCount(summary: DelaySummary, eventType: EventType) {
 type DepartureDelayStatsProps = {
     routeSummary: DelaySummary | null;
     selectedEventType: EventType;
+    t: TranslationStrings["departureDelayStats"];
 };
 
-export function DepartureDelayStats({ routeSummary, selectedEventType }: DepartureDelayStatsProps) {
+export function DepartureDelayStats({
+    routeSummary,
+    selectedEventType,
+    t,
+}: DepartureDelayStatsProps) {
     if (!routeSummary) {
         return (
             <Typography sx={{ fontSize: "0.875rem", color: "text.secondary" }}>
-                No route delay data found.
+                {t.noData}
             </Typography>
         );
     }
@@ -47,25 +53,33 @@ export function DepartureDelayStats({ routeSummary, selectedEventType }: Departu
     return (
         <div className="space-y-2">
             <Typography sx={{ fontSize: "1.125rem", fontWeight: 600, color: "text.primary" }}>
-                {eventCount} {selectedEventType === "departure" ? "departures" : "arrivals"}, on
-                time {pluralize(onTimeCount, "time")}
+                {eventCount} {selectedEventType === "departure" ? t.departures : t.arrivals},{" "}
+                {t.onTime} {pluralize(onTimeCount, t.time, t.times)}
             </Typography>
             <Typography sx={{ fontSize: "0.875rem", color: "text.primary" }}>
                 <span className="font-medium text-red-600">
-                    Delayed: {pluralize(delayedStats.count, "time")}
+                    {t.delayed} {pluralize(delayedStats.count, t.time, t.times)}
                 </span>
-                , on average by{" "}
+                , {t.onAverageBy}{" "}
                 <Typography component="span" sx={{ fontWeight: 500, color: "text.primary" }}>
-                    {pluralize(Number((delayedStats.avgSeconds / 60).toFixed(1)), "minute")}
+                    {pluralize(
+                        Number((delayedStats.avgSeconds / 60).toFixed(1)),
+                        t.minute,
+                        t.minutes
+                    )}
                 </Typography>
             </Typography>
             <Typography sx={{ fontSize: "0.875rem", color: "text.primary" }}>
                 <span className="font-medium text-green-600">
-                    Ahead: {pluralize(aheadStats.count, "time")}
+                    {t.ahead} {pluralize(aheadStats.count, t.time, t.times)}
                 </span>
-                , on average by{" "}
+                , {t.onAverageBy}{" "}
                 <Typography component="span" sx={{ fontWeight: 500, color: "text.primary" }}>
-                    {pluralize(Number((aheadStats.avgSeconds / 60).toFixed(1)), "minute")}
+                    {pluralize(
+                        Number((aheadStats.avgSeconds / 60).toFixed(1)),
+                        t.minute,
+                        t.minutes
+                    )}
                 </Typography>
             </Typography>
         </div>

@@ -11,6 +11,7 @@ import {
 import type { SelectChangeEvent } from "@mui/material/Select";
 import { PageSizeOption, PageSizeOptions, RouteDelayListItem } from "../types/routeDelays";
 import { getDelayColorToken } from "../utils/time";
+import { TranslationStrings } from "../utils/translations";
 
 type RouteDelayRoutesViewProps = {
     pagedRouteItems: RouteDelayListItem[];
@@ -20,6 +21,7 @@ type RouteDelayRoutesViewProps = {
     onSelectRoute: (routeKey: string) => void;
     onPageChange: (nextPage: number) => void;
     onRoutesPerPageChange: (nextPageSize: PageSizeOption) => void;
+    t: TranslationStrings["routeDelayRoutes"];
 };
 
 export function RouteDelayRoutesView({
@@ -30,6 +32,7 @@ export function RouteDelayRoutesView({
     onSelectRoute,
     onPageChange,
     onRoutesPerPageChange,
+    t,
 }: RouteDelayRoutesViewProps) {
     function getRouteListItemCB(routeItem: RouteDelayListItem) {
         const { id, label, avgDelayMinutes, uniqueTrips } = routeItem;
@@ -67,7 +70,7 @@ export function RouteDelayRoutesView({
                             {label}
                         </Typography>
                         <Typography sx={{ fontSize: "0.75rem", color: "text.secondary" }}>
-                            Average delay:{" "}
+                            {t.averageDelay}:{" "}
                             <Typography
                                 component="span"
                                 sx={{
@@ -76,9 +79,9 @@ export function RouteDelayRoutesView({
                                     color: getDelayColorToken(avgDelayMinutes),
                                 }}
                             >
-                                {avgDelayMinutes} min
+                                {avgDelayMinutes} {t.min}
                             </Typography>
-                            , {uniqueTrips} unique trips
+                            , {uniqueTrips} {t.unique}
                         </Typography>
                     </div>
                     <ArrowForwardIosIcon className="mr-2" />
@@ -90,7 +93,7 @@ export function RouteDelayRoutesView({
     function getRoutesPerPageOptionCB(pageSize: number) {
         return (
             <MenuItem key={pageSize} value={pageSize}>
-                {pageSize} / page
+                {pageSize} / {t.page}
             </MenuItem>
         );
     }
@@ -143,7 +146,7 @@ export function RouteDelayRoutesView({
                         color: "text.secondary",
                     }}
                 >
-                    No routes match the selected filters.
+                    {t.noMatch}
                 </Typography>
             ) : (
                 <ul className="space-y-2">{pagedRouteItems.map(getRouteListItemCB)}</ul>

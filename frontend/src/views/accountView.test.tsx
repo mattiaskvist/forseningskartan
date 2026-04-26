@@ -2,6 +2,7 @@ import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { AccountView } from "./accountView";
 import { renderWithTheme } from "../test/renderWithTheme";
+import { translations } from "../utils/translations";
 
 describe("AccountView", () => {
     it("calls onDelete directly when delete button is clicked", () => {
@@ -17,6 +18,7 @@ describe("AccountView", () => {
                 }}
                 onLogout={vi.fn()}
                 onDelete={onDelete}
+                t={translations.en.account}
             />
         );
 

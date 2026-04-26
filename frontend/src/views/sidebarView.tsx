@@ -26,8 +26,8 @@ import { Site } from "../types/sl";
 import { AppStyle } from "../types/appStyle";
 import { AppStyleSelector } from "../components/AppStyleSelector";
 import { Suspense } from "../components/Suspense";
-
-type SidebarNavItem = Pick<RouteConfig, "label" | "path" | "icon">;
+import { LanguageSelector } from "../components/LanguageSelector";
+import { LanguageCode, TranslationStrings } from "../utils/translations";
 
 type SidebarViewProps = {
     isOpen: boolean;
@@ -41,6 +41,10 @@ type SidebarViewProps = {
     onSelectFavoriteStop: (siteId: number) => void;
     appStyle: AppStyle;
     onAppStyleChange: (style: AppStyle) => void;
+    currentLanguage: LanguageCode;
+    onLanguageChange: (lang: LanguageCode) => void;
+    t: TranslationStrings["sideBar"];
+    tAppStyleSelector: TranslationStrings["appStyleSelector"];
 };
 
 export function SidebarView({
@@ -55,8 +59,12 @@ export function SidebarView({
     onSelectFavoriteStop,
     appStyle,
     onAppStyleChange,
+    currentLanguage,
+    onLanguageChange,
+    t,
+    tAppStyleSelector,
 }: SidebarViewProps) {
-    function isActiveCB(path: string): boolean {
+    function isActive(path: string): boolean {
         if (path === "/") {
             return currentPath === "/" || currentPath === "";
         }
@@ -67,8 +75,8 @@ export function SidebarView({
         onNavigate("/account");
     }
 
-    function renderNavItemCB(item: SidebarNavItem) {
-        const active = isActiveCB(item.path);
+    function renderNavItemCB(item: RouteConfig) {
+        const active = isActive(item.path);
 
         function handleClickCB() {
             onNavigate(item.path);
@@ -92,7 +100,7 @@ export function SidebarView({
                 >
                     <ListItemIcon sx={{ minWidth: 36, color: "inherit" }}>{item.icon}</ListItemIcon>
                     <ListItemText
-                        primary={item.label}
+                        primary={t[item.sidebarLabelKey]}
                         primaryTypographyProps={{ fontSize: "0.875rem", fontWeight: 500 }}
                     />
                 </ListItemButton>
@@ -134,7 +142,7 @@ export function SidebarView({
                             fontWeight: 500,
                         }}
                     >
-                        {user.displayName || user.email || "Account"}
+                        {user.displayName || user.email || t.myAccount}
                     </Typography>
 
                     <IconButton size="small" onClick={navigateToAccountACB}>
@@ -184,7 +192,7 @@ export function SidebarView({
                     startIcon={<LoginIcon fontSize="small" />}
                     onClick={handleClickCB}
                 >
-                    Log In
+                    {t.login}
                 </Button>
             </ListItem>
         );
@@ -248,6 +256,19 @@ export function SidebarView({
                 </Box>
 
                 <List sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 0.5, p: 1.5 }}>
+                    <ListItem sx={{ px: 1.5, mb: 0.5 }}>
+                        <Typography
+                            sx={{
+                                color: "text.secondary",
+                                fontSize: "0.75rem",
+                                fontWeight: 600,
+                                textTransform: "uppercase",
+                                letterSpacing: "0.05em",
+                            }}
+                        >
+                            {t.navigation}
+                        </Typography>
+                    </ListItem>
                     {ROUTES.map(renderNavItemCB)}
 
                     <ListItem
@@ -260,13 +281,36 @@ export function SidebarView({
                                 fontWeight: 600,
                                 textTransform: "uppercase",
                                 letterSpacing: "0.05em",
+                                mb: 1,
                             }}
                         >
-                            Style
+                            {t.style}
                         </Typography>
-                        <Box sx={{ pt: 1 }}>
-                            <AppStyleSelector appStyle={appStyle} setAppStyle={onAppStyleChange} />
+                        <Box sx={{ width: "100%", pb: 2 }}>
+                            <AppStyleSelector
+                                appStyle={appStyle}
+                                setAppStyle={onAppStyleChange}
+                                t={tAppStyleSelector}
+                            />
                         </Box>
+
+                        <Typography
+                            sx={{
+                                color: "text.secondary",
+                                fontSize: "0.75rem",
+                                fontWeight: 600,
+                                textTransform: "uppercase",
+                                letterSpacing: "0.05em",
+                                mb: 1,
+                            }}
+                        >
+                            {t.language}
+                        </Typography>
+                        <LanguageSelector
+                            currentLanguage={currentLanguage}
+                            onLanguageChange={onLanguageChange}
+                            t={t.languageSelector}
+                        />
                     </ListItem>
 
                     <ListItem sx={{ mt: 3, px: 1.5 }}>
@@ -279,24 +323,24 @@ export function SidebarView({
                                 letterSpacing: "0.05em",
                             }}
                         >
-                            Favorite stops
+                            {t.favoriteStops}
                         </Typography>
                     </ListItem>
 
                     {isFavoriteStopsLoading ? (
                         <ListItem sx={{ px: 1.5, py: 0.5 }}>
-                            <Suspense message="Loading favorite stops..." />
+                            <Suspense message={t.loadingFavoriteStops} />
                         </ListItem>
                     ) : !user ? (
                         <ListItem sx={{ px: 1.5, py: 0.5 }}>
                             <Typography sx={{ color: "text.secondary", fontSize: "0.75rem" }}>
-                                Log in to favorite stops
+                                {t.loginToFavorite}
                             </Typography>
                         </ListItem>
                     ) : favoriteStops.length === 0 ? (
                         <ListItem sx={{ px: 1.5, py: 0.5 }}>
                             <Typography sx={{ color: "text.secondary", fontSize: "0.75rem" }}>
-                                Select a stop to favorite it
+                                {t.selectToFavorite}
                             </Typography>
                         </ListItem>
                     ) : (
