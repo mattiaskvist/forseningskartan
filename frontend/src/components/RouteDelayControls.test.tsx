@@ -2,6 +2,7 @@ import { screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { RouteDelayControls } from "./RouteDelayControls";
 import { renderWithTheme } from "../test/renderWithTheme";
+import { translations } from "../utils/translations";
 
 describe("RouteDelayControls", () => {
     const noop = () => {}; // no need for vi.fn() unless we mock things or inspect returns
@@ -23,6 +24,9 @@ describe("RouteDelayControls", () => {
                 onEventTypeChange={noop}
                 onTransportationModeChange={noop}
                 onSearchQueryChange={noop}
+                t={translations.en.routeDelayControls}
+                tDatePicker={translations.en.availableDatesPicker}
+                tTransportModes={translations.en.transportModes}
             />
         );
 
@@ -47,10 +51,17 @@ describe("RouteDelayControls", () => {
                 onEventTypeChange={noop}
                 onTransportationModeChange={noop}
                 onSearchQueryChange={noop}
+                t={translations.en.routeDelayControls}
+                tDatePicker={translations.en.availableDatesPicker}
+                tTransportModes={translations.en.transportModes}
             />
         );
 
-        expect(screen.getAllByText("From date").length).toBeGreaterThan(0);
-        expect(screen.getAllByText("To date").length).toBeGreaterThan(0);
+        expect(
+            screen.getAllByText(translations.en.availableDatesPicker.startDate).length
+        ).toBeGreaterThan(0);
+        expect(
+            screen.getAllByText(translations.en.availableDatesPicker.endDate).length
+        ).toBeGreaterThan(0);
     });
 });

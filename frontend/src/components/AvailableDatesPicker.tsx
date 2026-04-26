@@ -3,8 +3,9 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Box } from "@mui/material";
 import dayjs, { Dayjs } from "dayjs";
 import minMax from "dayjs/plugin/minMax";
-import { CustomDateRange, CustomDateRangeLabelMap } from "../types/departureDelay";
+import { CustomDateRange } from "../types/departureDelay";
 import { getEffectiveCustomDateRange } from "../utils/time";
+import { TranslationStrings } from "../utils/translations";
 
 dayjs.extend(minMax);
 
@@ -12,16 +13,19 @@ type AvailableDatesPickerProps = {
     availableDates: string[];
     selectedDateRange: CustomDateRange | null;
     onSelectDateRange: (dateRange: CustomDateRange | null) => void;
+    t: TranslationStrings["availableDatesPicker"];
 };
 
 export function AvailableDatesPicker({
     availableDates,
     selectedDateRange,
     onSelectDateRange,
+    t,
 }: AvailableDatesPickerProps) {
     function getDayjsDateCB(date: string): Dayjs {
         return dayjs(date);
     }
+
     const dayjsDates = availableDates.map(getDayjsDateCB);
     const minDate = dayjs.min(dayjsDates) ?? undefined;
     const maxDate = dayjs.max(dayjsDates) ?? undefined;
@@ -80,7 +84,7 @@ export function AvailableDatesPicker({
                 <DatePicker
                     disabled={availableDates.length === 0}
                     format="YYYY-MM-DD"
-                    label={CustomDateRangeLabelMap.startDate}
+                    label={t.startDate}
                     minDate={minDate}
                     maxDate={startDateMax}
                     onChange={handleStartDateChangeACB}
@@ -90,7 +94,7 @@ export function AvailableDatesPicker({
                 <DatePicker
                     disabled={availableDates.length === 0}
                     format="YYYY-MM-DD"
-                    label={CustomDateRangeLabelMap.endDate}
+                    label={t.endDate}
                     minDate={endDateMin}
                     maxDate={maxDate}
                     onChange={handleEndDateChangeACB}

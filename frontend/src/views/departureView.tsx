@@ -6,6 +6,7 @@ import { DepartureHeaderView } from "./departureHeaderView";
 import { DepartureEmptyStateView } from "./departureEmptyStateView";
 import { DepartureList } from "../components/DepartureList";
 import { DepartureDetails } from "../components/DepartureDetails";
+import { TranslationStrings } from "../utils/translations";
 
 export type DepartureViewProps = {
     upcomingDepartures: Departure[];
@@ -26,6 +27,16 @@ export type DepartureViewProps = {
     isFavoriteStop: boolean;
     isUserLoggedIn: boolean;
     onToggleFavoriteStop: () => void;
+    t: TranslationStrings["departure"];
+    tHeader: TranslationStrings["departureHeader"];
+    tEmpty: TranslationStrings["departureEmpty"];
+    tList: TranslationStrings["departureList"];
+    tHistoricalDelays: TranslationStrings["departureHistoricalDelays"];
+    tDelayStats: TranslationStrings["departureDelayStats"];
+    tDelayControls: TranslationStrings["routeDelayControls"];
+    tDatePicker: TranslationStrings["availableDatesPicker"];
+    tDetails: TranslationStrings["departureDetails"];
+    tTransportModes: TranslationStrings["transportModes"];
 };
 
 export function DepartureView({
@@ -47,6 +58,16 @@ export function DepartureView({
     isFavoriteStop,
     isUserLoggedIn,
     onToggleFavoriteStop,
+    t,
+    tHeader,
+    tEmpty,
+    tList,
+    tHistoricalDelays,
+    tDelayStats,
+    tDelayControls,
+    tDatePicker,
+    tDetails,
+    tTransportModes,
 }: DepartureViewProps) {
     return (
         <div className="flex flex-col gap-2">
@@ -56,9 +77,10 @@ export function DepartureView({
                 isUserLoggedIn={isUserLoggedIn}
                 onToggleFavoriteStop={onToggleFavoriteStop}
                 onClose={onClose}
+                t={tHeader}
             />
             {isLoading ? (
-                <Suspense message="Loading departures..." />
+                <Suspense message={t.loading} />
             ) : selectedDeparture ? (
                 <DepartureDetails
                     departure={selectedDeparture}
@@ -71,14 +93,21 @@ export function DepartureView({
                     selectedCustomDateRange={selectedCustomDateRange}
                     onDatePresetChange={onDatePresetChange}
                     onCustomDateRangeChange={onCustomDateRangeChange}
+                    t={tDetails}
+                    tHistoricalDelays={tHistoricalDelays}
+                    tDelayStats={tDelayStats}
+                    tDelayControls={tDelayControls}
+                    tDatePicker={tDatePicker}
                 />
             ) : upcomingDepartures.length > 0 ? (
                 <DepartureList
                     departures={upcomingDepartures}
                     onSelectDeparture={onSelectDeparture}
+                    t={tList}
+                    tTransportModes={tTransportModes}
                 />
             ) : (
-                <DepartureEmptyStateView />
+                <DepartureEmptyStateView t={tEmpty} />
             )}
         </div>
     );

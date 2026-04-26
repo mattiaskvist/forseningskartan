@@ -6,6 +6,7 @@ import { MapSearchView } from "./mapSearchView";
 import { MapDeparturesPanelView } from "./mapDeparturesPanelView";
 import { StopMap } from "../components/StopMap";
 import { AppStyleSelector } from "../components/AppStyleSelector";
+import { TranslationStrings } from "../utils/translations";
 
 type MapViewProps = {
     allSites: Site[];
@@ -16,6 +17,10 @@ type MapViewProps = {
     departureViewProps: DepartureViewProps | null;
     appStyle: AppStyle;
     onAppStyleChange: (style: AppStyle) => void;
+    tMapDeparturePanel: TranslationStrings["mapDeparturePanel"];
+    tSearchBar: TranslationStrings["searchBar"];
+    tMapSearch: TranslationStrings["mapSearch"];
+    tAppStyleSelector: TranslationStrings["appStyleSelector"];
     selectedTransportationMode: TransportationMode | null;
     transportationModeOptions: TransportationMode[];
     onTransportationModeChange: (filter: TransportationMode | null) => void;
@@ -23,6 +28,7 @@ type MapViewProps = {
     isHideStopsWithoutDeparturesBoxHidden: boolean;
     onHideStopsWithoutDeparturesChange: (value: boolean) => void;
     totalSiteCount: number;
+    tTransportModes: TranslationStrings["transportModes"];
 };
 
 export function MapView({
@@ -34,6 +40,10 @@ export function MapView({
     departureViewProps,
     appStyle,
     onAppStyleChange,
+    tMapDeparturePanel,
+    tSearchBar,
+    tMapSearch,
+    tAppStyleSelector,
     selectedTransportationMode,
     transportationModeOptions,
     onTransportationModeChange,
@@ -41,6 +51,7 @@ export function MapView({
     isHideStopsWithoutDeparturesBoxHidden,
     onHideStopsWithoutDeparturesChange,
     totalSiteCount,
+    tTransportModes,
 }: MapViewProps) {
     return (
         <div className="relative h-full w-full">
@@ -58,7 +69,7 @@ export function MapView({
                     top: 16,
                     zIndex: 1000,
                     maxWidth: "calc(100vw - 2rem)",
-                    pointerEvents: "none", // allow clicks to pass through invisible overlay wrapper
+                    pointerEvents: "none",
                 }}
             >
                 <Box
@@ -67,7 +78,6 @@ export function MapView({
                         alignItems: { xs: "flex-end", md: "flex-start" },
                         gap: 1.5,
                         flexDirection: { xs: "column-reverse", md: "row" },
-                        // ensure child components can receive pointer events
                         "& > *": {
                             pointerEvents: "auto",
                         },
@@ -77,9 +87,13 @@ export function MapView({
                         appStyle={appStyle}
                         setAppStyle={onAppStyleChange}
                         isQuickOverlay
+                        t={tAppStyleSelector}
                     />
                     {departureViewProps && (
-                        <MapDeparturesPanelView departureViewProps={departureViewProps} />
+                        <MapDeparturesPanelView
+                            departureViewProps={departureViewProps}
+                            t={tMapDeparturePanel}
+                        />
                     )}
                 </Box>
             </Box>
@@ -89,6 +103,9 @@ export function MapView({
                 selectedSite={selectedSite}
                 handleSelectSiteCB={handleSelectSiteCB}
                 recentSearchSiteIds={recentSearchSiteIds}
+                t={tSearchBar}
+                tMapSearch={tMapSearch}
+                tTransportModes={tTransportModes}
                 selectedTransportationMode={selectedTransportationMode}
                 transportationModeOptions={transportationModeOptions}
                 onTransportationModeChange={onTransportationModeChange}

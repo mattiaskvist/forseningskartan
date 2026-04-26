@@ -1,12 +1,8 @@
-import { Box, Typography, ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { Box, ToggleButton } from "@mui/material";
 import { AvailableDatesPicker } from "./AvailableDatesPicker";
-import {
-    CustomDateRange,
-    DatePreset,
-    EventType,
-    DatePresets,
-    DatePresetLabelMap,
-} from "../types/departureDelay";
+import { FilterToggleButtonGroup } from "./FilterToggleButtonGroup";
+import { CustomDateRange, DatePreset, EventType, DatePresets } from "../types/departureDelay";
+import { TranslationStrings } from "../utils/translations";
 
 type DepartureDelayControlsProps = {
     availableDates: string[];
@@ -16,6 +12,8 @@ type DepartureDelayControlsProps = {
     onDatePresetChange: (preset: DatePreset) => void;
     onCustomDateRangeChange: (dateRange: CustomDateRange | null) => void;
     onEventTypeChange: (eventType: EventType) => void;
+    t: TranslationStrings["routeDelayControls"];
+    tDatePicker: TranslationStrings["availableDatesPicker"];
 };
 
 export function DepartureDelayControls({
@@ -26,29 +24,32 @@ export function DepartureDelayControls({
     onDatePresetChange,
     onCustomDateRangeChange,
     onEventTypeChange,
+    t,
+    tDatePicker,
 }: DepartureDelayControlsProps) {
-    function handleDatePresetChangeACB(
-        _: React.MouseEvent<HTMLElement>,
-        nextValue: DatePreset | null
-    ) {
-        if (nextValue) {
-            onDatePresetChange(nextValue);
-        }
-    }
-
-    function handleEventTypeChangeACB(
-        _: React.MouseEvent<HTMLElement>,
-        nextValue: EventType | null
-    ) {
-        if (nextValue) {
-            onEventTypeChange(nextValue);
-        }
-    }
-
-    function getPresetButtonCB(preset: DatePreset) {
+    function getPresetButtonCB(option: DatePreset) {
+        const labelMap: Record<DatePreset, string> = {
+            sameDayLastWeek: t.sameDayLastWeek,
+            last7Days: t.last7Days,
+            last5Weekdays: t.last5Weekdays,
+            lastWeekend: t.lastWeekend,
+            customDate: t.customDate,
+        };
         return (
-            <ToggleButton key={preset} value={preset}>
-                {DatePresetLabelMap[preset]}
+            <ToggleButton key={option} value={option}>
+                {labelMap[option]}
+            </ToggleButton>
+        );
+    }
+
+    function getEventTypeButtonCB(option: EventType) {
+        const labelMap: Record<EventType, string> = {
+            departure: t.departure,
+            arrival: t.arrival,
+        };
+        return (
+            <ToggleButton key={option} value={option}>
+                {labelMap[option]}
             </ToggleButton>
         );
     }
@@ -65,21 +66,13 @@ export function DepartureDelayControls({
                 p: 1,
             }}
         >
-            <div>
-                <Typography sx={{ fontSize: "0.75rem", color: "text.primary" }}>
-                    Date selection
-                </Typography>
-                <ToggleButtonGroup
-                    color="primary"
-                    exclusive
-                    onChange={handleDatePresetChangeACB}
-                    size="small"
-                    value={selectedDatePreset}
-                    sx={{ mt: 1 }}
-                >
-                    {DatePresets.map(getPresetButtonCB)}
-                </ToggleButtonGroup>
-            </div>
+            <FilterToggleButtonGroup
+                label={t.dateSelection}
+                options={DatePresets}
+                selectedValue={selectedDatePreset}
+                onValueChange={onDatePresetChange}
+                renderButtonCB={getPresetButtonCB}
+            />
 
             {selectedDatePreset === "customDate" && (
                 <div className="pt-2">
@@ -87,28 +80,18 @@ export function DepartureDelayControls({
                         availableDates={availableDates}
                         selectedDateRange={selectedCustomDateRange}
                         onSelectDateRange={onCustomDateRangeChange}
+                        t={tDatePicker}
                     />
                 </div>
             )}
 
-            <div className="flex flex-col gap-2 pt-1">
-                <div>
-                    <Typography sx={{ fontSize: "0.75rem", color: "text.primary" }}>
-                        Event type
-                    </Typography>
-                    <ToggleButtonGroup
-                        color="primary"
-                        exclusive
-                        onChange={handleEventTypeChangeACB}
-                        size="small"
-                        value={selectedEventType}
-                        className="mt-1"
-                    >
-                        <ToggleButton value="departure">Departure</ToggleButton>
-                        <ToggleButton value="arrival">Arrival</ToggleButton>
-                    </ToggleButtonGroup>
-                </div>
-            </div>
+            <FilterToggleButtonGroup
+                label={t.eventType}
+                options={["departure", "arrival"] as EventType[]}
+                selectedValue={selectedEventType}
+                onValueChange={onEventTypeChange}
+                renderButtonCB={getEventTypeButtonCB}
+            />
         </Box>
     );
 }

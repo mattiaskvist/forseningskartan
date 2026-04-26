@@ -3,30 +3,31 @@ import { MapView } from "../views/mapView";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import {
     getAggregatedDatesCB,
+    getAppStylePreferenceCB,
     getAuthUserCB,
+    getCurrentLanguageCB,
     getDepartureHistoricalDelayLoadingCB,
     getDepartureHistoricalDelaySummaryCB,
     getDeparturesCB,
     getDeparturesLoadingCB,
     getFavoriteSiteIdsCB,
+    getHideStopsWithoutDeparturesCB,
+    getMapTransportationModeFilterCB,
     getRecentSearchSiteIdsCB,
-    getAppStylePreferenceCB,
     getSelectedCustomDateRangeCB,
+    getRoutesByStopPointCB,
     getSelectedDatePresetCB,
     getSelectedDelayDatesCB,
     getSelectedDepartureCB,
+    getSelectedSiteCB,
     getSitesCB,
     getSitesLoadingCB,
-    getStopPointsCB,
     getStopPointGidsBySiteIdCB,
-    getStopPointsLoadingCB,
-    getSelectedSiteCB,
-    getRoutesByStopPointCB,
     getStopPointRoutesErrorCB,
-    getMapTransportationModeFilterCB,
-    getHideStopsWithoutDeparturesCB,
+    getStopPointsCB,
+    getStopPointsLoadingCB,
 } from "../store/selectors";
-import { selectSiteCB } from "../store/selection";
+import { selectSite } from "../store/selection";
 import {
     setSelectedCustomDateRange,
     setSelectedDatePreset,
@@ -53,6 +54,7 @@ import {
     routeTypesToTransportationModes,
 } from "../utils/transportationMode";
 import { getSitesWithRoutes } from "../utils/site";
+import { translations } from "../utils/translations";
 
 export function MapPresenter() {
     const dispatch = useAppDispatch();
@@ -70,6 +72,7 @@ export function MapPresenter() {
     const favoriteSiteIds = useAppSelector(getFavoriteSiteIdsCB);
     const recentSearchSiteIds = useAppSelector(getRecentSearchSiteIdsCB);
     const appStyle = useAppSelector(getAppStylePreferenceCB);
+    const currentLanguage = useAppSelector(getCurrentLanguageCB);
     const sites = useAppSelector(getSitesCB);
     const isSitesLoading = useAppSelector(getSitesLoadingCB);
     const stopPoints = useAppSelector(getStopPointsCB);
@@ -89,6 +92,7 @@ export function MapPresenter() {
         function getRouteTypeCB(route: RouteMeta): RouteType {
             return route.type;
         }
+
         const routeTypes = new Set(Object.values(routesByStopPoint).flat().map(getRouteTypeCB));
         return routeTypesToTransportationModes(routeTypes);
     }, [routesByStopPointsUnavailable, routesByStopPoint]);
@@ -114,18 +118,18 @@ export function MapPresenter() {
             stopPointGidsBySiteId
         );
     }, [
-        sites,
-        selectedTransportationMode,
-        routesByStopPointsUnavailable,
-        routesByStopPoint,
-        stopPoints,
-        stopPointGidsBySiteId,
         hideStopsWithoutDepartures,
+        routesByStopPoint,
+        routesByStopPointsUnavailable,
+        selectedTransportationMode,
+        sites,
+        stopPointGidsBySiteId,
+        stopPoints,
     ]);
 
     const handleSelectSiteCB = useCallback(
         (siteId: number | null) => {
-            selectSiteCB({ dispatch, siteId });
+            selectSite({ dispatch, siteId });
             if (siteId !== null) {
                 dispatch(recordRecentSearchSiteId(siteId));
             }
@@ -134,7 +138,7 @@ export function MapPresenter() {
     );
 
     if (isSitesLoading || !sites || isStopPointsLoading || !stopPoints) {
-        return <Suspense fullscreen message="Loading transit data and preparing the map..." />;
+        return <Suspense fullscreen message={translations[currentLanguage].map.loading} />;
     }
 
     function closeDeparturesViewACB() {
@@ -218,6 +222,16 @@ export function MapPresenter() {
               isFavoriteStop: favoriteSiteIds.includes(selectedSite.id),
               isUserLoggedIn: Boolean(user),
               onToggleFavoriteStop: toggleFavoriteStopACB,
+              t: translations[currentLanguage].departure,
+              tHeader: translations[currentLanguage].departureHeader,
+              tEmpty: translations[currentLanguage].departureEmpty,
+              tList: translations[currentLanguage].departureList,
+              tHistoricalDelays: translations[currentLanguage].departureHistoricalDelays,
+              tDelayStats: translations[currentLanguage].departureDelayStats,
+              tDelayControls: translations[currentLanguage].routeDelayControls,
+              tDatePicker: translations[currentLanguage].availableDatesPicker,
+              tDetails: translations[currentLanguage].departureDetails,
+              tTransportModes: translations[currentLanguage].transportModes,
           }
         : null;
 
@@ -231,6 +245,10 @@ export function MapPresenter() {
             departureViewProps={departureViewProps}
             appStyle={appStyle}
             onAppStyleChange={handleAppStyleChangeACB}
+            tMapDeparturePanel={translations[currentLanguage].mapDeparturePanel}
+            tSearchBar={translations[currentLanguage].searchBar}
+            tMapSearch={translations[currentLanguage].mapSearch}
+            tAppStyleSelector={translations[currentLanguage].appStyleSelector}
             selectedTransportationMode={selectedTransportationMode}
             transportationModeOptions={transportationModeOptions}
             onTransportationModeChange={handleTransportationModeChangeACB}
@@ -238,6 +256,7 @@ export function MapPresenter() {
             isHideStopsWithoutDeparturesBoxHidden={routesByStopPointsUnavailable}
             onHideStopsWithoutDeparturesChange={handleHideStopsWithoutDeparturesChangeACB}
             totalSiteCount={sites.length}
+            tTransportModes={translations[currentLanguage].transportModes}
         />
     );
 }

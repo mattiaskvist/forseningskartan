@@ -7,6 +7,7 @@ import { formatDelay, formatTime, getDelayMinutes } from "../utils/time";
 import { DepartureHistoricalDelays } from "./DepartureHistoricalDelays";
 import { CustomDateRange, DatePreset, EventType } from "../types/departureDelay";
 import { DelaySummary } from "../types/historicalDelay";
+import { TranslationStrings } from "../utils/translations";
 
 dayjs.extend(utc);
 
@@ -30,6 +31,11 @@ type DepartureDetailsProps = {
     selectedCustomDateRange: CustomDateRange | null;
     onDatePresetChange: (preset: DatePreset) => void;
     onCustomDateRangeChange: (dateRange: CustomDateRange | null) => void;
+    t: TranslationStrings["departureDetails"];
+    tHistoricalDelays: TranslationStrings["departureHistoricalDelays"];
+    tDelayStats: TranslationStrings["departureDelayStats"];
+    tDelayControls: TranslationStrings["routeDelayControls"];
+    tDatePicker: TranslationStrings["availableDatesPicker"];
 };
 
 export function DepartureDetails({
@@ -43,6 +49,11 @@ export function DepartureDetails({
     selectedCustomDateRange,
     onDatePresetChange,
     onCustomDateRangeChange,
+    t,
+    tHistoricalDelays,
+    tDelayStats,
+    tDelayControls,
+    tDatePicker,
 }: DepartureDetailsProps) {
     const [selectedEventType, setSelectedEventType] = useState<EventType>("departure");
 
@@ -60,8 +71,8 @@ export function DepartureDetails({
                     {departure.line.designation ?? departure.line.id} -{" "}
                     {departure.destination ?? departure.direction}
                 </Typography>
-                <Button variant="text" size="small" onClick={onBackToList}>
-                    Back
+                <Button variant="text" size="small" onClick={onBackToList} aria-label={t.back}>
+                    {t.back}
                 </Button>
             </div>
             <Box
@@ -77,14 +88,14 @@ export function DepartureDetails({
                     },
                 }}
             >
-                <DetailRow label="Planned departure" value={formatTime(departure.scheduled)} />
+                <DetailRow label={t.plannedDeparture} value={formatTime(departure.scheduled)} />
                 <DetailRow
-                    label="Expected departure"
+                    label={t.expectedDeparture}
                     value={formatTime(departure.expected ?? departure.scheduled)}
                 />
-                <DetailRow label="Delay" value={formatDelay(getDelayMinutes(departure))} />
+                <DetailRow label={t.delay} value={formatDelay(getDelayMinutes(departure))} />
                 <DetailRow
-                    label="Stop"
+                    label={t.stop}
                     value={`${departure.stop_area.name} ${departure.stop_point.designation ?? ""}`}
                 />
             </Box>
@@ -100,6 +111,10 @@ export function DepartureDetails({
                 onEventTypeChange={setSelectedEventType}
                 isLoadingData={isDepartureHistoricalDelayLoading}
                 routeSummary={selectedDepartureDelaySummary}
+                t={tHistoricalDelays}
+                tStats={tDelayStats}
+                tControls={tDelayControls}
+                tDatePicker={tDatePicker}
             />
         </div>
     );

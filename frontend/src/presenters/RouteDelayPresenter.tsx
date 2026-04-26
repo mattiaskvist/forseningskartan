@@ -13,6 +13,7 @@ import {
     getSelectedRouteDelayDatesCB,
     getRouteDelaysCB,
     getRouteDelaysLoadingCB,
+    getCurrentLanguageCB,
 } from "../store/selectors";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import {
@@ -24,12 +25,12 @@ import {
 } from "../store/reducers";
 import { Suspense } from "../components/Suspense";
 import { DelaySummary, RouteType } from "../types/historicalDelay";
-import { CustomDateRange, DatePreset, EventType } from "../types/departureDelay";
+import { CustomDateRange, DatePreset, EventType, getPresetDescription } from "../types/departureDelay";
+import { translations } from "../utils/translations";
 import { TransportationMode, transportationModeToRouteType } from "../types/sl";
 import { PageSizeOption, RouteDelayListItem, RouteDelaySection } from "../types/routeDelays";
 import { getAvgDelayMinutes, getAvgDelaySeconds } from "../utils/time";
 import { compareRouteNamesCB, getRouteDisplayName, getRouteIdentityKey } from "../utils/route";
-import { getPresetDescription } from "../types/departureDelay";
 import { routeTypesToTransportationModes } from "../utils/transportationMode";
 
 function getRouteModeKey(summary: DelaySummary): RouteType | null {
@@ -50,6 +51,7 @@ export function RouteDelayPresenter() {
     const selectedRouteKey = useAppSelector(getRouteDelaySelectedRouteKeyCB);
     const selectedRouteTrend = useAppSelector(getRouteDelayTrendPointsCB);
     const isTrendLoading = useAppSelector(getRouteDelayTrendLoadingCB);
+    const currentLanguage = useAppSelector(getCurrentLanguageCB);
     const [selectedSection, setSelectedSection] = useState<RouteDelaySection>("routes");
     const [searchQuery, setSearchQuery] = useState("");
     const [routesPerPage, setRoutesPerPage] = useState<PageSizeOption>(25);
@@ -103,14 +105,16 @@ export function RouteDelayPresenter() {
     }, [pagedRoutes, selectedEventType]);
 
     const selectedDateText = useMemo(() => {
-        return getPresetDescription(selectedDates);
-    }, [selectedDates]);
+        const t = translations[currentLanguage].departureHistoricalDelays;
+        return getPresetDescription(selectedDates, t.selectedDatesLabel, t.noAvailableDates);
+    }, [selectedDates, currentLanguage]);
 
     const routesInfoText = useMemo(() => {
+        const t = translations[currentLanguage].routeDelay;
         return selectedSection === "routes"
-            ? `Showing ${pagedRouteItems.length} of ${totalFilteredRoutes} filtered routes`
-            : `Showing ${totalFilteredRoutes} filtered routes`;
-    }, [selectedSection, pagedRouteItems, totalFilteredRoutes]);
+            ? t.showingFilteredRoutes(pagedRouteItems.length, totalFilteredRoutes)
+            : t.showingAllFilteredRoutes(totalFilteredRoutes);
+    }, [selectedSection, pagedRouteItems, totalFilteredRoutes, currentLanguage]);
 
     const transportationModeOptions = useMemo(() => {
         function isNonNullRouteTypeCB(type: RouteType | null): type is RouteType {
@@ -205,7 +209,7 @@ export function RouteDelayPresenter() {
 
     // avoid suspense after first load
     if (isAggregatedDatesLoading || (isRouteDelaysLoading && routeDelays.length === 0)) {
-        return <Suspense message="Loading route delays..." />;
+        return <Suspense message={translations[currentLanguage].routeDelay.loading} />;
     }
 
     return (
@@ -239,6 +243,16 @@ export function RouteDelayPresenter() {
             onBackToRoutes={handleBackToRoutesACB}
             onPageChange={handlePageChangeACB}
             onRoutesPerPageChange={handleRoutesPerPageChangeACB}
+            tRouteDelay={translations[currentLanguage].routeDelay}
+            tSectionToggle={translations[currentLanguage].routeDelaySectionToggle}
+            tRoutes={translations[currentLanguage].routeDelayRoutes}
+            tLeaderboard={translations[currentLanguage].routeDelayLeaderboard}
+            tRouteFallback={translations[currentLanguage].routeDelayRouteFallback}
+            tControls={translations[currentLanguage].routeDelayControls}
+            tDetailsPage={translations[currentLanguage].routeDetailsPage}
+            tDatePicker={translations[currentLanguage].availableDatesPicker}
+            tStats={translations[currentLanguage].departureDelayStats}
+            tTransportModes={translations[currentLanguage].transportModes}
         />
     );
 }

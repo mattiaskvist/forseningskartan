@@ -168,6 +168,10 @@ function getAppStylePreferenceCB(state: RootState) {
     return state.userPreferences.appStyle;
 }
 
+function getCurrentLanguageCB(state: RootState) {
+    return state.userPreferences.language;
+}
+
 function getRecentSearchSiteIdsCB(state: RootState) {
     return state.userPreferences.recentSearchSiteIds ?? [];
 }
@@ -268,6 +272,7 @@ export {
     getFavoriteSiteIdsCB,
     getAppStylePreferenceCB,
     getRecentSearchSiteIdsCB,
+    getCurrentLanguageCB,
     getMapTransportationModeFilterCB,
     getHideStopsWithoutDeparturesCB,
     getFavoriteSitesCB,

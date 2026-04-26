@@ -2,6 +2,7 @@ import { screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { RouteDelayLeaderboardView } from "./routeDelayLeaderboardView";
 import { renderWithTheme } from "../test/renderWithTheme";
+import { translations } from "../utils/translations";
 
 describe("RouteDelayLeaderboardView", () => {
     it("shows leaderboard column headers", () => {
@@ -15,6 +16,7 @@ describe("RouteDelayLeaderboardView", () => {
                         uniqueTrips: 7,
                     },
                 ]}
+                t={translations.en.routeDelayLeaderboard}
             />
         );
 

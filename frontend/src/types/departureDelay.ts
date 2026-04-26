@@ -8,7 +8,7 @@ export type CustomDateRange = {
     endDate: string | null;
 };
 
-function formatHourRangeLocal(hourUTC: number): string {
+export function formatHourRangeLocal(hourUTC: number): string {
     // create a UTC time at the given hour
     const start = dayjs.utc().hour(hourUTC).minute(0).second(0);
 
@@ -19,7 +19,11 @@ function formatHourRangeLocal(hourUTC: number): string {
     return `${localStart.format("HH:mm")}-${localEnd.format("HH:mm")}`;
 }
 
-function getDateRangeText(selectedDates: string[]): string {
+export function getDateRangeText(selectedDates: string[]): string {
+    if (selectedDates.length === 0) {
+        return "";
+    }
+
     const sortedDates = [...selectedDates].sort();
     const fromDate = sortedDates[0];
     const toDate = sortedDates[sortedDates.length - 1];
@@ -30,15 +34,20 @@ function getDateRangeText(selectedDates: string[]): string {
     return `${fromDate} - ${toDate}`;
 }
 
-export function getPresetDescription(selectedDates: string[], selectedHourUTC?: number): string {
+export function getPresetDescription(
+    selectedDates: string[],
+    selectedDatesLabel: string,
+    noAvailableDatesLabel: string,
+    selectedHourUTC?: number
+): string {
     if (selectedDates.length === 0) {
-        return "No available dates for this preset";
+        return noAvailableDatesLabel;
     }
 
     const dateRange = getDateRangeText(selectedDates);
     const hourRange = selectedHourUTC !== undefined ? formatHourRangeLocal(selectedHourUTC) : "";
 
-    return `Selected dates: ${dateRange}${hourRange ? `, ${hourRange}` : ""}`;
+    return `${selectedDatesLabel}: ${dateRange}${hourRange ? `, ${hourRange}` : ""}`;
 }
 
 export const DatePresetLabelMap: Record<DatePreset, string> = {
@@ -48,11 +57,6 @@ export const DatePresetLabelMap: Record<DatePreset, string> = {
     lastWeekend: "Last weekend",
     customDate: "Custom date range",
 };
-
-export const CustomDateRangeLabelMap = {
-    startDate: "From date",
-    endDate: "To date",
-} as const;
 
 export const DatePresets: DatePreset[] = Object.keys(DatePresetLabelMap) as DatePreset[];
 

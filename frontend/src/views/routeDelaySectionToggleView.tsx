@@ -1,14 +1,17 @@
 import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { RouteDelaySection } from "../types/routeDelays";
+import { TranslationStrings } from "../utils/translations";
 
 type RouteDelaySectionToggleViewProps = {
     selectedSection: RouteDelaySection;
     onSelectedSectionChange: (section: RouteDelaySection) => void;
+    t: TranslationStrings["routeDelaySectionToggle"];
 };
 
 export function RouteDelaySectionToggleView({
     selectedSection,
     onSelectedSectionChange,
+    t,
 }: RouteDelaySectionToggleViewProps) {
     function handleSectionChangeACB(
         _: React.MouseEvent<HTMLElement>,
@@ -34,10 +37,10 @@ export function RouteDelaySectionToggleView({
             }}
         >
             <ToggleButton value="routes" sx={{ fontWeight: 600 }}>
-                Routes
+                {t.routes}
             </ToggleButton>
             <ToggleButton value="leaderboard" sx={{ fontWeight: 600 }}>
-                Delay Leaderboard
+                {t.leaderboard}
             </ToggleButton>
         </ToggleButtonGroup>
     );
