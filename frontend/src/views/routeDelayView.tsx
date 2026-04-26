@@ -1,51 +1,37 @@
 import { Box, Paper, Typography } from "@mui/material";
 import { RouteDelayControls } from "../components/RouteDelayControls";
-import { DatePreset, EventType } from "../types/departureDelay";
+import { CustomDateRange, DatePreset, EventType } from "../types/departureDelay";
 import { TransportationMode } from "../types/sl";
-import {
-    PageSizeOption,
-    RouteDelayListItem,
-    RouteDelaySection,
-    RouteDelayTrendPoint,
-} from "../types/routeDelays";
-import { DelaySummary } from "../types/historicalDelay";
-import { RouteDelayRoutesView } from "./routeDelayRoutesView";
-import { RouteDelayLeaderboardView } from "./routeDelayLeaderboardView";
-import { RouteDelayRouteFallbackView } from "./routeDelayRouteFallbackView";
-import { RouteDetailsPage } from "../components/RouteDetailsPage";
+import { RouteDelaySection } from "../types/routeDelays";
 import { RouteDelaySectionToggleView } from "./routeDelaySectionToggleView";
 import { RouteDelayInfoView } from "./RouteDelayInfoView";
+import { TranslationStrings } from "../utils/translations";
+import { ReactNode } from "react";
 
 type RouteDelayViewProps = {
     selectedSection: RouteDelaySection;
     selectedDateText: string;
     routesInfoText: string;
     selectedDatePreset: DatePreset;
-    selectedCustomDate: string | null;
+    selectedCustomDateRange: CustomDateRange | null;
     selectedEventType: EventType;
     selectedTransportationMode: TransportationMode;
     searchQuery: string;
-    pagedRouteItems: RouteDelayListItem[];
-    currentPage: number;
-    totalPages: number;
-    routesPerPage: PageSizeOption;
-    selectedRouteKey: string | null;
-    selectedRouteSummary: DelaySummary | null;
-    leaderboardItems: RouteDelayListItem[];
-    trendPoints: RouteDelayTrendPoint[];
-    isTrendLoading: boolean;
+    isRouteDetailsOpen: boolean;
+    content: ReactNode;
     transportationModeOptions: TransportationMode[];
     availableDates: string[];
     onDatePresetChange: (preset: DatePreset) => void;
-    onCustomDateChange: (date: string) => void;
+    onCustomDateRangeChange: (dateRange: CustomDateRange | null) => void;
     onEventTypeChange: (eventType: EventType) => void;
     onTransportationModeChange: (filter: TransportationMode) => void;
     onSearchQueryChange: (query: string) => void;
     onSelectedSectionChange: (section: RouteDelaySection) => void;
-    onSelectRoute: (routeKey: string | null) => void;
-    onBackToRoutes: () => void;
-    onPageChange: (nextPage: number) => void;
-    onRoutesPerPageChange: (nextPageSize: PageSizeOption) => void;
+    tRouteDelay: TranslationStrings["routeDelay"];
+    tSectionToggle: TranslationStrings["routeDelaySectionToggle"];
+    tControls: TranslationStrings["routeDelayControls"];
+    tDatePicker: TranslationStrings["availableDatesPicker"];
+    tTransportModes: TranslationStrings["transportModes"];
 };
 
 export function RouteDelayView({
@@ -53,34 +39,26 @@ export function RouteDelayView({
     selectedDateText,
     routesInfoText,
     selectedDatePreset,
-    selectedCustomDate,
+    selectedCustomDateRange,
     selectedEventType,
     selectedTransportationMode,
     searchQuery,
-    pagedRouteItems,
-    currentPage,
-    totalPages,
-    routesPerPage,
-    selectedRouteKey,
-    selectedRouteSummary,
-    leaderboardItems,
-    trendPoints,
-    isTrendLoading,
+    isRouteDetailsOpen,
+    content,
     transportationModeOptions,
     availableDates,
     onDatePresetChange,
-    onCustomDateChange,
+    onCustomDateRangeChange,
     onEventTypeChange,
     onTransportationModeChange,
     onSearchQueryChange,
     onSelectedSectionChange,
-    onSelectRoute,
-    onBackToRoutes,
-    onPageChange,
-    onRoutesPerPageChange,
+    tRouteDelay,
+    tSectionToggle,
+    tControls,
+    tDatePicker,
+    tTransportModes,
 }: RouteDelayViewProps) {
-    const isRouteDetailsOpen = selectedRouteKey !== null;
-
     return (
         <Box
             sx={{
@@ -114,29 +92,33 @@ export function RouteDelayView({
                         color: "text.primary",
                     }}
                 >
-                    Route Delays
+                    {tRouteDelay.delays}
                 </Typography>
                 <div className="flex w-full flex-col gap-4">
                     <div className="space-y-4">
                         <RouteDelaySectionToggleView
                             selectedSection={selectedSection}
                             onSelectedSectionChange={onSelectedSectionChange}
+                            t={tSectionToggle}
                         />
                         <RouteDelayControls
                             selectedSection={selectedSection}
                             isRouteDetailsOpen={isRouteDetailsOpen}
                             availableDates={availableDates}
                             selectedDatePreset={selectedDatePreset}
-                            selectedCustomDate={selectedCustomDate}
+                            selectedCustomDateRange={selectedCustomDateRange}
                             selectedEventType={selectedEventType}
                             selectedTransportationMode={selectedTransportationMode}
                             searchQuery={searchQuery}
                             transportationModeOptions={transportationModeOptions}
                             onDatePresetChange={onDatePresetChange}
-                            onCustomDateChange={onCustomDateChange}
+                            onCustomDateRangeChange={onCustomDateRangeChange}
                             onEventTypeChange={onEventTypeChange}
                             onTransportationModeChange={onTransportationModeChange}
                             onSearchQueryChange={onSearchQueryChange}
+                            t={tControls}
+                            tDatePicker={tDatePicker}
+                            tTransportModes={tTransportModes}
                         />
                         <RouteDelayInfoView
                             selectedDateText={selectedDateText}
@@ -145,39 +127,7 @@ export function RouteDelayView({
                         />
                     </div>
 
-                    <div>
-                        {selectedRouteKey === null ? (
-                            <div className="flex flex-col gap-4 pt-4">
-                                {selectedSection === "routes" ? (
-                                    <RouteDelayRoutesView
-                                        pagedRouteItems={pagedRouteItems}
-                                        currentPage={currentPage}
-                                        totalPages={totalPages}
-                                        routesPerPage={routesPerPage}
-                                        onSelectRoute={onSelectRoute}
-                                        onPageChange={onPageChange}
-                                        onRoutesPerPageChange={onRoutesPerPageChange}
-                                    />
-                                ) : null}
-
-                                {selectedSection === "leaderboard" ? (
-                                    <RouteDelayLeaderboardView
-                                        leaderboardItems={leaderboardItems}
-                                    />
-                                ) : null}
-                            </div>
-                        ) : selectedRouteSummary ? (
-                            <RouteDetailsPage
-                                routeSummary={selectedRouteSummary}
-                                selectedEventType={selectedEventType}
-                                trendPoints={trendPoints}
-                                isTrendLoading={isTrendLoading}
-                                onBackToRoutes={onBackToRoutes}
-                            />
-                        ) : (
-                            <RouteDelayRouteFallbackView onBackToRoutes={onBackToRoutes} />
-                        )}
-                    </div>
+                    <div>{content}</div>
                 </div>
             </Paper>
         </Box>

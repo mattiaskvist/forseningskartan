@@ -1,6 +1,7 @@
 import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { renderWithTheme } from "../test/renderWithTheme";
+import { translations } from "../utils/translations";
 import { DepartureHeaderView } from "./departureHeaderView";
 
 describe("DepartureHeaderView", () => {
@@ -17,12 +18,13 @@ describe("DepartureHeaderView", () => {
                 lastUpdatedText="Last updated 12:34"
                 onRefreshDepartures={onRefreshDepartures}
                 onClose={vi.fn()}
+                t={translations.en.departureHeader}
             />
         );
 
         expect(screen.getByText("Last updated 12:34")).toBeInTheDocument();
 
-        fireEvent.click(screen.getByRole("button", { name: "Refresh departures" }));
+        fireEvent.click(screen.getByRole("button", { name: "Refresh" }));
         expect(onRefreshDepartures).toHaveBeenCalledOnce();
     });
 
@@ -37,9 +39,10 @@ describe("DepartureHeaderView", () => {
                 lastUpdatedText={null}
                 onRefreshDepartures={vi.fn()}
                 onClose={vi.fn()}
+                t={translations.en.departureHeader}
             />
         );
 
-        expect(screen.getByRole("button", { name: "Refresh departures" })).toBeDisabled();
+        expect(screen.getByRole("button", { name: "Refresh" })).toBeDisabled();
     });
 });

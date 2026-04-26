@@ -1,24 +1,21 @@
 import { createSelector } from "@reduxjs/toolkit";
-import { DatePreset } from "../types/departureDelay";
+import { CustomDateRange, DatePreset } from "../types/departureDelay";
 import { Site } from "../types/sl";
-import { getDatesForPreset, sortDatesDescendingCB } from "../utils/time";
+import { getDatesForPreset } from "../utils/time";
 import { RootState } from "./store";
 
 type SelectedDelayDatesInput = {
     selectedDatePreset: DatePreset;
-    selectedCustomDate: string | null;
+    selectedCustomDateRange: CustomDateRange | null;
     availableDates: string[];
 };
 
 function getSelectedDelayDates({
     selectedDatePreset,
-    selectedCustomDate,
+    selectedCustomDateRange,
     availableDates,
 }: SelectedDelayDatesInput): string[] {
-    const latestDate = [...availableDates].sort(sortDatesDescendingCB)[0];
-    const effectiveCustomDate = selectedCustomDate ?? latestDate ?? null;
-
-    return getDatesForPreset(selectedDatePreset, effectiveCustomDate, availableDates);
+    return getDatesForPreset(selectedDatePreset, selectedCustomDateRange, availableDates);
 }
 
 function getAuthUserCB(state: RootState) {
@@ -39,6 +36,14 @@ function getSitesLoadingCB(state: RootState) {
 
 function getSelectedSiteIdCB(state: RootState) {
     return state.sites.selectedSiteId;
+}
+
+function getUserLocationCB(state: RootState) {
+    return state.sites.userLocation;
+}
+
+function getMapCenterOnUserRequestedAtCB(state: RootState) {
+    return state.sites.mapCenterOnUserRequestedAt;
 }
 
 function getSelectedSiteCB(state: RootState) {
@@ -123,16 +128,16 @@ function getSelectedDatePresetCB(state: RootState) {
     return state.departureUI.selectedDatePreset;
 }
 
-function getSelectedCustomDateCB(state: RootState) {
-    return state.departureUI.selectedCustomDate;
+function getSelectedCustomDateRangeCB(state: RootState) {
+    return state.departureUI.selectedCustomDateRange;
 }
 
 function getRouteDelaySelectedDatePresetCB(state: RootState) {
     return state.routeDelayUI.selectedDatePreset;
 }
 
-function getRouteDelaySelectedCustomDateCB(state: RootState) {
-    return state.routeDelayUI.selectedCustomDate;
+function getRouteDelaySelectedCustomDateRangeCB(state: RootState) {
+    return state.routeDelayUI.selectedCustomDateRange;
 }
 
 function getRouteDelaySelectedEventTypeCB(state: RootState) {
@@ -175,6 +180,10 @@ function getAppStylePreferenceCB(state: RootState) {
     return state.userPreferences.appStyle;
 }
 
+function getCurrentLanguageCB(state: RootState) {
+    return state.userPreferences.language;
+}
+
 function getRecentSearchSiteIdsCB(state: RootState) {
     return state.userPreferences.recentSearchSiteIds ?? [];
 }
@@ -187,25 +196,33 @@ function getHideStopsWithoutDeparturesCB(state: RootState) {
     return state.userPreferences.hideStopsWithoutDepartures;
 }
 
+function getUserPreferencesLoadingCB(state: RootState) {
+    return state.userPreferences.isLoadingSavedPreferences;
+}
+
 // use createSelector for computationally expensive selectors
 // to memoize results and avoid unnecessary recalculations
 const getSelectedDelayDatesCB = createSelector(
-    [getSelectedDatePresetCB, getSelectedCustomDateCB, getAggregatedDatesCB],
-    (selectedDatePreset, selectedCustomDate, availableDates) => {
+    [getSelectedDatePresetCB, getSelectedCustomDateRangeCB, getAggregatedDatesCB],
+    (selectedDatePreset, selectedCustomDateRange, availableDates) => {
         return getSelectedDelayDates({
             selectedDatePreset,
-            selectedCustomDate,
+            selectedCustomDateRange,
             availableDates,
         });
     }
 );
 
 const getSelectedRouteDelayDatesCB = createSelector(
-    [getRouteDelaySelectedDatePresetCB, getRouteDelaySelectedCustomDateCB, getAggregatedDatesCB],
-    (selectedDatePreset, selectedCustomDate, availableDates) => {
+    [
+        getRouteDelaySelectedDatePresetCB,
+        getRouteDelaySelectedCustomDateRangeCB,
+        getAggregatedDatesCB,
+    ],
+    (selectedDatePreset, selectedCustomDateRange, availableDates) => {
         return getSelectedDelayDates({
             selectedDatePreset,
-            selectedCustomDate,
+            selectedCustomDateRange,
             availableDates,
         });
     }
@@ -258,9 +275,9 @@ export {
     getDeparturesLastUpdatedCB,
     getSelectedDepartureCB,
     getSelectedDatePresetCB,
-    getSelectedCustomDateCB,
+    getSelectedCustomDateRangeCB,
     getRouteDelaySelectedDatePresetCB,
-    getRouteDelaySelectedCustomDateCB,
+    getRouteDelaySelectedCustomDateRangeCB,
     getRouteDelaySelectedEventTypeCB,
     getRouteDelaySelectedTransportationModeCB,
     getRouteDelaySelectedRouteKeyCB,
@@ -272,9 +289,13 @@ export {
     getFavoriteSiteIdsCB,
     getAppStylePreferenceCB,
     getRecentSearchSiteIdsCB,
+    getCurrentLanguageCB,
     getMapTransportationModeFilterCB,
     getHideStopsWithoutDeparturesCB,
+    getUserPreferencesLoadingCB,
     getFavoriteSitesCB,
+    getUserLocationCB,
+    getMapCenterOnUserRequestedAtCB,
     getSelectedDelayDates,
     getSelectedDelayDatesCB,
     getSelectedRouteDelayDatesCB,

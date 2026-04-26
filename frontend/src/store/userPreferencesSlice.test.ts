@@ -3,6 +3,7 @@ import {
     applyLoadedUserPreferences,
     recordRecentSearchSiteId,
     setAppStylePreference,
+    setLanguagePreference,
     toggleFavoriteSiteId,
     userPreferencesSlice,
 } from "./userPreferencesSlice";
@@ -19,8 +20,10 @@ describe("userPreferencesSlice", () => {
             favoriteSiteIds: [],
             recentSearchSiteIds: [],
             appStyle: "Dark",
+            language: "en",
             mapTransportationModeFilter: null,
             hideStopsWithoutDepartures: true,
+            isLoadingSavedPreferences: false,
         });
     });
 
@@ -49,6 +52,12 @@ describe("userPreferencesSlice", () => {
         expect(updatedState.appStyle).toBe("Light");
     });
 
+    it("sets language preference", () => {
+        const updatedState = userPreferencesSlice.reducer(undefined, setLanguagePreference("sv"));
+
+        expect(updatedState.language).toBe("sv");
+    });
+
     // verify that we can load saved data
     // and successfully inject it into the app state on load.
     it("hydrates preferences from persisted state", () => {
@@ -59,6 +68,7 @@ describe("userPreferencesSlice", () => {
                 favoriteSiteIds: [2, 9],
                 recentSearchSiteIds: [1, 3, 5],
                 appStyle: "Classic",
+                language: "sv",
                 mapTransportationModeFilter: null,
                 hideStopsWithoutDepartures: true,
             })
@@ -69,8 +79,10 @@ describe("userPreferencesSlice", () => {
             favoriteSiteIds: [2, 9],
             recentSearchSiteIds: [1, 3, 5],
             appStyle: "Classic",
+            language: "sv",
             mapTransportationModeFilter: null,
             hideStopsWithoutDepartures: true,
+            isLoadingSavedPreferences: false,
         });
     });
 

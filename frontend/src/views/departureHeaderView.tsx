@@ -1,8 +1,9 @@
 import { Typography } from "@mui/material";
 import Button from "@mui/material/Button";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
-import RefreshIcon from "@mui/icons-material/Refresh";
+import { TranslationStrings } from "../utils/translations";
 
 type DepartureHeaderViewProps = {
     selectedSiteName: string;
@@ -13,6 +14,7 @@ type DepartureHeaderViewProps = {
     lastUpdatedText: string | null;
     onRefreshDepartures: () => void;
     onClose: () => void;
+    t: TranslationStrings["departureHeader"];
 };
 
 export function DepartureHeaderView({
@@ -24,6 +26,7 @@ export function DepartureHeaderView({
     lastUpdatedText,
     onRefreshDepartures,
     onClose,
+    t,
 }: DepartureHeaderViewProps) {
     return (
         <div className="flex items-start justify-between gap-2">
@@ -44,9 +47,9 @@ export function DepartureHeaderView({
                     onClick={onRefreshDepartures}
                     disabled={isLoading}
                     startIcon={<RefreshIcon />}
-                    aria-label="Refresh departures"
+                    aria-label={t.refresh}
                 >
-                    Refresh
+                    {t.refresh}
                 </Button>
                 <Button
                     variant="text"
@@ -56,24 +59,19 @@ export function DepartureHeaderView({
                     aria-label={
                         isUserLoggedIn
                             ? isFavoriteStop
-                                ? "Remove stop from favorites"
-                                : "Add stop to favorites"
-                            : "Log in to save favorites"
+                                ? t.unfavorite
+                                : t.favorite
+                            : t.loginFavorite
                     }
                 >
                     {isUserLoggedIn
                         ? isFavoriteStop
-                            ? "Unfavorite"
-                            : "Favorite"
-                        : "Log in to favorite"}
+                            ? t.unfavorite
+                            : t.favorite
+                        : t.loginFavorite}
                 </Button>
-                <Button
-                    variant="text"
-                    size="small"
-                    onClick={onClose}
-                    aria-label="Close departures view"
-                >
-                    Close
+                <Button variant="text" size="small" onClick={onClose} aria-label={t.close}>
+                    {t.close}
                 </Button>
             </div>
         </div>

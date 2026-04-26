@@ -5,6 +5,7 @@ import {
     getAvgDelayMinutes,
     getAvgDelaySeconds,
     getDelayMinutes,
+    getDatesForPreset,
     sortDatesDescendingCB,
 } from "./time";
 import { Departure } from "../types/sl";
@@ -157,5 +158,58 @@ describe("sortDatesDescendingCB", () => {
         const sorted = dates.sort(sortDatesDescendingCB);
 
         expect(sorted).toEqual(["2024-01-15", "2024-01-05", "2024-01-01"]);
+    });
+});
+
+describe("getDatesForPreset", () => {
+    it("returns all available dates within a custom range", () => {
+        const availableDates = [
+            "2024-01-02",
+            "2024-01-03",
+            "2024-01-04",
+            "2024-01-05",
+            "2024-01-07",
+        ];
+
+        expect(
+            getDatesForPreset(
+                "customDate",
+                {
+                    startDate: "2024-01-03",
+                    endDate: "2024-01-05",
+                },
+                availableDates
+            )
+        ).toEqual(["2024-01-05", "2024-01-04", "2024-01-03"]);
+    });
+
+    it("normalizes a custom range when the selected dates are reversed", () => {
+        const availableDates = ["2024-01-03", "2024-01-04", "2024-01-05"];
+
+        expect(
+            getDatesForPreset(
+                "customDate",
+                {
+                    startDate: "2024-01-05",
+                    endDate: "2024-01-03",
+                },
+                availableDates
+            )
+        ).toEqual(["2024-01-05", "2024-01-04", "2024-01-03"]);
+    });
+
+    it("treats a single selected custom boundary as a one-day range", () => {
+        const availableDates = ["2024-01-03", "2024-01-04", "2024-01-05"];
+
+        expect(
+            getDatesForPreset(
+                "customDate",
+                {
+                    startDate: "2024-01-04",
+                    endDate: null,
+                },
+                availableDates
+            )
+        ).toEqual(["2024-01-04"]);
     });
 });

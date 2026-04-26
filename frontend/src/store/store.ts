@@ -25,6 +25,8 @@ import {
     clearRecentSearchSiteIds,
     clearStoredRecentSearchSiteIds,
     setAppStylePreference,
+    setUserPreferencesLoading,
+    setLanguagePreference,
     storeRecentSearchSiteIds,
     toggleFavoriteSiteId,
     userPreferencesSlice,
@@ -45,9 +47,9 @@ import {
 import {
     setSelectedDeparture,
     setSelectedDatePreset,
-    setSelectedCustomDate,
+    setSelectedCustomDateRange,
     setRouteDelayDatePreset,
-    setRouteDelayCustomDate,
+    setRouteDelayCustomDateRange,
     setRouteDelaySelectedRouteKey,
     setStopPointGidsBySiteId,
 } from "./reducers";
@@ -98,7 +100,7 @@ export const store = configureStore({
 });
 
 listenerMiddleware.startListening({
-    matcher: isAnyOf(setSelectedDeparture, setSelectedDatePreset, setSelectedCustomDate),
+    matcher: isAnyOf(setSelectedDeparture, setSelectedDatePreset, setSelectedCustomDateRange),
     effect: (_, listenerApi) => {
         // avoid rapid updates triggering multiple fetches, only the latest matters
         listenerApi.cancelActiveListeners();
@@ -127,7 +129,7 @@ listenerMiddleware.startListening({
 listenerMiddleware.startListening({
     matcher: isAnyOf(
         setRouteDelayDatePreset,
-        setRouteDelayCustomDate,
+        setRouteDelayCustomDateRange,
         getAggregatedDates.fulfilled
     ),
     effect: (_, listenerApi) => {
@@ -155,8 +157,11 @@ listenerMiddleware.startListening({
         const user = action.payload;
 
         if (!user) {
+            dispatch(setUserPreferencesLoading(false));
             return;
         }
+
+        dispatch(setUserPreferencesLoading(true));
 
         try {
             const loadedPreferences = await fetchUserPreferences(user.uid);
@@ -179,8 +184,10 @@ listenerMiddleware.startListening({
             }
 
             await saveUserPreferences(user.uid, localPreferences);
+            dispatch(setUserPreferencesLoading(false));
             clearStoredRecentSearchSiteIds();
         } catch (error) {
+            dispatch(setUserPreferencesLoading(false));
             console.error("Failed to load user preferences:", error);
             dispatch(
                 showSnackbar({
@@ -205,6 +212,7 @@ listenerMiddleware.startListening({
     matcher: isAnyOf(
         toggleFavoriteSiteId,
         setAppStylePreference,
+        setLanguagePreference,
         recordRecentSearchSiteId,
         setMapTransportationModeFilter,
         setHideStopsWithoutDepartures
