@@ -57,8 +57,8 @@ export const getRouteDelays = createAsyncThunk("routeDelays/fetch", (dates: stri
 
 export const getRouteDelayTrend = createAsyncThunk(
     "routeDelayTrend/fetch",
-    ({ dates, routeShortName, routeType, eventType }: RouteDelayTrendParams) =>
-        fetchRouteDelayTrend({ dates, routeShortName, routeType, eventType })
+    ({ dates, routeShortName, routeType, eventType, timeGranularity }: RouteDelayTrendParams) =>
+        fetchRouteDelayTrend({ dates, routeShortName, routeType, eventType, timeGranularity })
 );
 
 // fetch historical delay summary for selected departure
@@ -168,6 +168,7 @@ export function fetchSelectedRouteTrend(): AppThunk {
                 routeShortName: selectedRouteShortName,
                 routeType: selectedRouteType,
                 eventType: state.routeDelayUI.selectedEventType,
+                timeGranularity: state.routeDelayUI.selectedTimeGranularity,
             })
         );
     };

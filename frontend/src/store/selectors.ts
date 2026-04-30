@@ -148,6 +148,10 @@ function getRouteDelaySelectedRouteKeyCB(state: RootState) {
     return state.routeDelayUI.selectedRouteKey;
 }
 
+function getRouteDelaySelectedTimeGranularityCB(state: RootState) {
+    return state.routeDelayUI.selectedTimeGranularity;
+}
+
 function getRouteDelayTrendPointsCB(state: RootState) {
     return state.routeDelayTrend.data;
 }
@@ -276,6 +280,7 @@ export {
     getRouteDelaySelectedEventTypeCB,
     getRouteDelaySelectedTransportationModeCB,
     getRouteDelaySelectedRouteKeyCB,
+    getRouteDelaySelectedTimeGranularityCB,
     getRouteDelayTrendPointsCB,
     getRouteDelayTrendLoadingCB,
     getSnackbarOpenCB,

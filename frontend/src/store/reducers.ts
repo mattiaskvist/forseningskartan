@@ -13,7 +13,7 @@ import { RoutesByStopPoint } from "../api/backend";
 import { Departure, DepartureResponse, Site, StopPoint, TransportationMode } from "../types/sl";
 import { DelaySummary } from "../types/historicalDelay";
 import { CustomDateRange, DatePreset, EventType } from "../types/departureDelay";
-import { RouteDelayTrendPoint } from "../types/routeDelays";
+import { RouteDelayTrendPoint, RouteDelayTimeGranularity } from "../types/routeDelays";
 import { StopPointGidsBySiteId } from "../utils/site";
 
 type SitesState = {
@@ -87,6 +87,7 @@ type RouteDelayUIState = {
     selectedEventType: EventType;
     selectedTransportationMode: TransportationMode;
     selectedRouteKey: string | null;
+    selectedTimeGranularity: RouteDelayTimeGranularity;
 };
 
 export const sitesSlice = createSlice({
@@ -425,6 +426,7 @@ export const routeDelayUISlice = createSlice({
         selectedEventType: "departure",
         selectedTransportationMode: "BUS",
         selectedRouteKey: null,
+        selectedTimeGranularity: "daily",
     } as RouteDelayUIState,
     reducers: {
         setRouteDelayDatePreset: (state, action: { payload: DatePreset }) => {
@@ -447,6 +449,9 @@ export const routeDelayUISlice = createSlice({
         setRouteDelaySelectedRouteKey: (state, action: { payload: string | null }) => {
             state.selectedRouteKey = action.payload;
         },
+        setRouteDelayTimeGranularity: (state, action: { payload: RouteDelayTimeGranularity }) => {
+            state.selectedTimeGranularity = action.payload;
+        },
     },
 });
 
@@ -456,4 +461,5 @@ export const {
     setRouteDelayEventType,
     setRouteDelayTransportationMode,
     setRouteDelaySelectedRouteKey,
+    setRouteDelayTimeGranularity,
 } = routeDelayUISlice.actions;
