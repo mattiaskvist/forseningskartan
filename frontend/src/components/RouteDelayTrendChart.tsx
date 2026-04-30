@@ -60,7 +60,7 @@ export function RouteDelayTrendChart({
             hourly: t.trendChartHourly,
         };
         return (
-            <ToggleButton value={granularity} aria-label={granularity}>
+            <ToggleButton key={granularity} value={granularity} aria-label={granularity}>
                 {labelMap[granularity]}
             </ToggleButton>
         );

@@ -3,7 +3,7 @@ import React from "react";
 
 type FilterToggleButtonGroupProps<T> = {
     label?: string;
-    options: T[];
+    options: readonly T[];
     selectedValue: T | null;
     onValueChange: (value: T) => void;
     renderButtonCB: (option: T) => React.ReactNode;
