@@ -24,28 +24,28 @@ export function RouteDelayTrendChart({
     t,
 }: RouteDelayTrendChartProps) {
     function getMonthDayFromDateCB(point: RouteDelayTrendPoint) {
-        try {
-            const date = new Date(point.date);
-            if (timeGranularity === "hourly") {
-                // 2026-03-20T06:00:00Z -> Mar 20, 06:00
-                return date.toLocaleString("sv-SE", {
-                    month: "short",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: false,
-                    timeZone: "Europe/Stockholm",
-                });
-            } else {
-                // 2026-03-20 -> Mar 20
-                return date.toLocaleString("sv-SE", {
-                    month: "short",
-                    day: "numeric",
-                    timeZone: "Europe/Stockholm",
-                });
-            }
-        } catch {
+        const date = new Date(point.date);
+        if (Number.isNaN(date.getTime())) {
             return point.date;
+        }
+
+        if (timeGranularity === "hourly") {
+            // 2026-03-20T06:00:00Z -> Mar 20, 06:00
+            return date.toLocaleString("sv-SE", {
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+                timeZone: "Europe/Stockholm",
+            });
+        } else {
+            // 2026-03-20 -> Mar 20
+            return date.toLocaleString("sv-SE", {
+                month: "short",
+                day: "numeric",
+                timeZone: "Europe/Stockholm",
+            });
         }
     }
     function getAvgDelayMinutesCB(point: RouteDelayTrendPoint) {
