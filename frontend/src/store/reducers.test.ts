@@ -65,6 +65,7 @@ describe("departuresSlice", () => {
             isLoading: false,
             error: null,
             currentRequestId: null,
+            lastUpdated: null,
         });
     });
 });

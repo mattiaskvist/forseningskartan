@@ -26,6 +26,8 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             unfavorite: "Unfavorite",
             favorite: "Favorite",
             loginFavorite: "Log in to favorite",
+            refresh: "Refresh",
+            lastUpdated: (time) => `Last updated ${time}`,
             close: "Close",
         },
         departureDetails: {
@@ -106,6 +108,7 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             loginToSaveFavoriteStops: "Log in to save favorite stops.",
             stopRemovedFromFavorites: "Removed stop from favorites.",
             stopAddedToFavorites: "Added stop to favorites.",
+            refreshDeparturesFailed: "Failed to refresh departures.",
         },
         mapSearch: {
             hideUnusedStops: "Hide unused stops",
@@ -216,6 +219,8 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             unfavorite: "Ta bort från favoriter",
             favorite: "Gör till favorit",
             loginFavorite: "Logga in för att göra till favorit",
+            refresh: "Uppdatera",
+            lastUpdated: (time) => `Senast uppdaterad ${time}`,
             close: "Stäng",
         },
         departureDetails: {
@@ -296,6 +301,7 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             loginToSaveFavoriteStops: "Logga in för att spara favorithållplatser.",
             stopRemovedFromFavorites: "Hållplats borttagen från favoriter.",
             stopAddedToFavorites: "Hållplats tillagd i favoriter.",
+            refreshDeparturesFailed: "Misslyckades med att uppdatera avgångar.",
         },
         mapSearch: {
             hideUnusedStops: "Dölj oanvända hållplatser",

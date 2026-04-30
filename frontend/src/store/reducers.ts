@@ -30,6 +30,7 @@ type DeparturesState = {
     isLoading: boolean;
     error: Error | null;
     currentRequestId: string | null;
+    lastUpdated: string | null;
 };
 
 type StopPointsState = {
@@ -148,6 +149,7 @@ export const departuresSlice = createSlice({
         isLoading: false,
         error: null,
         currentRequestId: null,
+        lastUpdated: null,
     } as DeparturesState,
     reducers: {},
     extraReducers: (builder) => {
@@ -166,6 +168,7 @@ export const departuresSlice = createSlice({
                 state.data = action.payload;
                 state.error = null;
                 state.currentRequestId = null;
+                state.lastUpdated = new Date().toISOString();
             })
             .addCase(getDepartures.rejected, (state, action) => {
                 if (state.currentRequestId !== action.meta.requestId) {
