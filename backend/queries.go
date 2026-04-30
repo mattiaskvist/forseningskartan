@@ -293,24 +293,7 @@ const (
 	TimeGranularityHourly TimeGranularity = "hourly"
 )
 
-func buildHourlyTrendQuery(dates []string, routeShortName, routeType string) (string, string, []any) {
-	timeFormat := "2006-01-02T15:00:00Z"
-
-	// Build date range filter - find the min and max dates
-	var minDate, maxDate string
-	if len(dates) > 0 {
-		minDate = dates[0]
-		maxDate = dates[0]
-		for _, d := range dates {
-			if d < minDate {
-				minDate = d
-			}
-			if d > maxDate {
-				maxDate = d
-			}
-		}
-	}
-
+func buildHourlyTrendQuery() string {
 	query := `
 		SELECT
 			a.hour_start_utc,
@@ -330,21 +313,16 @@ func buildHourlyTrendQuery(dates []string, routeShortName, routeType string) (st
 		FROM aggregate_route_hourly a
 		JOIN routes r ON r.id = a.route_id
 		WHERE
-			a.hour_start_utc >= $1::timestamp
-			AND a.hour_start_utc < ($2::timestamp + interval '1 day')
-			AND r.short_name = $3
-			AND ($4 = '' OR r.route_type = $4)
+			(a.hour_start_utc AT TIME ZONE 'UTC')::date = ANY($1::date[])
+			AND r.short_name = $2
+			AND ($3 = '' OR r.route_type = $3)
 		GROUP BY a.hour_start_utc
 		ORDER BY a.hour_start_utc
 	`
-	queryArgs := []any{minDate, maxDate, routeShortName, routeType}
-
-	return timeFormat, query, queryArgs
+	return query
 }
 
-func buildDailyTrendQuery(dates []string, routeShortName, routeType string) (string, string, []any) {
-	timeFormat := "2006-01-02"
-
+func buildDailyTrendQuery() string {
 	query := `
 		SELECT
 			a.service_date,
@@ -370,9 +348,7 @@ func buildDailyTrendQuery(dates []string, routeShortName, routeType string) (str
 		GROUP BY a.service_date
 		ORDER BY a.service_date
 	`
-	queryArgs := []any{dates, routeShortName, routeType}
-
-	return timeFormat, query, queryArgs
+	return query
 }
 
 func (s *server) queryRouteDelayTrend(
@@ -385,19 +361,20 @@ func (s *server) queryRouteDelayTrend(
 	var queryName string
 	var query string
 	var timeFormat string
-	var queryArgs []any
 
 	switch granularity {
 	case TimeGranularityHourly:
 		queryName = "route_delay_trend_hourly"
-		timeFormat, query, queryArgs = buildHourlyTrendQuery(dates, routeShortName, routeType)
+		timeFormat = "2006-01-02T15:00:00Z"
+		query = buildHourlyTrendQuery()
 	case TimeGranularityDaily:
 		queryName = "route_delay_trend"
-		timeFormat, query, queryArgs = buildDailyTrendQuery(dates, routeShortName, routeType)
+		timeFormat = "2006-01-02"
+		query = buildDailyTrendQuery()
 	}
 
 	start := time.Now()
-	rows, err := s.db.QueryContext(ctx, query, queryArgs...)
+	rows, err := s.db.QueryContext(ctx, query, dates, routeShortName, routeType)
 	if err != nil {
 		recordDBQueryResult(queryName, QueryResultError, time.Since(start))
 		return nil, err
@@ -444,6 +421,8 @@ func (s *server) queryRouteDelayTrend(
 			return nil, err
 		}
 
+		// normalize DB timestamptz to UTC to ensure consistent formatting
+		timeValue = timeValue.UTC()
 		timeKey := timeValue.Format(timeFormat)
 		if routeType != "" {
 			typeValue = routeType
