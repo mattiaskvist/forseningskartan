@@ -29,7 +29,7 @@ export function RouteDetailsView({
     tStats,
 }: RouteDetailsViewProps) {
     return (
-        <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2, backdropFilter: "blur(4px)" }}>
+        <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2 }}>
             <div className="flex items-center justify-between">
                 <Typography
                     variant="subtitle1"
