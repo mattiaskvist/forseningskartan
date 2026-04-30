@@ -1,6 +1,6 @@
 type RouteDelaySection = "routes" | "leaderboard";
 
-export const RouteDelayTimeGranularityOptions = ["daily", "hourly"];
+export const RouteDelayTimeGranularityOptions = ["daily", "hourly"] as const;
 type RouteDelayTimeGranularity = (typeof RouteDelayTimeGranularityOptions)[number];
 
 type RouteDelayTrendPoint = {
