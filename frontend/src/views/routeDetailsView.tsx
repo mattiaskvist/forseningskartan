@@ -6,7 +6,7 @@ import { getRouteDisplayName, getRouteTypeString } from "../utils/route";
 import { DepartureDelayStats } from "../components/DepartureDelayStats";
 import { RouteDelayTrendChart } from "../components/RouteDelayTrendChart";
 import { Suspense } from "../components/Suspense";
-import { RouteDelayTrendPoint } from "../types/routeDelays";
+import { RouteDelayTrendPoint, RouteDelayTimeGranularity } from "../types/routeDelays";
 import { TranslationStrings } from "../utils/translations";
 
 type RouteDetailsViewProps = {
@@ -15,6 +15,8 @@ type RouteDetailsViewProps = {
     trendPoints: RouteDelayTrendPoint[];
     isTrendLoading: boolean;
     onBackToRoutes: () => void;
+    timeGranularity: RouteDelayTimeGranularity;
+    onTimeGranularityChange: (granularity: RouteDelayTimeGranularity) => void;
     t: TranslationStrings["routeDetailsPage"];
     tStats: TranslationStrings["departureDelayStats"];
 };
@@ -25,6 +27,8 @@ export function RouteDetailsView({
     trendPoints,
     isTrendLoading,
     onBackToRoutes,
+    timeGranularity,
+    onTimeGranularityChange,
     t,
     tStats,
 }: RouteDetailsViewProps) {
@@ -87,6 +91,8 @@ export function RouteDetailsView({
                                 ? t.departureDelayTrend
                                 : t.arrivalDelayTrend
                         }`}
+                        timeGranularity={timeGranularity}
+                        onTimeGranularityChange={onTimeGranularityChange}
                         t={t}
                     />
                 )}
