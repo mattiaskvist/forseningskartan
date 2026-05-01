@@ -51,6 +51,7 @@ import {
     setRouteDelayDatePreset,
     setRouteDelayCustomDateRange,
     setRouteDelaySelectedRouteKey,
+    setRouteDelayTimeGranularity,
     setStopPointGidsBySiteId,
 } from "./reducers";
 import { fetchUserPreferences, saveUserPreferences } from "../firebase/userPreferences";
@@ -141,7 +142,11 @@ listenerMiddleware.startListening({
 });
 
 listenerMiddleware.startListening({
-    matcher: isAnyOf(setRouteDelaySelectedRouteKey, getRouteDelays.fulfilled),
+    matcher: isAnyOf(
+        setRouteDelaySelectedRouteKey,
+        setRouteDelayTimeGranularity,
+        getRouteDelays.fulfilled
+    ),
     effect: (_, listenerApi) => {
         listenerApi.cancelActiveListeners();
 

@@ -161,7 +161,7 @@ func (s *server) handleRouteDelays(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(summaries)
 }
 
-func (s *server) handleRouteDelayTrend(w http.ResponseWriter, r *http.Request) {
+func (s *server) handleRouteDelayTrend(w http.ResponseWriter, r *http.Request, granularity TimeGranularity) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -190,7 +190,7 @@ func (s *server) handleRouteDelayTrend(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	defer cancel()
 
-	trend, err := s.queryRouteDelayTrend(ctx, dates, routeShortName, routeType)
+	trend, err := s.queryRouteDelayTrend(ctx, dates, routeShortName, routeType, granularity)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("query failed: %v", err), http.StatusInternalServerError)
 		return

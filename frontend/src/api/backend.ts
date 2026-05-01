@@ -1,6 +1,6 @@
 import { DelaySummary, RouteMeta } from "../types/historicalDelay";
 import { EventType } from "../types/departureDelay";
-import { RouteDelayTrendPoint } from "../types/routeDelays";
+import { RouteDelayTrendPoint, RouteDelayTimeGranularity } from "../types/routeDelays";
 import { getAvgDelayMinutes } from "../utils/time";
 
 export type DepartureHistoricalDelayParams = {
@@ -16,6 +16,7 @@ export type RouteDelayTrendParams = {
     routeShortName: string;
     routeType: string;
     eventType: EventType;
+    timeGranularity: RouteDelayTimeGranularity;
 };
 
 type RouteDelayTrendSummaryResponse = Record<string, DelaySummary>;
@@ -136,6 +137,7 @@ export function fetchRouteDelayTrend({
     routeShortName,
     routeType,
     eventType,
+    timeGranularity,
 }: RouteDelayTrendParams): Promise<RouteDelayTrendPoint[]> {
     if (dates.length === 0) {
         return Promise.resolve([]);
@@ -156,6 +158,14 @@ export function fetchRouteDelayTrend({
     function mapTrendByDateACB(
         trendByDate: RouteDelayTrendSummaryResponse
     ): RouteDelayTrendPoint[] {
+        // Build hour tags as "2026-03-20T06:00:00Z" for hourly endpoint
+        function expandToHoursCB(date: string): string[] {
+            return Array.from({ length: 24 }, (_, hour) => {
+                const hourString = hour.toString().padStart(2, "0");
+                return `${date}T${hourString}:00:00Z`;
+            });
+        }
+
         function createTrendPointCB(date: string): RouteDelayTrendPoint {
             const routeSummary = trendByDate[date] ?? null;
             if (!routeSummary) {
@@ -171,7 +181,10 @@ export function fetchRouteDelayTrend({
             };
         }
 
-        return [...dates].sort().map(createTrendPointCB);
+        const sourceDates =
+            timeGranularity === "hourly" ? dates.flatMap(expandToHoursCB) : [...dates];
+
+        return sourceDates.sort().map(createTrendPointCB);
     }
 
     function catchErrorACB(error: unknown): RouteDelayTrendPoint[] {
@@ -179,7 +192,9 @@ export function fetchRouteDelayTrend({
         return [];
     }
 
-    const fullURL = `${backendBaseURL}/api/route-delay-trend?${params.toString()}`;
+    const endpoint =
+        timeGranularity === "hourly" ? "route-delay-trend-hourly" : "route-delay-trend";
+    const fullURL = `${backendBaseURL}/api/${endpoint}?${params.toString()}`;
     return fetch(fullURL, {
         headers: getBackendAuthHeaders(),
     })

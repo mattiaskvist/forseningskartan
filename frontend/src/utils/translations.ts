@@ -136,6 +136,8 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             arrivalDelayTrend: "Arrival delay trend over selected dates",
             trendChartDateAxis: "Date",
             trendChartAvgDelayAxis: "Avg delay (min)",
+            trendChartDaily: "Daily",
+            trendChartHourly: "Hourly",
         },
         routeDelayControls: {
             dateSelection: "Date selection",
@@ -326,6 +328,8 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             arrivalDelayTrend: "Ankomstförseningstrend över valda datum",
             trendChartDateAxis: "Datum",
             trendChartAvgDelayAxis: "Genomsnittlig försening (min)",
+            trendChartDaily: "Daglig",
+            trendChartHourly: "Timvis",
         },
         routeDelayControls: {
             dateSelection: "Datumval",

@@ -76,7 +76,12 @@ func main() {
 	apiMux.HandleFunc("/api/departure-historical-delay", srv.handleDepartureHistoricalDelay)
 	apiMux.HandleFunc("/api/available-dates", srv.handleAvailableDates)
 	apiMux.HandleFunc("/api/route-delays", srv.handleRouteDelays)
-	apiMux.HandleFunc("/api/route-delay-trend", srv.handleRouteDelayTrend)
+	apiMux.HandleFunc("/api/route-delay-trend", func(w http.ResponseWriter, r *http.Request) {
+		srv.handleRouteDelayTrend(w, r, TimeGranularityDaily)
+	})
+	apiMux.HandleFunc("/api/route-delay-trend-hourly", func(w http.ResponseWriter, r *http.Request) {
+		srv.handleRouteDelayTrend(w, r, TimeGranularityHourly)
+	})
 	apiMux.HandleFunc("/api/stop-point-routes", srv.handleStopPointRoutes)
 	apiMux.HandleFunc("/api/sl/stop-points", srv.handleSLStopPoints)
 

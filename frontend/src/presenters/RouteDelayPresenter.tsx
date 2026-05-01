@@ -8,6 +8,7 @@ import {
     getRouteDelaySelectedEventTypeCB,
     getRouteDelaySelectedRouteKeyCB,
     getRouteDelaySelectedTransportationModeCB,
+    getRouteDelaySelectedTimeGranularityCB,
     getRouteDelayTrendLoadingCB,
     getRouteDelayTrendPointsCB,
     getSelectedRouteDelayDatesCB,
@@ -22,6 +23,7 @@ import {
     setRouteDelayEventType,
     setRouteDelaySelectedRouteKey,
     setRouteDelayTransportationMode,
+    setRouteDelayTimeGranularity,
 } from "../store/reducers";
 import { Suspense } from "../components/Suspense";
 import { DelaySummary, RouteType } from "../types/historicalDelay";
@@ -33,7 +35,12 @@ import {
 } from "../types/departureDelay";
 import { translations } from "../utils/translations";
 import { TransportationMode, transportationModeToRouteType } from "../types/sl";
-import { PageSizeOption, RouteDelayListItem, RouteDelaySection } from "../types/routeDelays";
+import {
+    PageSizeOption,
+    RouteDelayListItem,
+    RouteDelaySection,
+    RouteDelayTimeGranularity,
+} from "../types/routeDelays";
 import { getAvgDelayMinutes, getAvgDelaySeconds } from "../utils/time";
 import { compareRouteNamesCB, getRouteDisplayName, getRouteIdentityKey } from "../utils/route";
 import { routeTypesToTransportationModes } from "../utils/transportationMode";
@@ -60,6 +67,7 @@ export function RouteDelayPresenter() {
     const selectedRouteKey = useAppSelector(getRouteDelaySelectedRouteKeyCB);
     const selectedRouteTrend = useAppSelector(getRouteDelayTrendPointsCB);
     const isTrendLoading = useAppSelector(getRouteDelayTrendLoadingCB);
+    const timeGranularity = useAppSelector(getRouteDelaySelectedTimeGranularityCB);
     const currentLanguage = useAppSelector(getCurrentLanguageCB);
     const [selectedSection, setSelectedSection] = useState<RouteDelaySection>("routes");
     const [searchQuery, setSearchQuery] = useState("");
@@ -216,6 +224,10 @@ export function RouteDelayPresenter() {
         setCurrentPage(1);
     }
 
+    function handleTimeGranularityChangeACB(granularity: RouteDelayTimeGranularity) {
+        dispatch(setRouteDelayTimeGranularity(granularity));
+    }
+
     // avoid suspense after first load
     if (isAggregatedDatesLoading || (isRouteDelaysLoading && routeDelays.length === 0)) {
         return <Suspense message={translations[currentLanguage].routeDelay.loading} />;
@@ -252,6 +264,8 @@ export function RouteDelayPresenter() {
             trendPoints={selectedRouteTrend}
             isTrendLoading={isTrendLoading}
             onBackToRoutes={handleBackToRoutesACB}
+            timeGranularity={timeGranularity}
+            onTimeGranularityChange={handleTimeGranularityChangeACB}
             t={translations[currentLanguage].routeDetailsPage}
             tStats={translations[currentLanguage].departureDelayStats}
         />

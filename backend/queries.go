@@ -286,15 +286,43 @@ func (s *server) queryRouteDelays(ctx context.Context, dates []string) ([]*delay
 	return summaries, nil
 }
 
-func (s *server) queryRouteDelayTrend(
-	ctx context.Context,
-	dates []string,
-	routeShortName string,
-	routeType string,
-) (map[string]*delaySummary, error) {
-	const queryName = "route_delay_trend"
-	start := time.Now()
+type TimeGranularity string
 
+const (
+	TimeGranularityDaily  TimeGranularity = "daily"
+	TimeGranularityHourly TimeGranularity = "hourly"
+)
+
+func buildHourlyTrendQuery() string {
+	query := `
+		SELECT
+			a.hour_start_utc,
+			COALESCE(MAX(r.long_name), ''),
+			COALESCE(MAX(r.route_type), ''),
+			SUM(a.arrival_events) AS arrival_events,
+			SUM(a.departure_events) AS departure_events,
+			SUM(a.unique_trips) AS unique_trips,
+			SUM(a.arrival_delay_count) AS arrival_delay_count,
+			SUM(a.arrival_delay_count * a.arrival_delay_avg_seconds) AS arrival_delay_seconds_total,
+			SUM(a.departure_delay_count) AS departure_delay_count,
+			SUM(a.departure_delay_count * a.departure_delay_avg_seconds) AS departure_delay_seconds_total,
+			SUM(a.arrival_ahead_count) AS arrival_ahead_count,
+			SUM(a.arrival_ahead_count * a.arrival_ahead_avg_seconds) AS arrival_ahead_seconds_total,
+			SUM(a.departure_ahead_count) AS departure_ahead_count,
+			SUM(a.departure_ahead_count * a.departure_ahead_avg_seconds) AS departure_ahead_seconds_total
+		FROM aggregate_route_hourly a
+		JOIN routes r ON r.id = a.route_id
+		WHERE
+			(a.hour_start_utc AT TIME ZONE 'UTC')::date = ANY($1::date[])
+			AND r.short_name = $2
+			AND ($3 = '' OR r.route_type = $3)
+		GROUP BY a.hour_start_utc
+		ORDER BY a.hour_start_utc
+	`
+	return query
+}
+
+func buildDailyTrendQuery() string {
 	query := `
 		SELECT
 			a.service_date,
@@ -320,7 +348,32 @@ func (s *server) queryRouteDelayTrend(
 		GROUP BY a.service_date
 		ORDER BY a.service_date
 	`
+	return query
+}
 
+func (s *server) queryRouteDelayTrend(
+	ctx context.Context,
+	dates []string,
+	routeShortName string,
+	routeType string,
+	granularity TimeGranularity,
+) (map[string]*delaySummary, error) {
+	var queryName string
+	var query string
+	var timeFormat string
+
+	switch granularity {
+	case TimeGranularityHourly:
+		queryName = "route_delay_trend_hourly"
+		timeFormat = "2006-01-02T15:00:00Z"
+		query = buildHourlyTrendQuery()
+	case TimeGranularityDaily:
+		queryName = "route_delay_trend"
+		timeFormat = "2006-01-02"
+		query = buildDailyTrendQuery()
+	}
+
+	start := time.Now()
 	rows, err := s.db.QueryContext(ctx, query, dates, routeShortName, routeType)
 	if err != nil {
 		recordDBQueryResult(queryName, QueryResultError, time.Since(start))
@@ -328,11 +381,11 @@ func (s *server) queryRouteDelayTrend(
 	}
 	defer rows.Close() // nolint: errcheck
 
-	trendByDate := make(map[string]*delaySummary)
+	trendByTime := make(map[string]*delaySummary)
 
 	for rows.Next() {
 		var (
-			serviceDate                time.Time
+			timeValue                  time.Time
 			longName                   string
 			typeValue                  string
 			arrivalEvents              int64
@@ -349,7 +402,7 @@ func (s *server) queryRouteDelayTrend(
 		)
 
 		if err := rows.Scan(
-			&serviceDate,
+			&timeValue,
 			&longName,
 			&typeValue,
 			&arrivalEvents,
@@ -368,12 +421,14 @@ func (s *server) queryRouteDelayTrend(
 			return nil, err
 		}
 
-		serviceDateValue := serviceDate.Format("2006-01-02")
+		// normalize DB timestamptz to UTC to ensure consistent formatting
+		timeValue = timeValue.UTC()
+		timeKey := timeValue.Format(timeFormat)
 		if routeType != "" {
 			typeValue = routeType
 		}
 
-		trendByDate[serviceDateValue] = &delaySummary{
+		trendByTime[timeKey] = &delaySummary{
 			Key: routeShortName,
 			Route: &routeMeta{
 				ShortName: routeShortName,
@@ -408,7 +463,7 @@ func (s *server) queryRouteDelayTrend(
 	}
 
 	recordDBQueryResult(queryName, QueryResultSuccess, time.Since(start))
-	return trendByDate, nil
+	return trendByTime, nil
 }
 
 func (s *server) queryStopPointRoutes(ctx context.Context, date string) (map[string][]*routeMeta, error) {

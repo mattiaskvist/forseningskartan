@@ -80,7 +80,6 @@ export function RouteDelayView({
                     maxWidth: "48rem",
                     p: 2.5,
                     borderRadius: 2,
-                    backdropFilter: "blur(4px)",
                     boxShadow: 3,
                 }}
             >

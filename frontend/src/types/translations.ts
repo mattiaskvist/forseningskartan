@@ -151,6 +151,8 @@ export interface RouteDetailsPageStrings {
     arrivalDelayTrend: string;
     trendChartDateAxis: string;
     trendChartAvgDelayAxis: string;
+    trendChartDaily: string;
+    trendChartHourly: string;
 }
 
 export interface RouteDelayControlsStrings {
