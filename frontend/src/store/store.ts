@@ -143,6 +143,10 @@ listenerMiddleware.startListening({
 
         let departures: Departure[];
         if (getDepartures.fulfilled.match(action)) {
+            // dont update on stale requests
+            if (state.departures.currentRequestId !== action.meta.requestId) {
+                return;
+            }
             departures = action.payload?.departures ?? [];
         } else {
             departures = state.departures.data?.departures ?? [];
