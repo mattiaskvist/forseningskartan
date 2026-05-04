@@ -63,7 +63,7 @@ import { deleteCurrentUser, logoutCurrentUser } from "./authThunks";
 import { buildStopPointGidsBySiteId } from "../utils/site";
 import { translations } from "../utils/translations";
 import { getGeolocationSnackbarPayload } from "../utils/geolocation";
-import { ModeWithOther } from "../types/sl";
+import { Departure, ModeWithOther } from "../types/sl";
 import { getUpcomingDepartures } from "../utils/departures";
 const listenerMiddleware = createListenerMiddleware();
 
@@ -137,11 +137,16 @@ listenerMiddleware.startListening({
 
 // Compute unique modes when new stop is selected and departures are loaded
 listenerMiddleware.startListening({
-    actionCreator: getDepartures.fulfilled,
+    matcher: isAnyOf(getDepartures.fulfilled, applyLoadedUserPreferences),
     effect: (action, listenerApi) => {
         const state = listenerApi.getState() as RootState;
 
-        const departures = action.payload?.departures ?? [];
+        let departures: Departure[];
+        if (getDepartures.fulfilled.match(action)) {
+            departures = action.payload?.departures ?? [];
+        } else {
+            departures = state.departures.data?.departures ?? [];
+        }
         const upcomingDepartures = getUpcomingDepartures(departures);
         const modes = new Set<ModeWithOther>();
 
