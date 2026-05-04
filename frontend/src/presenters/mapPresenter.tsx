@@ -35,8 +35,6 @@ import {
     setSelectedDatePreset,
     setSelectedDeparture,
     setSelectedSiteId,
-    setUserLocation,
-    requestMapCenterOnUser,
 } from "../store/reducers";
 import { Departure, TransportationMode } from "../types/sl";
 import { CustomDateRange, DatePreset } from "../types/departureDelay";
@@ -49,7 +47,7 @@ import {
     setMapTransportationModeFilter,
     toggleFavoriteSiteId,
 } from "../store/userPreferencesSlice";
-import { showSnackbar, hideSnackbar } from "../store/snackbarSlice";
+import { showSnackbar } from "../store/snackbarSlice";
 import { Suspense } from "../components/Suspense";
 import { getUpcomingDepartures } from "../utils/departures";
 import { RouteMeta, RouteType } from "../types/historicalDelay";
@@ -59,6 +57,7 @@ import {
 } from "../utils/transportationMode";
 import { getSitesWithRoutes } from "../utils/site";
 import { translations } from "../utils/translations";
+import { requestUserGeolocation } from "../store/actions";
 
 export function MapPresenter() {
     const dispatch = useAppDispatch();
@@ -174,81 +173,7 @@ export function MapPresenter() {
     }
 
     function handleRequestMapCenterOnUserACB() {
-        if (!navigator.geolocation) {
-            dispatch(
-                showSnackbar({
-                    message: tMap.geolocationUnsupported,
-                    severity: "error",
-                })
-            );
-            return;
-        }
-
-        if (!window.isSecureContext) {
-            dispatch(
-                showSnackbar({
-                    message: tMap.locationSecureConnectionRequired,
-                    severity: "warning",
-                })
-            );
-            return;
-        }
-
-        function successCallback(position: GeolocationPosition) {
-            dispatch(hideSnackbar());
-            dispatch(
-                setUserLocation({
-                    lat: position.coords.latitude,
-                    lon: position.coords.longitude,
-                })
-            );
-            dispatch(requestMapCenterOnUser());
-        }
-
-        function errorCallback(error: GeolocationPositionError) {
-            // If high accuracy failed, try one more time with low accuracy
-            if (error.code === error.POSITION_UNAVAILABLE || error.code === error.TIMEOUT) {
-                navigator.geolocation.getCurrentPosition(successCallback, finalErrorCallback, {
-                    enableHighAccuracy: false,
-                    timeout: 15000,
-                    maximumAge: 300000, // 5 minutes
-                });
-                return;
-            }
-            finalErrorCallback(error);
-        }
-
-        function finalErrorCallback(error: GeolocationPositionError) {
-            let message = tMap.locationLookupFailed;
-            if (error.code === error.PERMISSION_DENIED) {
-                message = tMap.locationPermissionDenied;
-            } else if (error.code === error.POSITION_UNAVAILABLE) {
-                message = tMap.locationUnavailable;
-            } else if (error.code === error.TIMEOUT) {
-                message = tMap.locationTimeout;
-            }
-
-            dispatch(
-                showSnackbar({
-                    message,
-                    severity: "error",
-                })
-            );
-        }
-
-        dispatch(
-            showSnackbar({
-                message: tMap.findingLocation,
-                severity: "info",
-            })
-        );
-
-        // Start with high accuracy request
-        navigator.geolocation.getCurrentPosition(successCallback, errorCallback, {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 60000, // Allow 1 minute old cached position
-        });
+        dispatch(requestUserGeolocation());
     }
 
     function toggleFavoriteStopACB() {

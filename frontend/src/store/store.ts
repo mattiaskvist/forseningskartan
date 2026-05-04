@@ -43,6 +43,7 @@ import {
     getStopPoints,
     getAggregatedDates,
     getRouteDelays,
+    requestUserGeolocation,
 } from "./actions";
 import {
     setSelectedDeparture,
@@ -57,6 +58,8 @@ import {
 import { fetchUserPreferences, saveUserPreferences } from "../firebase/userPreferences";
 import { deleteCurrentUser, logoutCurrentUser } from "./authThunks";
 import { buildStopPointGidsBySiteId } from "../utils/site";
+import { translations } from "../utils/translations";
+import { getGeolocationSnackbarPayload } from "../utils/geolocation";
 const listenerMiddleware = createListenerMiddleware();
 
 function mergeRecentSearchSiteIds(
@@ -244,6 +247,37 @@ listenerMiddleware.startListening({
                 })
             );
         }
+    },
+});
+
+listenerMiddleware.startListening({
+    actionCreator: requestUserGeolocation.pending,
+    effect: (_, listenerApi) => {
+        const state = listenerApi.getState() as RootState;
+        const tMap = translations[state.userPreferences.language].map;
+
+        listenerApi.dispatch(
+            showSnackbar({
+                message: tMap.findingLocation,
+                severity: "info",
+            })
+        );
+    },
+});
+
+listenerMiddleware.startListening({
+    actionCreator: requestUserGeolocation.rejected,
+    effect: (action, listenerApi) => {
+        const state = listenerApi.getState() as RootState;
+        const tMap = translations[state.userPreferences.language].map;
+
+        const reason = action.payload;
+        if (!reason) {
+            return;
+        }
+
+        const snackbarPayload = getGeolocationSnackbarPayload(reason, tMap);
+        listenerApi.dispatch(showSnackbar(snackbarPayload));
     },
 });
 
