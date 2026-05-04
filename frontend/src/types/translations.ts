@@ -6,6 +6,7 @@ export const isLanguageCode = (candidate: unknown): candidate is LanguageCode =>
 export interface AccountStrings {
     signOut: string;
     deleteAccount: string;
+    cancelDelete: string;
     loading: string;
     logoutSuccess: string;
     logoutError: string;

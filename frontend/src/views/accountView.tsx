@@ -1,4 +1,17 @@
-import { Box, Paper, Typography, Avatar, Button, Divider } from "@mui/material";
+import { useState } from "react";
+import {
+    Box,
+    Paper,
+    Typography,
+    Avatar,
+    Button,
+    Divider,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+} from "@mui/material";
 import { AuthUserState } from "../store/authSlice";
 import { TranslationStrings } from "../utils/translations";
 
@@ -10,6 +23,21 @@ type AccountViewProps = {
 };
 
 export function AccountView({ user, onLogout, onDelete, t }: AccountViewProps) {
+    const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+    function handleDeleteRequestedACB() {
+        setDeleteDialogOpen(true);
+    }
+
+    function handleDeleteCancelledACB() {
+        setDeleteDialogOpen(false);
+    }
+
+    function handleDeleteConfirmedACB() {
+        setDeleteDialogOpen(false);
+        onDelete();
+    }
+
     return (
         <Box
             sx={{
@@ -85,11 +113,28 @@ export function AccountView({ user, onLogout, onDelete, t }: AccountViewProps) {
                     <Button fullWidth variant="outlined" onClick={onLogout}>
                         {t.signOut}
                     </Button>
-                    <Button fullWidth variant="outlined" color="error" onClick={onDelete}>
+                    <Button
+                        fullWidth
+                        variant="outlined"
+                        color="error"
+                        onClick={handleDeleteRequestedACB}
+                    >
                         {t.deleteAccount}
                     </Button>
                 </Box>
             </Paper>
+            <Dialog open={isDeleteDialogOpen} onClose={handleDeleteCancelledACB}>
+                <DialogTitle>{t.deleteAccount}</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>{t.deleteConfirm}</DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDeleteCancelledACB}>{t.cancelDelete}</Button>
+                    <Button color="error" variant="contained" onClick={handleDeleteConfirmedACB}>
+                        {t.deleteAccount}
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 }
