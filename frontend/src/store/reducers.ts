@@ -427,6 +427,7 @@ export const departureUISlice = createSlice({
             state.selectedDeparture = action.payload;
             state.selectedDatePreset = "sameDayLastWeek";
             state.selectedCustomDateRange = null;
+            state.searchQuery = "";
         },
         setSelectedDatePreset: (state, action: { payload: DatePreset }) => {
             state.selectedDatePreset = action.payload;
