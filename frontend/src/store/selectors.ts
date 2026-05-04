@@ -152,6 +152,22 @@ function getRouteDelaySelectedTimeGranularityCB(state: RootState) {
     return state.routeDelayUI.selectedTimeGranularity;
 }
 
+function getRouteDelaySelectedSectionCB(state: RootState) {
+    return state.routeDelayUI.selectedSection;
+}
+
+function getRouteDelaySearchQueryCB(state: RootState) {
+    return state.routeDelayUI.searchQuery;
+}
+
+function getRouteDelayRoutesPerPageCB(state: RootState) {
+    return state.routeDelayUI.routesPerPage;
+}
+
+function getRouteDelayCurrentPageCB(state: RootState) {
+    return state.routeDelayUI.currentPage;
+}
+
 function getRouteDelayTrendPointsCB(state: RootState) {
     return state.routeDelayTrend.data;
 }
@@ -281,6 +297,10 @@ export {
     getRouteDelaySelectedTransportationModeCB,
     getRouteDelaySelectedRouteKeyCB,
     getRouteDelaySelectedTimeGranularityCB,
+    getRouteDelaySelectedSectionCB,
+    getRouteDelaySearchQueryCB,
+    getRouteDelayRoutesPerPageCB,
+    getRouteDelayCurrentPageCB,
     getRouteDelayTrendPointsCB,
     getRouteDelayTrendLoadingCB,
     getSnackbarOpenCB,

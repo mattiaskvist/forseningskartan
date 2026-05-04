@@ -1,6 +1,6 @@
-import { ReactNode } from "react";
 import { DepartureHeaderView } from "./departureHeaderView";
 import { TranslationStrings } from "../utils/translations";
+import { DepartureContentView, DepartureContentViewProps } from "./departureContentView";
 
 export type DepartureViewProps = {
     selectedSiteName: string;
@@ -9,7 +9,7 @@ export type DepartureViewProps = {
     isUserLoggedIn: boolean;
     onToggleFavoriteStop: () => void;
     tHeader: TranslationStrings["departureHeader"];
-    content: ReactNode;
+    departureViewContentProps: DepartureContentViewProps;
 };
 
 export function DepartureView({
@@ -19,7 +19,7 @@ export function DepartureView({
     isUserLoggedIn,
     onToggleFavoriteStop,
     tHeader,
-    content,
+    departureViewContentProps,
 }: DepartureViewProps) {
     return (
         <div className="flex flex-col gap-2">
@@ -31,7 +31,7 @@ export function DepartureView({
                 onClose={onClose}
                 t={tHeader}
             />
-            {content}
+            <DepartureContentView {...departureViewContentProps} />
         </div>
     );
 }

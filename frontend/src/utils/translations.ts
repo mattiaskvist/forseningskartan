@@ -8,6 +8,7 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
         account: {
             signOut: "Sign Out",
             deleteAccount: "Delete Account",
+            cancelDelete: "Cancel",
             loading: "Loading account details...",
             logoutSuccess: "Logged out",
             logoutError: "Failed to log out",
@@ -200,6 +201,7 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
         account: {
             signOut: "Logga ut",
             deleteAccount: "Radera konto",
+            cancelDelete: "Avbryt",
             loading: "Laddar kontouppgifter...",
             logoutSuccess: "Utloggad",
             logoutError: "Misslyckades med att logga ut",

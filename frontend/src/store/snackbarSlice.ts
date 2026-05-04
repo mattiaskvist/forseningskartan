@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 export type SnackbarSeverity = "success" | "info" | "warning" | "error";
 
-type SnackbarPayload = {
+export type SnackbarPayload = {
     message: string;
     severity: SnackbarSeverity;
 };
