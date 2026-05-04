@@ -64,6 +64,7 @@ import { buildStopPointGidsBySiteId } from "../utils/site";
 import { translations } from "../utils/translations";
 import { getGeolocationSnackbarPayload } from "../utils/geolocation";
 import { ModeWithOther } from "../types/sl";
+import { getUpcomingDepartures } from "../utils/departures";
 const listenerMiddleware = createListenerMiddleware();
 
 function mergeRecentSearchSiteIds(
@@ -141,9 +142,10 @@ listenerMiddleware.startListening({
         const state = listenerApi.getState() as RootState;
 
         const departures = action.payload?.departures ?? [];
+        const upcomingDepartures = getUpcomingDepartures(departures);
         const modes = new Set<ModeWithOther>();
 
-        for (const departure of departures) {
+        for (const departure of upcomingDepartures) {
             const mode = departure.line.transport_mode ?? "OTHER";
             modes.add(mode);
         }
@@ -153,7 +155,7 @@ listenerMiddleware.startListening({
         const selectedMode =
             preferredMode != null && uniqueModes.includes(preferredMode)
                 ? preferredMode
-                : uniqueModes[0] ?? null;
+                : (uniqueModes[0] ?? null);
         const dispatch = listenerApi.dispatch as AppDispatch;
 
         dispatch(setUniqueModes(uniqueModes));
