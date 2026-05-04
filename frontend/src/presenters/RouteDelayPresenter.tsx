@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { RouteDelayView } from "../views/routeDelayView";
 import {
     getAggregatedDatesCB,
@@ -15,6 +15,10 @@ import {
     getRouteDelaysCB,
     getRouteDelaysLoadingCB,
     getCurrentLanguageCB,
+    getRouteDelaySelectedSectionCB,
+    getRouteDelaySearchQueryCB,
+    getRouteDelayRoutesPerPageCB,
+    getRouteDelayCurrentPageCB,
 } from "../store/selectors";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import {
@@ -24,6 +28,10 @@ import {
     setRouteDelaySelectedRouteKey,
     setRouteDelayTransportationMode,
     setRouteDelayTimeGranularity,
+    setRouteDelaySearchQuery,
+    setRouteDelayCurrentPage,
+    setRouteDelaySelectedSection,
+    setRouteDelayRoutesPerPage,
 } from "../store/reducers";
 import { Suspense } from "../components/Suspense";
 import { DelaySummary, RouteType } from "../types/historicalDelay";
@@ -66,10 +74,10 @@ export function RouteDelayPresenter() {
     const isTrendLoading = useAppSelector(getRouteDelayTrendLoadingCB);
     const timeGranularity = useAppSelector(getRouteDelaySelectedTimeGranularityCB);
     const currentLanguage = useAppSelector(getCurrentLanguageCB);
-    const [selectedSection, setSelectedSection] = useState<RouteDelaySection>("routes");
-    const [searchQuery, setSearchQuery] = useState("");
-    const [routesPerPage, setRoutesPerPage] = useState<PageSizeOption>(25);
-    const [currentPage, setCurrentPage] = useState(1);
+    const selectedSection = useAppSelector(getRouteDelaySelectedSectionCB);
+    const searchQuery = useAppSelector(getRouteDelaySearchQueryCB);
+    const routesPerPage = useAppSelector(getRouteDelayRoutesPerPageCB);
+    const currentPage = useAppSelector(getRouteDelayCurrentPageCB);
 
     const matchesTransportationFilterCB = useCallback(
         (summary: DelaySummary): boolean => {
@@ -175,28 +183,23 @@ export function RouteDelayPresenter() {
     }, [routeDelays, selectedRouteKey]);
 
     function handleDatePresetChangeACB(preset: DatePreset) {
-        setCurrentPage(1);
         dispatch(setRouteDelayDatePreset(preset));
     }
 
     function handleCustomDateRangeChangeACB(dateRange: CustomDateRange | null) {
-        setCurrentPage(1);
         dispatch(setRouteDelayCustomDateRange(dateRange));
     }
 
     function handleEventTypeChangeACB(eventType: EventType) {
-        setCurrentPage(1);
         dispatch(setRouteDelayEventType(eventType));
     }
 
     function handleTransportationModeChangeACB(filter: TransportationMode) {
-        setCurrentPage(1);
         dispatch(setRouteDelayTransportationMode(filter));
     }
 
     function handleSearchQueryChangeACB(query: string) {
-        setSearchQuery(query);
-        setCurrentPage(1);
+        dispatch(setRouteDelaySearchQuery(query));
     }
 
     function handleSelectRouteACB(routeKey: string | null) {
@@ -208,17 +211,15 @@ export function RouteDelayPresenter() {
     }
 
     function handlePageChangeACB(nextPage: number) {
-        setCurrentPage(nextPage);
+        dispatch(setRouteDelayCurrentPage(nextPage));
     }
 
     function handleSetSelectedSectionACB(section: RouteDelaySection) {
-        setSelectedSection(section);
-        dispatch(setRouteDelaySelectedRouteKey(null));
+        dispatch(setRouteDelaySelectedSection(section));
     }
 
     function handleRoutesPerPageChangeACB(nextPageSize: PageSizeOption) {
-        setRoutesPerPage(nextPageSize);
-        setCurrentPage(1);
+        dispatch(setRouteDelayRoutesPerPage(nextPageSize));
     }
 
     function handleTimeGranularityChangeACB(granularity: RouteDelayTimeGranularity) {
