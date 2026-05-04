@@ -44,10 +44,7 @@ import {
 import { getAvgDelayMinutes, getAvgDelaySeconds } from "../utils/time";
 import { compareRouteNamesCB, getRouteDisplayName, getRouteIdentityKey } from "../utils/route";
 import { routeTypesToTransportationModes } from "../utils/transportationMode";
-import { RouteDelayRoutesView } from "../views/routeDelayRoutesView";
-import { RouteDelayLeaderboardView } from "../views/routeDelayLeaderboardView";
-import { RouteDelayRouteFallbackView } from "../views/routeDelayRouteFallbackView";
-import { RouteDetailsView } from "../views/routeDetailsView";
+import { RouteDelayContentViewProps } from "../views/routeDelayContentView";
 
 function getRouteModeKey(summary: DelaySummary): RouteType | null {
     return summary.route?.type ?? null;
@@ -234,47 +231,30 @@ export function RouteDelayPresenter() {
     }
 
     const isRouteDetailsOpen = selectedRouteKey !== null;
-
-    const content = !isRouteDetailsOpen ? (
-        <div className="flex flex-col gap-4 pt-4">
-            {selectedSection === "routes" ? (
-                <RouteDelayRoutesView
-                    pagedRouteItems={pagedRouteItems}
-                    currentPage={safeCurrentPage}
-                    totalPages={totalPages}
-                    routesPerPage={routesPerPage}
-                    onSelectRoute={handleSelectRouteACB}
-                    onPageChange={handlePageChangeACB}
-                    onRoutesPerPageChange={handleRoutesPerPageChangeACB}
-                    t={translations[currentLanguage].routeDelayRoutes}
-                />
-            ) : null}
-
-            {selectedSection === "leaderboard" ? (
-                <RouteDelayLeaderboardView
-                    leaderboardItems={leaderboardItems}
-                    t={translations[currentLanguage].routeDelayLeaderboard}
-                />
-            ) : null}
-        </div>
-    ) : selectedRouteSummary ? (
-        <RouteDetailsView
-            routeSummary={selectedRouteSummary}
-            selectedEventType={selectedEventType}
-            trendPoints={selectedRouteTrend}
-            isTrendLoading={isTrendLoading}
-            onBackToRoutes={handleBackToRoutesACB}
-            timeGranularity={timeGranularity}
-            onTimeGranularityChange={handleTimeGranularityChangeACB}
-            t={translations[currentLanguage].routeDetailsPage}
-            tStats={translations[currentLanguage].departureDelayStats}
-        />
-    ) : (
-        <RouteDelayRouteFallbackView
-            onBackToRoutes={handleBackToRoutesACB}
-            t={translations[currentLanguage].routeDelayRouteFallback}
-        />
-    );
+    const routeDelayContentViewProps: RouteDelayContentViewProps = {
+        selectedSection,
+        isRouteDetailsOpen,
+        pagedRouteItems,
+        currentPage: safeCurrentPage,
+        totalPages,
+        routesPerPage,
+        onSelectRoute: handleSelectRouteACB,
+        onPageChange: handlePageChangeACB,
+        onRoutesPerPageChange: handleRoutesPerPageChangeACB,
+        selectedRouteSummary,
+        selectedEventType,
+        trendPoints: selectedRouteTrend,
+        isTrendLoading,
+        onBackToRoutes: handleBackToRoutesACB,
+        timeGranularity,
+        onTimeGranularityChange: handleTimeGranularityChangeACB,
+        leaderboardItems: leaderboardItems,
+        tRouteDelayLeaderboard: translations[currentLanguage].routeDelayLeaderboard,
+        tRouteDetailsPage: translations[currentLanguage].routeDetailsPage,
+        tStats: translations[currentLanguage].departureDelayStats,
+        tRouteDelayRoutes: translations[currentLanguage].routeDelayRoutes,
+        tRouteDelayRouteFallback: translations[currentLanguage].routeDelayRouteFallback,
+    };
 
     return (
         <RouteDelayView
@@ -287,7 +267,6 @@ export function RouteDelayPresenter() {
             selectedTransportationMode={selectedTransportationMode}
             searchQuery={searchQuery}
             isRouteDetailsOpen={isRouteDetailsOpen}
-            content={content}
             transportationModeOptions={transportationModeOptions}
             availableDates={availableDates}
             onDatePresetChange={handleDatePresetChangeACB}
@@ -301,6 +280,7 @@ export function RouteDelayPresenter() {
             tControls={translations[currentLanguage].routeDelayControls}
             tDatePicker={translations[currentLanguage].availableDatesPicker}
             tTransportModes={translations[currentLanguage].transportModes}
+            routeDelayContentViewProps={routeDelayContentViewProps}
         />
     );
 }
