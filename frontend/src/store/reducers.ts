@@ -185,7 +185,6 @@ export const departuresSlice = createSlice({
                 state.isLoading = false;
                 state.data = action.payload;
                 state.error = null;
-                state.currentRequestId = null;
             })
             .addCase(getDepartures.rejected, (state, action) => {
                 if (state.currentRequestId !== action.meta.requestId) {
