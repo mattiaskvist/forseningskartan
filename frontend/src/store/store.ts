@@ -150,10 +150,14 @@ listenerMiddleware.startListening({
 
         const uniqueModes = Array.from(modes).sort();
         const preferredMode = state.userPreferences.mapTransportationModeFilter;
+        const selectedMode =
+            preferredMode != null && uniqueModes.includes(preferredMode)
+                ? preferredMode
+                : uniqueModes[0] ?? null;
         const dispatch = listenerApi.dispatch as AppDispatch;
 
         dispatch(setUniqueModes(uniqueModes));
-        dispatch(setSelectedMode(preferredMode ?? uniqueModes[0] ?? null));
+        dispatch(setSelectedMode(selectedMode));
     },
 });
 
