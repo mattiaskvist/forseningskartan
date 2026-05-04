@@ -1,7 +1,7 @@
-import { RouteDelayRoutesView } from "../views/routeDelayRoutesView";
-import { RouteDelayLeaderboardView } from "../views/routeDelayLeaderboardView";
-import { RouteDelayRouteFallbackView } from "../views/routeDelayRouteFallbackView";
-import { RouteDetailsView } from "../views/routeDetailsView";
+import { RouteDelayRoutesView } from "./routeDelayRoutesView";
+import { RouteDelayLeaderboardView } from "./routeDelayLeaderboardView";
+import { RouteDelayRouteFallbackView } from "./routeDelayRouteFallbackView";
+import { RouteDetailsView } from "./routeDetailsView";
 import { TranslationStrings } from "../utils/translations";
 import {
     PageSizeOption,
