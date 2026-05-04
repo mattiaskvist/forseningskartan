@@ -213,7 +213,6 @@ export interface TransportModesStrings {
     metro: string;
     train: string;
     ferry: string;
-    ship: string;
     taxi: string;
     other: string;
 }
