@@ -39,6 +39,7 @@ import {
     fetchSelectedDepartureStopDelays,
     fetchSelectedRouteDelays,
     fetchSelectedRouteTrend,
+    getDepartures,
     getSites,
     getStopPoints,
     getAggregatedDates,
@@ -49,17 +50,20 @@ import {
     setSelectedDeparture,
     setSelectedDatePreset,
     setSelectedCustomDateRange,
+    setSelectedMode,
     setRouteDelayDatePreset,
     setRouteDelayCustomDateRange,
     setRouteDelaySelectedRouteKey,
     setRouteDelayTimeGranularity,
     setStopPointGidsBySiteId,
+    setUniqueModes,
 } from "./reducers";
 import { fetchUserPreferences, saveUserPreferences } from "../firebase/userPreferences";
 import { deleteCurrentUser, logoutCurrentUser } from "./authThunks";
 import { buildStopPointGidsBySiteId } from "../utils/site";
 import { translations } from "../utils/translations";
 import { getGeolocationSnackbarPayload } from "../utils/geolocation";
+import { ModeWithOther } from "../types/sl";
 const listenerMiddleware = createListenerMiddleware();
 
 function mergeRecentSearchSiteIds(
@@ -127,6 +131,29 @@ listenerMiddleware.startListening({
 
         const dispatch = listenerApi.dispatch as AppDispatch;
         dispatch(setStopPointGidsBySiteId(buildStopPointGidsBySiteId(sites, stopPoints)));
+    },
+});
+
+// Compute unique modes when new stop is selected and departures are loaded
+listenerMiddleware.startListening({
+    actionCreator: getDepartures.fulfilled,
+    effect: (action, listenerApi) => {
+        const state = listenerApi.getState() as RootState;
+
+        const departures = action.payload?.departures ?? [];
+        const modes = new Set<ModeWithOther>();
+
+        for (const departure of departures) {
+            const mode = departure.line.transport_mode ?? "OTHER";
+            modes.add(mode);
+        }
+
+        const uniqueModes = Array.from(modes).sort();
+        const preferredMode = state.userPreferences.mapTransportationModeFilter;
+        const dispatch = listenerApi.dispatch as AppDispatch;
+
+        dispatch(setUniqueModes(uniqueModes));
+        dispatch(setSelectedMode(preferredMode ?? uniqueModes[0] ?? null));
     },
 });
 

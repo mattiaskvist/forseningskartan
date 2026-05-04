@@ -28,15 +28,20 @@ import {
     getMapCenterOnUserRequestedAtCB,
     getStopPointsCB,
     getStopPointsLoadingCB,
+    getDepartureSelectedModeCB,
+    getDepartureSearchQueryCB,
+    getDepartureUniqueModesCB,
 } from "../store/selectors";
 import { selectSite } from "../store/selection";
 import {
+    setSearchQuery,
     setSelectedCustomDateRange,
     setSelectedDatePreset,
     setSelectedDeparture,
+    setSelectedMode,
     setSelectedSiteId,
 } from "../store/reducers";
-import { Departure, TransportationMode } from "../types/sl";
+import { Departure, ModeWithOther, TransportationMode } from "../types/sl";
 import { CustomDateRange, DatePreset } from "../types/departureDelay";
 import { AppStyle } from "../types/appStyle";
 import { DepartureViewProps } from "../views/departureView";
@@ -87,6 +92,9 @@ export function MapPresenter() {
     const mapCenterOnUserRequestedAt = useAppSelector(getMapCenterOnUserRequestedAtCB);
     const selectedTransportationMode = useAppSelector(getMapTransportationModeFilterCB);
     const hideStopsWithoutDepartures = useAppSelector(getHideStopsWithoutDeparturesCB);
+    const departureSelectedMode = useAppSelector(getDepartureSelectedModeCB);
+    const departureSearchQuery = useAppSelector(getDepartureSearchQueryCB);
+    const departureUniqueModes = useAppSelector(getDepartureUniqueModesCB);
     const tMap = translations[currentLanguage].map;
 
     const routesByStopPointsUnavailable = routesByStopPointError !== null || !routesByStopPoint;
@@ -209,6 +217,14 @@ export function MapPresenter() {
         dispatch(setHideStopsWithoutDepartures(value));
     }
 
+    function handleSelectedModeChangeACB(mode: ModeWithOther | null) {
+        dispatch(setSelectedMode(mode));
+    }
+
+    function handleSearchQueryChangeACB(query: string) {
+        dispatch(setSearchQuery(query));
+    }
+
     const departures = departureResponse?.departures ?? [];
     const upcomingDepartures = getUpcomingDepartures(departures);
 
@@ -234,6 +250,11 @@ export function MapPresenter() {
                   onDatePresetChange: setSelectedDatePresetACB,
                   onCustomDateRangeChange: setSelectedCustomDateRangeACB,
                   onSelectDeparture: selectDepartureACB,
+                  uniqueModes: departureUniqueModes,
+                  selectedMode: departureSelectedMode,
+                  onSelectedModeChange: handleSelectedModeChangeACB,
+                  searchQuery: departureSearchQuery,
+                  onSearchQueryChange: handleSearchQueryChangeACB,
                   tDepartureDetails: translations[currentLanguage].departureDetails,
                   tHistoricalDelays: translations[currentLanguage].departureHistoricalDelays,
                   tDelayStats: translations[currentLanguage].departureDelayStats,

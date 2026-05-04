@@ -1,7 +1,7 @@
 import { Suspense } from "../components/Suspense";
 import { CustomDateRange, DatePreset } from "../types/departureDelay";
 import { DelaySummary } from "../types/historicalDelay";
-import { Departure } from "../types/sl";
+import { Departure, ModeWithOther } from "../types/sl";
 import { TranslationStrings } from "../types/translations";
 import { DepartureDetailsView } from "./departureDetailsView";
 import { DepartureEmptyStateView } from "./departureEmptyStateView";
@@ -21,6 +21,11 @@ export type DepartureContentViewProps = {
     onDatePresetChange: (preset: DatePreset) => void;
     onCustomDateRangeChange: (dateRange: CustomDateRange | null) => void;
     onSelectDeparture: (departure: Departure) => void;
+    selectedMode: ModeWithOther | null;
+    onSelectedModeChange: (mode: ModeWithOther | null) => void;
+    searchQuery: string;
+    onSearchQueryChange: (query: string) => void;
+    uniqueModes: ModeWithOther[];
     tDepartureDetails: TranslationStrings["departureDetails"];
     tHistoricalDelays: TranslationStrings["departureHistoricalDelays"];
     tDelayStats: TranslationStrings["departureDelayStats"];
@@ -46,6 +51,11 @@ export function DepartureContentView({
     onDatePresetChange,
     onCustomDateRangeChange,
     onSelectDeparture,
+    selectedMode,
+    onSelectedModeChange,
+    searchQuery,
+    onSearchQueryChange,
+    uniqueModes,
     tDepartureDetails,
     tHistoricalDelays,
     tDelayStats,
@@ -80,6 +90,11 @@ export function DepartureContentView({
         <DepartureListView
             departures={upcomingDepartures}
             onSelectDeparture={onSelectDeparture}
+            uniqueModes={uniqueModes}
+            selectedMode={selectedMode}
+            onSelectedModeChange={onSelectedModeChange}
+            searchQuery={searchQuery}
+            onSearchQueryChange={onSearchQueryChange}
             t={tDepartureList}
             tTransportModes={tTransportModes}
         />
