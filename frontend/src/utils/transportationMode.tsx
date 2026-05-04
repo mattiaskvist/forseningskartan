@@ -44,7 +44,7 @@ export function getTransportationModeLabel(
         METRO: tTransportModes.metro,
         TRAIN: tTransportModes.train,
         FERRY: tTransportModes.ferry,
-        SHIP: tTransportModes.ship,
+        SHIP: tTransportModes.ferry,
         TAXI: tTransportModes.taxi,
         OTHER: tTransportModes.other,
     };

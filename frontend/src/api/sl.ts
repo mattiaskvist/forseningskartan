@@ -34,8 +34,14 @@ export function fetchSitesACB(): Promise<Site[]> {
         .catch(throwErrorACB);
 }
 
-export function fetchDeparturesACB(siteId: number): Promise<DepartureResponse> {
-    return fetch(`${BASE_URL}/sites/${siteId}/departures`)
+export function fetchDeparturesACB(
+    siteId: number,
+    forecastMinutes: number = 1200 // max value allowed by API
+): Promise<DepartureResponse> {
+    if (forecastMinutes < 0 || forecastMinutes > 1200) {
+        throw new Error("forecastMinutes must be between 0 and 1200");
+    }
+    return fetch(`${BASE_URL}/sites/${siteId}/departures?forecast=${forecastMinutes}`)
         .then(handleResponseACB)
         .catch(throwErrorACB);
 }
