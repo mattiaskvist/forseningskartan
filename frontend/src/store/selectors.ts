@@ -128,6 +128,18 @@ function getSelectedCustomDateRangeCB(state: RootState) {
     return state.departureUI.selectedCustomDateRange;
 }
 
+function getDepartureSelectedModeCB(state: RootState) {
+    return state.departureUI.selectedMode;
+}
+
+function getDepartureUniqueModesCB(state: RootState) {
+    return state.departureUI.uniqueModes;
+}
+
+function getDepartureSearchQueryCB(state: RootState) {
+    return state.departureUI.searchQuery;
+}
+
 function getRouteDelaySelectedDatePresetCB(state: RootState) {
     return state.routeDelayUI.selectedDatePreset;
 }
@@ -291,6 +303,9 @@ export {
     getSelectedDepartureCB,
     getSelectedDatePresetCB,
     getSelectedCustomDateRangeCB,
+    getDepartureSelectedModeCB,
+    getDepartureUniqueModesCB,
+    getDepartureSearchQueryCB,
     getRouteDelaySelectedDatePresetCB,
     getRouteDelaySelectedCustomDateRangeCB,
     getRouteDelaySelectedEventTypeCB,

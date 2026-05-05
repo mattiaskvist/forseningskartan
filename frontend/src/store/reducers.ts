@@ -10,7 +10,14 @@ import {
     getRouteDelayTrend,
 } from "./actions";
 import { RoutesByStopPoint } from "../api/backend";
-import { Departure, DepartureResponse, Site, StopPoint, TransportationMode } from "../types/sl";
+import {
+    Departure,
+    DepartureResponse,
+    ModeWithOther,
+    Site,
+    StopPoint,
+    TransportationMode,
+} from "../types/sl";
 import { DelaySummary } from "../types/historicalDelay";
 import { CustomDateRange, DatePreset, EventType } from "../types/departureDelay";
 import {
@@ -84,6 +91,9 @@ type DepartureUIState = {
     selectedDeparture: Departure | null;
     selectedDatePreset: DatePreset;
     selectedCustomDateRange: CustomDateRange | null;
+    selectedMode: ModeWithOther | null;
+    uniqueModes: ModeWithOther[];
+    searchQuery: string;
 };
 
 type RouteDelayUIState = {
@@ -175,7 +185,6 @@ export const departuresSlice = createSlice({
                 state.isLoading = false;
                 state.data = action.payload;
                 state.error = null;
-                state.currentRequestId = null;
             })
             .addCase(getDepartures.rejected, (state, action) => {
                 if (state.currentRequestId !== action.meta.requestId) {
@@ -408,12 +417,16 @@ export const departureUISlice = createSlice({
         selectedDeparture: null,
         selectedDatePreset: "sameDayLastWeek",
         selectedCustomDateRange: null,
+        selectedMode: null,
+        uniqueModes: [],
+        searchQuery: "",
     } as DepartureUIState,
     reducers: {
         setSelectedDeparture: (state, action: { payload: Departure | null }) => {
             state.selectedDeparture = action.payload;
             state.selectedDatePreset = "sameDayLastWeek";
             state.selectedCustomDateRange = null;
+            state.searchQuery = "";
         },
         setSelectedDatePreset: (state, action: { payload: DatePreset }) => {
             state.selectedDatePreset = action.payload;
@@ -421,11 +434,26 @@ export const departureUISlice = createSlice({
         setSelectedCustomDateRange: (state, action: { payload: CustomDateRange | null }) => {
             state.selectedCustomDateRange = action.payload;
         },
+        setSelectedMode: (state, action: { payload: ModeWithOther | null }) => {
+            state.selectedMode = action.payload;
+        },
+        setUniqueModes: (state, action: { payload: ModeWithOther[] }) => {
+            state.uniqueModes = action.payload;
+        },
+        setSearchQuery: (state, action: { payload: string }) => {
+            state.searchQuery = action.payload;
+        },
     },
 });
 
-export const { setSelectedDeparture, setSelectedDatePreset, setSelectedCustomDateRange } =
-    departureUISlice.actions;
+export const {
+    setSelectedDeparture,
+    setSelectedDatePreset,
+    setSelectedCustomDateRange,
+    setSelectedMode,
+    setUniqueModes,
+    setSearchQuery,
+} = departureUISlice.actions;
 
 export const routeDelayUISlice = createSlice({
     name: "routeDelayUI",

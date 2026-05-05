@@ -39,6 +39,7 @@ import {
     fetchSelectedDepartureStopDelays,
     fetchSelectedRouteDelays,
     fetchSelectedRouteTrend,
+    getDepartures,
     getSites,
     getStopPoints,
     getAggregatedDates,
@@ -49,17 +50,21 @@ import {
     setSelectedDeparture,
     setSelectedDatePreset,
     setSelectedCustomDateRange,
+    setSelectedMode,
     setRouteDelayDatePreset,
     setRouteDelayCustomDateRange,
     setRouteDelaySelectedRouteKey,
     setRouteDelayTimeGranularity,
     setStopPointGidsBySiteId,
+    setUniqueModes,
 } from "./reducers";
 import { fetchUserPreferences, saveUserPreferences } from "../firebase/userPreferences";
 import { deleteCurrentUser, logoutCurrentUser } from "./authThunks";
 import { buildStopPointGidsBySiteId } from "../utils/site";
 import { translations } from "../utils/translations";
 import { getGeolocationSnackbarPayload } from "../utils/geolocation";
+import { Departure, ModeWithOther } from "../types/sl";
+import { getUpcomingDepartures } from "../utils/departures";
 const listenerMiddleware = createListenerMiddleware();
 
 function mergeRecentSearchSiteIds(
@@ -127,6 +132,43 @@ listenerMiddleware.startListening({
 
         const dispatch = listenerApi.dispatch as AppDispatch;
         dispatch(setStopPointGidsBySiteId(buildStopPointGidsBySiteId(sites, stopPoints)));
+    },
+});
+
+// Compute unique modes when new stop is selected and departures are loaded
+listenerMiddleware.startListening({
+    matcher: isAnyOf(getDepartures.fulfilled, applyLoadedUserPreferences),
+    effect: (action, listenerApi) => {
+        const state = listenerApi.getState() as RootState;
+
+        let departures: Departure[];
+        if (getDepartures.fulfilled.match(action)) {
+            // dont update on stale requests
+            if (state.departures.currentRequestId !== action.meta.requestId) {
+                return;
+            }
+            departures = action.payload?.departures ?? [];
+        } else {
+            departures = state.departures.data?.departures ?? [];
+        }
+        const upcomingDepartures = getUpcomingDepartures(departures);
+        const modes = new Set<ModeWithOther>();
+
+        for (const departure of upcomingDepartures) {
+            const mode = departure.line.transport_mode ?? "OTHER";
+            modes.add(mode);
+        }
+
+        const uniqueModes = Array.from(modes).sort();
+        const preferredMode = state.userPreferences.mapTransportationModeFilter;
+        const selectedMode =
+            preferredMode != null && uniqueModes.includes(preferredMode)
+                ? preferredMode
+                : (uniqueModes[0] ?? null);
+        const dispatch = listenerApi.dispatch as AppDispatch;
+
+        dispatch(setUniqueModes(uniqueModes));
+        dispatch(setSelectedMode(selectedMode));
     },
 });
 
