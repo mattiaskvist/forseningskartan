@@ -222,6 +222,7 @@ listenerMiddleware.startListening({
         const currentUser = user;
 
         dispatch(setUserPreferencesLoading(true));
+        let initialMergedPreferencesSaved = false;
 
         // callback for when user preferences change in firebase
         function onChangeACB(loadedPreferences: PersistedUserPreferencesState | null) {
@@ -229,16 +230,30 @@ listenerMiddleware.startListening({
             const localPreferences = state.userPreferences;
 
             if (loadedPreferences) {
-                const mergedPreferences = {
-                    ...loadedPreferences,
-                    recentSearchSiteIds: mergeRecentSearchSiteIds(
-                        localPreferences.recentSearchSiteIds,
-                        loadedPreferences.recentSearchSiteIds
-                    ),
-                };
+                // if we have loaded preferences from firebase but not merged them with the local preferences,
+                // do that and save the merged result to firebase
+                if (!initialMergedPreferencesSaved) {
+                    const mergedPreferences = {
+                        ...loadedPreferences,
+                        recentSearchSiteIds: mergeRecentSearchSiteIds(
+                            localPreferences.recentSearchSiteIds,
+                            loadedPreferences.recentSearchSiteIds
+                        ),
+                    };
 
-                dispatch(applyLoadedUserPreferences(mergedPreferences));
-                clearStoredRecentSearchSiteIds();
+                    dispatch(applyLoadedUserPreferences(mergedPreferences));
+                    initialMergedPreferencesSaved = true;
+                    saveUserPreferences(currentUser.uid, mergedPreferences)
+                        .then(() => {
+                            dispatch(setUserPreferencesLoading(false));
+                            clearStoredRecentSearchSiteIds();
+                        })
+                        .catch(onErrorACB);
+                } else {
+                    // if we have already merged and saved the local preferences once,
+                    // we assume that firebase has the latest preferences and apply them
+                    dispatch(applyLoadedUserPreferences(loadedPreferences));
+                }
                 return;
             }
 
