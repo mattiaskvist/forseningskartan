@@ -224,7 +224,7 @@ listenerMiddleware.startListening({
         dispatch(setUserPreferencesLoading(true));
 
         // callback for when user preferences change in firebase
-        async function onChangeACB(loadedPreferences: PersistedUserPreferencesState | null) {
+        function onChangeACB(loadedPreferences: PersistedUserPreferencesState | null) {
             const state = listenerApi.getState() as RootState;
             const localPreferences = state.userPreferences;
 
@@ -243,9 +243,12 @@ listenerMiddleware.startListening({
             }
 
             // no preferences in firebase, save the current local preferences to firebase
-            await saveUserPreferences(currentUser.uid, localPreferences);
-            dispatch(setUserPreferencesLoading(false));
-            clearStoredRecentSearchSiteIds();
+            saveUserPreferences(currentUser.uid, localPreferences)
+                .then(() => {
+                    dispatch(setUserPreferencesLoading(false));
+                    clearStoredRecentSearchSiteIds();
+                })
+                .catch(onErrorACB);
         }
 
         function onErrorACB(error: unknown) {
