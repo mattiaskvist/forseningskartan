@@ -8,6 +8,7 @@ const RECENT_SEARCH_STORAGE_KEY = "recentSearchSiteIds";
 const LANGUAGE_STORAGE_KEY = "language";
 
 function getStoredAppStyle(): AppStyle {
+    // Read persisted app style with safe fallbacks for test environments
     try {
         const stored = localStorage.getItem(APP_STYLE_STORAGE_KEY);
         if (stored && (appStyles as readonly string[]).includes(stored)) {
@@ -20,6 +21,7 @@ function getStoredAppStyle(): AppStyle {
 }
 
 function storeAppStyle(style: AppStyle) {
+    // Persist chosen app style to localStorage, ignore errors in tests
     try {
         localStorage.setItem(APP_STYLE_STORAGE_KEY, style);
     } catch {
@@ -133,6 +135,7 @@ export const defaultUserPreferencesState: UserPreferencesState = {
 };
 
 function normalizeFavoriteSiteIds(favoriteSiteIds: number[]): number[] {
+    // Deduplicate favorite site ids and drop non-integer values
     const uniqueFavoriteSiteIds = new Set<number>();
 
     for (const siteId of favoriteSiteIds) {

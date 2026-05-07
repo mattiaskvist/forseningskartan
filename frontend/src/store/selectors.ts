@@ -10,6 +10,7 @@ type SelectedDelayDatesInput = {
     availableDates: string[];
 };
 
+// Compute list of dates based on selected preset and custom date range
 function getSelectedDelayDates({
     selectedDatePreset,
     selectedCustomDateRange,
@@ -256,6 +257,7 @@ const getSelectedRouteDelayDatesCB = createSelector(
     }
 );
 
+// Map favorite site IDs to Site objects using a temporary map
 const getFavoriteSitesCB = createSelector(
     [getFavoriteSiteIdsCB, getSitesCB],
     (favoriteSiteIds, sites): Site[] => {

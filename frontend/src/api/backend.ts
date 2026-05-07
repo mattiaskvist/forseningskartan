@@ -181,6 +181,8 @@ export function fetchRouteDelayTrend({
             };
         }
 
+        // When hourly, expand each date to 24 hourly tags
+        // Missing days produce points with avgDelayMinutes: null to keep the timeline
         const sourceDates =
             timeGranularity === "hourly" ? dates.flatMap(expandToHoursCB) : [...dates];
 

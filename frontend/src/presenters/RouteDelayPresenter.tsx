@@ -89,6 +89,8 @@ export function RouteDelayPresenter() {
         [selectedTransportationMode]
     );
 
+    // Apply transportation-mode filter and search, then sort routes
+    // Memoized to avoid re-filtering on unrelated changes
     const filteredAndSortedRoutes = useMemo(() => {
         const normalizedSearch = searchQuery.trim().toLowerCase();
 
@@ -107,6 +109,7 @@ export function RouteDelayPresenter() {
 
     const totalFilteredRoutes = filteredAndSortedRoutes.length;
     const totalPages = Math.max(1, Math.ceil(totalFilteredRoutes / routesPerPage));
+    // Ensure current page is within bounds after filtering changes
     const safeCurrentPage = Math.min(currentPage, totalPages);
 
     const pagedRoutes = useMemo(() => {
@@ -149,6 +152,7 @@ export function RouteDelayPresenter() {
         return routeTypesToTransportationModes(availableRouteTypes);
     }, [routeDelays]);
 
+    // Leaderboard: sort by average delay descending and map to display items
     const leaderboardItems = useMemo((): RouteDelayListItem[] => {
         const filteredRoutes = routeDelays.filter(matchesTransportationFilterCB);
 
