@@ -230,8 +230,7 @@ export function RouteDelayPresenter() {
         dispatch(setRouteDelayTimeGranularity(granularity));
     }
 
-    // avoid suspense after first load
-    if (isAggregatedDatesLoading || (isRouteDelaysLoading && routeDelays.length === 0)) {
+    if (isAggregatedDatesLoading) {
         return <Suspense message={translations[currentLanguage].routeDelay.loading} />;
     }
 
@@ -250,10 +249,12 @@ export function RouteDelayPresenter() {
         selectedEventType,
         trendPoints: selectedRouteTrend,
         isTrendLoading,
+        isRouteDelaysLoading,
         onBackToRoutes: handleBackToRoutesACB,
         timeGranularity,
         onTimeGranularityChange: handleTimeGranularityChangeACB,
         leaderboardItems: leaderboardItems,
+        tRouteDelay: translations[currentLanguage].routeDelay,
         tRouteDelayLeaderboard: translations[currentLanguage].routeDelayLeaderboard,
         tRouteDetailsPage: translations[currentLanguage].routeDetailsPage,
         tStats: translations[currentLanguage].departureDelayStats,

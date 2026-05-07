@@ -43,7 +43,6 @@ import {
     getSites,
     getStopPoints,
     getAggregatedDates,
-    getRouteDelays,
     requestUserGeolocation,
 } from "./actions";
 import {
@@ -180,6 +179,7 @@ listenerMiddleware.startListening({
     },
 });
 
+// Fetch route delays (all routes) when date range changes
 listenerMiddleware.startListening({
     matcher: isAnyOf(
         setRouteDelayDatePreset,
@@ -194,11 +194,14 @@ listenerMiddleware.startListening({
     },
 });
 
+// Fetch route delay trend (single route) when
+// selected route, time granularity, or date range changes
 listenerMiddleware.startListening({
     matcher: isAnyOf(
         setRouteDelaySelectedRouteKey,
         setRouteDelayTimeGranularity,
-        getRouteDelays.fulfilled
+        setRouteDelayDatePreset,
+        setRouteDelayCustomDateRange
     ),
     effect: (_, listenerApi) => {
         listenerApi.cancelActiveListeners();
