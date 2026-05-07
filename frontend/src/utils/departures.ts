@@ -41,7 +41,7 @@ function compareDeparturesCB(a: Departure, b: Departure) {
 }
 
 export function getUpcomingDepartures(departures: Departure[]): Departure[] {
-    // Filter out non-upcoming states and sort by timestamp
-    // Unparsable timestamps are treated as null and sorted to the end
+    // Filter out non-upcoming states and departures with unparsable timestamps,
+    // then sort the remaining departures by timestamp
     return departures.filter(isUpcomingDepartureCB).sort(compareDeparturesCB);
 }
