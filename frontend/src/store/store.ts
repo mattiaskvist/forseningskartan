@@ -33,6 +33,7 @@ import {
     recordRecentSearchSiteId,
     setMapTransportationModeFilter,
     setHideStopsWithoutDepartures,
+    PersistedUserPreferencesState,
 } from "./userPreferencesSlice";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -58,7 +59,11 @@ import {
     setStopPointGidsBySiteId,
     setUniqueModes,
 } from "./reducers";
-import { fetchUserPreferences, saveUserPreferences } from "../firebase/userPreferences";
+import {
+    subscribeUserPreferences,
+    saveUserPreferences,
+    userPreferencesSubscription,
+} from "../firebase/userPreferences";
 import { deleteCurrentUser, logoutCurrentUser } from "./authThunks";
 import { buildStopPointGidsBySiteId } from "../utils/site";
 import { translations } from "../utils/translations";
@@ -206,15 +211,20 @@ listenerMiddleware.startListening({
         const dispatch = listenerApi.dispatch as AppDispatch;
         const user = action.payload;
 
+        // clean up any existing subscription
+        userPreferencesSubscription.clear();
+
         if (!user) {
             dispatch(setUserPreferencesLoading(false));
             return;
         }
 
+        const currentUser = user;
+
         dispatch(setUserPreferencesLoading(true));
 
-        try {
-            const loadedPreferences = await fetchUserPreferences(user.uid);
+        // callback for when user preferences change in firebase
+        async function onChangeACB(loadedPreferences: PersistedUserPreferencesState | null) {
             const state = listenerApi.getState() as RootState;
             const localPreferences = state.userPreferences;
 
@@ -228,17 +238,19 @@ listenerMiddleware.startListening({
                 };
 
                 dispatch(applyLoadedUserPreferences(mergedPreferences));
-                await saveUserPreferences(user.uid, mergedPreferences);
                 clearStoredRecentSearchSiteIds();
                 return;
             }
 
-            await saveUserPreferences(user.uid, localPreferences);
+            // no preferences in firebase, save the current local preferences to firebase
+            await saveUserPreferences(currentUser.uid, localPreferences);
             dispatch(setUserPreferencesLoading(false));
             clearStoredRecentSearchSiteIds();
-        } catch (error) {
+        }
+
+        function onErrorACB(error: unknown) {
             dispatch(setUserPreferencesLoading(false));
-            console.error("Failed to load user preferences:", error);
+            console.error("Failed to subscribe to user preferences:", error);
             dispatch(
                 showSnackbar({
                     message: "Failed to load saved preferences.",
@@ -246,6 +258,11 @@ listenerMiddleware.startListening({
                 })
             );
         }
+
+        // subscribe to changes in user preferences
+        const unsubscribe = subscribeUserPreferences(user.uid, onChangeACB, onErrorACB);
+        // store the unsubscribe function so we can clean up later
+        userPreferencesSubscription.replace(unsubscribe);
     },
 });
 
@@ -254,6 +271,8 @@ listenerMiddleware.startListening({
     effect: (_, listenerApi) => {
         const dispatch = listenerApi.dispatch as AppDispatch;
         dispatch(clearRecentSearchSiteIds());
+        // clean up subscription when user logs out or is deleted
+        userPreferencesSubscription.clear();
     },
 });
 
