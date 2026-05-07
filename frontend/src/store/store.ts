@@ -50,6 +50,7 @@ import {
     setSelectedDeparture,
     setSelectedDatePreset,
     setSelectedCustomDateRange,
+    setDeparturesLastUpdated,
     setSelectedMode,
     setRouteDelayDatePreset,
     setRouteDelayCustomDateRange,
@@ -167,6 +168,9 @@ listenerMiddleware.startListening({
                 : (uniqueModes[0] ?? null);
         const dispatch = listenerApi.dispatch as AppDispatch;
 
+        if (getDepartures.fulfilled.match(action)) {
+            dispatch(setDeparturesLastUpdated(new Date().toISOString()));
+        }
         dispatch(setUniqueModes(uniqueModes));
         dispatch(setSelectedMode(selectedMode));
     },

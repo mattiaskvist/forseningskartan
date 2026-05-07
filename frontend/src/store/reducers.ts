@@ -171,13 +171,18 @@ export const departuresSlice = createSlice({
         currentRequestId: null,
         lastUpdated: null,
     } as DeparturesState,
-    reducers: {},
+    reducers: {
+        setDeparturesLastUpdated: (state, action: PayloadAction<string | null>) => {
+            state.lastUpdated = action.payload;
+        },
+    },
     extraReducers: (builder) => {
         builder
             .addCase(getDepartures.pending, (state, action) => {
                 state.isLoading = true;
                 state.error = null;
                 state.currentRequestId = action.meta.requestId;
+                state.lastUpdated = null;
             })
             .addCase(getDepartures.fulfilled, (state, action) => {
                 if (state.currentRequestId !== action.meta.requestId) {
@@ -187,9 +192,6 @@ export const departuresSlice = createSlice({
                 state.isLoading = false;
                 state.data = action.payload;
                 state.error = null;
-                state.currentRequestId = null;
-                // Store a model timestamp for presenters to format; views only receive display text.
-                state.lastUpdated = new Date().toISOString();
             })
             .addCase(getDepartures.rejected, (state, action) => {
                 if (state.currentRequestId !== action.meta.requestId) {
@@ -203,6 +205,8 @@ export const departuresSlice = createSlice({
             });
     },
 });
+
+export const { setDeparturesLastUpdated } = departuresSlice.actions;
 
 export const stopPointsSlice = createSlice({
     name: "stopPoints",
