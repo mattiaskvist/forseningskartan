@@ -8,6 +8,7 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
         account: {
             signOut: "Sign Out",
             deleteAccount: "Delete Account",
+            cancelDelete: "Cancel",
             loading: "Loading account details...",
             logoutSuccess: "Logged out",
             logoutError: "Failed to log out",
@@ -139,6 +140,8 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             arrivalDelayTrend: "Arrival delay trend over selected dates",
             trendChartDateAxis: "Date",
             trendChartAvgDelayAxis: "Avg delay (min)",
+            trendChartDaily: "Daily",
+            trendChartHourly: "Hourly",
         },
         routeDelayControls: {
             dateSelection: "Date selection",
@@ -192,7 +195,6 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             metro: "Metro",
             train: "Train",
             ferry: "Ferry",
-            ship: "Ship",
             taxi: "Taxi",
             other: "Other",
         },
@@ -201,6 +203,7 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
         account: {
             signOut: "Logga ut",
             deleteAccount: "Radera konto",
+            cancelDelete: "Avbryt",
             loading: "Laddar kontouppgifter...",
             logoutSuccess: "Utloggad",
             logoutError: "Misslyckades med att logga ut",
@@ -332,6 +335,8 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             arrivalDelayTrend: "Ankomstförseningstrend över valda datum",
             trendChartDateAxis: "Datum",
             trendChartAvgDelayAxis: "Genomsnittlig försening (min)",
+            trendChartDaily: "Daglig",
+            trendChartHourly: "Timvis",
         },
         routeDelayControls: {
             dateSelection: "Datumval",
@@ -386,7 +391,6 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             metro: "Tunnelbana",
             train: "Tåg",
             ferry: "Färja",
-            ship: "Fartyg",
             taxi: "Taxi",
             other: "Övrigt",
         },

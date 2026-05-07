@@ -1,7 +1,7 @@
 import { Departure, ModeWithOther } from "../types/sl";
 import { formatDelay, formatTime, getDelayMinutes, getDelayColorToken } from "../utils/time";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Box, Card, TextField, Typography } from "@mui/material";
 import { FilterToggleButtonGroup } from "../components/FilterToggleButtonGroup";
 import { TranslationStrings } from "../utils/translations";
@@ -13,6 +13,11 @@ import {
 type DepartureListViewProps = {
     departures: Departure[];
     onSelectDeparture: (departure: Departure) => void;
+    uniqueModes: ModeWithOther[];
+    selectedMode: ModeWithOther | null;
+    onSelectedModeChange: (mode: ModeWithOther | null) => void;
+    searchQuery: string;
+    onSearchQueryChange: (query: string) => void;
     t: TranslationStrings["departureList"];
     tTransportModes: TranslationStrings["transportModes"];
 };
@@ -20,25 +25,14 @@ type DepartureListViewProps = {
 export function DepartureListView({
     departures,
     onSelectDeparture,
+    uniqueModes,
+    selectedMode,
+    onSelectedModeChange,
+    searchQuery,
+    onSearchQueryChange,
     t,
     tTransportModes,
 }: DepartureListViewProps) {
-    const uniqueModes = useMemo(() => {
-        const modes = new Set<ModeWithOther>();
-
-        for (const departure of departures) {
-            const mode = departure.line.transport_mode ?? "OTHER";
-            if (!modes.has(mode)) {
-                modes.add(mode);
-            }
-        }
-
-        return Array.from(modes).sort();
-    }, [departures]);
-
-    const [selectedMode, setSelectedMode] = useState<ModeWithOther | null>(uniqueModes[0] ?? null);
-    const [searchQuery, setSearchQuery] = useState("");
-
     const departuresByMode = useMemo(() => {
         const groupedDepartures = new Map<ModeWithOther, Departure[]>();
 
@@ -158,7 +152,7 @@ export function DepartureListView({
     }
 
     function handleSearchChangeACB(e: React.ChangeEvent<HTMLInputElement>) {
-        setSearchQuery(e.target.value);
+        onSearchQueryChange(e.target.value);
     }
 
     return (
@@ -170,14 +164,14 @@ export function DepartureListView({
                 value={searchQuery}
                 onChange={handleSearchChangeACB}
             />
-            {uniqueModes.length > 0 && selectedMode ? (
+            {uniqueModes.length > 0 && (
                 <FilterToggleButtonGroup
                     options={uniqueModes}
                     selectedValue={selectedMode}
-                    onValueChange={setSelectedMode}
+                    onValueChange={onSelectedModeChange}
                     renderButtonCB={(mode) => getTransportationModeButton(mode, tTransportModes)}
                 />
-            ) : null}
+            )}
 
             {selectedMode ? (
                 renderModeDepartures(selectedMode)

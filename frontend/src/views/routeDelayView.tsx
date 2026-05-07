@@ -6,7 +6,7 @@ import { RouteDelaySection } from "../types/routeDelays";
 import { RouteDelaySectionToggleView } from "./routeDelaySectionToggleView";
 import { RouteDelayInfoView } from "./RouteDelayInfoView";
 import { TranslationStrings } from "../utils/translations";
-import { ReactNode } from "react";
+import { RouteDelayContentView, RouteDelayContentViewProps } from "./routeDelayContentView";
 
 type RouteDelayViewProps = {
     selectedSection: RouteDelaySection;
@@ -18,7 +18,6 @@ type RouteDelayViewProps = {
     selectedTransportationMode: TransportationMode;
     searchQuery: string;
     isRouteDetailsOpen: boolean;
-    content: ReactNode;
     transportationModeOptions: TransportationMode[];
     availableDates: string[];
     onDatePresetChange: (preset: DatePreset) => void;
@@ -32,6 +31,7 @@ type RouteDelayViewProps = {
     tControls: TranslationStrings["routeDelayControls"];
     tDatePicker: TranslationStrings["availableDatesPicker"];
     tTransportModes: TranslationStrings["transportModes"];
+    routeDelayContentViewProps: RouteDelayContentViewProps;
 };
 
 export function RouteDelayView({
@@ -44,7 +44,6 @@ export function RouteDelayView({
     selectedTransportationMode,
     searchQuery,
     isRouteDetailsOpen,
-    content,
     transportationModeOptions,
     availableDates,
     onDatePresetChange,
@@ -58,6 +57,7 @@ export function RouteDelayView({
     tControls,
     tDatePicker,
     tTransportModes,
+    routeDelayContentViewProps,
 }: RouteDelayViewProps) {
     return (
         <Box
@@ -80,7 +80,6 @@ export function RouteDelayView({
                     maxWidth: "48rem",
                     p: 2.5,
                     borderRadius: 2,
-                    backdropFilter: "blur(4px)",
                     boxShadow: 3,
                 }}
             >
@@ -127,7 +126,7 @@ export function RouteDelayView({
                         />
                     </div>
 
-                    <div>{content}</div>
+                    <RouteDelayContentView {...routeDelayContentViewProps} />
                 </div>
             </Paper>
         </Box>

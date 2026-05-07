@@ -29,21 +29,23 @@ import {
     getMapCenterOnUserRequestedAtCB,
     getStopPointsCB,
     getStopPointsLoadingCB,
+    getDepartureSelectedModeCB,
+    getDepartureSearchQueryCB,
+    getDepartureUniqueModesCB,
 } from "../store/selectors";
 import { selectSite } from "../store/selection";
 import {
+    setSearchQuery,
     setSelectedCustomDateRange,
     setSelectedDatePreset,
     setSelectedDeparture,
+    setSelectedMode,
     setSelectedSiteId,
-    setUserLocation,
-    requestMapCenterOnUser,
 } from "../store/reducers";
-import { Departure, TransportationMode } from "../types/sl";
+import { Departure, ModeWithOther, TransportationMode } from "../types/sl";
 import { CustomDateRange, DatePreset } from "../types/departureDelay";
 import { AppStyle } from "../types/appStyle";
 import { DepartureViewProps } from "../views/departureView";
-import { DepartureEmptyStateView } from "../views/departureEmptyStateView";
 import {
     recordRecentSearchSiteId,
     setAppStylePreference,
@@ -51,7 +53,7 @@ import {
     setMapTransportationModeFilter,
     toggleFavoriteSiteId,
 } from "../store/userPreferencesSlice";
-import { showSnackbar, hideSnackbar } from "../store/snackbarSlice";
+import { showSnackbar } from "../store/snackbarSlice";
 import { Suspense } from "../components/Suspense";
 import { getUpcomingDepartures } from "../utils/departures";
 import { RouteMeta, RouteType } from "../types/historicalDelay";
@@ -60,13 +62,12 @@ import {
     routeTypesToTransportationModes,
 } from "../utils/transportationMode";
 import { getSitesWithRoutes } from "../utils/site";
-import { getDepartures } from "../store/actions";
+import { getDepartures, requestUserGeolocation } from "../store/actions";
 import { formatTime } from "../utils/time";
 import { translations } from "../utils/translations";
-import { DepartureDetailsView } from "../views/departureDetailsView";
-import { DepartureListView } from "../views/departureListView";
 
-// A refreshed departure may have changed prediction data, so match on stable trip identity.
+// Presenter refreshes can receive new prediction data for the same trip.
+// Match on stable trip identity so the selected detail view survives a refresh.
 function isSameDepartureCB(a: Departure, b: Departure): boolean {
     return (
         a.journey.id === b.journey.id &&
@@ -104,6 +105,9 @@ export function MapPresenter() {
     const mapCenterOnUserRequestedAt = useAppSelector(getMapCenterOnUserRequestedAtCB);
     const selectedTransportationMode = useAppSelector(getMapTransportationModeFilterCB);
     const hideStopsWithoutDepartures = useAppSelector(getHideStopsWithoutDeparturesCB);
+    const departureSelectedMode = useAppSelector(getDepartureSelectedModeCB);
+    const departureSearchQuery = useAppSelector(getDepartureSearchQueryCB);
+    const departureUniqueModes = useAppSelector(getDepartureUniqueModesCB);
     const tMap = translations[currentLanguage].map;
 
     const routesByStopPointsUnavailable = routesByStopPointError !== null || !routesByStopPoint;
@@ -190,81 +194,7 @@ export function MapPresenter() {
     }
 
     function handleRequestMapCenterOnUserACB() {
-        if (!navigator.geolocation) {
-            dispatch(
-                showSnackbar({
-                    message: tMap.geolocationUnsupported,
-                    severity: "error",
-                })
-            );
-            return;
-        }
-
-        if (!window.isSecureContext) {
-            dispatch(
-                showSnackbar({
-                    message: tMap.locationSecureConnectionRequired,
-                    severity: "warning",
-                })
-            );
-            return;
-        }
-
-        function successCallback(position: GeolocationPosition) {
-            dispatch(hideSnackbar());
-            dispatch(
-                setUserLocation({
-                    lat: position.coords.latitude,
-                    lon: position.coords.longitude,
-                })
-            );
-            dispatch(requestMapCenterOnUser());
-        }
-
-        function errorCallback(error: GeolocationPositionError) {
-            // If high accuracy failed, try one more time with low accuracy
-            if (error.code === error.POSITION_UNAVAILABLE || error.code === error.TIMEOUT) {
-                navigator.geolocation.getCurrentPosition(successCallback, finalErrorCallback, {
-                    enableHighAccuracy: false,
-                    timeout: 15000,
-                    maximumAge: 300000, // 5 minutes
-                });
-                return;
-            }
-            finalErrorCallback(error);
-        }
-
-        function finalErrorCallback(error: GeolocationPositionError) {
-            let message = tMap.locationLookupFailed;
-            if (error.code === error.PERMISSION_DENIED) {
-                message = tMap.locationPermissionDenied;
-            } else if (error.code === error.POSITION_UNAVAILABLE) {
-                message = tMap.locationUnavailable;
-            } else if (error.code === error.TIMEOUT) {
-                message = tMap.locationTimeout;
-            }
-
-            dispatch(
-                showSnackbar({
-                    message,
-                    severity: "error",
-                })
-            );
-        }
-
-        dispatch(
-            showSnackbar({
-                message: tMap.findingLocation,
-                severity: "info",
-            })
-        );
-
-        // Start with high accuracy request
-        navigator.geolocation.getCurrentPosition(successCallback, errorCallback, {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 60000, // Allow 1 minute old cached position
-        });
+        dispatch(requestUserGeolocation());
     }
 
     function toggleFavoriteStopACB() {
@@ -324,9 +254,19 @@ export function MapPresenter() {
         }
     }
 
+    function handleSelectedModeChangeACB(mode: ModeWithOther | null) {
+        dispatch(setSelectedMode(mode));
+    }
+
+    function handleSearchQueryChangeACB(query: string) {
+        dispatch(setSearchQuery(query));
+    }
+
     const departures = departureResponse?.departures ?? [];
     const upcomingDepartures = getUpcomingDepartures(departures);
 
+    // The presenter is the MVP glue: read model state from Redux, turn it into
+    // plain view props, and pass callbacks that dispatch model changes.
     const departureViewProps: DepartureViewProps | null = selectedSite
         ? {
               selectedSiteName: selectedSite.name,
@@ -342,36 +282,35 @@ export function MapPresenter() {
               isUserLoggedIn: Boolean(user),
               onToggleFavoriteStop: toggleFavoriteStopACB,
               tHeader: translations[currentLanguage].departureHeader,
-              content: isDeparturesLoading ? (
-                  <Suspense message={translations[currentLanguage].departure.loading} />
-              ) : selectedDeparture ? (
-                  <DepartureDetailsView
-                      departure={selectedDeparture}
-                      onBackToList={returnToDepartureListACB}
-                      availableDates={availableDates}
-                      selectedDelayDates={selectedDelayDates}
-                      selectedDepartureDelaySummary={selectedDepartureDelaySummary}
-                      isDepartureHistoricalDelayLoading={isDepartureHistoricalDelayLoading}
-                      selectedDatePreset={selectedDatePreset}
-                      selectedCustomDateRange={selectedCustomDateRange}
-                      onDatePresetChange={setSelectedDatePresetACB}
-                      onCustomDateRangeChange={setSelectedCustomDateRangeACB}
-                      t={translations[currentLanguage].departureDetails}
-                      tHistoricalDelays={translations[currentLanguage].departureHistoricalDelays}
-                      tDelayStats={translations[currentLanguage].departureDelayStats}
-                      tDelayControls={translations[currentLanguage].routeDelayControls}
-                      tDatePicker={translations[currentLanguage].availableDatesPicker}
-                  />
-              ) : upcomingDepartures.length > 0 ? (
-                  <DepartureListView
-                      departures={upcomingDepartures}
-                      onSelectDeparture={selectDepartureACB}
-                      t={translations[currentLanguage].departureList}
-                      tTransportModes={translations[currentLanguage].transportModes}
-                  />
-              ) : (
-                  <DepartureEmptyStateView t={translations[currentLanguage].departureEmpty} />
-              ),
+              departureViewContentProps: {
+                  isDeparturesLoading,
+                  selectedDeparture,
+                  upcomingDepartures,
+                  onBackToList: returnToDepartureListACB,
+                  availableDates,
+                  selectedDelayDates,
+                  selectedDepartureDelaySummary,
+                  isDepartureHistoricalDelayLoading,
+                  selectedDatePreset,
+                  selectedCustomDateRange,
+                  onDatePresetChange: setSelectedDatePresetACB,
+                  onCustomDateRangeChange: setSelectedCustomDateRangeACB,
+                  onSelectDeparture: selectDepartureACB,
+                  uniqueModes: departureUniqueModes,
+                  selectedMode: departureSelectedMode,
+                  onSelectedModeChange: handleSelectedModeChangeACB,
+                  searchQuery: departureSearchQuery,
+                  onSearchQueryChange: handleSearchQueryChangeACB,
+                  tDepartureDetails: translations[currentLanguage].departureDetails,
+                  tHistoricalDelays: translations[currentLanguage].departureHistoricalDelays,
+                  tDelayStats: translations[currentLanguage].departureDelayStats,
+                  tDelayControls: translations[currentLanguage].routeDelayControls,
+                  tDatePicker: translations[currentLanguage].availableDatesPicker,
+                  tDeparture: translations[currentLanguage].departure,
+                  tDepartureList: translations[currentLanguage].departureList,
+                  tTransportModes: translations[currentLanguage].transportModes,
+                  tDepartureEmpty: translations[currentLanguage].departureEmpty,
+              },
           }
         : null;
 

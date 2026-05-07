@@ -132,6 +132,18 @@ function getSelectedCustomDateRangeCB(state: RootState) {
     return state.departureUI.selectedCustomDateRange;
 }
 
+function getDepartureSelectedModeCB(state: RootState) {
+    return state.departureUI.selectedMode;
+}
+
+function getDepartureUniqueModesCB(state: RootState) {
+    return state.departureUI.uniqueModes;
+}
+
+function getDepartureSearchQueryCB(state: RootState) {
+    return state.departureUI.searchQuery;
+}
+
 function getRouteDelaySelectedDatePresetCB(state: RootState) {
     return state.routeDelayUI.selectedDatePreset;
 }
@@ -150,6 +162,26 @@ function getRouteDelaySelectedTransportationModeCB(state: RootState) {
 
 function getRouteDelaySelectedRouteKeyCB(state: RootState) {
     return state.routeDelayUI.selectedRouteKey;
+}
+
+function getRouteDelaySelectedTimeGranularityCB(state: RootState) {
+    return state.routeDelayUI.selectedTimeGranularity;
+}
+
+function getRouteDelaySelectedSectionCB(state: RootState) {
+    return state.routeDelayUI.selectedSection;
+}
+
+function getRouteDelaySearchQueryCB(state: RootState) {
+    return state.routeDelayUI.searchQuery;
+}
+
+function getRouteDelayRoutesPerPageCB(state: RootState) {
+    return state.routeDelayUI.routesPerPage;
+}
+
+function getRouteDelayCurrentPageCB(state: RootState) {
+    return state.routeDelayUI.currentPage;
 }
 
 function getRouteDelayTrendPointsCB(state: RootState) {
@@ -276,11 +308,19 @@ export {
     getSelectedDepartureCB,
     getSelectedDatePresetCB,
     getSelectedCustomDateRangeCB,
+    getDepartureSelectedModeCB,
+    getDepartureUniqueModesCB,
+    getDepartureSearchQueryCB,
     getRouteDelaySelectedDatePresetCB,
     getRouteDelaySelectedCustomDateRangeCB,
     getRouteDelaySelectedEventTypeCB,
     getRouteDelaySelectedTransportationModeCB,
     getRouteDelaySelectedRouteKeyCB,
+    getRouteDelaySelectedTimeGranularityCB,
+    getRouteDelaySelectedSectionCB,
+    getRouteDelaySearchQueryCB,
+    getRouteDelayRoutesPerPageCB,
+    getRouteDelayCurrentPageCB,
     getRouteDelayTrendPointsCB,
     getRouteDelayTrendLoadingCB,
     getSnackbarOpenCB,

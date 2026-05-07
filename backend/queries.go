@@ -286,6 +286,186 @@ func (s *server) queryRouteDelays(ctx context.Context, dates []string) ([]*delay
 	return summaries, nil
 }
 
+type TimeGranularity string
+
+const (
+	TimeGranularityDaily  TimeGranularity = "daily"
+	TimeGranularityHourly TimeGranularity = "hourly"
+)
+
+func buildHourlyTrendQuery() string {
+	query := `
+		SELECT
+			a.hour_start_utc,
+			COALESCE(MAX(r.long_name), ''),
+			COALESCE(MAX(r.route_type), ''),
+			SUM(a.arrival_events) AS arrival_events,
+			SUM(a.departure_events) AS departure_events,
+			SUM(a.unique_trips) AS unique_trips,
+			SUM(a.arrival_delay_count) AS arrival_delay_count,
+			SUM(a.arrival_delay_count * a.arrival_delay_avg_seconds) AS arrival_delay_seconds_total,
+			SUM(a.departure_delay_count) AS departure_delay_count,
+			SUM(a.departure_delay_count * a.departure_delay_avg_seconds) AS departure_delay_seconds_total,
+			SUM(a.arrival_ahead_count) AS arrival_ahead_count,
+			SUM(a.arrival_ahead_count * a.arrival_ahead_avg_seconds) AS arrival_ahead_seconds_total,
+			SUM(a.departure_ahead_count) AS departure_ahead_count,
+			SUM(a.departure_ahead_count * a.departure_ahead_avg_seconds) AS departure_ahead_seconds_total
+		FROM aggregate_route_hourly a
+		JOIN routes r ON r.id = a.route_id
+		WHERE
+			(a.hour_start_utc AT TIME ZONE 'UTC')::date = ANY($1::date[])
+			AND r.short_name = $2
+			AND ($3 = '' OR r.route_type = $3)
+		GROUP BY a.hour_start_utc
+		ORDER BY a.hour_start_utc
+	`
+	return query
+}
+
+func buildDailyTrendQuery() string {
+	query := `
+		SELECT
+			a.service_date,
+			COALESCE(MAX(r.long_name), ''),
+			COALESCE(MAX(r.route_type), ''),
+			SUM(a.arrival_events) AS arrival_events,
+			SUM(a.departure_events) AS departure_events,
+			SUM(a.unique_trips) AS unique_trips,
+			SUM(a.arrival_delay_count) AS arrival_delay_count,
+			SUM(a.arrival_delay_count * a.arrival_delay_avg_seconds) AS arrival_delay_seconds_total,
+			SUM(a.departure_delay_count) AS departure_delay_count,
+			SUM(a.departure_delay_count * a.departure_delay_avg_seconds) AS departure_delay_seconds_total,
+			SUM(a.arrival_ahead_count) AS arrival_ahead_count,
+			SUM(a.arrival_ahead_count * a.arrival_ahead_avg_seconds) AS arrival_ahead_seconds_total,
+			SUM(a.departure_ahead_count) AS departure_ahead_count,
+			SUM(a.departure_ahead_count * a.departure_ahead_avg_seconds) AS departure_ahead_seconds_total
+		FROM aggregate_route_daily a
+		JOIN routes r ON r.id = a.route_id
+		WHERE
+			a.service_date = ANY($1::date[])
+			AND r.short_name = $2
+			AND ($3 = '' OR r.route_type = $3)
+		GROUP BY a.service_date
+		ORDER BY a.service_date
+	`
+	return query
+}
+
+func (s *server) queryRouteDelayTrend(
+	ctx context.Context,
+	dates []string,
+	routeShortName string,
+	routeType string,
+	granularity TimeGranularity,
+) (map[string]*delaySummary, error) {
+	var queryName string
+	var query string
+	var timeFormat string
+
+	switch granularity {
+	case TimeGranularityHourly:
+		queryName = "route_delay_trend_hourly"
+		timeFormat = "2006-01-02T15:00:00Z"
+		query = buildHourlyTrendQuery()
+	case TimeGranularityDaily:
+		queryName = "route_delay_trend"
+		timeFormat = "2006-01-02"
+		query = buildDailyTrendQuery()
+	}
+
+	start := time.Now()
+	rows, err := s.db.QueryContext(ctx, query, dates, routeShortName, routeType)
+	if err != nil {
+		recordDBQueryResult(queryName, QueryResultError, time.Since(start))
+		return nil, err
+	}
+	defer rows.Close() // nolint: errcheck
+
+	trendByTime := make(map[string]*delaySummary)
+
+	for rows.Next() {
+		var (
+			timeValue                  time.Time
+			longName                   string
+			typeValue                  string
+			arrivalEvents              int64
+			departureEvents            int64
+			uniqueTrips                int64
+			arrivalDelayCount          int64
+			arrivalDelaySecondsTotal   float64
+			departureDelayCount        int64
+			departureDelaySecondsTotal float64
+			arrivalAheadCount          int64
+			arrivalAheadSecondsTotal   float64
+			departureAheadCount        int64
+			departureAheadSecondsTotal float64
+		)
+
+		if err := rows.Scan(
+			&timeValue,
+			&longName,
+			&typeValue,
+			&arrivalEvents,
+			&departureEvents,
+			&uniqueTrips,
+			&arrivalDelayCount,
+			&arrivalDelaySecondsTotal,
+			&departureDelayCount,
+			&departureDelaySecondsTotal,
+			&arrivalAheadCount,
+			&arrivalAheadSecondsTotal,
+			&departureAheadCount,
+			&departureAheadSecondsTotal,
+		); err != nil {
+			recordDBQueryResult(queryName, QueryResultError, time.Since(start))
+			return nil, err
+		}
+
+		// normalize DB timestamptz to UTC to ensure consistent formatting
+		timeValue = timeValue.UTC()
+		timeKey := timeValue.Format(timeFormat)
+		if routeType != "" {
+			typeValue = routeType
+		}
+
+		trendByTime[timeKey] = &delaySummary{
+			Key: routeShortName,
+			Route: &routeMeta{
+				ShortName: routeShortName,
+				LongName:  longName,
+				Type:      typeValue,
+			},
+			ArrivalEventCount:   arrivalEvents,
+			DepartureEventCount: departureEvents,
+			UniqueTrips:         uniqueTrips,
+			ArrivalDelayStats: delayStats{
+				Count:      arrivalDelayCount,
+				AvgSeconds: avgOrZero(arrivalDelaySecondsTotal, arrivalDelayCount),
+			},
+			DepartureDelayStats: delayStats{
+				Count:      departureDelayCount,
+				AvgSeconds: avgOrZero(departureDelaySecondsTotal, departureDelayCount),
+			},
+			ArrivalAheadStats: delayStats{
+				Count:      arrivalAheadCount,
+				AvgSeconds: avgOrZero(arrivalAheadSecondsTotal, arrivalAheadCount),
+			},
+			DepartureAheadStats: delayStats{
+				Count:      departureAheadCount,
+				AvgSeconds: avgOrZero(departureAheadSecondsTotal, departureAheadCount),
+			},
+		}
+	}
+
+	if err := rows.Err(); err != nil {
+		recordDBQueryResult(queryName, QueryResultError, time.Since(start))
+		return nil, err
+	}
+
+	recordDBQueryResult(queryName, QueryResultSuccess, time.Since(start))
+	return trendByTime, nil
+}
+
 func (s *server) queryStopPointRoutes(ctx context.Context, date string) (map[string][]*routeMeta, error) {
 	const queryName = "stop_point_routes"
 	start := time.Now()

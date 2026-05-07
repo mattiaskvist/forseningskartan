@@ -35,6 +35,11 @@ describe("DepartureListView", () => {
             <DepartureListView
                 departures={mockDepartures}
                 onSelectDeparture={vi.fn()}
+                uniqueModes={["METRO"]}
+                selectedMode={"METRO"}
+                onSelectedModeChange={vi.fn()}
+                searchQuery=""
+                onSearchQueryChange={vi.fn()}
                 t={translations.en.departureList}
                 tTransportModes={translations.en.transportModes}
             />
@@ -53,6 +58,11 @@ describe("DepartureListView", () => {
             <DepartureListView
                 departures={mockDepartures}
                 onSelectDeparture={vi.fn()}
+                uniqueModes={["METRO"]}
+                selectedMode={"BUS"}
+                onSelectedModeChange={vi.fn()}
+                searchQuery=""
+                onSearchQueryChange={vi.fn()}
                 t={translations.en.departureList}
                 tTransportModes={translations.en.transportModes}
             />

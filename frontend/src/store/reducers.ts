@@ -10,10 +10,22 @@ import {
     getRouteDelayTrend,
 } from "./actions";
 import { RoutesByStopPoint } from "../api/backend";
-import { Departure, DepartureResponse, Site, StopPoint, TransportationMode } from "../types/sl";
+import {
+    Departure,
+    DepartureResponse,
+    ModeWithOther,
+    Site,
+    StopPoint,
+    TransportationMode,
+} from "../types/sl";
 import { DelaySummary } from "../types/historicalDelay";
 import { CustomDateRange, DatePreset, EventType } from "../types/departureDelay";
-import { RouteDelayTrendPoint } from "../types/routeDelays";
+import {
+    RouteDelayTrendPoint,
+    RouteDelayTimeGranularity,
+    RouteDelaySection,
+    PageSizeOption,
+} from "../types/routeDelays";
 import { StopPointGidsBySiteId } from "../utils/site";
 
 type SitesState = {
@@ -80,6 +92,9 @@ type DepartureUIState = {
     selectedDeparture: Departure | null;
     selectedDatePreset: DatePreset;
     selectedCustomDateRange: CustomDateRange | null;
+    selectedMode: ModeWithOther | null;
+    uniqueModes: ModeWithOther[];
+    searchQuery: string;
 };
 
 type RouteDelayUIState = {
@@ -88,6 +103,11 @@ type RouteDelayUIState = {
     selectedEventType: EventType;
     selectedTransportationMode: TransportationMode;
     selectedRouteKey: string | null;
+    selectedTimeGranularity: RouteDelayTimeGranularity;
+    selectedSection: RouteDelaySection;
+    searchQuery: string;
+    routesPerPage: PageSizeOption;
+    currentPage: number;
 };
 
 export const sitesSlice = createSlice({
@@ -168,6 +188,7 @@ export const departuresSlice = createSlice({
                 state.data = action.payload;
                 state.error = null;
                 state.currentRequestId = null;
+                // Store a model timestamp for presenters to format; views only receive display text.
                 state.lastUpdated = new Date().toISOString();
             })
             .addCase(getDepartures.rejected, (state, action) => {
@@ -401,12 +422,16 @@ export const departureUISlice = createSlice({
         selectedDeparture: null,
         selectedDatePreset: "sameDayLastWeek",
         selectedCustomDateRange: null,
+        selectedMode: null,
+        uniqueModes: [],
+        searchQuery: "",
     } as DepartureUIState,
     reducers: {
         setSelectedDeparture: (state, action: { payload: Departure | null }) => {
             state.selectedDeparture = action.payload;
             state.selectedDatePreset = "sameDayLastWeek";
             state.selectedCustomDateRange = null;
+            state.searchQuery = "";
         },
         setSelectedDatePreset: (state, action: { payload: DatePreset }) => {
             state.selectedDatePreset = action.payload;
@@ -414,11 +439,26 @@ export const departureUISlice = createSlice({
         setSelectedCustomDateRange: (state, action: { payload: CustomDateRange | null }) => {
             state.selectedCustomDateRange = action.payload;
         },
+        setSelectedMode: (state, action: { payload: ModeWithOther | null }) => {
+            state.selectedMode = action.payload;
+        },
+        setUniqueModes: (state, action: { payload: ModeWithOther[] }) => {
+            state.uniqueModes = action.payload;
+        },
+        setSearchQuery: (state, action: { payload: string }) => {
+            state.searchQuery = action.payload;
+        },
     },
 });
 
-export const { setSelectedDeparture, setSelectedDatePreset, setSelectedCustomDateRange } =
-    departureUISlice.actions;
+export const {
+    setSelectedDeparture,
+    setSelectedDatePreset,
+    setSelectedCustomDateRange,
+    setSelectedMode,
+    setUniqueModes,
+    setSearchQuery,
+} = departureUISlice.actions;
 
 export const routeDelayUISlice = createSlice({
     name: "routeDelayUI",
@@ -428,6 +468,11 @@ export const routeDelayUISlice = createSlice({
         selectedEventType: "departure",
         selectedTransportationMode: "BUS",
         selectedRouteKey: null,
+        selectedTimeGranularity: "daily",
+        selectedSection: "routes",
+        searchQuery: "",
+        routesPerPage: 25,
+        currentPage: 1,
     } as RouteDelayUIState,
     reducers: {
         setRouteDelayDatePreset: (state, action: { payload: DatePreset }) => {
@@ -436,19 +481,41 @@ export const routeDelayUISlice = createSlice({
             if (action.payload !== "customDate") {
                 state.selectedCustomDateRange = null;
             }
+            state.currentPage = 1;
         },
         setRouteDelayCustomDateRange: (state, action: { payload: CustomDateRange | null }) => {
             state.selectedCustomDateRange = action.payload;
+            state.currentPage = 1;
         },
         setRouteDelayEventType: (state, action: { payload: EventType }) => {
             state.selectedEventType = action.payload;
+            state.currentPage = 1;
         },
         setRouteDelayTransportationMode: (state, action: { payload: TransportationMode }) => {
             state.selectedTransportationMode = action.payload;
             state.selectedRouteKey = null;
+            state.currentPage = 1;
         },
         setRouteDelaySelectedRouteKey: (state, action: { payload: string | null }) => {
             state.selectedRouteKey = action.payload;
+        },
+        setRouteDelayTimeGranularity: (state, action: { payload: RouteDelayTimeGranularity }) => {
+            state.selectedTimeGranularity = action.payload;
+        },
+        setRouteDelaySelectedSection: (state, action: { payload: RouteDelaySection }) => {
+            state.selectedSection = action.payload;
+            state.selectedRouteKey = null;
+        },
+        setRouteDelaySearchQuery: (state, action: { payload: string }) => {
+            state.searchQuery = action.payload;
+            state.currentPage = 1;
+        },
+        setRouteDelayRoutesPerPage: (state, action: { payload: PageSizeOption }) => {
+            state.routesPerPage = action.payload;
+            state.currentPage = 1;
+        },
+        setRouteDelayCurrentPage: (state, action: { payload: number }) => {
+            state.currentPage = action.payload;
         },
     },
 });
@@ -459,4 +526,9 @@ export const {
     setRouteDelayEventType,
     setRouteDelayTransportationMode,
     setRouteDelaySelectedRouteKey,
+    setRouteDelayTimeGranularity,
+    setRouteDelaySelectedSection,
+    setRouteDelaySearchQuery,
+    setRouteDelayRoutesPerPage,
+    setRouteDelayCurrentPage,
 } = routeDelayUISlice.actions;

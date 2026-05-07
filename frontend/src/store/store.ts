@@ -39,23 +39,32 @@ import {
     fetchSelectedDepartureStopDelays,
     fetchSelectedRouteDelays,
     fetchSelectedRouteTrend,
+    getDepartures,
     getSites,
     getStopPoints,
     getAggregatedDates,
     getRouteDelays,
+    requestUserGeolocation,
 } from "./actions";
 import {
     setSelectedDeparture,
     setSelectedDatePreset,
     setSelectedCustomDateRange,
+    setSelectedMode,
     setRouteDelayDatePreset,
     setRouteDelayCustomDateRange,
     setRouteDelaySelectedRouteKey,
+    setRouteDelayTimeGranularity,
     setStopPointGidsBySiteId,
+    setUniqueModes,
 } from "./reducers";
 import { fetchUserPreferences, saveUserPreferences } from "../firebase/userPreferences";
 import { deleteCurrentUser, logoutCurrentUser } from "./authThunks";
 import { buildStopPointGidsBySiteId } from "../utils/site";
+import { translations } from "../utils/translations";
+import { getGeolocationSnackbarPayload } from "../utils/geolocation";
+import { Departure, ModeWithOther } from "../types/sl";
+import { getUpcomingDepartures } from "../utils/departures";
 const listenerMiddleware = createListenerMiddleware();
 
 function mergeRecentSearchSiteIds(
@@ -126,6 +135,43 @@ listenerMiddleware.startListening({
     },
 });
 
+// Compute unique modes when new stop is selected and departures are loaded
+listenerMiddleware.startListening({
+    matcher: isAnyOf(getDepartures.fulfilled, applyLoadedUserPreferences),
+    effect: (action, listenerApi) => {
+        const state = listenerApi.getState() as RootState;
+
+        let departures: Departure[];
+        if (getDepartures.fulfilled.match(action)) {
+            // dont update on stale requests
+            if (state.departures.currentRequestId !== action.meta.requestId) {
+                return;
+            }
+            departures = action.payload?.departures ?? [];
+        } else {
+            departures = state.departures.data?.departures ?? [];
+        }
+        const upcomingDepartures = getUpcomingDepartures(departures);
+        const modes = new Set<ModeWithOther>();
+
+        for (const departure of upcomingDepartures) {
+            const mode = departure.line.transport_mode ?? "OTHER";
+            modes.add(mode);
+        }
+
+        const uniqueModes = Array.from(modes).sort();
+        const preferredMode = state.userPreferences.mapTransportationModeFilter;
+        const selectedMode =
+            preferredMode != null && uniqueModes.includes(preferredMode)
+                ? preferredMode
+                : (uniqueModes[0] ?? null);
+        const dispatch = listenerApi.dispatch as AppDispatch;
+
+        dispatch(setUniqueModes(uniqueModes));
+        dispatch(setSelectedMode(selectedMode));
+    },
+});
+
 listenerMiddleware.startListening({
     matcher: isAnyOf(
         setRouteDelayDatePreset,
@@ -141,7 +187,11 @@ listenerMiddleware.startListening({
 });
 
 listenerMiddleware.startListening({
-    matcher: isAnyOf(setRouteDelaySelectedRouteKey, getRouteDelays.fulfilled),
+    matcher: isAnyOf(
+        setRouteDelaySelectedRouteKey,
+        setRouteDelayTimeGranularity,
+        getRouteDelays.fulfilled
+    ),
     effect: (_, listenerApi) => {
         listenerApi.cancelActiveListeners();
 
@@ -239,6 +289,37 @@ listenerMiddleware.startListening({
                 })
             );
         }
+    },
+});
+
+listenerMiddleware.startListening({
+    actionCreator: requestUserGeolocation.pending,
+    effect: (_, listenerApi) => {
+        const state = listenerApi.getState() as RootState;
+        const tMap = translations[state.userPreferences.language].map;
+
+        listenerApi.dispatch(
+            showSnackbar({
+                message: tMap.findingLocation,
+                severity: "info",
+            })
+        );
+    },
+});
+
+listenerMiddleware.startListening({
+    actionCreator: requestUserGeolocation.rejected,
+    effect: (action, listenerApi) => {
+        const state = listenerApi.getState() as RootState;
+        const tMap = translations[state.userPreferences.language].map;
+
+        const reason = action.payload;
+        if (!reason) {
+            return;
+        }
+
+        const snackbarPayload = getGeolocationSnackbarPayload(reason, tMap);
+        listenerApi.dispatch(showSnackbar(snackbarPayload));
     },
 });
 

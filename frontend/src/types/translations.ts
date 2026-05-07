@@ -6,6 +6,7 @@ export const isLanguageCode = (candidate: unknown): candidate is LanguageCode =>
 export interface AccountStrings {
     signOut: string;
     deleteAccount: string;
+    cancelDelete: string;
     loading: string;
     logoutSuccess: string;
     logoutError: string;
@@ -154,6 +155,8 @@ export interface RouteDetailsPageStrings {
     arrivalDelayTrend: string;
     trendChartDateAxis: string;
     trendChartAvgDelayAxis: string;
+    trendChartDaily: string;
+    trendChartHourly: string;
 }
 
 export interface RouteDelayControlsStrings {
@@ -214,7 +217,6 @@ export interface TransportModesStrings {
     metro: string;
     train: string;
     ferry: string;
-    ship: string;
     taxi: string;
     other: string;
 }

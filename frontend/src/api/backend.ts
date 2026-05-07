@@ -1,6 +1,6 @@
 import { DelaySummary, RouteMeta } from "../types/historicalDelay";
 import { EventType } from "../types/departureDelay";
-import { RouteDelayTrendPoint } from "../types/routeDelays";
+import { RouteDelayTrendPoint, RouteDelayTimeGranularity } from "../types/routeDelays";
 import { getAvgDelayMinutes } from "../utils/time";
 
 export type DepartureHistoricalDelayParams = {
@@ -16,7 +16,10 @@ export type RouteDelayTrendParams = {
     routeShortName: string;
     routeType: string;
     eventType: EventType;
+    timeGranularity: RouteDelayTimeGranularity;
 };
+
+type RouteDelayTrendSummaryResponse = Record<string, DelaySummary>;
 
 export type RoutesByStopPoint = Record<string, RouteMeta[]>;
 
@@ -134,23 +137,38 @@ export function fetchRouteDelayTrend({
     routeShortName,
     routeType,
     eventType,
+    timeGranularity,
 }: RouteDelayTrendParams): Promise<RouteDelayTrendPoint[]> {
     if (dates.length === 0) {
         return Promise.resolve([]);
     }
 
-    function createDatePromiseCB(date: string): Promise<RouteDelayTrendPoint> {
-        function processDailySummariesACB(
-            dailySummaries: DelaySummary[] | null
-        ): RouteDelayTrendPoint {
-            function isMatchingRouteCB(summary: DelaySummary): boolean {
-                return (
-                    summary.route?.shortName === routeShortName && summary.route?.type === routeType
-                );
-            }
-            const selectedRouteSummary = dailySummaries?.find(isMatchingRouteCB) ?? null;
+    const params = new URLSearchParams();
+    appendListParam(params, "dates", dates);
+    params.set("routeShortName", routeShortName);
+    params.set("routeType", routeType);
 
-            if (!selectedRouteSummary) {
+    function handleResponseACB(response: Response): Promise<RouteDelayTrendSummaryResponse> {
+        if (!response.ok) {
+            throw new Error(`Failed to fetch route delay trend: ${response.status}`);
+        }
+        return response.json();
+    }
+
+    function mapTrendByDateACB(
+        trendByDate: RouteDelayTrendSummaryResponse
+    ): RouteDelayTrendPoint[] {
+        // Build hour tags as "2026-03-20T06:00:00Z" for hourly endpoint
+        function expandToHoursCB(date: string): string[] {
+            return Array.from({ length: 24 }, (_, hour) => {
+                const hourString = hour.toString().padStart(2, "0");
+                return `${date}T${hourString}:00:00Z`;
+            });
+        }
+
+        function createTrendPointCB(date: string): RouteDelayTrendPoint {
+            const routeSummary = trendByDate[date] ?? null;
+            if (!routeSummary) {
                 return {
                     date,
                     avgDelayMinutes: null,
@@ -159,21 +177,14 @@ export function fetchRouteDelayTrend({
 
             return {
                 date,
-                avgDelayMinutes: getAvgDelayMinutes(selectedRouteSummary, eventType),
+                avgDelayMinutes: getAvgDelayMinutes(routeSummary, eventType),
             };
         }
 
-        return fetchDailyRouteDelays([date]).then(processDailySummariesACB);
-    }
+        const sourceDates =
+            timeGranularity === "hourly" ? dates.flatMap(expandToHoursCB) : [...dates];
 
-    const datePromises = dates.map(createDatePromiseCB);
-
-    function comparePointsByDateCB(a: RouteDelayTrendPoint, b: RouteDelayTrendPoint): number {
-        return a.date.localeCompare(b.date);
-    }
-
-    function sortResultsACB(trendResults: RouteDelayTrendPoint[]): RouteDelayTrendPoint[] {
-        return [...trendResults].sort(comparePointsByDateCB);
+        return sourceDates.sort().map(createTrendPointCB);
     }
 
     function catchErrorACB(error: unknown): RouteDelayTrendPoint[] {
@@ -181,7 +192,15 @@ export function fetchRouteDelayTrend({
         return [];
     }
 
-    return Promise.all(datePromises).then(sortResultsACB).catch(catchErrorACB);
+    const endpoint =
+        timeGranularity === "hourly" ? "route-delay-trend-hourly" : "route-delay-trend";
+    const fullURL = `${backendBaseURL}/api/${endpoint}?${params.toString()}`;
+    return fetch(fullURL, {
+        headers: getBackendAuthHeaders(),
+    })
+        .then(handleResponseACB)
+        .then(mapTrendByDateACB)
+        .catch(catchErrorACB);
 }
 
 export function fetchStopPointRoutesByDate(date: string): Promise<RoutesByStopPoint | null> {

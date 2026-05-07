@@ -30,6 +30,8 @@ describe("RouteDetailsView", () => {
                 trendPoints={[]}
                 isTrendLoading={false}
                 onBackToRoutes={vi.fn()}
+                timeGranularity="daily"
+                onTimeGranularityChange={vi.fn()}
                 t={translations.en.routeDetailsPage}
                 tStats={translations.en.departureDelayStats}
             />

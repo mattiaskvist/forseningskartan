@@ -33,10 +33,6 @@ export function AccountPresenter() {
     }
 
     async function handleDeleteACB() {
-        if (!window.confirm(t.deleteConfirm)) {
-            return;
-        }
-
         try {
             await dispatch(deleteCurrentUser()).unwrap();
             dispatch(showSnackbar({ message: t.deleteSuccess, severity: "success" }));
