@@ -224,6 +224,11 @@ listenerMiddleware.startListening({
         dispatch(setUserPreferencesLoading(true));
         let initialMergedPreferencesSaved = false;
 
+        function onSaveErrorACB(error: unknown) {
+            dispatch(setUserPreferencesLoading(false));
+            console.error("Failed to save user preferences:", error);
+        }
+
         // callback for when user preferences change in firebase
         function onChangeACB(loadedPreferences: PersistedUserPreferencesState | null) {
             const state = listenerApi.getState() as RootState;
@@ -248,7 +253,7 @@ listenerMiddleware.startListening({
                             dispatch(setUserPreferencesLoading(false));
                             clearStoredRecentSearchSiteIds();
                         })
-                        .catch(onErrorACB);
+                        .catch(onSaveErrorACB);
                 } else {
                     // if we have already merged and saved the local preferences once,
                     // we assume that firebase has the latest preferences and apply them
@@ -258,12 +263,13 @@ listenerMiddleware.startListening({
             }
 
             // no preferences in firebase, save the current local preferences to firebase
+            initialMergedPreferencesSaved = true;
             saveUserPreferences(currentUser.uid, localPreferences)
                 .then(() => {
                     dispatch(setUserPreferencesLoading(false));
                     clearStoredRecentSearchSiteIds();
                 })
-                .catch(onErrorACB);
+                .catch(onSaveErrorACB);
         }
 
         function onErrorACB(error: unknown) {
