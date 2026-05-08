@@ -28,6 +28,8 @@ function storeAppStyle(style: AppStyle) {
 
 function getStoredHasSeenAppIntro(): boolean {
     try {
+        // Local storage initializes the model immediately. The presenter still waits
+        // for auth/Firebase preference loading before deciding whether to show the intro.
         return localStorage.getItem(APP_INTRO_SEEN_STORAGE_KEY) === "true";
     } catch {
         // localStorage unavailable at module init in test environments
@@ -111,7 +113,10 @@ export type UserPreferencesState = {
     mapTransportationModeFilter: TransportationMode | null;
     hideStopsWithoutDepartures: boolean;
     hasSeenAppIntro: boolean;
+    isLoadingFirebasePreferences: boolean;
 };
+
+export type UserPreferencesData = Omit<UserPreferencesState, "isLoadingFirebasePreferences">;
 
 export const defaultUserPreferencesState: UserPreferencesState = {
     favoriteSiteIds: [],
@@ -120,6 +125,7 @@ export const defaultUserPreferencesState: UserPreferencesState = {
     mapTransportationModeFilter: null,
     hideStopsWithoutDepartures: true,
     hasSeenAppIntro: getStoredHasSeenAppIntro(),
+    isLoadingFirebasePreferences: true,
 };
 
 function normalizeFavoriteSiteIds(favoriteSiteIds: number[]): number[] {
@@ -178,7 +184,7 @@ export const userPreferencesSlice = createSlice({
             state.appStyle = action.payload;
             storeAppStyle(action.payload);
         },
-        applyLoadedUserPreferences: (state, action: PayloadAction<UserPreferencesState>) => {
+        applyLoadedUserPreferences: (state, action: PayloadAction<UserPreferencesData>) => {
             state.favoriteSiteIds = normalizeFavoriteSiteIds(action.payload.favoriteSiteIds);
             state.recentSearchSiteIds = normalizeRecentSearchSiteIds(
                 action.payload.recentSearchSiteIds
@@ -186,11 +192,16 @@ export const userPreferencesSlice = createSlice({
             state.appStyle = action.payload.appStyle;
             state.mapTransportationModeFilter = action.payload.mapTransportationModeFilter;
             state.hideStopsWithoutDepartures = action.payload.hideStopsWithoutDepartures;
+            state.hasSeenAppIntro = action.payload.hasSeenAppIntro;
+            state.isLoadingFirebasePreferences = false;
             storeAppStyle(action.payload.appStyle);
         },
         setHasSeenAppIntro: (state, action: PayloadAction<boolean>) => {
             state.hasSeenAppIntro = action.payload;
             storeHasSeenAppIntro(action.payload);
+        },
+        setUserPreferencesLoading: (state, action: PayloadAction<boolean>) => {
+            state.isLoadingFirebasePreferences = action.payload;
         },
         setMapTransportationModeFilter: (
             state,
@@ -211,6 +222,7 @@ export const {
     recordRecentSearchSiteId,
     clearRecentSearchSiteIds,
     setHasSeenAppIntro,
+    setUserPreferencesLoading,
     setMapTransportationModeFilter,
     setHideStopsWithoutDepartures,
 } = userPreferencesSlice.actions;

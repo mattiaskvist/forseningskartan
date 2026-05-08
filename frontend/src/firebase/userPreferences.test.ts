@@ -43,4 +43,12 @@ describe("sanitizeUserPreferences", () => {
 
         expect(sanitized.appStyle).toBe("Classic");
     });
+
+    it("keeps a valid app intro seen preference", () => {
+        const sanitized = sanitizeUserPreferences({
+            hasSeenAppIntro: true,
+        });
+
+        expect(sanitized.hasSeenAppIntro).toBe(true);
+    });
 });

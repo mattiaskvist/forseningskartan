@@ -12,39 +12,33 @@ import {
 
 type AppIntroViewProps = {
     isOpen: boolean;
+    title: string;
+    description: string;
+    items: {
+        title: string;
+        description: string;
+    }[];
+    actionLabel: string;
     onClose: () => void;
 };
 
-const introItems = [
-    {
-        title: "Find a stop",
-        description: "Search or filter the map to inspect Stockholm transit stops.",
-    },
-    {
-        title: "Check live departures",
-        description: "Open a stop to see upcoming departures and current delay predictions.",
-    },
-    {
-        title: "Compare historical delays",
-        description: "Select a departure to see how that line usually performs at similar times.",
-    },
-    {
-        title: "Explore route delays",
-        description: "Use Route Delays to compare routes, dates, transport modes, and trends.",
-    },
-];
-
-export function AppIntroView({ isOpen, onClose }: AppIntroViewProps) {
+export function AppIntroView({
+    isOpen,
+    title,
+    description,
+    items,
+    actionLabel,
+    onClose,
+}: AppIntroViewProps) {
     return (
         <Dialog open={isOpen} onClose={onClose} maxWidth="sm" fullWidth>
-            <DialogTitle>Welcome to Förseningskartan</DialogTitle>
+            <DialogTitle>{title}</DialogTitle>
             <DialogContent>
                 <Typography sx={{ color: "text.secondary", mb: 1 }}>
-                    Use live and historical delay data to understand what is happening now and what
-                    usually happens over time.
+                    {description}
                 </Typography>
                 <List disablePadding>
-                    {introItems.map((item) => (
+                    {items.map((item) => (
                         <ListItem key={item.title} disableGutters>
                             <ListItemText
                                 primary={item.title}
@@ -57,7 +51,7 @@ export function AppIntroView({ isOpen, onClose }: AppIntroViewProps) {
             </DialogContent>
             <DialogActions>
                 <Button onClick={onClose} variant="contained">
-                    Get started
+                    {actionLabel}
                 </Button>
             </DialogActions>
         </Dialog>

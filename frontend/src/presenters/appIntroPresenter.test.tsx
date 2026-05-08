@@ -4,21 +4,46 @@ import { ThemeProvider } from "@mui/material/styles";
 import { beforeEach, describe, expect, it } from "vitest";
 import { Provider } from "react-redux";
 import { createAppMuiTheme } from "../theme/muiTheme";
+import { authSlice } from "../store/authSlice";
 import { defaultUserPreferencesState, userPreferencesSlice } from "../store/userPreferencesSlice";
 import { AppIntroPresenter } from "./appIntroPresenter";
 
 const storage = new Map<string, string>();
 const testTheme = createAppMuiTheme("Dark");
 
-function renderPresenter(hasSeenAppIntro = false) {
+type RenderPresenterOptions = {
+    hasSeenAppIntro?: boolean;
+    isAuthLoading?: boolean;
+    isLoadingFirebasePreferences?: boolean;
+};
+
+function renderPresenter({
+    hasSeenAppIntro = false,
+    isAuthLoading = false,
+    isLoadingFirebasePreferences = false,
+}: RenderPresenterOptions = {}) {
     const store = configureStore({
         reducer: {
+            auth: authSlice.reducer,
             userPreferences: userPreferencesSlice.reducer,
         },
         preloadedState: {
+            auth: {
+                user: isAuthLoading
+                    ? null
+                    : {
+                          uid: "test-user",
+                          email: "test@example.com",
+                          displayName: "Test User",
+                          photoURL: null,
+                      },
+                loading: isAuthLoading,
+                error: null,
+            },
             userPreferences: {
                 ...defaultUserPreferencesState,
                 hasSeenAppIntro,
+                isLoadingFirebasePreferences,
             },
         },
     });
@@ -51,7 +76,19 @@ describe("AppIntroPresenter", () => {
     });
 
     it("does not show the app intro after it has been dismissed before", () => {
-        renderPresenter(true);
+        renderPresenter({ hasSeenAppIntro: true });
+
+        expect(screen.queryByText("Welcome to Förseningskartan")).not.toBeInTheDocument();
+    });
+
+    it("does not show the app intro while auth is loading", () => {
+        renderPresenter({ isAuthLoading: true });
+
+        expect(screen.queryByText("Welcome to Förseningskartan")).not.toBeInTheDocument();
+    });
+
+    it("does not show the app intro while Firebase preferences are loading", () => {
+        renderPresenter({ isLoadingFirebasePreferences: true });
 
         expect(screen.queryByText("Welcome to Förseningskartan")).not.toBeInTheDocument();
     });
@@ -61,7 +98,7 @@ describe("AppIntroPresenter", () => {
 
         fireEvent.click(screen.getByRole("button", { name: "Get started" }));
 
-        expect(localStorage.getItem("forseningskartan.hasSeenIntro")).toBe("true");
+        expect(localStorage.getItem("hasSeenIntro")).toBe("true");
         return waitFor(() => {
             expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
         });

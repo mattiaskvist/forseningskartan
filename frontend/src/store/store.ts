@@ -29,6 +29,8 @@ import {
     toggleFavoriteSiteId,
     userPreferencesSlice,
     recordRecentSearchSiteId,
+    setHasSeenAppIntro,
+    setUserPreferencesLoading,
     setMapTransportationModeFilter,
     setHideStopsWithoutDepartures,
 } from "./userPreferencesSlice";
@@ -155,8 +157,11 @@ listenerMiddleware.startListening({
         const user = action.payload;
 
         if (!user) {
+            dispatch(setUserPreferencesLoading(false));
             return;
         }
+
+        dispatch(setUserPreferencesLoading(true));
 
         try {
             const loadedPreferences = await fetchUserPreferences(user.uid);
@@ -166,6 +171,10 @@ listenerMiddleware.startListening({
             if (loadedPreferences) {
                 const mergedPreferences = {
                     ...loadedPreferences,
+                    // Resolve the intro as seen if either source says it is seen. This prevents
+                    // older or missing Firebase data from reopening an intro dismissed locally.
+                    hasSeenAppIntro:
+                        localPreferences.hasSeenAppIntro || loadedPreferences.hasSeenAppIntro,
                     recentSearchSiteIds: mergeRecentSearchSiteIds(
                         localPreferences.recentSearchSiteIds,
                         loadedPreferences.recentSearchSiteIds
@@ -188,6 +197,8 @@ listenerMiddleware.startListening({
                     severity: "error",
                 })
             );
+        } finally {
+            dispatch(setUserPreferencesLoading(false));
         }
     },
 });
@@ -206,6 +217,7 @@ listenerMiddleware.startListening({
         toggleFavoriteSiteId,
         setAppStylePreference,
         recordRecentSearchSiteId,
+        setHasSeenAppIntro,
         setMapTransportationModeFilter,
         setHideStopsWithoutDepartures
     ),

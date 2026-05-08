@@ -1,5 +1,5 @@
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
-import { defaultUserPreferencesState, UserPreferencesState } from "../store/userPreferencesSlice";
+import { defaultUserPreferencesState, UserPreferencesData } from "../store/userPreferencesSlice";
 import { appStyles, AppStyle } from "../types/appStyle";
 import { db } from "./firestore";
 import { TransportationMode, transportationModes } from "../types/sl";
@@ -20,9 +20,16 @@ function isIntegerSiteIdCB(siteId: unknown): siteId is number {
     return Number.isInteger(siteId);
 }
 
-export function sanitizeUserPreferences(candidate: unknown): UserPreferencesState {
+export function sanitizeUserPreferences(candidate: unknown): UserPreferencesData {
     if (candidate === null || typeof candidate !== "object") {
-        return { ...defaultUserPreferencesState };
+        return {
+            favoriteSiteIds: defaultUserPreferencesState.favoriteSiteIds,
+            recentSearchSiteIds: defaultUserPreferencesState.recentSearchSiteIds,
+            appStyle: defaultUserPreferencesState.appStyle,
+            mapTransportationModeFilter: defaultUserPreferencesState.mapTransportationModeFilter,
+            hideStopsWithoutDepartures: defaultUserPreferencesState.hideStopsWithoutDepartures,
+            hasSeenAppIntro: defaultUserPreferencesState.hasSeenAppIntro,
+        };
     }
 
     const parsedCandidate = candidate as {
@@ -31,6 +38,7 @@ export function sanitizeUserPreferences(candidate: unknown): UserPreferencesStat
         recentSearchSiteIds?: unknown;
         mapTransportationModeFilter?: unknown;
         hideStopsWithoutDepartures?: unknown;
+        hasSeenAppIntro?: unknown;
     };
     const appStyle = isAppStyle(parsedCandidate.appStyle)
         ? parsedCandidate.appStyle
@@ -53,17 +61,22 @@ export function sanitizeUserPreferences(candidate: unknown): UserPreferencesStat
         typeof parsedCandidate.hideStopsWithoutDepartures === "boolean"
             ? parsedCandidate.hideStopsWithoutDepartures
             : defaultUserPreferencesState.hideStopsWithoutDepartures;
+    const hasSeenAppIntro =
+        typeof parsedCandidate.hasSeenAppIntro === "boolean"
+            ? parsedCandidate.hasSeenAppIntro
+            : defaultUserPreferencesState.hasSeenAppIntro;
+
     return {
         appStyle,
         favoriteSiteIds,
         recentSearchSiteIds,
         mapTransportationModeFilter,
         hideStopsWithoutDepartures,
-        hasSeenAppIntro: defaultUserPreferencesState.hasSeenAppIntro,
+        hasSeenAppIntro,
     };
 }
 
-export async function fetchUserPreferences(uid: string): Promise<UserPreferencesState | null> {
+export async function fetchUserPreferences(uid: string): Promise<UserPreferencesData | null> {
     const userPreferencesRef = doc(db, USER_PREFERENCES_COLLECTION, uid);
     const userPreferencesSnapshot = await getDoc(userPreferencesRef);
 
@@ -74,7 +87,7 @@ export async function fetchUserPreferences(uid: string): Promise<UserPreferences
     return sanitizeUserPreferences(userPreferencesSnapshot.data());
 }
 
-export async function saveUserPreferences(uid: string, preferences: UserPreferencesState) {
+export async function saveUserPreferences(uid: string, preferences: UserPreferencesData) {
     const userPreferencesRef = doc(db, USER_PREFERENCES_COLLECTION, uid);
     const {
         favoriteSiteIds,
@@ -82,6 +95,7 @@ export async function saveUserPreferences(uid: string, preferences: UserPreferen
         appStyle,
         mapTransportationModeFilter,
         hideStopsWithoutDepartures,
+        hasSeenAppIntro,
     } = preferences;
 
     await setDoc(
@@ -92,6 +106,7 @@ export async function saveUserPreferences(uid: string, preferences: UserPreferen
             appStyle,
             mapTransportationModeFilter,
             hideStopsWithoutDepartures,
+            hasSeenAppIntro,
             updatedAt: serverTimestamp(),
         },
         { merge: true }

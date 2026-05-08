@@ -23,6 +23,7 @@ describe("userPreferencesSlice", () => {
             mapTransportationModeFilter: null,
             hideStopsWithoutDepartures: true,
             hasSeenAppIntro: false,
+            isLoadingFirebasePreferences: true,
         });
     });
 
@@ -75,6 +76,7 @@ describe("userPreferencesSlice", () => {
             mapTransportationModeFilter: null,
             hideStopsWithoutDepartures: true,
             hasSeenAppIntro: false,
+            isLoadingFirebasePreferences: false,
         });
     });
 

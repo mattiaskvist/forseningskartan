@@ -191,6 +191,10 @@ function getHasSeenAppIntroCB(state: RootState) {
     return state.userPreferences.hasSeenAppIntro;
 }
 
+function getUserPreferencesLoadingCB(state: RootState) {
+    return state.userPreferences.isLoadingFirebasePreferences;
+}
+
 // use createSelector for computationally expensive selectors
 // to memoize results and avoid unnecessary recalculations
 const getSelectedDelayDatesCB = createSelector(
@@ -279,6 +283,7 @@ export {
     getMapTransportationModeFilterCB,
     getHideStopsWithoutDeparturesCB,
     getHasSeenAppIntroCB,
+    getUserPreferencesLoadingCB,
     getFavoriteSitesCB,
     getSelectedDelayDates,
     getSelectedDelayDatesCB,
