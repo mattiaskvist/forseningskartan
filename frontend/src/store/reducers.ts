@@ -178,6 +178,8 @@ export const departuresSlice = createSlice({
                 state.currentRequestId = action.meta.requestId;
             })
             .addCase(getDepartures.fulfilled, (state, action) => {
+                // Ignore responses from stale requests using currentRequestId
+                // This prevents race conditions when multiple requests overlap
                 if (state.currentRequestId !== action.meta.requestId) {
                     return;
                 }
@@ -187,6 +189,7 @@ export const departuresSlice = createSlice({
                 state.error = null;
             })
             .addCase(getDepartures.rejected, (state, action) => {
+                // Same guard for rejected: only clear state for the active request
                 if (state.currentRequestId !== action.meta.requestId) {
                     return;
                 }
@@ -275,6 +278,8 @@ export const departureHistoricalDelaySlice = createSlice({
                 state.currentRequestId = action.meta.requestId;
             })
             .addCase(getDepartureHistoricalDelaySummary.fulfilled, (state, action) => {
+                // Ignore responses from stale requests using currentRequestId
+                // This prevents race conditions when multiple requests overlap
                 if (state.currentRequestId !== action.meta.requestId) {
                     return;
                 }
@@ -285,6 +290,7 @@ export const departureHistoricalDelaySlice = createSlice({
                 state.currentRequestId = null;
             })
             .addCase(getDepartureHistoricalDelaySummary.rejected, (state, action) => {
+                // Same guard for rejected: only clear state for the active request
                 if (state.currentRequestId !== action.meta.requestId) {
                     return;
                 }
@@ -314,6 +320,8 @@ export const routeDelaysSlice = createSlice({
                 state.currentRequestId = action.meta.requestId;
             })
             .addCase(getRouteDelays.fulfilled, (state, action) => {
+                // Ignore responses from stale requests using currentRequestId
+                // This prevents race conditions when multiple requests overlap
                 if (state.currentRequestId !== action.meta.requestId) {
                     return;
                 }
@@ -324,6 +332,7 @@ export const routeDelaysSlice = createSlice({
                 state.currentRequestId = null;
             })
             .addCase(getRouteDelays.rejected, (state, action) => {
+                // Same guard for rejected: only clear state for the active request
                 if (state.currentRequestId !== action.meta.requestId) {
                     return;
                 }

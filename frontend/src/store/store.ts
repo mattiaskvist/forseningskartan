@@ -44,7 +44,6 @@ import {
     getSites,
     getStopPoints,
     getAggregatedDates,
-    getRouteDelays,
     requestUserGeolocation,
 } from "./actions";
 import {
@@ -76,6 +75,9 @@ function mergeRecentSearchSiteIds(
     localRecentSearchSiteIds: number[] = [],
     firebaseRecentSearchSiteIds: number[] = []
 ): number[] {
+    // Merge local and remote recent search IDs, keep ints only
+    // Preserve order and cap to 5 entries
+    // Put local IDs first since they reflect the most recent searches
     const uniqueRecentSearchSiteIds = new Set<number>();
 
     for (const siteId of [...localRecentSearchSiteIds, ...firebaseRecentSearchSiteIds]) {
@@ -113,6 +115,7 @@ export const store = configureStore({
         getDefaultMiddleware().prepend(listenerMiddleware.middleware),
 });
 
+// Fetch stop delays when selected departure or date range changes
 listenerMiddleware.startListening({
     matcher: isAnyOf(setSelectedDeparture, setSelectedDatePreset, setSelectedCustomDateRange),
     effect: (_, listenerApi) => {
@@ -124,6 +127,8 @@ listenerMiddleware.startListening({
     },
 });
 
+// Build and cache mapping from site id -> stopPoint GIDs when sites/stopPoints load
+// This derived mapping is used by map and query helpers elsewhere
 listenerMiddleware.startListening({
     matcher: isAnyOf(getSites.fulfilled, getStopPoints.fulfilled),
     effect: (_, listenerApi) => {
@@ -141,6 +146,8 @@ listenerMiddleware.startListening({
 });
 
 // Compute unique modes when new stop is selected and departures are loaded
+// Set a selected mode preferring the map mode filter
+// falling back to the first available mode, or null if no departures
 listenerMiddleware.startListening({
     matcher: isAnyOf(getDepartures.fulfilled, applyLoadedUserPreferences),
     effect: (action, listenerApi) => {
@@ -177,6 +184,7 @@ listenerMiddleware.startListening({
     },
 });
 
+// Fetch route delays (all routes) when date range changes
 listenerMiddleware.startListening({
     matcher: isAnyOf(
         setRouteDelayDatePreset,
@@ -191,11 +199,14 @@ listenerMiddleware.startListening({
     },
 });
 
+// Fetch route delay trend (single route) when
+// selected route, time granularity, or date range changes
 listenerMiddleware.startListening({
     matcher: isAnyOf(
         setRouteDelaySelectedRouteKey,
         setRouteDelayTimeGranularity,
-        getRouteDelays.fulfilled
+        setRouteDelayDatePreset,
+        setRouteDelayCustomDateRange
     ),
     effect: (_, listenerApi) => {
         listenerApi.cancelActiveListeners();
@@ -205,6 +216,10 @@ listenerMiddleware.startListening({
     },
 });
 
+// Sync user preferences after auth state changes
+// If remote preferences exist merge them with local state apply them, and persist
+// If no remote preferences exist, initialize remote storage from local state
+// Remove locally recent searches after they have been stored remotely to not reapply them on next login
 listenerMiddleware.startListening({
     actionCreator: setUser,
     effect: async (action, listenerApi) => {
@@ -290,6 +305,7 @@ listenerMiddleware.startListening({
     },
 });
 
+// Clear recent searches on logout or account deletion to not reapply them for next user
 listenerMiddleware.startListening({
     matcher: isAnyOf(logoutCurrentUser.fulfilled, deleteCurrentUser.fulfilled),
     effect: (_, listenerApi) => {
@@ -300,7 +316,8 @@ listenerMiddleware.startListening({
     },
 });
 
-// user preferences
+// Persist user preferences: localStorage for anonymous users and
+// Firestore for logged-in users. Show snackbar on failure
 listenerMiddleware.startListening({
     matcher: isAnyOf(
         toggleFavoriteSiteId,
@@ -335,6 +352,7 @@ listenerMiddleware.startListening({
     },
 });
 
+// Show snackbar when geolocation request is initiated
 listenerMiddleware.startListening({
     actionCreator: requestUserGeolocation.pending,
     effect: (_, listenerApi) => {
@@ -350,6 +368,7 @@ listenerMiddleware.startListening({
     },
 });
 
+// Show snackbar on geolocation failure with reason-specific message
 listenerMiddleware.startListening({
     actionCreator: requestUserGeolocation.rejected,
     effect: (action, listenerApi) => {

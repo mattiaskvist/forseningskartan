@@ -41,6 +41,7 @@ export function AvailableDatesPicker({
     const endDateMin = selectedStartDayjsDate ?? minDate;
 
     function shouldDisableDateCB(date: Dayjs): boolean {
+        // Disable dates not present in availableDates to prevent invalid queries
         return !availableDates.includes(date.format("YYYY-MM-DD"));
     }
 

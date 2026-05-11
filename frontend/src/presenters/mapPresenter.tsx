@@ -111,6 +111,8 @@ export function MapPresenter() {
         return routeTypesToTransportationModes(routeTypes);
     }, [routesByStopPointsUnavailable, routesByStopPoint]);
 
+    // Compute visible sites using filters and route availability
+    // Memoized to avoid recomputing on unrelated store updates
     const filteredSites = useMemo(() => {
         if (!sites || !stopPoints) {
             return [];
@@ -184,6 +186,7 @@ export function MapPresenter() {
         dispatch(requestUserGeolocation());
     }
 
+    // Toggle favorite stop requires login and provides snackbar feedback
     function toggleFavoriteStopACB() {
         if (!selectedSite) {
             return;

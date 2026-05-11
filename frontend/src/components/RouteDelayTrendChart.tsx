@@ -23,6 +23,8 @@ export function RouteDelayTrendChart({
     onTimeGranularityChange,
     t,
 }: RouteDelayTrendChartProps) {
+    // Format x-axis labels differently for hourly vs daily granularity
+    // Use Stockholm timezone to match backend aggregation
     function getMonthDayFromDateCB(point: RouteDelayTrendPoint) {
         const date = new Date(point.date);
         if (Number.isNaN(date.getTime())) {
@@ -51,6 +53,7 @@ export function RouteDelayTrendChart({
     function getAvgDelayMinutesCB(point: RouteDelayTrendPoint) {
         return point.avgDelayMinutes;
     }
+    // Map points to chart labels and series values. Keep arrays aligned
     const xLabels = points.map(getMonthDayFromDateCB);
     const yValues = points.map(getAvgDelayMinutesCB);
 

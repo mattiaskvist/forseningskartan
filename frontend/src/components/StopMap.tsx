@@ -99,6 +99,8 @@ export function StopMap({
     }, [appStyle]);
 
     useEffect(() => {
+        // Initialize leaflet map once and set up layers/controls
+        // Clean up fully on unmount to avoid leaking DOM or map instances
         if (!mapContainerRef.current || mapRef.current) {
             return;
         }
@@ -161,6 +163,8 @@ export function StopMap({
 
     const createSiteMarker = useCallback(
         (site: Site): CircleMarker => {
+            // Create a CircleMarker for a site and bind click handler to
+            // toggle selection. Markers are created once and cached
             const marker = new CircleMarker(
                 [site.lat, site.lon],
                 getUnselectedMarkerStyle(mapStyleRef.current)
@@ -236,7 +240,8 @@ export function StopMap({
         const visibleSiteIds = visibleSiteIdsRef.current;
         const nextVisibleSiteIds = new Set<number>(filteredSites.map((site) => site.id));
 
-        // Remove markers for sites that are no longer visible
+        // Sync visible marker layer with filteredSites: remove hidden markers
+        // and add newly visible ones without recreating cached markers
         function hideNoLongerVisibleSiteCB(siteId: number) {
             if (nextVisibleSiteIds.has(siteId)) {
                 return;
@@ -249,7 +254,7 @@ export function StopMap({
         }
         Array.from(visibleSiteIds).forEach(hideNoLongerVisibleSiteCB);
 
-        // Add markers for newly visible sites
+        // Add markers for newly visible sites from cached marker map
         function showNewlyVisibleSiteCB(siteId: number) {
             if (visibleSiteIds.has(siteId)) {
                 return;
