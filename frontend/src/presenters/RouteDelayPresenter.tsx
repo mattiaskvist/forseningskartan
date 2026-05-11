@@ -53,6 +53,7 @@ import { getAvgDelayMinutes, getAvgDelaySeconds } from "../utils/time";
 import { compareRouteNamesCB, getRouteDisplayName, getRouteIdentityKey } from "../utils/route";
 import { routeTypesToTransportationModes } from "../utils/transportationMode";
 import { RouteDelayContentViewProps } from "../views/routeDelayContentView";
+import { normalizeText } from "../utils/text";
 
 function getRouteModeKey(summary: DelaySummary): RouteType | null {
     return summary.route?.type ?? null;
@@ -92,13 +93,13 @@ export function RouteDelayPresenter() {
     // Apply transportation-mode filter and search, then sort routes
     // Memoized to avoid re-filtering on unrelated changes
     const filteredAndSortedRoutes = useMemo(() => {
-        const normalizedSearch = searchQuery.trim().toLowerCase();
+        const normalizedSearch = normalizeText(searchQuery);
 
         function matchesSearchCB(summary: DelaySummary): boolean {
             if (normalizedSearch === "") {
                 return true;
             }
-            return getRouteDisplayName(summary).toLowerCase().includes(normalizedSearch);
+            return normalizeText(getRouteDisplayName(summary)).includes(normalizedSearch);
         }
 
         return routeDelays
