@@ -171,6 +171,7 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             loading: "Loading historical delay stats...",
             selectedDatesLabel: "Selected dates",
             noAvailableDates: "No available dates for this preset",
+            toRouteDelayDetails: "Route delays",
         },
         availableDatesPicker: {
             startDate: "From date",
@@ -363,6 +364,7 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             loading: "Laddar historisk förseningstatistik...",
             selectedDatesLabel: "Valda datum",
             noAvailableDates: "Inga tillgängliga datum för detta val",
+            toRouteDelayDetails: "Visa linjeförseningar",
         },
         availableDatesPicker: {
             startDate: "Från datum",

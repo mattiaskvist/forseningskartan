@@ -189,6 +189,7 @@ export interface DepartureHistoricalDelaysStrings {
     loading: string;
     selectedDatesLabel: string;
     noAvailableDates: string;
+    toRouteDelayDetails: string;
 }
 
 export interface AvailableDatesPickerStrings {
