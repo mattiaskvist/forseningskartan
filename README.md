@@ -4,32 +4,37 @@ The application is currently available at https://forseningskartan.web.app/.
 
 Förseningskartan is a web application for exploring public transport delays, currently only in Stockholm. It combines live departure data from SL with historically aggregated GTFS delay data so users can understand both what is happening now and what usually happens at a stop/route/time. GTFS (General Transit Feed Specification) is a standardized data format used by transit agencies to share schedules and real-time updates, including delays, routes, and stop information.
 
-## What has been done (as of 2026-04-16)
+## What has been done (as of 2026-05-11)
 
 The following has been implemented:
 
 - Basic project setup with Vite + React + TypeScript for frontend and Go for backend and GTFS aggregation
-- Core map view, stop search and live departures
+- Core map view, stop search with search history and live departures with refresh button
+- Filtering of stops on map by method of transportation and option to hide stops without departures
+- User geolocation and centering map on user location with a button
 - Historical GTFS aggregation pipeline and deployment
 - Self-hosted backend API exposing historical delay data
 - Integration of aggregated per-stop and route delay data in frontend
-- Placeholder integration of per-route delay stats
+- Per-route delay stats page with various filters and a delay trend chart that shows delays by day and by hour
+- Per-route delay leaderboard showing which routes are most delayed on average
 - Frontend deployment
 - Basic sidebar with navigation
+- Three color themes used across the app and a style switcher in sidebar and on the map
+- Support for two languages (Swedish and English) with a language switcher in the sidebar
 - User account view in sidebar and login with Google
 - User personalization:
   - Favorite stops in departures view
   - Favorite stops shown in sidebar for logged-in users
-  - User preferences (favorite stops, map style) persisted to Firestore
+  - User preferences (favorite stops, app style, search history, language, map stop filters) persisted to Firestore
+- Live persistence update: when a user changes a preference in one tab the change is immediately reflected in all other tabs
 
 For an up-to-date list of completed work, please visit [the project board and roadmap](https://github.com/users/mattiaskvist/projects/5).
 
-## What is still planned (as of 2026-04-16)
+## What is still planned (as of 2026-05-11)
 
 The following work is still planned:
 
 - Historical delay data improvements:
-  - Per-route delay stats refinements
   - Show where delays happen on the map (_strech goal_)
 - Journey planning and richer trip views (_stretch goal_):
   - Journey planner
