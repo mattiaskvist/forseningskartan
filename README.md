@@ -63,9 +63,29 @@ The consultation produced the following suggestions:
 3. Was already an idea to implement in [Issue #12: Get live vehicle position and draw route on map](https://github.com/mattiaskvist/forseningskartan/issues/12).
 4. Addressed in [Issue #43: Addressing feedback from prototyping stage user consultation](https://github.com/mattiaskvist/forseningskartan/issues/43).
 
-## Evaluation stage user consultation
+## Evaluation stage user consultation (2026-05-11)
 
-TODO, https://github.com/mattiaskvist/forseningskartan/issues/31
+To satisfy the evaluation-stage user consultation requirement, a user consultation was carried out and recorded in [Issue #31](https://github.com/mattiaskvist/forseningskartan/issues/31).
+
+### Feedback received
+
+The consultation produced the following suggestions:
+
+1. When you search for a destination like Fruängen, if the user omits the accent (Fruangen), you should still display Fruängen for user convenience probably. This person used a US keyboard.
+2. ⁠⁠Sign in with email box should also have dark mode to match the rest of the app in dark mode. Since the Mui around is dark mode, but the firebase ui remains light mode still.
+3. ⁠⁠I think after some zooming in on map, the circles should stop getting smaller (like beyond the third to last zoom, they should remain same size as third to last zoom probably).
+4. ⁠⁠Add some top padding/margin to the search stops searchbar, since when you select a stop it overlaps the ferry somewhat.
+5. ⁠⁠If possible, it would be very nice to see the whole route on the map when you click on a route.
+6. Mobile is pretty much unusable.
+
+### Addressing feedback
+
+1. Addressed in [Issue #153: Addressing feedback from evaluation stage user consultation](https://github.com/mattiaskvist/forseningskartan/issues/153).
+2. Does not seem possible to customize the Google sign-in popup.
+3. Addressed in [Issue #153: Addressing feedback from evaluation stage user consultation](https://github.com/mattiaskvist/forseningskartan/issues/153).
+4. Addressed in [Issue #153: Addressing feedback from evaluation stage user consultation](https://github.com/mattiaskvist/forseningskartan/issues/153).
+5. Was already an idea to implement in [Issue #12: Get live vehicle position and draw route on map](https://github.com/mattiaskvist/forseningskartan/issues/12).
+6. Probably quite a bit of work and we have limited time left, added as a stretch goal in [Issue #154: Adapt frontend to mobile](https://github.com/mattiaskvist/forseningskartan/issues/154)
 
 ## Project file structure
 
