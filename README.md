@@ -87,6 +87,14 @@ The consultation produced the following suggestions:
 5. Was already an idea to implement in [Issue #12: Get live vehicle position and draw route on map](https://github.com/mattiaskvist/forseningskartan/issues/12).
 6. Probably quite a bit of work and we have limited time left, added as a stretch goal in [Issue #154: Adapt frontend to mobile](https://github.com/mattiaskvist/forseningskartan/issues/154)
 
+Before addressing 1, 3, and 4:
+
+![](images/eval-user-consultation/before.png)
+
+After addressing 1, 3, and 4:
+
+![](images/eval-user-consultation/after.png)
+
 ## Project file structure
 
 Directory overview:
