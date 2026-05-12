@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { MapView } from "../views/mapView";
 import { useAppDispatch, useAppSelector } from "../store/store";
@@ -151,17 +151,20 @@ export function MapPresenter() {
         stopPoints,
     ]);
 
-    function onSelectSite(siteId: number | null) {
-        selectSite({ dispatch, siteId });
-        if (siteId !== null) {
-            dispatch(recordRecentSearchSiteId(siteId));
-        }
-    }
+    const handleSelectSiteCB = useCallback(
+        (siteId: number | null) => {
+            selectSite({ dispatch, siteId });
+            if (siteId !== null) {
+                dispatch(recordRecentSearchSiteId(siteId));
+            }
+        },
+        [dispatch]
+    );
 
     function handleSiteMarkerClick(siteId: number) {
         // Marker clicks are screen behavior: the presenter decides whether a click selects or clears.
         const nextSiteId = selectedSite?.id === siteId ? null : siteId;
-        onSelectSite(nextSiteId);
+        handleSelectSiteCB(nextSiteId);
     }
 
     // The presenter owns the movement policy; StopMap only receives a concrete command to execute.
@@ -326,7 +329,7 @@ export function MapPresenter() {
             filteredSites={filteredSites}
             selectedSite={selectedSite}
             selectedSiteId={selectedSite?.id ?? null}
-            onSelectSite={onSelectSite}
+            handleSelectSiteCB={handleSelectSiteCB}
             onSiteMarkerClick={handleSiteMarkerClick}
             recentSearchSiteIds={recentSearchSiteIds}
             departureViewProps={departureViewProps}

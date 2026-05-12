@@ -9,7 +9,7 @@ type MapSearchViewProps = {
     allSites: Site[];
     filteredSites: Site[];
     selectedSite: Site | null;
-    onSelectSite: (siteId: number | null) => void;
+    handleSelectSiteCB: (siteId: number | null) => void;
     recentSearchSiteIds: number[];
     t: TranslationStrings["searchBar"];
     tMapSearch: TranslationStrings["mapSearch"];
@@ -27,7 +27,7 @@ export function MapSearchView({
     allSites,
     filteredSites,
     selectedSite,
-    onSelectSite,
+    handleSelectSiteCB,
     recentSearchSiteIds,
     t,
     tMapSearch,
@@ -98,7 +98,7 @@ export function MapSearchView({
                     allSites={allSites}
                     filteredSites={filteredSites}
                     selectedSite={selectedSite}
-                    onSelectSite={onSelectSite}
+                    handleSelectSiteCB={handleSelectSiteCB}
                     recentSearchSiteIds={recentSearchSiteIds}
                     t={t}
                 />

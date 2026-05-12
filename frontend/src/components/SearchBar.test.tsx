@@ -18,7 +18,7 @@ describe("SearchBar", () => {
                 allSites={sites}
                 filteredSites={sites}
                 selectedSite={null}
-                onSelectSite={() => {}}
+                handleSelectSiteCB={() => {}}
                 recentSearchSiteIds={[3, 1]}
                 t={translations.en.searchBar}
             />
@@ -45,7 +45,7 @@ describe("SearchBar", () => {
                 allSites={sites}
                 filteredSites={sites}
                 selectedSite={null}
-                onSelectSite={() => {}}
+                handleSelectSiteCB={() => {}}
                 recentSearchSiteIds={[2]}
                 t={translations.en.searchBar}
             />

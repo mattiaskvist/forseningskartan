@@ -14,7 +14,7 @@ type MapViewProps = {
     filteredSites: Site[];
     selectedSite: Site | null;
     selectedSiteId: number | null;
-    onSelectSite: (siteId: number | null) => void;
+    handleSelectSiteCB: (siteId: number | null) => void;
     onSiteMarkerClick: (siteId: number) => void;
     recentSearchSiteIds: number[];
     departureViewProps: DepartureViewProps | null;
@@ -44,7 +44,7 @@ export function MapView({
     filteredSites,
     selectedSite,
     selectedSiteId,
-    onSelectSite,
+    handleSelectSiteCB,
     onSiteMarkerClick,
     recentSearchSiteIds,
     departureViewProps,
@@ -138,7 +138,7 @@ export function MapView({
                 allSites={allSites}
                 filteredSites={filteredSites}
                 selectedSite={selectedSite}
-                onSelectSite={onSelectSite}
+                handleSelectSiteCB={handleSelectSiteCB}
                 recentSearchSiteIds={recentSearchSiteIds}
                 t={tSearchBar}
                 tMapSearch={tMapSearch}

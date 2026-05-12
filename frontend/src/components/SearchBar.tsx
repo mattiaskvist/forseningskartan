@@ -20,7 +20,7 @@ type SearchBarProps = {
     allSites: Site[];
     filteredSites: Site[];
     selectedSite: Site | null;
-    onSelectSite: (siteId: number | null) => void;
+    handleSelectSiteCB: (siteId: number | null) => void;
     recentSearchSiteIds?: number[];
     t: TranslationStrings["searchBar"];
 };
@@ -29,7 +29,7 @@ export function SearchBar({
     allSites,
     filteredSites,
     selectedSite,
-    onSelectSite,
+    handleSelectSiteCB,
     recentSearchSiteIds = [],
     t,
 }: SearchBarProps) {
@@ -62,7 +62,7 @@ export function SearchBar({
 
     function handleChangeCB(_: unknown, site: Site | null) {
         // when user selects option
-        onSelectSite(site?.id ?? null);
+        handleSelectSiteCB(site?.id ?? null);
     }
 
     function getRenderInputCB(params: AutocompleteRenderInputParams): React.ReactNode {
