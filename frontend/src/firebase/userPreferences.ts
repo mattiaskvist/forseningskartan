@@ -41,6 +41,7 @@ export function sanitizeUserPreferences(candidate: unknown): PersistedUserPrefer
             language: defaultUserPreferencesState.language,
             mapTransportationModeFilter: defaultUserPreferencesState.mapTransportationModeFilter,
             hideStopsWithoutDepartures: defaultUserPreferencesState.hideStopsWithoutDepartures,
+            hasSeenAppIntro: defaultUserPreferencesState.hasSeenAppIntro,
         };
     }
 
@@ -51,6 +52,7 @@ export function sanitizeUserPreferences(candidate: unknown): PersistedUserPrefer
         language?: unknown;
         mapTransportationModeFilter?: unknown;
         hideStopsWithoutDepartures?: unknown;
+        hasSeenAppIntro?: unknown;
     };
     const appStyle = isAppStyle(parsedCandidate.appStyle)
         ? parsedCandidate.appStyle
@@ -76,6 +78,11 @@ export function sanitizeUserPreferences(candidate: unknown): PersistedUserPrefer
         typeof parsedCandidate.hideStopsWithoutDepartures === "boolean"
             ? parsedCandidate.hideStopsWithoutDepartures
             : defaultUserPreferencesState.hideStopsWithoutDepartures;
+    const hasSeenAppIntro =
+        typeof parsedCandidate.hasSeenAppIntro === "boolean"
+            ? parsedCandidate.hasSeenAppIntro
+            : defaultUserPreferencesState.hasSeenAppIntro;
+
     return {
         appStyle,
         favoriteSiteIds,
@@ -83,6 +90,7 @@ export function sanitizeUserPreferences(candidate: unknown): PersistedUserPrefer
         language,
         mapTransportationModeFilter,
         hideStopsWithoutDepartures,
+        hasSeenAppIntro,
     };
 }
 
@@ -108,6 +116,7 @@ export async function saveUserPreferences(uid: string, preferences: PersistedUse
         language,
         mapTransportationModeFilter,
         hideStopsWithoutDepartures,
+        hasSeenAppIntro,
     } = preferences;
 
     await setDoc(
@@ -119,6 +128,7 @@ export async function saveUserPreferences(uid: string, preferences: PersistedUse
             language,
             mapTransportationModeFilter,
             hideStopsWithoutDepartures,
+            hasSeenAppIntro,
             updatedAt: serverTimestamp(),
         },
         { merge: true }

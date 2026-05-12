@@ -6,6 +6,7 @@ import { useAppSelector } from "./store/store";
 import { SidebarPresenter } from "./presenters/sidebarPresenter";
 import { AccountPresenter } from "./presenters/accountPresenter";
 import { LoginPresenter } from "./presenters/loginPresenter";
+import { AppIntroPresenter } from "./presenters/appIntroPresenter";
 import { GlobalSnackbarPresenter } from "./presenters/globalSnackbarPresenter";
 import { ROUTES, type RouteConfig } from "./routes";
 import { getAppStylePreferenceCB } from "./store/selectors";
@@ -34,6 +35,7 @@ function App() {
                     <Route path="/login" element={<LoginPresenter />} />
                     <Route path="/account" element={<AccountPresenter />} />
                 </Routes>
+                <AppIntroPresenter />
                 <GlobalSnackbarPresenter />
             </Box>
         </ThemeProvider>

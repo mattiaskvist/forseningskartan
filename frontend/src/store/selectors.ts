@@ -229,6 +229,10 @@ function getHideStopsWithoutDeparturesCB(state: RootState) {
     return state.userPreferences.hideStopsWithoutDepartures;
 }
 
+function getHasSeenAppIntroCB(state: RootState) {
+    return state.userPreferences.hasSeenAppIntro;
+}
+
 function getUserPreferencesLoadingCB(state: RootState) {
     return state.userPreferences.isLoadingSavedPreferences;
 }
@@ -334,6 +338,7 @@ export {
     getCurrentLanguageCB,
     getMapTransportationModeFilterCB,
     getHideStopsWithoutDeparturesCB,
+    getHasSeenAppIntroCB,
     getUserPreferencesLoadingCB,
     getFavoriteSitesCB,
     getUserLocationCB,

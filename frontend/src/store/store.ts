@@ -25,6 +25,7 @@ import {
     clearRecentSearchSiteIds,
     clearStoredRecentSearchSiteIds,
     setAppStylePreference,
+    setHasSeenAppIntro,
     setUserPreferencesLoading,
     setLanguagePreference,
     storeRecentSearchSiteIds,
@@ -287,6 +288,10 @@ listenerMiddleware.startListening({
                 if (!initialMergedPreferencesSaved) {
                     const mergedPreferences = {
                         ...loadedPreferences,
+                        // Treat the intro as seen if either local or remote preferences say so.
+                        // This avoids showing it again while still letting Firebase learn local dismissals.
+                        hasSeenAppIntro:
+                            localPreferences.hasSeenAppIntro || loadedPreferences.hasSeenAppIntro,
                         recentSearchSiteIds: mergeRecentSearchSiteIds(
                             localPreferences.recentSearchSiteIds,
                             loadedPreferences.recentSearchSiteIds
@@ -355,6 +360,7 @@ listenerMiddleware.startListening({
         toggleFavoriteSiteId,
         setAppStylePreference,
         setLanguagePreference,
+        setHasSeenAppIntro,
         recordRecentSearchSiteId,
         setMapTransportationModeFilter,
         setHideStopsWithoutDepartures

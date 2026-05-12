@@ -3,6 +3,7 @@ import {
     applyLoadedUserPreferences,
     recordRecentSearchSiteId,
     setAppStylePreference,
+    setHasSeenAppIntro,
     setLanguagePreference,
     toggleFavoriteSiteId,
     userPreferencesSlice,
@@ -23,6 +24,7 @@ describe("userPreferencesSlice", () => {
             language: "en",
             mapTransportationModeFilter: null,
             hideStopsWithoutDepartures: true,
+            hasSeenAppIntro: false,
             isLoadingSavedPreferences: false,
         });
     });
@@ -71,6 +73,7 @@ describe("userPreferencesSlice", () => {
                 language: "sv",
                 mapTransportationModeFilter: null,
                 hideStopsWithoutDepartures: true,
+                hasSeenAppIntro: false,
             })
         );
 
@@ -82,8 +85,15 @@ describe("userPreferencesSlice", () => {
             language: "sv",
             mapTransportationModeFilter: null,
             hideStopsWithoutDepartures: true,
+            hasSeenAppIntro: false,
             isLoadingSavedPreferences: false,
         });
+    });
+
+    it("marks app intro as seen", () => {
+        const updatedState = userPreferencesSlice.reducer(undefined, setHasSeenAppIntro(true));
+
+        expect(updatedState.hasSeenAppIntro).toBe(true);
     });
 
     // verify that recording recent searches works as expected

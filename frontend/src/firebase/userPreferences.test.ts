@@ -10,6 +10,7 @@ describe("sanitizeUserPreferences", () => {
             language: "en",
             mapTransportationModeFilter: null,
             hideStopsWithoutDepartures: true,
+            hasSeenAppIntro: false,
         });
     });
 
@@ -67,5 +68,13 @@ describe("sanitizeUserPreferences", () => {
 
         expect(sanitized.mapTransportationModeFilter).toBe("BUS");
         expect(sanitized.hideStopsWithoutDepartures).toBe(false);
+    });
+
+    it("keeps a valid app intro seen preference", () => {
+        const sanitized = sanitizeUserPreferences({
+            hasSeenAppIntro: true,
+        });
+
+        expect(sanitized.hasSeenAppIntro).toBe(true);
     });
 });

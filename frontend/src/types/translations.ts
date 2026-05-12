@@ -47,6 +47,18 @@ export interface MapDeparturesPanelStrings {
     lastUpdated: (time: string) => string;
 }
 
+export interface AppIntroItemStrings {
+    title: string;
+    description: string;
+}
+
+export interface AppIntroStrings {
+    title: string;
+    description: string;
+    items: AppIntroItemStrings[];
+    actionLabel: string;
+}
+
 export interface MapStrings {
     loading: string;
     centerOnMyLocation: string;
@@ -229,6 +241,7 @@ export interface TranslationStrings {
     departureDetails: DepartureDetailsStrings;
     departure: DepartureStrings;
     mapDeparturePanel: MapDeparturesPanelStrings;
+    appIntro: AppIntroStrings;
     routeDelayLeaderboard: RouteDelayLeaderboardStrings;
     routeDelayRouteFallback: RouteDelayRouteFallbackStrings;
     routeDelayRoutes: RouteDelayRoutesStrings;

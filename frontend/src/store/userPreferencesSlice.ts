@@ -6,6 +6,7 @@ import { TransportationMode } from "../types/sl";
 const APP_STYLE_STORAGE_KEY = "appStyle";
 const RECENT_SEARCH_STORAGE_KEY = "recentSearchSiteIds";
 const LANGUAGE_STORAGE_KEY = "language";
+const APP_INTRO_SEEN_STORAGE_KEY = "hasSeenIntro";
 
 function getStoredAppStyle(): AppStyle {
     // Read persisted app style with safe fallbacks for test environments
@@ -46,6 +47,25 @@ function storeLanguage(language: LanguageCode) {
         localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
     } catch {
         // ignore
+    }
+}
+
+function getStoredHasSeenAppIntro(): boolean {
+    try {
+        // Local storage initializes the model immediately. The presenter still waits
+        // for auth/Firebase preference loading before deciding whether to show the intro.
+        return localStorage.getItem(APP_INTRO_SEEN_STORAGE_KEY) === "true";
+    } catch {
+        // localStorage unavailable at module init in test environments
+    }
+    return false;
+}
+
+function storeHasSeenAppIntro(hasSeenAppIntro: boolean) {
+    try {
+        localStorage.setItem(APP_INTRO_SEEN_STORAGE_KEY, String(hasSeenAppIntro));
+    } catch {
+        // ignore — test environments
     }
 }
 
@@ -117,6 +137,7 @@ export type PersistedUserPreferencesState = {
     language: LanguageCode;
     mapTransportationModeFilter: TransportationMode | null;
     hideStopsWithoutDepartures: boolean;
+    hasSeenAppIntro: boolean;
 };
 
 // no need to persist the loading state
@@ -131,6 +152,7 @@ export const defaultUserPreferencesState: UserPreferencesState = {
     language: getStoredLanguage(),
     mapTransportationModeFilter: null,
     hideStopsWithoutDepartures: true,
+    hasSeenAppIntro: getStoredHasSeenAppIntro(),
     isLoadingSavedPreferences: false,
 };
 
@@ -206,10 +228,15 @@ export const userPreferencesSlice = createSlice({
             state.appStyle = action.payload.appStyle;
             state.mapTransportationModeFilter = action.payload.mapTransportationModeFilter;
             state.hideStopsWithoutDepartures = action.payload.hideStopsWithoutDepartures;
+            state.hasSeenAppIntro = action.payload.hasSeenAppIntro;
             state.isLoadingSavedPreferences = false;
             storeAppStyle(action.payload.appStyle);
             state.language = action.payload.language;
             storeLanguage(action.payload.language);
+        },
+        setHasSeenAppIntro: (state, action: PayloadAction<boolean>) => {
+            state.hasSeenAppIntro = action.payload;
+            storeHasSeenAppIntro(action.payload);
         },
         setUserPreferencesLoading: (state, action: PayloadAction<boolean>) => {
             state.isLoadingSavedPreferences = action.payload;
@@ -231,6 +258,7 @@ export const {
     setAppStylePreference,
     setLanguagePreference,
     applyLoadedUserPreferences,
+    setHasSeenAppIntro,
     recordRecentSearchSiteId,
     clearRecentSearchSiteIds,
     setUserPreferencesLoading,

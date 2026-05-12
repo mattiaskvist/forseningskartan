@@ -44,6 +44,33 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             refresh: "Refresh",
             lastUpdated: (time) => `Last updated ${time}`,
         },
+        appIntro: {
+            title: "Welcome to Förseningskartan",
+            description:
+                "Use live and historical delay data to understand what is happening now and what usually happens over time.",
+            items: [
+                {
+                    title: "Find a stop",
+                    description: "Search or filter the map to inspect Stockholm transit stops.",
+                },
+                {
+                    title: "Check live departures",
+                    description:
+                        "Open a stop to see upcoming departures and current delay predictions.",
+                },
+                {
+                    title: "Compare historical delays",
+                    description:
+                        "Select a departure to see how that line usually performs at similar times.",
+                },
+                {
+                    title: "Explore route delays",
+                    description:
+                        "Use Route Delays to compare routes, dates, transport modes, and trends.",
+                },
+            ],
+            actionLabel: "Get started",
+        },
         routeDelayLeaderboard: {
             min: "min",
             rank: "Rank",
@@ -239,6 +266,34 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             departures: "Avgångar",
             refresh: "Uppdatera",
             lastUpdated: (time) => `Senast uppdaterad ${time}`,
+        },
+        appIntro: {
+            title: "Välkommen till Förseningskartan",
+            description:
+                "Använd live- och historisk förseningsdata för att förstå vad som händer nu och vad som brukar hända över tid.",
+            items: [
+                {
+                    title: "Hitta en hållplats",
+                    description:
+                        "Sök eller filtrera kartan för att undersöka hållplatser i Stockholms kollektivtrafik.",
+                },
+                {
+                    title: "Se liveavgångar",
+                    description:
+                        "Öppna en hållplats för att se kommande avgångar och aktuella förseningsprognoser.",
+                },
+                {
+                    title: "Jämför historiska förseningar",
+                    description:
+                        "Välj en avgång för att se hur linjen brukar prestera vid liknande tider.",
+                },
+                {
+                    title: "Utforska linjeförseningar",
+                    description:
+                        "Använd Linjeförseningar för att jämföra linjer, datum, trafikslag och trender.",
+                },
+            ],
+            actionLabel: "Kom igång",
         },
         routeDelayLeaderboard: {
             min: "min",
