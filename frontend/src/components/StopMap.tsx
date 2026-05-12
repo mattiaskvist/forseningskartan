@@ -137,7 +137,7 @@ export function StopMap({
 
         // Update marker sizes on zoom to keep them visible and
         // appropriately sized at different zoom levels
-        function updateMarkerSizes() {
+        function updateMarkerSizesACB() {
             const zoom = map.getZoom();
             const radius = getBaseMarkerRadius(zoom);
 
@@ -160,7 +160,7 @@ export function StopMap({
             }
         }
 
-        map.on("zoomend", updateMarkerSizes);
+        map.on("zoomend", updateMarkerSizesACB);
         const allMarkersBySiteId = allMarkersBySiteIdRef.current;
         const allSitesById = allSitesByIdRef.current;
         const visibleSiteIds = visibleSiteIdsRef.current;
@@ -170,7 +170,7 @@ export function StopMap({
             mapRef.current = null;
             tileLayerRef.current = null;
             markersLayerRef.current = null;
-            map.off("zoomend", updateMarkerSizes);
+            map.off("zoomend", updateMarkerSizesACB);
             allMarkersBySiteId.clear();
             allSitesById.clear();
             visibleSiteIds.clear();
