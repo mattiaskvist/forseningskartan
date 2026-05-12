@@ -41,6 +41,8 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
         },
         mapDeparturePanel: {
             departures: "Departures",
+            refresh: "Refresh",
+            lastUpdated: (time) => `Last updated ${time}`,
         },
         routeDelayLeaderboard: {
             min: "min",
@@ -107,6 +109,7 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             loginToSaveFavoriteStops: "Log in to save favorite stops.",
             stopRemovedFromFavorites: "Removed stop from favorites.",
             stopAddedToFavorites: "Added stop to favorites.",
+            refreshDeparturesFailed: "Failed to refresh departures.",
         },
         mapSearch: {
             hideUnusedStops: "Hide unused stops",
@@ -234,6 +237,8 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
         },
         mapDeparturePanel: {
             departures: "Avgångar",
+            refresh: "Uppdatera",
+            lastUpdated: (time) => `Senast uppdaterad ${time}`,
         },
         routeDelayLeaderboard: {
             min: "min",
@@ -300,6 +305,7 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             loginToSaveFavoriteStops: "Logga in för att spara favorithållplatser.",
             stopRemovedFromFavorites: "Hållplats borttagen från favoriter.",
             stopAddedToFavorites: "Hållplats tillagd i favoriter.",
+            refreshDeparturesFailed: "Misslyckades med att uppdatera avgångar.",
         },
         mapSearch: {
             hideUnusedStops: "Dölj oanvända hållplatser",

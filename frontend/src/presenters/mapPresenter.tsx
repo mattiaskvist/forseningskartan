@@ -10,6 +10,7 @@ import {
     getDepartureHistoricalDelayLoadingCB,
     getDepartureHistoricalDelaySummaryCB,
     getDeparturesCB,
+    getDeparturesLastUpdatedCB,
     getDeparturesLoadingCB,
     getFavoriteSiteIdsCB,
     getHideStopsWithoutDeparturesCB,
@@ -63,8 +64,9 @@ import {
     routeTypesToTransportationModes,
 } from "../utils/transportationMode";
 import { getSitesWithRoutes } from "../utils/site";
+import { getDepartures, requestUserGeolocation } from "../store/actions";
+import { formatTime } from "../utils/time";
 import { translations } from "../utils/translations";
-import { requestUserGeolocation } from "../store/actions";
 
 export function MapPresenter() {
     const dispatch = useAppDispatch();
@@ -72,6 +74,7 @@ export function MapPresenter() {
     const selectedSite = useAppSelector(getSelectedSiteCB);
     const departureResponse = useAppSelector(getDeparturesCB);
     const isDeparturesLoading = useAppSelector(getDeparturesLoadingCB);
+    const departuresLastUpdated = useAppSelector(getDeparturesLastUpdatedCB);
     const availableDates = useAppSelector(getAggregatedDatesCB);
     const selectedDeparture = useAppSelector(getSelectedDepartureCB);
     const selectedDatePreset = useAppSelector(getSelectedDatePresetCB);
@@ -223,6 +226,15 @@ export function MapPresenter() {
         dispatch(setHideStopsWithoutDepartures(value));
     }
 
+    function refreshDeparturesACB() {
+        if (!selectedSite) {
+            return;
+        }
+
+        // Keep the presenter thin: dispatch the model action and let listeners reconcile side effects.
+        dispatch(getDepartures(selectedSite.id));
+    }
+
     function handleSelectedModeChangeACB(mode: ModeWithOther | null) {
         dispatch(setSelectedMode(mode));
     }
@@ -248,6 +260,7 @@ export function MapPresenter() {
     const departures = departureResponse?.departures ?? [];
     const upcomingDepartures = getUpcomingDepartures(departures);
 
+    // The presenter is the MVP glue: read model state, create plain view props, and expose dispatch callbacks.
     const departureViewProps: DepartureViewProps | null = selectedSite
         ? {
               selectedSiteName: selectedSite.name,
@@ -297,6 +310,15 @@ export function MapPresenter() {
             handleSelectSiteCB={handleSelectSiteCB}
             recentSearchSiteIds={recentSearchSiteIds}
             departureViewProps={departureViewProps}
+            isDeparturesLoading={isDeparturesLoading}
+            departuresLastUpdatedText={
+                departuresLastUpdated
+                    ? translations[currentLanguage].mapDeparturePanel.lastUpdated(
+                          formatTime(departuresLastUpdated)
+                      )
+                    : null
+            }
+            onRefreshDepartures={refreshDeparturesACB}
             appStyle={appStyle}
             onAppStyleChange={handleAppStyleChangeACB}
             userLocation={userLocation}

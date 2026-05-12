@@ -46,14 +46,21 @@ export function getUpcomingDepartures(departures: Departure[]): Departure[] {
     return departures.filter(isUpcomingDepartureCB).sort(compareDeparturesCB);
 }
 
+// Prediction fields can change between fetches, so preserve detail selection by stable trip identity.
+export function isSameDeparture(a: Departure, b: Departure): boolean {
+    return (
+        a.journey.id === b.journey.id &&
+        a.stop_point.id === b.stop_point.id &&
+        a.scheduled === b.scheduled
+    );
+}
+
 // Same key as route.ts getRouteIdentityKey() but for Departure
 export function getRouteDelayKey(departure: Departure): string | null {
     const transportMode = departure.line.transport_mode;
     if (!transportMode) {
         return null;
     }
-
-    console.log(departure.line.designation?.trim(), " or ", departure.line.id);
 
     const shortName = departure.line.designation?.trim() || `${departure.line.id}`;
     const routeType = transportationModeToRouteType[transportMode];

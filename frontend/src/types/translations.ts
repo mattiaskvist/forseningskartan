@@ -43,6 +43,8 @@ export interface DepartureStrings {
 
 export interface MapDeparturesPanelStrings {
     departures: string;
+    refresh: string;
+    lastUpdated: (time: string) => string;
 }
 
 export interface MapStrings {
@@ -59,6 +61,7 @@ export interface MapStrings {
     loginToSaveFavoriteStops: string;
     stopRemovedFromFavorites: string;
     stopAddedToFavorites: string;
+    refreshDeparturesFailed: string;
 }
 
 export interface MapSearchStrings {

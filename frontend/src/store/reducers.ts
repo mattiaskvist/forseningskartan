@@ -42,6 +42,7 @@ type DeparturesState = {
     isLoading: boolean;
     error: Error | null;
     currentRequestId: string | null;
+    lastUpdated: string | null;
 };
 
 type StopPointsState = {
@@ -168,14 +169,20 @@ export const departuresSlice = createSlice({
         isLoading: false,
         error: null,
         currentRequestId: null,
+        lastUpdated: null,
     } as DeparturesState,
-    reducers: {},
+    reducers: {
+        setDeparturesLastUpdated: (state, action: PayloadAction<string | null>) => {
+            state.lastUpdated = action.payload;
+        },
+    },
     extraReducers: (builder) => {
         builder
             .addCase(getDepartures.pending, (state, action) => {
                 state.isLoading = true;
                 state.error = null;
                 state.currentRequestId = action.meta.requestId;
+                state.lastUpdated = null;
             })
             .addCase(getDepartures.fulfilled, (state, action) => {
                 // Ignore responses from stale requests using currentRequestId
@@ -201,6 +208,8 @@ export const departuresSlice = createSlice({
             });
     },
 });
+
+export const { setDeparturesLastUpdated } = departuresSlice.actions;
 
 export const stopPointsSlice = createSlice({
     name: "stopPoints",

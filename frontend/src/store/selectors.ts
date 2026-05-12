@@ -117,6 +117,10 @@ function getDeparturesLoadingCB(state: RootState) {
     return state.departures.isLoading;
 }
 
+function getDeparturesLastUpdatedCB(state: RootState) {
+    return state.departures.lastUpdated;
+}
+
 function getSelectedDepartureCB(state: RootState) {
     return state.departureUI.selectedDeparture;
 }
@@ -302,6 +306,7 @@ export {
     getAggregatedDatesLoadingCB,
     getDeparturesCB,
     getDeparturesLoadingCB,
+    getDeparturesLastUpdatedCB,
     getSelectedDepartureCB,
     getSelectedDatePresetCB,
     getSelectedCustomDateRangeCB,

@@ -23,6 +23,7 @@ export function DepartureView({
 }: DepartureViewProps) {
     return (
         <div className="flex flex-col gap-2">
+            {/* View components stay passive in MVP: render props and invoke presenter callbacks. */}
             <DepartureHeaderView
                 selectedSiteName={selectedSiteName}
                 isFavoriteStop={isFavoriteStop}
