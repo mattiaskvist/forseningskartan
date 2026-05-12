@@ -5,7 +5,7 @@ import { DepartureViewProps } from "./departureView";
 import { AppStyle } from "../types/appStyle";
 import { MapSearchView } from "./mapSearchView";
 import { MapDeparturesPanelView } from "./mapDeparturesPanelView";
-import { StopMap } from "../components/StopMap";
+import { StopMap, type MapCameraTarget } from "../components/StopMap";
 import { AppStyleSelector } from "../components/AppStyleSelector";
 import { TranslationStrings } from "../utils/translations";
 
@@ -13,7 +13,9 @@ type MapViewProps = {
     allSites: Site[];
     filteredSites: Site[];
     selectedSite: Site | null;
+    selectedSiteId: number | null;
     handleSelectSiteCB: (siteId: number | null) => void;
+    onSiteMarkerClick: (siteId: number) => void;
     recentSearchSiteIds: number[];
     departureViewProps: DepartureViewProps | null;
     isDeparturesLoading: boolean;
@@ -22,7 +24,8 @@ type MapViewProps = {
     appStyle: AppStyle;
     onAppStyleChange: (style: AppStyle) => void;
     userLocation: { lat: number; lon: number } | null;
-    mapCenterOnUserRequestedAt: number;
+    selectedSiteCameraTarget: MapCameraTarget | null;
+    userLocationCameraTarget: MapCameraTarget | null;
     onRequestMapCenterOnUser: () => void;
     tMapDeparturePanel: TranslationStrings["mapDeparturePanel"];
     tMap: TranslationStrings["map"];
@@ -43,7 +46,9 @@ export function MapView({
     allSites,
     filteredSites,
     selectedSite,
+    selectedSiteId,
     handleSelectSiteCB,
+    onSiteMarkerClick,
     recentSearchSiteIds,
     departureViewProps,
     isDeparturesLoading,
@@ -52,7 +57,8 @@ export function MapView({
     appStyle,
     onAppStyleChange,
     userLocation,
-    mapCenterOnUserRequestedAt,
+    selectedSiteCameraTarget,
+    userLocationCameraTarget,
     onRequestMapCenterOnUser,
     tMapDeparturePanel,
     tMap,
@@ -73,11 +79,12 @@ export function MapView({
             <StopMap
                 allSites={allSites}
                 filteredSites={filteredSites}
-                selectedSite={selectedSite}
-                handleSelectSiteCB={handleSelectSiteCB}
+                selectedSiteId={selectedSiteId}
+                onSiteMarkerClick={onSiteMarkerClick}
                 appStyle={appStyle}
                 userLocation={userLocation}
-                mapCenterOnUserRequestedAt={mapCenterOnUserRequestedAt}
+                selectedSiteCameraTarget={selectedSiteCameraTarget}
+                userLocationCameraTarget={userLocationCameraTarget}
             />
             <Box
                 sx={{

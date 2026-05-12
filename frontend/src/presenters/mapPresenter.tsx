@@ -68,6 +68,11 @@ import { getDepartures, requestUserGeolocation } from "../store/actions";
 import { formatTime } from "../utils/time";
 import { translations } from "../utils/translations";
 
+const SELECTED_SITE_CAMERA_ZOOM = 14;
+const SELECTED_SITE_CAMERA_DURATION_SECONDS = 0.4;
+const USER_LOCATION_CAMERA_ZOOM = 14;
+const USER_LOCATION_CAMERA_DURATION_SECONDS = 0.6;
+
 export function MapPresenter() {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
@@ -158,6 +163,35 @@ export function MapPresenter() {
         },
         [dispatch]
     );
+
+    function handleSiteMarkerClick(siteId: number) {
+        // Marker clicks are screen behavior: the presenter decides whether a click selects or clears.
+        const nextSiteId = selectedSite?.id === siteId ? null : siteId;
+        handleSelectSiteCB(nextSiteId);
+    }
+
+    // The presenter owns the movement policy; StopMap only receives a concrete command to execute.
+    const selectedSiteCameraTarget = selectedSite
+        ? {
+              lat: selectedSite.lat,
+              lon: selectedSite.lon,
+              zoom: SELECTED_SITE_CAMERA_ZOOM,
+              durationSeconds: SELECTED_SITE_CAMERA_DURATION_SECONDS,
+              requestKey: selectedSite.id,
+          }
+        : null;
+
+    // requestKey changes only when the user asks to center, so the map will not refly on every render.
+    const userLocationCameraTarget =
+        userLocation && mapCenterOnUserRequestedAt !== 0
+            ? {
+                  lat: userLocation.lat,
+                  lon: userLocation.lon,
+                  zoom: USER_LOCATION_CAMERA_ZOOM,
+                  durationSeconds: USER_LOCATION_CAMERA_DURATION_SECONDS,
+                  requestKey: mapCenterOnUserRequestedAt,
+              }
+            : null;
 
     if (isSitesLoading || !sites || isStopPointsLoading || !stopPoints) {
         return <Suspense fullscreen message={tMap.loading} />;
@@ -307,7 +341,9 @@ export function MapPresenter() {
             allSites={sites}
             filteredSites={filteredSites}
             selectedSite={selectedSite}
+            selectedSiteId={selectedSite?.id ?? null}
             handleSelectSiteCB={handleSelectSiteCB}
+            onSiteMarkerClick={handleSiteMarkerClick}
             recentSearchSiteIds={recentSearchSiteIds}
             departureViewProps={departureViewProps}
             isDeparturesLoading={isDeparturesLoading}
@@ -322,7 +358,8 @@ export function MapPresenter() {
             appStyle={appStyle}
             onAppStyleChange={handleAppStyleChangeACB}
             userLocation={userLocation}
-            mapCenterOnUserRequestedAt={mapCenterOnUserRequestedAt}
+            selectedSiteCameraTarget={selectedSiteCameraTarget}
+            userLocationCameraTarget={userLocationCameraTarget}
             onRequestMapCenterOnUser={handleRequestMapCenterOnUserACB}
             tMapDeparturePanel={translations[currentLanguage].mapDeparturePanel}
             tMap={tMap}

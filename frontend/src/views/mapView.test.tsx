@@ -4,8 +4,10 @@ import { MapView } from "./mapView";
 import { renderWithTheme } from "../test/renderWithTheme";
 import { translations } from "../utils/translations";
 
+const stopMapMock = vi.hoisted(() => vi.fn(() => <div data-testid="stop-map" />));
+
 vi.mock("../components/StopMap", () => ({
-    StopMap: () => <div data-testid="stop-map" />,
+    StopMap: stopMapMock,
 }));
 
 vi.mock("./mapSearchView", () => ({
@@ -19,13 +21,30 @@ vi.mock("./mapDeparturesPanelView", () => ({
 describe("MapView", () => {
     it("shows a quick app style selector and emits style changes", () => {
         const onAppStyleChange = vi.fn();
+        const onSiteMarkerClick = vi.fn();
+        const selectedSiteCameraTarget = {
+            lat: 59.3,
+            lon: 18.1,
+            zoom: 14,
+            durationSeconds: 0.4,
+            requestKey: 7,
+        };
+        const userLocationCameraTarget = {
+            lat: 59.4,
+            lon: 18.2,
+            zoom: 14,
+            durationSeconds: 0.6,
+            requestKey: 123,
+        };
 
         renderWithTheme(
             <MapView
                 allSites={[]}
                 filteredSites={[]}
                 selectedSite={null}
+                selectedSiteId={7}
                 handleSelectSiteCB={vi.fn()}
+                onSiteMarkerClick={onSiteMarkerClick}
                 recentSearchSiteIds={[]}
                 departureViewProps={null}
                 isDeparturesLoading={false}
@@ -34,7 +53,8 @@ describe("MapView", () => {
                 appStyle="Dark"
                 onAppStyleChange={onAppStyleChange}
                 userLocation={null}
-                mapCenterOnUserRequestedAt={0}
+                selectedSiteCameraTarget={selectedSiteCameraTarget}
+                userLocationCameraTarget={userLocationCameraTarget}
                 onRequestMapCenterOnUser={vi.fn()}
                 tMapDeparturePanel={translations.en.mapDeparturePanel}
                 tMap={translations.en.map}
@@ -50,6 +70,16 @@ describe("MapView", () => {
                 totalSiteCount={0}
                 tTransportModes={translations.en.transportModes}
             />
+        );
+
+        const stopMapProps = stopMapMock.mock.calls[0][0];
+        expect(stopMapProps).toEqual(
+            expect.objectContaining({
+                selectedSiteId: 7,
+                onSiteMarkerClick,
+                selectedSiteCameraTarget,
+                userLocationCameraTarget,
+            })
         );
 
         const lightButton = screen.getByRole("button", { name: "Light" });
