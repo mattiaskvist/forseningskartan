@@ -45,12 +45,14 @@ export function SidebarPresenter() {
     }
 
     function selectFavoriteStopACB(siteId: number) {
+        // Select favorite stop and close the sidebar
         selectSite({ dispatch, siteId });
         navigate("/");
         setIsOpen(false);
     }
 
     async function handleLogoutACB() {
+        // Logout flow: dispatch thunk, show snackbar on result and navigate home
         try {
             await dispatch(logoutCurrentUser()).unwrap();
             dispatch(showSnackbar({ message: tAccount.logoutSuccess, severity: "success" }));

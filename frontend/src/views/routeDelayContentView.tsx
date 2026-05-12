@@ -12,6 +12,7 @@ import {
 } from "../types/routeDelays";
 import { DelaySummary } from "../types/historicalDelay";
 import { EventType } from "../types/departureDelay";
+import { Suspense } from "../components/Suspense";
 
 export type RouteDelayContentViewProps = {
     selectedSection: RouteDelaySection;
@@ -27,10 +28,12 @@ export type RouteDelayContentViewProps = {
     selectedEventType: EventType;
     trendPoints: RouteDelayTrendPoint[];
     isTrendLoading: boolean;
+    isRouteDelaysLoading: boolean;
     onBackToRoutes: () => void;
     timeGranularity: RouteDelayTimeGranularity;
     onTimeGranularityChange: (granularity: RouteDelayTimeGranularity) => void;
     leaderboardItems: RouteDelayListItem[];
+    tRouteDelay: TranslationStrings["routeDelay"];
     tRouteDelayLeaderboard: TranslationStrings["routeDelayLeaderboard"];
     tRouteDetailsPage: TranslationStrings["routeDetailsPage"];
     tStats: TranslationStrings["departureDelayStats"];
@@ -52,51 +55,68 @@ export function RouteDelayContentView({
     selectedEventType,
     trendPoints,
     isTrendLoading,
+    isRouteDelaysLoading,
     onBackToRoutes,
     timeGranularity,
     onTimeGranularityChange,
     leaderboardItems,
+    tRouteDelay,
     tRouteDelayLeaderboard,
     tRouteDetailsPage,
     tStats,
     tRouteDelayRoutes,
     tRouteDelayRouteFallback,
 }: RouteDelayContentViewProps) {
-    return !isRouteDetailsOpen ? (
-        <div className="flex flex-col gap-4 pt-4">
-            {selectedSection === "routes" ? (
-                <RouteDelayRoutesView
-                    pagedRouteItems={pagedRouteItems}
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    routesPerPage={routesPerPage}
-                    onSelectRoute={onSelectRoute}
-                    onPageChange={onPageChange}
-                    onRoutesPerPageChange={onRoutesPerPageChange}
-                    t={tRouteDelayRoutes}
-                />
-            ) : null}
+    if (isRouteDelaysLoading) {
+        return <Suspense message={tRouteDelay.loading} />;
+    }
 
-            {selectedSection === "leaderboard" ? (
-                <RouteDelayLeaderboardView
-                    leaderboardItems={leaderboardItems}
-                    t={tRouteDelayLeaderboard}
-                />
-            ) : null}
-        </div>
-    ) : selectedRouteSummary ? (
-        <RouteDetailsView
-            routeSummary={selectedRouteSummary}
-            selectedEventType={selectedEventType}
-            trendPoints={trendPoints}
-            isTrendLoading={isTrendLoading}
-            onBackToRoutes={onBackToRoutes}
-            timeGranularity={timeGranularity}
-            onTimeGranularityChange={onTimeGranularityChange}
-            t={tRouteDetailsPage}
-            tStats={tStats}
-        />
-    ) : (
-        <RouteDelayRouteFallbackView onBackToRoutes={onBackToRoutes} t={tRouteDelayRouteFallback} />
-    );
+    if (!isRouteDetailsOpen) {
+        return (
+            <div className="flex flex-col gap-4 pt-4">
+                {selectedSection === "routes" && (
+                    <RouteDelayRoutesView
+                        pagedRouteItems={pagedRouteItems}
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        routesPerPage={routesPerPage}
+                        onSelectRoute={onSelectRoute}
+                        onPageChange={onPageChange}
+                        onRoutesPerPageChange={onRoutesPerPageChange}
+                        t={tRouteDelayRoutes}
+                    />
+                )}
+
+                {selectedSection === "leaderboard" && (
+                    <RouteDelayLeaderboardView
+                        leaderboardItems={leaderboardItems}
+                        t={tRouteDelayLeaderboard}
+                    />
+                )}
+            </div>
+        );
+    }
+
+    if (selectedRouteSummary) {
+        return (
+            <RouteDetailsView
+                routeSummary={selectedRouteSummary}
+                selectedEventType={selectedEventType}
+                trendPoints={trendPoints}
+                isTrendLoading={isTrendLoading}
+                onBackToRoutes={onBackToRoutes}
+                timeGranularity={timeGranularity}
+                onTimeGranularityChange={onTimeGranularityChange}
+                t={tRouteDetailsPage}
+                tStats={tStats}
+            />
+        );
+    } else {
+        return (
+            <RouteDelayRouteFallbackView
+                onBackToRoutes={onBackToRoutes}
+                t={tRouteDelayRouteFallback}
+            />
+        );
+    }
 }

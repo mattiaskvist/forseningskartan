@@ -1,4 +1,5 @@
-import { Box, Typography } from "@mui/material";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import { Box, Button, Typography } from "@mui/material";
 import { DelaySummary } from "../types/historicalDelay";
 import {
     CustomDateRange,
@@ -21,6 +22,7 @@ type DepartureHistoricalDelaysProps = {
     onDatePresetChange: (preset: DatePreset) => void;
     onCustomDateRangeChange: (dateRange: CustomDateRange | null) => void;
     onEventTypeChange: (eventType: EventType) => void;
+    onViewRouteDelayDetails: () => void;
     isLoadingData: boolean;
     routeSummary: DelaySummary | null;
     t: TranslationStrings["departureHistoricalDelays"];
@@ -39,6 +41,7 @@ export function DepartureHistoricalDelays({
     onDatePresetChange,
     onCustomDateRangeChange,
     onEventTypeChange,
+    onViewRouteDelayDetails,
     isLoadingData,
     routeSummary,
     t,
@@ -48,9 +51,19 @@ export function DepartureHistoricalDelays({
 }: DepartureHistoricalDelaysProps) {
     return (
         <div className="flex flex-col gap-2">
-            <Typography sx={{ fontSize: "0.875rem", fontWeight: 600, color: "text.primary" }}>
-                {t.title}
-            </Typography>
+            <div className="flex items-center justify-between">
+                <Typography sx={{ fontSize: "0.875rem", fontWeight: 600, color: "text.primary" }}>
+                    {t.title}
+                </Typography>
+                <Button
+                    variant="text"
+                    size="small"
+                    endIcon={<ArrowForwardIcon fontSize="small" />}
+                    onClick={onViewRouteDelayDetails}
+                >
+                    {t.toRouteDelayDetails}
+                </Button>
+            </div>
             <DepartureDelayControls
                 availableDates={availableDates}
                 selectedDatePreset={selectedDatePreset}

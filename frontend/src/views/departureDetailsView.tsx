@@ -1,3 +1,4 @@
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useState } from "react";
 import { Button, Box, Typography } from "@mui/material";
 import dayjs from "dayjs";
@@ -23,6 +24,7 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 type DepartureDetailsViewProps = {
     departure: Departure;
     onBackToList: () => void;
+    onViewRouteDelayDetails: () => void;
     availableDates: string[];
     selectedDelayDates: string[];
     selectedDepartureDelaySummary: DelaySummary | null;
@@ -41,6 +43,7 @@ type DepartureDetailsViewProps = {
 export function DepartureDetailsView({
     departure,
     onBackToList,
+    onViewRouteDelayDetails,
     availableDates,
     selectedDelayDates,
     selectedDepartureDelaySummary,
@@ -71,7 +74,13 @@ export function DepartureDetailsView({
                     {departure.line.designation ?? departure.line.id} -{" "}
                     {departure.destination ?? departure.direction}
                 </Typography>
-                <Button variant="text" size="small" onClick={onBackToList} aria-label={t.back}>
+                <Button
+                    variant="text"
+                    size="small"
+                    startIcon={<ArrowBackIcon fontSize="small" />}
+                    onClick={onBackToList}
+                    aria-label={t.back}
+                >
                     {t.back}
                 </Button>
             </div>
@@ -109,6 +118,7 @@ export function DepartureDetailsView({
                 onDatePresetChange={onDatePresetChange}
                 onCustomDateRangeChange={onCustomDateRangeChange}
                 onEventTypeChange={setSelectedEventType}
+                onViewRouteDelayDetails={onViewRouteDelayDetails}
                 isLoadingData={isDepartureHistoricalDelayLoading}
                 routeSummary={selectedDepartureDelaySummary}
                 t={tHistoricalDelays}

@@ -1,4 +1,12 @@
-import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
+import {
+    doc,
+    getDoc,
+    serverTimestamp,
+    setDoc,
+    onSnapshot,
+    Unsubscribe,
+    DocumentSnapshot,
+} from "firebase/firestore";
 import {
     defaultUserPreferencesState,
     PersistedUserPreferencesState,
@@ -116,3 +124,50 @@ export async function saveUserPreferences(uid: string, preferences: PersistedUse
         { merge: true }
     );
 }
+
+export function subscribeUserPreferences(
+    uid: string,
+    onChange: (prefs: PersistedUserPreferencesState | null) => void,
+    onError: (error: unknown) => void
+): Unsubscribe {
+    const userPreferencesRef = doc(db, USER_PREFERENCES_COLLECTION, uid);
+
+    // called every time the document changes, including the initial call with the current data
+    function onNextACB(snapshot: DocumentSnapshot) {
+        if (!snapshot.exists()) {
+            onChange(null);
+            return;
+        }
+
+        try {
+            const sanitized = sanitizeUserPreferences(snapshot.data());
+            onChange(sanitized);
+        } catch (err) {
+            onError(err);
+        }
+    }
+
+    const unsubscribe = onSnapshot(userPreferencesRef, onNextACB, onError);
+    return unsubscribe;
+}
+
+// Manages the single active subscription to user preferences,
+// making sure we dont have multiple listeners active at the same time
+function createUserPreferencesSubscriptionManager() {
+    let unsubscribe: Unsubscribe | null = null;
+
+    return {
+        // replaces the current subscription with a new one, unsubscribing from the old one if it exists
+        replace(next: Unsubscribe | null) {
+            unsubscribe?.();
+            unsubscribe = next;
+        },
+        // unsubscribes from the current subscription if it exists and clears it
+        clear() {
+            unsubscribe?.();
+            unsubscribe = null;
+        },
+    };
+}
+
+export const userPreferencesSubscription = createUserPreferencesSubscriptionManager();

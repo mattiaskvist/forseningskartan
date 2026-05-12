@@ -10,6 +10,7 @@ export function GlobalSnackbarPresenter() {
     const severity = useAppSelector(getSnackbarSeverityCB);
 
     function handleCloseCB(_event?: React.SyntheticEvent | Event, reason?: string) {
+        // Ignore clickaway events so incidental clicks don't dismiss messages
         if (reason === "clickaway") {
             return;
         }

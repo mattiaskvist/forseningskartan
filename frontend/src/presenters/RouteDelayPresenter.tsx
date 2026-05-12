@@ -53,6 +53,7 @@ import { getAvgDelayMinutes, getAvgDelaySeconds } from "../utils/time";
 import { compareRouteNamesCB, getRouteDisplayName, getRouteIdentityKey } from "../utils/route";
 import { routeTypesToTransportationModes } from "../utils/transportationMode";
 import { RouteDelayContentViewProps } from "../views/routeDelayContentView";
+import { normalizeText } from "../utils/text";
 
 function getRouteModeKey(summary: DelaySummary): RouteType | null {
     return summary.route?.type ?? null;
@@ -89,14 +90,16 @@ export function RouteDelayPresenter() {
         [selectedTransportationMode]
     );
 
+    // Apply transportation-mode filter and search, then sort routes
+    // Memoized to avoid re-filtering on unrelated changes
     const filteredAndSortedRoutes = useMemo(() => {
-        const normalizedSearch = searchQuery.trim().toLowerCase();
+        const normalizedSearch = normalizeText(searchQuery);
 
         function matchesSearchCB(summary: DelaySummary): boolean {
             if (normalizedSearch === "") {
                 return true;
             }
-            return getRouteDisplayName(summary).toLowerCase().includes(normalizedSearch);
+            return normalizeText(getRouteDisplayName(summary)).includes(normalizedSearch);
         }
 
         return routeDelays
@@ -107,6 +110,7 @@ export function RouteDelayPresenter() {
 
     const totalFilteredRoutes = filteredAndSortedRoutes.length;
     const totalPages = Math.max(1, Math.ceil(totalFilteredRoutes / routesPerPage));
+    // Ensure current page is within bounds after filtering changes
     const safeCurrentPage = Math.min(currentPage, totalPages);
 
     const pagedRoutes = useMemo(() => {
@@ -149,6 +153,7 @@ export function RouteDelayPresenter() {
         return routeTypesToTransportationModes(availableRouteTypes);
     }, [routeDelays]);
 
+    // Leaderboard: sort by average delay descending and map to display items
     const leaderboardItems = useMemo((): RouteDelayListItem[] => {
         const filteredRoutes = routeDelays.filter(matchesTransportationFilterCB);
 
@@ -226,8 +231,7 @@ export function RouteDelayPresenter() {
         dispatch(setRouteDelayTimeGranularity(granularity));
     }
 
-    // avoid suspense after first load
-    if (isAggregatedDatesLoading || (isRouteDelaysLoading && routeDelays.length === 0)) {
+    if (isAggregatedDatesLoading) {
         return <Suspense message={translations[currentLanguage].routeDelay.loading} />;
     }
 
@@ -246,10 +250,12 @@ export function RouteDelayPresenter() {
         selectedEventType,
         trendPoints: selectedRouteTrend,
         isTrendLoading,
+        isRouteDelaysLoading,
         onBackToRoutes: handleBackToRoutesACB,
         timeGranularity,
         onTimeGranularityChange: handleTimeGranularityChangeACB,
         leaderboardItems: leaderboardItems,
+        tRouteDelay: translations[currentLanguage].routeDelay,
         tRouteDelayLeaderboard: translations[currentLanguage].routeDelayLeaderboard,
         tRouteDetailsPage: translations[currentLanguage].routeDetailsPage,
         tStats: translations[currentLanguage].departureDelayStats,

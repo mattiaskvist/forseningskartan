@@ -1,4 +1,4 @@
-import { Departure } from "../types/sl";
+import { Departure, transportationModeToRouteType } from "../types/sl";
 
 const nonUpcomingStates = new Set([
     "DEPARTED",
@@ -41,6 +41,8 @@ function compareDeparturesCB(a: Departure, b: Departure) {
 }
 
 export function getUpcomingDepartures(departures: Departure[]): Departure[] {
+    // Filter out non-upcoming states and departures with unparsable timestamps,
+    // then sort the remaining departures by timestamp
     return departures.filter(isUpcomingDepartureCB).sort(compareDeparturesCB);
 }
 
@@ -51,4 +53,16 @@ export function isSameDeparture(a: Departure, b: Departure): boolean {
         a.stop_point.id === b.stop_point.id &&
         a.scheduled === b.scheduled
     );
+}
+
+// Same key as route.ts getRouteIdentityKey() but for Departure
+export function getRouteDelayKey(departure: Departure): string | null {
+    const transportMode = departure.line.transport_mode;
+    if (!transportMode) {
+        return null;
+    }
+
+    const shortName = departure.line.designation?.trim() || `${departure.line.id}`;
+    const routeType = transportationModeToRouteType[transportMode];
+    return `${shortName}::${routeType}`;
 }

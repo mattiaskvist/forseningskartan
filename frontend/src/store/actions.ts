@@ -65,6 +65,8 @@ export const getRouteDelayTrend = createAsyncThunk(
 );
 
 // https://redux-toolkit.js.org/usage/usage-with-typescript#createasyncthunk
+// Thunk that requests browser geolocation with graceful fallbacks
+// Returns typed reject values on known failure modes for user feedback
 export const requestUserGeolocation = createAsyncThunk<
     void, // return type
     void, // argument type
@@ -131,7 +133,9 @@ export const requestUserGeolocation = createAsyncThunk<
     }
 );
 
-// fetch historical delay summary for selected departure
+// Fetch historical delay summary for selected departure
+// Reads store to build parameters for historical delay query
+// Returns early on missing selection or invalid timestamps
 export function fetchSelectedDepartureStopDelays(): AppThunk {
     return (dispatch, getState) => {
         const state = getState();
@@ -190,6 +194,7 @@ export function fetchSelectedDepartureStopDelays(): AppThunk {
     };
 }
 
+// Dispatches daily route delays for the computed selected dates
 export function fetchSelectedRouteDelays(): AppThunk {
     return (dispatch, getState) => {
         const state = getState();
@@ -207,6 +212,7 @@ export function fetchSelectedRouteDelays(): AppThunk {
     };
 }
 
+// Compute and dispatch route trend fetch, clears trend if selection invalid
 export function fetchSelectedRouteTrend(): AppThunk {
     return (dispatch, getState) => {
         const state = getState();

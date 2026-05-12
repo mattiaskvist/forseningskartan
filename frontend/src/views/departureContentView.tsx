@@ -12,6 +12,7 @@ export type DepartureContentViewProps = {
     selectedDeparture: Departure | null;
     upcomingDepartures: Departure[];
     onBackToList: () => void;
+    onViewRouteDelayDetails: () => void;
     availableDates: string[];
     selectedDelayDates: string[];
     selectedDepartureDelaySummary: DelaySummary | null;
@@ -42,6 +43,7 @@ export function DepartureContentView({
     selectedDeparture,
     upcomingDepartures,
     onBackToList,
+    onViewRouteDelayDetails,
     availableDates,
     selectedDelayDates,
     selectedDepartureDelaySummary,
@@ -72,6 +74,7 @@ export function DepartureContentView({
         <DepartureDetailsView
             departure={selectedDeparture}
             onBackToList={onBackToList}
+            onViewRouteDelayDetails={onViewRouteDelayDetails}
             availableDates={availableDates}
             selectedDelayDates={selectedDelayDates}
             selectedDepartureDelaySummary={selectedDepartureDelaySummary}

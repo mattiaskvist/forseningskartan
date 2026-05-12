@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { MapView } from "../views/mapView";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import {
@@ -41,6 +42,7 @@ import {
     setSelectedDeparture,
     setSelectedMode,
     setSelectedSiteId,
+    setRouteDelaySelectedRouteKey,
 } from "../store/reducers";
 import { Departure, ModeWithOther, TransportationMode } from "../types/sl";
 import { CustomDateRange, DatePreset } from "../types/departureDelay";
@@ -55,7 +57,7 @@ import {
 } from "../store/userPreferencesSlice";
 import { showSnackbar } from "../store/snackbarSlice";
 import { Suspense } from "../components/Suspense";
-import { getUpcomingDepartures } from "../utils/departures";
+import { getRouteDelayKey, getUpcomingDepartures } from "../utils/departures";
 import { RouteMeta, RouteType } from "../types/historicalDelay";
 import {
     getSitesByTransportationMode,
@@ -68,6 +70,7 @@ import { translations } from "../utils/translations";
 
 export function MapPresenter() {
     const dispatch = useAppDispatch();
+    const navigate = useNavigate();
     const selectedSite = useAppSelector(getSelectedSiteCB);
     const departureResponse = useAppSelector(getDeparturesCB);
     const isDeparturesLoading = useAppSelector(getDeparturesLoadingCB);
@@ -114,6 +117,8 @@ export function MapPresenter() {
         return routeTypesToTransportationModes(routeTypes);
     }, [routesByStopPointsUnavailable, routesByStopPoint]);
 
+    // Compute visible sites using filters and route availability
+    // Memoized to avoid recomputing on unrelated store updates
     const filteredSites = useMemo(() => {
         if (!sites || !stopPoints) {
             return [];
@@ -187,6 +192,7 @@ export function MapPresenter() {
         dispatch(requestUserGeolocation());
     }
 
+    // Toggle favorite stop requires login and provides snackbar feedback
     function toggleFavoriteStopACB() {
         if (!selectedSite) {
             return;
@@ -237,6 +243,20 @@ export function MapPresenter() {
         dispatch(setSearchQuery(query));
     }
 
+    function handleViewRouteDelayDetailsACB() {
+        if (!selectedDeparture) {
+            return;
+        }
+
+        const routeKey = getRouteDelayKey(selectedDeparture);
+        if (!routeKey) {
+            return;
+        }
+
+        dispatch(setRouteDelaySelectedRouteKey(routeKey));
+        navigate("/route-delays");
+    }
+
     const departures = departureResponse?.departures ?? [];
     const upcomingDepartures = getUpcomingDepartures(departures);
 
@@ -254,6 +274,7 @@ export function MapPresenter() {
                   selectedDeparture,
                   upcomingDepartures,
                   onBackToList: returnToDepartureListACB,
+                  onViewRouteDelayDetails: handleViewRouteDelayDetailsACB,
                   availableDates,
                   selectedDelayDates,
                   selectedDepartureDelaySummary,

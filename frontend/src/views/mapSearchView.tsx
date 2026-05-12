@@ -93,14 +93,16 @@ export function MapSearchView({
                 allowDeselect={true}
                 onDeselect={() => onTransportationModeChange(null)}
             />
-            <SearchBar
-                allSites={allSites}
-                filteredSites={filteredSites}
-                selectedSite={selectedSite}
-                handleSelectSiteCB={handleSelectSiteCB}
-                recentSearchSiteIds={recentSearchSiteIds}
-                t={t}
-            />
+            <Box sx={{ mt: 0.5 }}>
+                <SearchBar
+                    allSites={allSites}
+                    filteredSites={filteredSites}
+                    selectedSite={selectedSite}
+                    handleSelectSiteCB={handleSelectSiteCB}
+                    recentSearchSiteIds={recentSearchSiteIds}
+                    t={t}
+                />
+            </Box>
         </Paper>
     );
 }

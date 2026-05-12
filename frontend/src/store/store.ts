@@ -33,6 +33,7 @@ import {
     recordRecentSearchSiteId,
     setMapTransportationModeFilter,
     setHideStopsWithoutDepartures,
+    PersistedUserPreferencesState,
 } from "./userPreferencesSlice";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -43,7 +44,6 @@ import {
     getSites,
     getStopPoints,
     getAggregatedDates,
-    getRouteDelays,
     requestUserGeolocation,
 } from "./actions";
 import {
@@ -59,7 +59,11 @@ import {
     setStopPointGidsBySiteId,
     setUniqueModes,
 } from "./reducers";
-import { fetchUserPreferences, saveUserPreferences } from "../firebase/userPreferences";
+import {
+    subscribeUserPreferences,
+    saveUserPreferences,
+    userPreferencesSubscription,
+} from "../firebase/userPreferences";
 import { deleteCurrentUser, logoutCurrentUser } from "./authThunks";
 import { buildStopPointGidsBySiteId } from "../utils/site";
 import { translations } from "../utils/translations";
@@ -72,6 +76,9 @@ function mergeRecentSearchSiteIds(
     localRecentSearchSiteIds: number[] = [],
     firebaseRecentSearchSiteIds: number[] = []
 ): number[] {
+    // Merge local and remote recent search IDs, keep ints only
+    // Preserve order and cap to 5 entries
+    // Put local IDs first since they reflect the most recent searches
     const uniqueRecentSearchSiteIds = new Set<number>();
 
     for (const siteId of [...localRecentSearchSiteIds, ...firebaseRecentSearchSiteIds]) {
@@ -109,6 +116,7 @@ export const store = configureStore({
         getDefaultMiddleware().prepend(listenerMiddleware.middleware),
 });
 
+// Fetch stop delays when selected departure or date range changes
 listenerMiddleware.startListening({
     matcher: isAnyOf(setSelectedDeparture, setSelectedDatePreset, setSelectedCustomDateRange),
     effect: (_, listenerApi) => {
@@ -120,6 +128,8 @@ listenerMiddleware.startListening({
     },
 });
 
+// Build and cache mapping from site id -> stopPoint GIDs when sites/stopPoints load
+// This derived mapping is used by map and query helpers elsewhere
 listenerMiddleware.startListening({
     matcher: isAnyOf(getSites.fulfilled, getStopPoints.fulfilled),
     effect: (_, listenerApi) => {
@@ -137,6 +147,7 @@ listenerMiddleware.startListening({
 });
 
 // Compute derived departure UI state when departures load or preferences change.
+// Prefer the map mode filter, falling back to the first available mode or null.
 listenerMiddleware.startListening({
     matcher: isAnyOf(getDepartures.fulfilled, applyLoadedUserPreferences),
     effect: (action, listenerApi) => {
@@ -205,6 +216,7 @@ listenerMiddleware.startListening({
     },
 });
 
+// Fetch route delays (all routes) when date range changes
 listenerMiddleware.startListening({
     matcher: isAnyOf(
         setRouteDelayDatePreset,
@@ -219,11 +231,14 @@ listenerMiddleware.startListening({
     },
 });
 
+// Fetch route delay trend (single route) when
+// selected route, time granularity, or date range changes
 listenerMiddleware.startListening({
     matcher: isAnyOf(
         setRouteDelaySelectedRouteKey,
         setRouteDelayTimeGranularity,
-        getRouteDelays.fulfilled
+        setRouteDelayDatePreset,
+        setRouteDelayCustomDateRange
     ),
     effect: (_, listenerApi) => {
         listenerApi.cancelActiveListeners();
@@ -233,45 +248,80 @@ listenerMiddleware.startListening({
     },
 });
 
+// Sync user preferences after auth state changes
+// If remote preferences exist merge them with local state apply them, and persist
+// If no remote preferences exist, initialize remote storage from local state
+// Remove locally recent searches after they have been stored remotely to not reapply them on next login
 listenerMiddleware.startListening({
     actionCreator: setUser,
     effect: async (action, listenerApi) => {
         const dispatch = listenerApi.dispatch as AppDispatch;
         const user = action.payload;
 
+        // clean up any existing subscription
+        userPreferencesSubscription.clear();
+
         if (!user) {
             dispatch(setUserPreferencesLoading(false));
             return;
         }
 
-        dispatch(setUserPreferencesLoading(true));
+        const currentUser = user;
 
-        try {
-            const loadedPreferences = await fetchUserPreferences(user.uid);
+        dispatch(setUserPreferencesLoading(true));
+        let initialMergedPreferencesSaved = false;
+
+        function onSaveErrorACB(error: unknown) {
+            dispatch(setUserPreferencesLoading(false));
+            console.error("Failed to save user preferences:", error);
+        }
+
+        // callback for when user preferences change in firebase
+        function onChangeACB(loadedPreferences: PersistedUserPreferencesState | null) {
             const state = listenerApi.getState() as RootState;
             const localPreferences = state.userPreferences;
 
             if (loadedPreferences) {
-                const mergedPreferences = {
-                    ...loadedPreferences,
-                    recentSearchSiteIds: mergeRecentSearchSiteIds(
-                        localPreferences.recentSearchSiteIds,
-                        loadedPreferences.recentSearchSiteIds
-                    ),
-                };
+                // if we have loaded preferences from firebase but not merged them with the local preferences,
+                // do that and save the merged result to firebase
+                if (!initialMergedPreferencesSaved) {
+                    const mergedPreferences = {
+                        ...loadedPreferences,
+                        recentSearchSiteIds: mergeRecentSearchSiteIds(
+                            localPreferences.recentSearchSiteIds,
+                            loadedPreferences.recentSearchSiteIds
+                        ),
+                    };
 
-                dispatch(applyLoadedUserPreferences(mergedPreferences));
-                await saveUserPreferences(user.uid, mergedPreferences);
-                clearStoredRecentSearchSiteIds();
+                    dispatch(applyLoadedUserPreferences(mergedPreferences));
+                    initialMergedPreferencesSaved = true;
+                    saveUserPreferences(currentUser.uid, mergedPreferences)
+                        .then(() => {
+                            dispatch(setUserPreferencesLoading(false));
+                            clearStoredRecentSearchSiteIds();
+                        })
+                        .catch(onSaveErrorACB);
+                } else {
+                    // if we have already merged and saved the local preferences once,
+                    // we assume that firebase has the latest preferences and apply them
+                    dispatch(applyLoadedUserPreferences(loadedPreferences));
+                }
                 return;
             }
 
-            await saveUserPreferences(user.uid, localPreferences);
+            // no preferences in firebase, save the current local preferences to firebase
+            initialMergedPreferencesSaved = true;
+            saveUserPreferences(currentUser.uid, localPreferences)
+                .then(() => {
+                    dispatch(setUserPreferencesLoading(false));
+                    clearStoredRecentSearchSiteIds();
+                })
+                .catch(onSaveErrorACB);
+        }
+
+        function onErrorACB(error: unknown) {
             dispatch(setUserPreferencesLoading(false));
-            clearStoredRecentSearchSiteIds();
-        } catch (error) {
-            dispatch(setUserPreferencesLoading(false));
-            console.error("Failed to load user preferences:", error);
+            console.error("Failed to subscribe to user preferences:", error);
             dispatch(
                 showSnackbar({
                     message: "Failed to load saved preferences.",
@@ -279,18 +329,27 @@ listenerMiddleware.startListening({
                 })
             );
         }
+
+        // subscribe to changes in user preferences
+        const unsubscribe = subscribeUserPreferences(user.uid, onChangeACB, onErrorACB);
+        // store the unsubscribe function so we can clean up later
+        userPreferencesSubscription.replace(unsubscribe);
     },
 });
 
+// Clear recent searches on logout or account deletion to not reapply them for next user
 listenerMiddleware.startListening({
     matcher: isAnyOf(logoutCurrentUser.fulfilled, deleteCurrentUser.fulfilled),
     effect: (_, listenerApi) => {
         const dispatch = listenerApi.dispatch as AppDispatch;
         dispatch(clearRecentSearchSiteIds());
+        // clean up subscription when user logs out or is deleted
+        userPreferencesSubscription.clear();
     },
 });
 
-// user preferences
+// Persist user preferences: localStorage for anonymous users and
+// Firestore for logged-in users. Show snackbar on failure
 listenerMiddleware.startListening({
     matcher: isAnyOf(
         toggleFavoriteSiteId,
@@ -325,6 +384,7 @@ listenerMiddleware.startListening({
     },
 });
 
+// Show snackbar when geolocation request is initiated
 listenerMiddleware.startListening({
     actionCreator: requestUserGeolocation.pending,
     effect: (_, listenerApi) => {
@@ -340,6 +400,7 @@ listenerMiddleware.startListening({
     },
 });
 
+// Show snackbar on geolocation failure with reason-specific message
 listenerMiddleware.startListening({
     actionCreator: requestUserGeolocation.rejected,
     effect: (action, listenerApi) => {
