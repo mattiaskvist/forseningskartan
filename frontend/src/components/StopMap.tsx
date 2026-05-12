@@ -15,16 +15,24 @@ import { AppStyle } from "../types/appStyle";
 type StopMapProps = {
     allSites: Site[];
     filteredSites: Site[];
-    selectedSite: Site | null;
-    handleSelectSiteCB: (siteId: number | null) => void;
+    selectedSiteId: number | null;
+    onSiteMarkerClick: (siteId: number) => void;
     appStyle: AppStyle;
     userLocation: { lat: number; lon: number } | null;
-    mapCenterOnUserRequestedAt: number;
+    selectedSiteCameraTarget: MapCameraTarget | null;
+    userLocationCameraTarget: MapCameraTarget | null;
+};
+
+export type MapCameraTarget = {
+    lat: number;
+    lon: number;
+    zoom: number;
+    durationSeconds: number;
+    requestKey: number;
 };
 
 const STOCKHOLM_CENTER: [number, number] = [59.3293, 18.0686];
 const STOCKHOLM_ZOOM = 13;
-const SELECTED_SITE_ZOOM = 14;
 const MAX_ZOOM = 19;
 const INCREASE_MARKER_SIZE_ZOOM = 15; // zoom level after which marker sizes start increasing to remain visible when zooming in
 const BASE_MARKER_RADIUS = 4;
@@ -88,11 +96,12 @@ function getBaseMarkerRadius(zoom: number) {
 export function StopMap({
     allSites,
     filteredSites,
-    selectedSite,
-    handleSelectSiteCB,
+    selectedSiteId,
+    onSiteMarkerClick,
     appStyle,
     userLocation,
-    mapCenterOnUserRequestedAt,
+    selectedSiteCameraTarget,
+    userLocationCameraTarget,
 }: StopMapProps) {
     const mapContainerRef = useRef<HTMLDivElement | null>(null);
     const mapRef = useRef<LeafletMap | null>(null);
@@ -105,10 +114,19 @@ export function StopMap({
     const selectedSiteIdRef = useRef<number | null>(null);
     const mapStyleRef = useRef(appStyle);
     const userMarkerRef = useRef<CircleMarker | null>(null);
+    const siteMarkerClickRef = useRef(onSiteMarkerClick);
+    // Camera targets can be recreated by React, but each request key should move the map only once.
+    const selectedSiteCameraRequestKeyRef = useRef<number | null>(null);
+    const userLocationCameraRequestKeyRef = useRef<number | null>(null);
 
     useEffect(() => {
         mapStyleRef.current = appStyle;
     }, [appStyle]);
+
+    useEffect(() => {
+        // Leaflet keeps the original click handler on cached markers, so keep its callback fresh here.
+        siteMarkerClickRef.current = onSiteMarkerClick;
+    }, [onSiteMarkerClick]);
 
     useEffect(() => {
         // Initialize leaflet map once and set up layers/controls
@@ -177,6 +195,8 @@ export function StopMap({
             selectedMarkerRef.current = null;
             selectedSiteIdRef.current = null;
             userMarkerRef.current = null;
+            selectedSiteCameraRequestKeyRef.current = null;
+            userLocationCameraRequestKeyRef.current = null;
         };
     }, []);
 
@@ -201,27 +221,23 @@ export function StopMap({
         tileLayerRef.current = tileLayer;
     }, [appStyle]);
 
-    const createSiteMarker = useCallback(
-        (site: Site): CircleMarker => {
-            // Create a CircleMarker for a site and bind click handler to
-            // toggle selection. Markers are created once and cached
-            const marker = new CircleMarker(
-                [site.lat, site.lon],
-                getUnselectedMarkerStyle(mapStyleRef.current)
-            );
-            marker.bindTooltip(site.name);
+    const createSiteMarker = useCallback((site: Site): CircleMarker => {
+        // Create a CircleMarker for a site and bind click handling once.
+        // Markers are cached, so selection policy stays outside this Leaflet adapter.
+        const marker = new CircleMarker(
+            [site.lat, site.lon],
+            getUnselectedMarkerStyle(mapStyleRef.current)
+        );
+        marker.bindTooltip(site.name);
 
-            function handleSiteMarkerClickACB() {
-                const selectedSiteId = selectedSiteIdRef.current;
-                const nextSiteId = selectedSiteId === site.id ? null : site.id;
-                handleSelectSiteCB(nextSiteId);
-            }
-            marker.on("click", handleSiteMarkerClickACB);
+        function handleSiteMarkerClickACB() {
+            // Markers are cached, so the Leaflet click handler reads the latest presenter callback.
+            siteMarkerClickRef.current(site.id);
+        }
+        marker.on("click", handleSiteMarkerClickACB);
 
-            return marker;
-        },
-        [handleSelectSiteCB]
-    );
+        return marker;
+    }, []);
 
     // Build and cache markers once for all sites, then reuse them across filter changes
     useEffect(() => {
@@ -260,12 +276,12 @@ export function StopMap({
         }
         allMarkersBySiteId.forEach(removeStaleSiteCB);
 
-        // If the currently selected site is no longer in the list of all sites, deselect it
+        // If the selected site disappears, clear only this component's marker bookkeeping.
         if (selectedSiteIdRef.current !== null && !nextSiteIds.has(selectedSiteIdRef.current)) {
             selectedMarkerRef.current = null;
             selectedSiteIdRef.current = null;
         }
-    }, [allSites, handleSelectSiteCB, createSiteMarker]);
+    }, [allSites, createSiteMarker]);
 
     // Update markers when sites change
     useEffect(() => {
@@ -316,7 +332,7 @@ export function StopMap({
             visibleSiteIds.add(siteId);
         }
         nextVisibleSiteIds.forEach(showNewlyVisibleSiteCB);
-    }, [filteredSites, handleSelectSiteCB, createSiteMarker]);
+    }, [filteredSites, createSiteMarker]);
 
     // Update marker styles when map style changes
     useEffect(() => {
@@ -331,14 +347,14 @@ export function StopMap({
         if (!mapRef.current) {
             return;
         }
-        selectedSiteIdRef.current = selectedSite?.id ?? null;
+        selectedSiteIdRef.current = selectedSiteId;
 
         if (selectedMarkerRef.current) {
             setMarkerSelectedStyle(selectedMarkerRef.current, false, mapStyleRef.current);
         }
 
-        if (selectedSite) {
-            const selectedMarker = allMarkersBySiteIdRef.current.get(selectedSite.id) ?? null;
+        if (selectedSiteId !== null) {
+            const selectedMarker = allMarkersBySiteIdRef.current.get(selectedSiteId) ?? null;
             if (selectedMarker) {
                 setMarkerSelectedStyle(selectedMarker, true, mapStyleRef.current);
             }
@@ -347,34 +363,54 @@ export function StopMap({
         }
 
         selectedMarkerRef.current = null;
-    }, [selectedSite]);
+    }, [selectedSiteId]);
 
     useEffect(() => {
         const map = mapRef.current;
+        if (!selectedSiteCameraTarget) {
+            // Clearing selection should allow selecting the same stop again to move the map.
+            selectedSiteCameraRequestKeyRef.current = null;
+            return;
+        }
         if (!map) {
             return;
         }
-
-        if (selectedSite) {
-            map.flyTo([selectedSite.lat, selectedSite.lon], SELECTED_SITE_ZOOM, {
-                animate: true,
-                duration: 0.4,
-            });
-        }
-    }, [selectedSite]);
-
-    // Fly to user location when trigger changes
-    useEffect(() => {
-        const map = mapRef.current;
-        if (!map || !userLocation || mapCenterOnUserRequestedAt === 0) {
+        // The target object may be a new reference, but the request key tells us if it is real new work.
+        if (selectedSiteCameraRequestKeyRef.current === selectedSiteCameraTarget.requestKey) {
             return;
         }
+        selectedSiteCameraRequestKeyRef.current = selectedSiteCameraTarget.requestKey;
 
-        map.flyTo([userLocation.lat, userLocation.lon], SELECTED_SITE_ZOOM, {
-            animate: true,
-            duration: 0.6,
-        });
-    }, [mapCenterOnUserRequestedAt, userLocation]);
+        map.flyTo(
+            [selectedSiteCameraTarget.lat, selectedSiteCameraTarget.lon],
+            selectedSiteCameraTarget.zoom,
+            {
+                animate: true,
+                duration: selectedSiteCameraTarget.durationSeconds,
+            }
+        );
+    }, [selectedSiteCameraTarget]);
+
+    useEffect(() => {
+        const map = mapRef.current;
+        if (!map || !userLocationCameraTarget) {
+            return;
+        }
+        // User-location centering should run once per button request, not once per render.
+        if (userLocationCameraRequestKeyRef.current === userLocationCameraTarget.requestKey) {
+            return;
+        }
+        userLocationCameraRequestKeyRef.current = userLocationCameraTarget.requestKey;
+
+        map.flyTo(
+            [userLocationCameraTarget.lat, userLocationCameraTarget.lon],
+            userLocationCameraTarget.zoom,
+            {
+                animate: true,
+                duration: userLocationCameraTarget.durationSeconds,
+            }
+        );
+    }, [userLocationCameraTarget]);
 
     // Update user marker when location changes
     useEffect(() => {

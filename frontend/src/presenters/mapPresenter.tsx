@@ -66,6 +66,11 @@ import { getSitesWithRoutes } from "../utils/site";
 import { translations } from "../utils/translations";
 import { requestUserGeolocation } from "../store/actions";
 
+const SELECTED_SITE_CAMERA_ZOOM = 14;
+const SELECTED_SITE_CAMERA_DURATION_SECONDS = 0.4;
+const USER_LOCATION_CAMERA_ZOOM = 14;
+const USER_LOCATION_CAMERA_DURATION_SECONDS = 0.6;
+
 export function MapPresenter() {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
@@ -155,6 +160,45 @@ export function MapPresenter() {
         },
         [dispatch]
     );
+
+    const handleSiteMarkerClick = useCallback(
+        (siteId: number) => {
+            // Marker clicks are screen behavior: the presenter decides whether a click selects or clears.
+            const nextSiteId = selectedSite?.id === siteId ? null : siteId;
+            handleSelectSiteCB(nextSiteId);
+        },
+        [handleSelectSiteCB, selectedSite?.id]
+    );
+
+    const selectedSiteCameraTarget = useMemo(() => {
+        if (!selectedSite) {
+            return null;
+        }
+
+        // The presenter owns the movement policy; StopMap only receives a concrete command to execute.
+        return {
+            lat: selectedSite.lat,
+            lon: selectedSite.lon,
+            zoom: SELECTED_SITE_CAMERA_ZOOM,
+            durationSeconds: SELECTED_SITE_CAMERA_DURATION_SECONDS,
+            requestKey: selectedSite.id,
+        };
+    }, [selectedSite]);
+
+    const userLocationCameraTarget = useMemo(() => {
+        if (!userLocation || mapCenterOnUserRequestedAt === 0) {
+            return null;
+        }
+
+        // requestKey changes only when the user asks to center, so the map will not refly on every render.
+        return {
+            lat: userLocation.lat,
+            lon: userLocation.lon,
+            zoom: USER_LOCATION_CAMERA_ZOOM,
+            durationSeconds: USER_LOCATION_CAMERA_DURATION_SECONDS,
+            requestKey: mapCenterOnUserRequestedAt,
+        };
+    }, [mapCenterOnUserRequestedAt, userLocation]);
 
     if (isSitesLoading || !sites || isStopPointsLoading || !stopPoints) {
         return <Suspense fullscreen message={tMap.loading} />;
@@ -294,13 +338,16 @@ export function MapPresenter() {
             allSites={sites}
             filteredSites={filteredSites}
             selectedSite={selectedSite}
+            selectedSiteId={selectedSite?.id ?? null}
             handleSelectSiteCB={handleSelectSiteCB}
+            onSiteMarkerClick={handleSiteMarkerClick}
             recentSearchSiteIds={recentSearchSiteIds}
             departureViewProps={departureViewProps}
             appStyle={appStyle}
             onAppStyleChange={handleAppStyleChangeACB}
             userLocation={userLocation}
-            mapCenterOnUserRequestedAt={mapCenterOnUserRequestedAt}
+            selectedSiteCameraTarget={selectedSiteCameraTarget}
+            userLocationCameraTarget={userLocationCameraTarget}
             onRequestMapCenterOnUser={handleRequestMapCenterOnUserACB}
             tMapDeparturePanel={translations[currentLanguage].mapDeparturePanel}
             tMap={tMap}
