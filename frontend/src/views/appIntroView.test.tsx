@@ -19,7 +19,8 @@ const appIntroViewProps = {
         },
         {
             title: "Compare historical delays",
-            description: "Select a departure to see how that line usually performs at similar times.",
+            description:
+                "Select a departure to see how that line usually performs at similar times.",
         },
         {
             title: "Explore route delays",

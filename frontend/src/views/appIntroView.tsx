@@ -34,9 +34,7 @@ export function AppIntroView({
         <Dialog open={isOpen} onClose={onClose} maxWidth="sm" fullWidth>
             <DialogTitle>{title}</DialogTitle>
             <DialogContent>
-                <Typography sx={{ color: "text.secondary", mb: 1 }}>
-                    {description}
-                </Typography>
+                <Typography sx={{ color: "text.secondary", mb: 1 }}>{description}</Typography>
                 <List disablePadding>
                     {items.map((item) => (
                         <ListItem key={item.title} disableGutters>
