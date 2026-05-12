@@ -104,6 +104,7 @@ export function StopMap({
     userLocationCameraTarget,
 }: StopMapProps) {
     const mapContainerRef = useRef<HTMLDivElement | null>(null);
+    // Leaflet objects live outside React's render flow, so refs keep the same instances between renders.
     const mapRef = useRef<LeafletMap | null>(null);
     const tileLayerRef = useRef<TileLayer | null>(null);
     const markersLayerRef = useRef<LayerGroup | null>(null);
@@ -114,8 +115,9 @@ export function StopMap({
     const selectedSiteIdRef = useRef<number | null>(null);
     const mapStyleRef = useRef(appStyle);
     const userMarkerRef = useRef<CircleMarker | null>(null);
+    // Cached Leaflet handlers read this ref so they call the latest presenter callback.
     const siteMarkerClickRef = useRef(onSiteMarkerClick);
-    // Camera targets can be recreated by React, but each request key should move the map only once.
+    // Camera request keys are refs because they dedupe map moves without causing React re-renders.
     const selectedSiteCameraRequestKeyRef = useRef<number | null>(null);
     const userLocationCameraRequestKeyRef = useRef<number | null>(null);
 

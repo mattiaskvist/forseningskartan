@@ -161,44 +161,34 @@ export function MapPresenter() {
         [dispatch]
     );
 
-    const handleSiteMarkerClick = useCallback(
-        (siteId: number) => {
-            // Marker clicks are screen behavior: the presenter decides whether a click selects or clears.
-            const nextSiteId = selectedSite?.id === siteId ? null : siteId;
-            handleSelectSiteCB(nextSiteId);
-        },
-        [handleSelectSiteCB, selectedSite?.id]
-    );
+    function handleSiteMarkerClick(siteId: number) {
+        // Marker clicks are screen behavior: the presenter decides whether a click selects or clears.
+        const nextSiteId = selectedSite?.id === siteId ? null : siteId;
+        handleSelectSiteCB(nextSiteId);
+    }
 
-    const selectedSiteCameraTarget = useMemo(() => {
-        if (!selectedSite) {
-            return null;
-        }
+    // The presenter owns the movement policy; StopMap only receives a concrete command to execute.
+    const selectedSiteCameraTarget = selectedSite
+        ? {
+              lat: selectedSite.lat,
+              lon: selectedSite.lon,
+              zoom: SELECTED_SITE_CAMERA_ZOOM,
+              durationSeconds: SELECTED_SITE_CAMERA_DURATION_SECONDS,
+              requestKey: selectedSite.id,
+          }
+        : null;
 
-        // The presenter owns the movement policy; StopMap only receives a concrete command to execute.
-        return {
-            lat: selectedSite.lat,
-            lon: selectedSite.lon,
-            zoom: SELECTED_SITE_CAMERA_ZOOM,
-            durationSeconds: SELECTED_SITE_CAMERA_DURATION_SECONDS,
-            requestKey: selectedSite.id,
-        };
-    }, [selectedSite]);
-
-    const userLocationCameraTarget = useMemo(() => {
-        if (!userLocation || mapCenterOnUserRequestedAt === 0) {
-            return null;
-        }
-
-        // requestKey changes only when the user asks to center, so the map will not refly on every render.
-        return {
-            lat: userLocation.lat,
-            lon: userLocation.lon,
-            zoom: USER_LOCATION_CAMERA_ZOOM,
-            durationSeconds: USER_LOCATION_CAMERA_DURATION_SECONDS,
-            requestKey: mapCenterOnUserRequestedAt,
-        };
-    }, [mapCenterOnUserRequestedAt, userLocation]);
+    // requestKey changes only when the user asks to center, so the map will not refly on every render.
+    const userLocationCameraTarget =
+        userLocation && mapCenterOnUserRequestedAt !== 0
+            ? {
+                  lat: userLocation.lat,
+                  lon: userLocation.lon,
+                  zoom: USER_LOCATION_CAMERA_ZOOM,
+                  durationSeconds: USER_LOCATION_CAMERA_DURATION_SECONDS,
+                  requestKey: mapCenterOnUserRequestedAt,
+              }
+            : null;
 
     if (isSitesLoading || !sites || isStopPointsLoading || !stopPoints) {
         return <Suspense fullscreen message={tMap.loading} />;
