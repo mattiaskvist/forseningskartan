@@ -1,12 +1,14 @@
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useState } from "react";
 import { Button, Box, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { Departure } from "../types/sl";
 import { formatDelay, formatTime, getDelayMinutes } from "../utils/time";
-import { DepartureHistoricalDelays } from "./DepartureHistoricalDelays";
-import { DatePreset, EventType } from "../types/departureDelay";
+import { DepartureHistoricalDelays } from "../components/DepartureHistoricalDelays";
+import { CustomDateRange, DatePreset, EventType } from "../types/departureDelay";
 import { DelaySummary } from "../types/historicalDelay";
+import { TranslationStrings } from "../utils/translations";
 
 dayjs.extend(utc);
 
@@ -19,31 +21,43 @@ function DetailRow({ label, value }: { label: string; value: string }) {
     );
 }
 
-type DepartureDetailsProps = {
+type DepartureDetailsViewProps = {
     departure: Departure;
     onBackToList: () => void;
+    onViewRouteDelayDetails: () => void;
     availableDates: string[];
     selectedDelayDates: string[];
     selectedDepartureDelaySummary: DelaySummary | null;
     isDepartureHistoricalDelayLoading: boolean;
     selectedDatePreset: DatePreset;
-    selectedCustomDate: string | null;
+    selectedCustomDateRange: CustomDateRange | null;
     onDatePresetChange: (preset: DatePreset) => void;
-    onCustomDateChange: (date: string) => void;
+    onCustomDateRangeChange: (dateRange: CustomDateRange | null) => void;
+    t: TranslationStrings["departureDetails"];
+    tHistoricalDelays: TranslationStrings["departureHistoricalDelays"];
+    tDelayStats: TranslationStrings["departureDelayStats"];
+    tDelayControls: TranslationStrings["routeDelayControls"];
+    tDatePicker: TranslationStrings["availableDatesPicker"];
 };
 
-export function DepartureDetails({
+export function DepartureDetailsView({
     departure,
     onBackToList,
+    onViewRouteDelayDetails,
     availableDates,
     selectedDelayDates,
     selectedDepartureDelaySummary,
     isDepartureHistoricalDelayLoading,
     selectedDatePreset,
-    selectedCustomDate,
+    selectedCustomDateRange,
     onDatePresetChange,
-    onCustomDateChange,
-}: DepartureDetailsProps) {
+    onCustomDateRangeChange,
+    t,
+    tHistoricalDelays,
+    tDelayStats,
+    tDelayControls,
+    tDatePicker,
+}: DepartureDetailsViewProps) {
     const [selectedEventType, setSelectedEventType] = useState<EventType>("departure");
 
     const selectedDepartureDate = dayjs(departure.expected ?? departure.scheduled).utc();
@@ -60,8 +74,14 @@ export function DepartureDetails({
                     {departure.line.designation ?? departure.line.id} -{" "}
                     {departure.destination ?? departure.direction}
                 </Typography>
-                <Button variant="text" size="small" onClick={onBackToList}>
-                    Back
+                <Button
+                    variant="text"
+                    size="small"
+                    startIcon={<ArrowBackIcon fontSize="small" />}
+                    onClick={onBackToList}
+                    aria-label={t.back}
+                >
+                    {t.back}
                 </Button>
             </div>
             <Box
@@ -77,14 +97,14 @@ export function DepartureDetails({
                     },
                 }}
             >
-                <DetailRow label="Planned departure" value={formatTime(departure.scheduled)} />
+                <DetailRow label={t.plannedDeparture} value={formatTime(departure.scheduled)} />
                 <DetailRow
-                    label="Expected departure"
+                    label={t.expectedDeparture}
                     value={formatTime(departure.expected ?? departure.scheduled)}
                 />
-                <DetailRow label="Delay" value={formatDelay(getDelayMinutes(departure))} />
+                <DetailRow label={t.delay} value={formatDelay(getDelayMinutes(departure))} />
                 <DetailRow
-                    label="Stop"
+                    label={t.stop}
                     value={`${departure.stop_area.name} ${departure.stop_point.designation ?? ""}`}
                 />
             </Box>
@@ -93,13 +113,18 @@ export function DepartureDetails({
                 selectedDelayDates={selectedDelayDates}
                 selectedDepartureHourUTC={selectedDepartureHourUTC}
                 selectedDatePreset={selectedDatePreset}
-                selectedCustomDate={selectedCustomDate}
+                selectedCustomDateRange={selectedCustomDateRange}
                 selectedEventType={selectedEventType}
                 onDatePresetChange={onDatePresetChange}
-                onCustomDateChange={onCustomDateChange}
+                onCustomDateRangeChange={onCustomDateRangeChange}
                 onEventTypeChange={setSelectedEventType}
+                onViewRouteDelayDetails={onViewRouteDelayDetails}
                 isLoadingData={isDepartureHistoricalDelayLoading}
                 routeSummary={selectedDepartureDelaySummary}
+                t={tHistoricalDelays}
+                tStats={tDelayStats}
+                tControls={tDelayControls}
+                tDatePicker={tDatePicker}
             />
         </div>
     );

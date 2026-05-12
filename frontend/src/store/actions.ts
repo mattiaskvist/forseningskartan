@@ -13,9 +13,12 @@ import { AppThunk } from "./store";
 import { getSelectedDelayDates } from "./selectors";
 import { getStopPointGidsForSite } from "../utils/site";
 import { transportationModeToRouteType } from "../types/sl";
-import { clearRouteDelayTrend } from "./reducers";
+import { clearRouteDelayTrend, requestMapCenterOnUser, setUserLocation } from "./reducers";
 import { getRouteIdentityKey } from "../utils/route";
 import { DelaySummary } from "../types/historicalDelay";
+import { hideSnackbar } from "./snackbarSlice";
+import { GeolocationRequestErrorCode } from "../types/geolocation";
+import { getGeolocationRequestErrorCode } from "../utils/geolocation";
 
 export const getSites = createAsyncThunk("sites/fetch", fetchSitesACB);
 
@@ -57,11 +60,82 @@ export const getRouteDelays = createAsyncThunk("routeDelays/fetch", (dates: stri
 
 export const getRouteDelayTrend = createAsyncThunk(
     "routeDelayTrend/fetch",
-    ({ dates, routeShortName, routeType, eventType }: RouteDelayTrendParams) =>
-        fetchRouteDelayTrend({ dates, routeShortName, routeType, eventType })
+    ({ dates, routeShortName, routeType, eventType, timeGranularity }: RouteDelayTrendParams) =>
+        fetchRouteDelayTrend({ dates, routeShortName, routeType, eventType, timeGranularity })
 );
 
-// fetch historical delay summary for selected departure
+// https://redux-toolkit.js.org/usage/usage-with-typescript#createasyncthunk
+// Thunk that requests browser geolocation with graceful fallbacks
+// Returns typed reject values on known failure modes for user feedback
+export const requestUserGeolocation = createAsyncThunk<
+    void, // return type
+    void, // argument type
+    { rejectValue: GeolocationRequestErrorCode } // thunkAPI fields type
+>(
+    "sites/requestUserGeolocation",
+    async (
+        _, // no arguments
+        { dispatch, rejectWithValue } // provided by thunkAPI object
+    ) => {
+        if (!navigator.geolocation) {
+            return rejectWithValue("unsupported");
+        }
+
+        if (!window.isSecureContext) {
+            return rejectWithValue("insecure-context");
+        }
+
+        try {
+            await new Promise<void>((resolve, reject) => {
+                function successCallback(position: GeolocationPosition) {
+                    dispatch(hideSnackbar());
+                    dispatch(
+                        setUserLocation({
+                            lat: position.coords.latitude,
+                            lon: position.coords.longitude,
+                        })
+                    );
+                    dispatch(requestMapCenterOnUser());
+                    resolve();
+                }
+
+                function errorCallback(error: GeolocationPositionError) {
+                    // If high accuracy failed, try one more time with low accuracy
+                    if (error.code === error.POSITION_UNAVAILABLE || error.code === error.TIMEOUT) {
+                        navigator.geolocation.getCurrentPosition(
+                            successCallback,
+                            finalErrorCallback,
+                            {
+                                enableHighAccuracy: false,
+                                timeout: 15000,
+                                maximumAge: 300000, // 5 minutes
+                            }
+                        );
+                        return;
+                    }
+                    finalErrorCallback(error);
+                }
+
+                function finalErrorCallback(error: GeolocationPositionError) {
+                    reject(getGeolocationRequestErrorCode(error));
+                }
+
+                // Start with high accuracy request
+                navigator.geolocation.getCurrentPosition(successCallback, errorCallback, {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 60000, // Allow 1 minute old cached position
+                });
+            });
+        } catch (error) {
+            return rejectWithValue(error as GeolocationRequestErrorCode);
+        }
+    }
+);
+
+// Fetch historical delay summary for selected departure
+// Reads store to build parameters for historical delay query
+// Returns early on missing selection or invalid timestamps
 export function fetchSelectedDepartureStopDelays(): AppThunk {
     return (dispatch, getState) => {
         const state = getState();
@@ -81,7 +155,7 @@ export function fetchSelectedDepartureStopDelays(): AppThunk {
 
         const selectedDates = getSelectedDelayDates({
             selectedDatePreset: state.departureUI.selectedDatePreset,
-            selectedCustomDate: state.departureUI.selectedCustomDate,
+            selectedCustomDateRange: state.departureUI.selectedCustomDateRange,
             availableDates: state.aggregatedDates.data,
         });
         if (selectedDates.length === 0) {
@@ -120,12 +194,13 @@ export function fetchSelectedDepartureStopDelays(): AppThunk {
     };
 }
 
+// Dispatches daily route delays for the computed selected dates
 export function fetchSelectedRouteDelays(): AppThunk {
     return (dispatch, getState) => {
         const state = getState();
         const selectedDates = getSelectedDelayDates({
             selectedDatePreset: state.routeDelayUI.selectedDatePreset,
-            selectedCustomDate: state.routeDelayUI.selectedCustomDate,
+            selectedCustomDateRange: state.routeDelayUI.selectedCustomDateRange,
             availableDates: state.aggregatedDates.data,
         });
 
@@ -137,6 +212,7 @@ export function fetchSelectedRouteDelays(): AppThunk {
     };
 }
 
+// Compute and dispatch route trend fetch, clears trend if selection invalid
 export function fetchSelectedRouteTrend(): AppThunk {
     return (dispatch, getState) => {
         const state = getState();
@@ -146,7 +222,7 @@ export function fetchSelectedRouteTrend(): AppThunk {
         const selectedRouteSummary = state.routeDelays.data?.find(isSelectedRouteSummaryCB);
         const selectedDates = getSelectedDelayDates({
             selectedDatePreset: state.routeDelayUI.selectedDatePreset,
-            selectedCustomDate: state.routeDelayUI.selectedCustomDate,
+            selectedCustomDateRange: state.routeDelayUI.selectedCustomDateRange,
             availableDates: state.aggregatedDates.data,
         });
 
@@ -168,6 +244,7 @@ export function fetchSelectedRouteTrend(): AppThunk {
                 routeShortName: selectedRouteShortName,
                 routeType: selectedRouteType,
                 eventType: state.routeDelayUI.selectedEventType,
+                timeGranularity: state.routeDelayUI.selectedTimeGranularity,
             })
         );
     };

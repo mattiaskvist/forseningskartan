@@ -7,7 +7,7 @@ type SelectSiteParams = {
     siteId: number | null;
 };
 
-export function selectSiteCB({ dispatch, siteId }: SelectSiteParams) {
+export function selectSite({ dispatch, siteId }: SelectSiteParams) {
     dispatch(setSelectedDeparture(null));
     dispatch(setSelectedSiteId(siteId));
     if (siteId === null) {

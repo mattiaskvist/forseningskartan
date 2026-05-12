@@ -7,6 +7,8 @@ import type { AppThunk } from "./store";
 let loginAuthUI: firebaseui.auth.AuthUI | null = null;
 
 export function initializeAuthSync(): AppThunk<() => void> {
+    // Initialize auth state listener and return unsubscribe to allow cleanup
+    // The listener dispatches setUser when auth state changes
     return (dispatch) => initializeAuthListener(dispatch);
 }
 
@@ -20,6 +22,7 @@ export const deleteCurrentUser = createAsyncThunk("auth/delete", async () => {
 
 export function getLoginAuthUI(): AppThunk<firebaseui.auth.AuthUI> {
     return () => {
+        // Create or reuse a firebaseui.AuthUI instance
         if (!loginAuthUI) {
             loginAuthUI = firebaseui.auth.AuthUI.getInstance() || new firebaseui.auth.AuthUI(auth);
         }

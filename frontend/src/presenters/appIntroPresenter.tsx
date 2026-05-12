@@ -1,37 +1,25 @@
 import { AppIntroView } from "../views/appIntroView";
 import {
     getAuthLoadingCB,
+    getCurrentLanguageCB,
     getHasSeenAppIntroCB,
     getUserPreferencesLoadingCB,
 } from "../store/selectors";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import { setHasSeenAppIntro } from "../store/userPreferencesSlice";
-
-const appIntroItems = [
-    {
-        title: "Find a stop",
-        description: "Search or filter the map to inspect Stockholm transit stops.",
-    },
-    {
-        title: "Check live departures",
-        description: "Open a stop to see upcoming departures and current delay predictions.",
-    },
-    {
-        title: "Compare historical delays",
-        description: "Select a departure to see how that line usually performs at similar times.",
-    },
-    {
-        title: "Explore route delays",
-        description: "Use Route Delays to compare routes, dates, transport modes, and trends.",
-    },
-];
+import { translations } from "../utils/translations";
 
 export function AppIntroPresenter() {
     const dispatch = useAppDispatch();
     const hasSeenAppIntro = useAppSelector(getHasSeenAppIntroCB);
     const isAuthLoading = useAppSelector(getAuthLoadingCB);
-    const isLoadingFirebasePreferences = useAppSelector(getUserPreferencesLoadingCB);
-    const shouldShowIntro = !isAuthLoading && !isLoadingFirebasePreferences && !hasSeenAppIntro;
+    const isLoadingSavedPreferences = useAppSelector(getUserPreferencesLoadingCB);
+    const currentLanguage = useAppSelector(getCurrentLanguageCB);
+    const t = translations[currentLanguage].appIntro;
+
+    // The presenter gates the dialog until auth and saved preferences are settled,
+    // so logged-in users do not see a localStorage-based intro flash before Firebase loads.
+    const shouldShowIntro = !isAuthLoading && !isLoadingSavedPreferences && !hasSeenAppIntro;
 
     function closeIntroACB() {
         dispatch(setHasSeenAppIntro(true));
@@ -40,10 +28,10 @@ export function AppIntroPresenter() {
     return (
         <AppIntroView
             isOpen={shouldShowIntro}
-            title="Welcome to Förseningskartan"
-            description="Use live and historical delay data to understand what is happening now and what usually happens over time."
-            items={appIntroItems}
-            actionLabel="Get started"
+            title={t.title}
+            description={t.description}
+            items={t.items}
+            actionLabel={t.actionLabel}
             onClose={closeIntroACB}
         />
     );

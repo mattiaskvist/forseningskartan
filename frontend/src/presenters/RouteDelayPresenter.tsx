@@ -1,36 +1,59 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { RouteDelayView } from "../views/routeDelayView";
 import {
     getAggregatedDatesCB,
     getAggregatedDatesLoadingCB,
-    getRouteDelaySelectedCustomDateCB,
+    getRouteDelaySelectedCustomDateRangeCB,
     getRouteDelaySelectedDatePresetCB,
     getRouteDelaySelectedEventTypeCB,
     getRouteDelaySelectedRouteKeyCB,
     getRouteDelaySelectedTransportationModeCB,
+    getRouteDelaySelectedTimeGranularityCB,
     getRouteDelayTrendLoadingCB,
     getRouteDelayTrendPointsCB,
     getSelectedRouteDelayDatesCB,
     getRouteDelaysCB,
     getRouteDelaysLoadingCB,
+    getCurrentLanguageCB,
+    getRouteDelaySelectedSectionCB,
+    getRouteDelaySearchQueryCB,
+    getRouteDelayRoutesPerPageCB,
+    getRouteDelayCurrentPageCB,
 } from "../store/selectors";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import {
-    setRouteDelayCustomDate,
+    setRouteDelayCustomDateRange,
     setRouteDelayDatePreset,
     setRouteDelayEventType,
     setRouteDelaySelectedRouteKey,
     setRouteDelayTransportationMode,
+    setRouteDelayTimeGranularity,
+    setRouteDelaySearchQuery,
+    setRouteDelayCurrentPage,
+    setRouteDelaySelectedSection,
+    setRouteDelayRoutesPerPage,
 } from "../store/reducers";
 import { Suspense } from "../components/Suspense";
 import { DelaySummary, RouteType } from "../types/historicalDelay";
-import { DatePreset, EventType } from "../types/departureDelay";
+import {
+    CustomDateRange,
+    DatePreset,
+    EventType,
+    getPresetDescription,
+} from "../types/departureDelay";
+import { translations } from "../utils/translations";
 import { TransportationMode, transportationModeToRouteType } from "../types/sl";
-import { PageSizeOption, RouteDelayListItem, RouteDelaySection } from "../types/routeDelays";
+import {
+    PageSizeOption,
+    RouteDelayListItem,
+    RouteDelaySection,
+    RouteDelayTimeGranularity,
+} from "../types/routeDelays";
 import { getAvgDelayMinutes, getAvgDelaySeconds } from "../utils/time";
 import { compareRouteNamesCB, getRouteDisplayName, getRouteIdentityKey } from "../utils/route";
-import { getPresetDescription } from "../types/departureDelay";
 import { routeTypesToTransportationModes } from "../utils/transportationMode";
+import { RouteDelayContentViewProps } from "../views/routeDelayContentView";
+import { normalizeText } from "../utils/text";
 
 function getRouteModeKey(summary: DelaySummary): RouteType | null {
     return summary.route?.type ?? null;
@@ -44,16 +67,18 @@ export function RouteDelayPresenter() {
     const isRouteDelaysLoading = useAppSelector(getRouteDelaysLoadingCB);
     const isAggregatedDatesLoading = useAppSelector(getAggregatedDatesLoadingCB);
     const selectedDatePreset = useAppSelector(getRouteDelaySelectedDatePresetCB);
-    const selectedCustomDate = useAppSelector(getRouteDelaySelectedCustomDateCB);
+    const selectedCustomDateRange = useAppSelector(getRouteDelaySelectedCustomDateRangeCB);
     const selectedEventType = useAppSelector(getRouteDelaySelectedEventTypeCB);
     const selectedTransportationMode = useAppSelector(getRouteDelaySelectedTransportationModeCB);
     const selectedRouteKey = useAppSelector(getRouteDelaySelectedRouteKeyCB);
     const selectedRouteTrend = useAppSelector(getRouteDelayTrendPointsCB);
     const isTrendLoading = useAppSelector(getRouteDelayTrendLoadingCB);
-    const [selectedSection, setSelectedSection] = useState<RouteDelaySection>("routes");
-    const [searchQuery, setSearchQuery] = useState("");
-    const [routesPerPage, setRoutesPerPage] = useState<PageSizeOption>(25);
-    const [currentPage, setCurrentPage] = useState(1);
+    const timeGranularity = useAppSelector(getRouteDelaySelectedTimeGranularityCB);
+    const currentLanguage = useAppSelector(getCurrentLanguageCB);
+    const selectedSection = useAppSelector(getRouteDelaySelectedSectionCB);
+    const searchQuery = useAppSelector(getRouteDelaySearchQueryCB);
+    const routesPerPage = useAppSelector(getRouteDelayRoutesPerPageCB);
+    const currentPage = useAppSelector(getRouteDelayCurrentPageCB);
 
     const matchesTransportationFilterCB = useCallback(
         (summary: DelaySummary): boolean => {
@@ -65,14 +90,16 @@ export function RouteDelayPresenter() {
         [selectedTransportationMode]
     );
 
+    // Apply transportation-mode filter and search, then sort routes
+    // Memoized to avoid re-filtering on unrelated changes
     const filteredAndSortedRoutes = useMemo(() => {
-        const normalizedSearch = searchQuery.trim().toLowerCase();
+        const normalizedSearch = normalizeText(searchQuery);
 
         function matchesSearchCB(summary: DelaySummary): boolean {
             if (normalizedSearch === "") {
                 return true;
             }
-            return getRouteDisplayName(summary).toLowerCase().includes(normalizedSearch);
+            return normalizeText(getRouteDisplayName(summary)).includes(normalizedSearch);
         }
 
         return routeDelays
@@ -83,6 +110,7 @@ export function RouteDelayPresenter() {
 
     const totalFilteredRoutes = filteredAndSortedRoutes.length;
     const totalPages = Math.max(1, Math.ceil(totalFilteredRoutes / routesPerPage));
+    // Ensure current page is within bounds after filtering changes
     const safeCurrentPage = Math.min(currentPage, totalPages);
 
     const pagedRoutes = useMemo(() => {
@@ -103,14 +131,16 @@ export function RouteDelayPresenter() {
     }, [pagedRoutes, selectedEventType]);
 
     const selectedDateText = useMemo(() => {
-        return getPresetDescription(selectedDates);
-    }, [selectedDates]);
+        const t = translations[currentLanguage].departureHistoricalDelays;
+        return getPresetDescription(selectedDates, t.selectedDatesLabel, t.noAvailableDates);
+    }, [selectedDates, currentLanguage]);
 
     const routesInfoText = useMemo(() => {
+        const t = translations[currentLanguage].routeDelay;
         return selectedSection === "routes"
-            ? `Showing ${pagedRouteItems.length} of ${totalFilteredRoutes} filtered routes`
-            : `Showing ${totalFilteredRoutes} filtered routes`;
-    }, [selectedSection, pagedRouteItems, totalFilteredRoutes]);
+            ? t.showingFilteredRoutes(pagedRouteItems.length, totalFilteredRoutes)
+            : t.showingAllFilteredRoutes(totalFilteredRoutes);
+    }, [selectedSection, pagedRouteItems, totalFilteredRoutes, currentLanguage]);
 
     const transportationModeOptions = useMemo(() => {
         function isNonNullRouteTypeCB(type: RouteType | null): type is RouteType {
@@ -123,6 +153,7 @@ export function RouteDelayPresenter() {
         return routeTypesToTransportationModes(availableRouteTypes);
     }, [routeDelays]);
 
+    // Leaderboard: sort by average delay descending and map to display items
     const leaderboardItems = useMemo((): RouteDelayListItem[] => {
         const filteredRoutes = routeDelays.filter(matchesTransportationFilterCB);
 
@@ -157,28 +188,23 @@ export function RouteDelayPresenter() {
     }, [routeDelays, selectedRouteKey]);
 
     function handleDatePresetChangeACB(preset: DatePreset) {
-        setCurrentPage(1);
         dispatch(setRouteDelayDatePreset(preset));
     }
 
-    function handleCustomDateChangeACB(date: string) {
-        setCurrentPage(1);
-        dispatch(setRouteDelayCustomDate(date));
+    function handleCustomDateRangeChangeACB(dateRange: CustomDateRange | null) {
+        dispatch(setRouteDelayCustomDateRange(dateRange));
     }
 
     function handleEventTypeChangeACB(eventType: EventType) {
-        setCurrentPage(1);
         dispatch(setRouteDelayEventType(eventType));
     }
 
     function handleTransportationModeChangeACB(filter: TransportationMode) {
-        setCurrentPage(1);
         dispatch(setRouteDelayTransportationMode(filter));
     }
 
     function handleSearchQueryChangeACB(query: string) {
-        setSearchQuery(query);
-        setCurrentPage(1);
+        dispatch(setRouteDelaySearchQuery(query));
     }
 
     function handleSelectRouteACB(routeKey: string | null) {
@@ -190,22 +216,52 @@ export function RouteDelayPresenter() {
     }
 
     function handlePageChangeACB(nextPage: number) {
-        setCurrentPage(nextPage);
+        dispatch(setRouteDelayCurrentPage(nextPage));
     }
 
     function handleSetSelectedSectionACB(section: RouteDelaySection) {
-        setSelectedSection(section);
-        dispatch(setRouteDelaySelectedRouteKey(null));
+        dispatch(setRouteDelaySelectedSection(section));
     }
 
     function handleRoutesPerPageChangeACB(nextPageSize: PageSizeOption) {
-        setRoutesPerPage(nextPageSize);
-        setCurrentPage(1);
+        dispatch(setRouteDelayRoutesPerPage(nextPageSize));
     }
 
-    if (isRouteDelaysLoading || isAggregatedDatesLoading) {
-        return <Suspense message="Loading route delays..." />;
+    function handleTimeGranularityChangeACB(granularity: RouteDelayTimeGranularity) {
+        dispatch(setRouteDelayTimeGranularity(granularity));
     }
+
+    if (isAggregatedDatesLoading) {
+        return <Suspense message={translations[currentLanguage].routeDelay.loading} />;
+    }
+
+    const isRouteDetailsOpen = selectedRouteKey !== null;
+    const routeDelayContentViewProps: RouteDelayContentViewProps = {
+        selectedSection,
+        isRouteDetailsOpen,
+        pagedRouteItems,
+        currentPage: safeCurrentPage,
+        totalPages,
+        routesPerPage,
+        onSelectRoute: handleSelectRouteACB,
+        onPageChange: handlePageChangeACB,
+        onRoutesPerPageChange: handleRoutesPerPageChangeACB,
+        selectedRouteSummary,
+        selectedEventType,
+        trendPoints: selectedRouteTrend,
+        isTrendLoading,
+        isRouteDelaysLoading,
+        onBackToRoutes: handleBackToRoutesACB,
+        timeGranularity,
+        onTimeGranularityChange: handleTimeGranularityChangeACB,
+        leaderboardItems: leaderboardItems,
+        tRouteDelay: translations[currentLanguage].routeDelay,
+        tRouteDelayLeaderboard: translations[currentLanguage].routeDelayLeaderboard,
+        tRouteDetailsPage: translations[currentLanguage].routeDetailsPage,
+        tStats: translations[currentLanguage].departureDelayStats,
+        tRouteDelayRoutes: translations[currentLanguage].routeDelayRoutes,
+        tRouteDelayRouteFallback: translations[currentLanguage].routeDelayRouteFallback,
+    };
 
     return (
         <RouteDelayView
@@ -213,31 +269,25 @@ export function RouteDelayPresenter() {
             selectedDateText={selectedDateText}
             routesInfoText={routesInfoText}
             selectedDatePreset={selectedDatePreset}
-            selectedCustomDate={selectedCustomDate}
+            selectedCustomDateRange={selectedCustomDateRange}
             selectedEventType={selectedEventType}
             selectedTransportationMode={selectedTransportationMode}
             searchQuery={searchQuery}
-            pagedRouteItems={pagedRouteItems}
-            currentPage={safeCurrentPage}
-            totalPages={totalPages}
-            routesPerPage={routesPerPage}
-            selectedRouteKey={selectedRouteKey}
-            selectedRouteSummary={selectedRouteSummary}
-            leaderboardItems={leaderboardItems}
-            trendPoints={selectedRouteTrend}
-            isTrendLoading={isTrendLoading}
+            isRouteDetailsOpen={isRouteDetailsOpen}
             transportationModeOptions={transportationModeOptions}
             availableDates={availableDates}
             onDatePresetChange={handleDatePresetChangeACB}
-            onCustomDateChange={handleCustomDateChangeACB}
+            onCustomDateRangeChange={handleCustomDateRangeChangeACB}
             onEventTypeChange={handleEventTypeChangeACB}
             onTransportationModeChange={handleTransportationModeChangeACB}
             onSearchQueryChange={handleSearchQueryChangeACB}
             onSelectedSectionChange={handleSetSelectedSectionACB}
-            onSelectRoute={handleSelectRouteACB}
-            onBackToRoutes={handleBackToRoutesACB}
-            onPageChange={handlePageChangeACB}
-            onRoutesPerPageChange={handleRoutesPerPageChangeACB}
+            tRouteDelay={translations[currentLanguage].routeDelay}
+            tSectionToggle={translations[currentLanguage].routeDelaySectionToggle}
+            tControls={translations[currentLanguage].routeDelayControls}
+            tDatePicker={translations[currentLanguage].availableDatesPicker}
+            tTransportModes={translations[currentLanguage].transportModes}
+            routeDelayContentViewProps={routeDelayContentViewProps}
         />
     );
 }

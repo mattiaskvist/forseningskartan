@@ -1,41 +1,50 @@
 import { useCallback, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { MapView } from "../views/mapView";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import {
     getAggregatedDatesCB,
+    getAppStylePreferenceCB,
     getAuthUserCB,
+    getCurrentLanguageCB,
     getDepartureHistoricalDelayLoadingCB,
     getDepartureHistoricalDelaySummaryCB,
     getDeparturesCB,
-    getDeparturesLastUpdatedCB,
     getDeparturesLoadingCB,
     getFavoriteSiteIdsCB,
+    getHideStopsWithoutDeparturesCB,
+    getMapTransportationModeFilterCB,
     getRecentSearchSiteIdsCB,
-    getAppStylePreferenceCB,
-    getSelectedCustomDateCB,
+    getSelectedCustomDateRangeCB,
+    getRoutesByStopPointCB,
     getSelectedDatePresetCB,
     getSelectedDelayDatesCB,
     getSelectedDepartureCB,
+    getSelectedSiteCB,
     getSitesCB,
     getSitesLoadingCB,
-    getStopPointsCB,
     getStopPointGidsBySiteIdCB,
-    getStopPointsLoadingCB,
-    getSelectedSiteCB,
-    getRoutesByStopPointCB,
     getStopPointRoutesErrorCB,
-    getMapTransportationModeFilterCB,
-    getHideStopsWithoutDeparturesCB,
+    getUserLocationCB,
+    getMapCenterOnUserRequestedAtCB,
+    getStopPointsCB,
+    getStopPointsLoadingCB,
+    getDepartureSelectedModeCB,
+    getDepartureSearchQueryCB,
+    getDepartureUniqueModesCB,
 } from "../store/selectors";
-import { selectSiteCB } from "../store/selection";
+import { selectSite } from "../store/selection";
 import {
-    setSelectedCustomDate,
+    setSearchQuery,
+    setSelectedCustomDateRange,
     setSelectedDatePreset,
     setSelectedDeparture,
+    setSelectedMode,
     setSelectedSiteId,
+    setRouteDelaySelectedRouteKey,
 } from "../store/reducers";
-import { Departure, TransportationMode } from "../types/sl";
-import { DatePreset } from "../types/departureDelay";
+import { Departure, ModeWithOther, TransportationMode } from "../types/sl";
+import { CustomDateRange, DatePreset } from "../types/departureDelay";
 import { AppStyle } from "../types/appStyle";
 import { DepartureViewProps } from "../views/departureView";
 import {
@@ -47,35 +56,26 @@ import {
 } from "../store/userPreferencesSlice";
 import { showSnackbar } from "../store/snackbarSlice";
 import { Suspense } from "../components/Suspense";
-import { getUpcomingDepartures } from "../utils/departures";
+import { getRouteDelayKey, getUpcomingDepartures } from "../utils/departures";
 import { RouteMeta, RouteType } from "../types/historicalDelay";
 import {
     getSitesByTransportationMode,
     routeTypesToTransportationModes,
 } from "../utils/transportationMode";
 import { getSitesWithRoutes } from "../utils/site";
-import { getDepartures } from "../store/actions";
-import { formatTime } from "../utils/time";
-
-// a refreshed departure may have changed prediction data, so match on stable trip identity
-function isSameDepartureCB(a: Departure, b: Departure): boolean {
-    return (
-        a.journey.id === b.journey.id &&
-        a.stop_point.id === b.stop_point.id &&
-        a.scheduled === b.scheduled
-    );
-}
+import { translations } from "../utils/translations";
+import { requestUserGeolocation } from "../store/actions";
 
 export function MapPresenter() {
     const dispatch = useAppDispatch();
+    const navigate = useNavigate();
     const selectedSite = useAppSelector(getSelectedSiteCB);
     const departureResponse = useAppSelector(getDeparturesCB);
     const isDeparturesLoading = useAppSelector(getDeparturesLoadingCB);
-    const departuresLastUpdated = useAppSelector(getDeparturesLastUpdatedCB);
     const availableDates = useAppSelector(getAggregatedDatesCB);
     const selectedDeparture = useAppSelector(getSelectedDepartureCB);
     const selectedDatePreset = useAppSelector(getSelectedDatePresetCB);
-    const selectedCustomDate = useAppSelector(getSelectedCustomDateCB);
+    const selectedCustomDateRange = useAppSelector(getSelectedCustomDateRangeCB);
     const selectedDelayDates = useAppSelector(getSelectedDelayDatesCB);
     const selectedDepartureDelaySummary = useAppSelector(getDepartureHistoricalDelaySummaryCB);
     const isDepartureHistoricalDelayLoading = useAppSelector(getDepartureHistoricalDelayLoadingCB);
@@ -83,6 +83,7 @@ export function MapPresenter() {
     const favoriteSiteIds = useAppSelector(getFavoriteSiteIdsCB);
     const recentSearchSiteIds = useAppSelector(getRecentSearchSiteIdsCB);
     const appStyle = useAppSelector(getAppStylePreferenceCB);
+    const currentLanguage = useAppSelector(getCurrentLanguageCB);
     const sites = useAppSelector(getSitesCB);
     const isSitesLoading = useAppSelector(getSitesLoadingCB);
     const stopPoints = useAppSelector(getStopPointsCB);
@@ -90,8 +91,14 @@ export function MapPresenter() {
     const isStopPointsLoading = useAppSelector(getStopPointsLoadingCB);
     const routesByStopPoint = useAppSelector(getRoutesByStopPointCB);
     const routesByStopPointError = useAppSelector(getStopPointRoutesErrorCB);
+    const userLocation = useAppSelector(getUserLocationCB);
+    const mapCenterOnUserRequestedAt = useAppSelector(getMapCenterOnUserRequestedAtCB);
     const selectedTransportationMode = useAppSelector(getMapTransportationModeFilterCB);
     const hideStopsWithoutDepartures = useAppSelector(getHideStopsWithoutDeparturesCB);
+    const departureSelectedMode = useAppSelector(getDepartureSelectedModeCB);
+    const departureSearchQuery = useAppSelector(getDepartureSearchQueryCB);
+    const departureUniqueModes = useAppSelector(getDepartureUniqueModesCB);
+    const tMap = translations[currentLanguage].map;
 
     const routesByStopPointsUnavailable = routesByStopPointError !== null || !routesByStopPoint;
     const transportationModeOptions = useMemo(() => {
@@ -102,10 +109,13 @@ export function MapPresenter() {
         function getRouteTypeCB(route: RouteMeta): RouteType {
             return route.type;
         }
+
         const routeTypes = new Set(Object.values(routesByStopPoint).flat().map(getRouteTypeCB));
         return routeTypesToTransportationModes(routeTypes);
     }, [routesByStopPointsUnavailable, routesByStopPoint]);
 
+    // Compute visible sites using filters and route availability
+    // Memoized to avoid recomputing on unrelated store updates
     const filteredSites = useMemo(() => {
         if (!sites || !stopPoints) {
             return [];
@@ -127,18 +137,18 @@ export function MapPresenter() {
             stopPointGidsBySiteId
         );
     }, [
-        sites,
-        selectedTransportationMode,
-        routesByStopPointsUnavailable,
-        routesByStopPoint,
-        stopPoints,
-        stopPointGidsBySiteId,
         hideStopsWithoutDepartures,
+        routesByStopPoint,
+        routesByStopPointsUnavailable,
+        selectedTransportationMode,
+        sites,
+        stopPointGidsBySiteId,
+        stopPoints,
     ]);
 
     const handleSelectSiteCB = useCallback(
         (siteId: number | null) => {
-            selectSiteCB({ dispatch, siteId });
+            selectSite({ dispatch, siteId });
             if (siteId !== null) {
                 dispatch(recordRecentSearchSiteId(siteId));
             }
@@ -147,7 +157,7 @@ export function MapPresenter() {
     );
 
     if (isSitesLoading || !sites || isStopPointsLoading || !stopPoints) {
-        return <Suspense fullscreen message="Loading transit data and preparing the map..." />;
+        return <Suspense fullscreen message={tMap.loading} />;
     }
 
     function closeDeparturesViewACB() {
@@ -167,14 +177,19 @@ export function MapPresenter() {
         dispatch(setSelectedDatePreset(preset));
     }
 
-    function setSelectedCustomDateACB(date: string) {
-        dispatch(setSelectedCustomDate(date));
+    function setSelectedCustomDateRangeACB(dateRange: CustomDateRange | null) {
+        dispatch(setSelectedCustomDateRange(dateRange));
     }
 
     function handleAppStyleChangeACB(style: AppStyle) {
         dispatch(setAppStylePreference(style));
     }
 
+    function handleRequestMapCenterOnUserACB() {
+        dispatch(requestUserGeolocation());
+    }
+
+    // Toggle favorite stop requires login and provides snackbar feedback
     function toggleFavoriteStopACB() {
         if (!selectedSite) {
             return;
@@ -183,7 +198,7 @@ export function MapPresenter() {
         if (!user) {
             dispatch(
                 showSnackbar({
-                    message: "Log in to save favorite stops.",
+                    message: tMap.loginToSaveFavoriteStops,
                     severity: "info",
                 })
             );
@@ -194,7 +209,7 @@ export function MapPresenter() {
         dispatch(toggleFavoriteSiteId(selectedSite.id));
         dispatch(
             showSnackbar({
-                message: isFavorite ? "Removed stop from favorites." : "Added stop to favorites.",
+                message: isFavorite ? tMap.stopRemovedFromFavorites : tMap.stopAddedToFavorites,
                 severity: "success",
             })
         );
@@ -208,28 +223,26 @@ export function MapPresenter() {
         dispatch(setHideStopsWithoutDepartures(value));
     }
 
-    async function refreshDeparturesACB() {
-        if (!selectedSite) {
+    function handleSelectedModeChangeACB(mode: ModeWithOther | null) {
+        dispatch(setSelectedMode(mode));
+    }
+
+    function handleSearchQueryChangeACB(query: string) {
+        dispatch(setSearchQuery(query));
+    }
+
+    function handleViewRouteDelayDetailsACB() {
+        if (!selectedDeparture) {
             return;
         }
 
-        try {
-            const refreshedDepartureResponse = await dispatch(
-                getDepartures(selectedSite.id)
-            ).unwrap();
-            if (!selectedDeparture) {
-                return;
-            }
-
-            // keep the detail panel on the same trip after refresh, or return to the list if it disappeared.
-            const refreshedDeparture =
-                refreshedDepartureResponse.departures?.find((departure) =>
-                    isSameDepartureCB(departure, selectedDeparture)
-                ) ?? null;
-            dispatch(setSelectedDeparture(refreshedDeparture));
-        } catch {
-            dispatch(showSnackbar({ message: "Failed to refresh departures.", severity: "error" }));
+        const routeKey = getRouteDelayKey(selectedDeparture);
+        if (!routeKey) {
+            return;
         }
+
+        dispatch(setRouteDelaySelectedRouteKey(routeKey));
+        navigate("/route-delays");
     }
 
     const departures = departureResponse?.departures ?? [];
@@ -237,28 +250,42 @@ export function MapPresenter() {
 
     const departureViewProps: DepartureViewProps | null = selectedSite
         ? {
-              upcomingDepartures,
-              selectedDeparture,
               selectedSiteName: selectedSite.name,
               onClose: closeDeparturesViewACB,
-              onSelectDeparture: selectDepartureACB,
-              onBackToList: returnToDepartureListACB,
-              isLoading: isDeparturesLoading,
-              lastUpdatedText: departuresLastUpdated
-                  ? `Last updated ${formatTime(departuresLastUpdated)}`
-                  : null,
-              onRefreshDepartures: refreshDeparturesACB,
-              availableDates,
-              selectedDelayDates,
-              selectedDepartureDelaySummary,
-              isDepartureHistoricalDelayLoading,
-              selectedDatePreset,
-              selectedCustomDate,
-              onDatePresetChange: setSelectedDatePresetACB,
-              onCustomDateChange: setSelectedCustomDateACB,
               isFavoriteStop: favoriteSiteIds.includes(selectedSite.id),
               isUserLoggedIn: Boolean(user),
               onToggleFavoriteStop: toggleFavoriteStopACB,
+              tHeader: translations[currentLanguage].departureHeader,
+              departureViewContentProps: {
+                  isDeparturesLoading,
+                  selectedDeparture,
+                  upcomingDepartures,
+                  onBackToList: returnToDepartureListACB,
+                  onViewRouteDelayDetails: handleViewRouteDelayDetailsACB,
+                  availableDates,
+                  selectedDelayDates,
+                  selectedDepartureDelaySummary,
+                  isDepartureHistoricalDelayLoading,
+                  selectedDatePreset,
+                  selectedCustomDateRange,
+                  onDatePresetChange: setSelectedDatePresetACB,
+                  onCustomDateRangeChange: setSelectedCustomDateRangeACB,
+                  onSelectDeparture: selectDepartureACB,
+                  uniqueModes: departureUniqueModes,
+                  selectedMode: departureSelectedMode,
+                  onSelectedModeChange: handleSelectedModeChangeACB,
+                  searchQuery: departureSearchQuery,
+                  onSearchQueryChange: handleSearchQueryChangeACB,
+                  tDepartureDetails: translations[currentLanguage].departureDetails,
+                  tHistoricalDelays: translations[currentLanguage].departureHistoricalDelays,
+                  tDelayStats: translations[currentLanguage].departureDelayStats,
+                  tDelayControls: translations[currentLanguage].routeDelayControls,
+                  tDatePicker: translations[currentLanguage].availableDatesPicker,
+                  tDeparture: translations[currentLanguage].departure,
+                  tDepartureList: translations[currentLanguage].departureList,
+                  tTransportModes: translations[currentLanguage].transportModes,
+                  tDepartureEmpty: translations[currentLanguage].departureEmpty,
+              },
           }
         : null;
 
@@ -272,6 +299,14 @@ export function MapPresenter() {
             departureViewProps={departureViewProps}
             appStyle={appStyle}
             onAppStyleChange={handleAppStyleChangeACB}
+            userLocation={userLocation}
+            mapCenterOnUserRequestedAt={mapCenterOnUserRequestedAt}
+            onRequestMapCenterOnUser={handleRequestMapCenterOnUserACB}
+            tMapDeparturePanel={translations[currentLanguage].mapDeparturePanel}
+            tMap={tMap}
+            tSearchBar={translations[currentLanguage].searchBar}
+            tMapSearch={translations[currentLanguage].mapSearch}
+            tAppStyleSelector={translations[currentLanguage].appStyleSelector}
             selectedTransportationMode={selectedTransportationMode}
             transportationModeOptions={transportationModeOptions}
             onTransportationModeChange={handleTransportationModeChangeACB}
@@ -279,6 +314,7 @@ export function MapPresenter() {
             isHideStopsWithoutDeparturesBoxHidden={routesByStopPointsUnavailable}
             onHideStopsWithoutDeparturesChange={handleHideStopsWithoutDeparturesChangeACB}
             totalSiteCount={sites.length}
+            tTransportModes={translations[currentLanguage].transportModes}
         />
     );
 }

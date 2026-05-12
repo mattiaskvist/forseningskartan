@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
     getSites,
     getDepartures,
@@ -10,15 +10,29 @@ import {
     getRouteDelayTrend,
 } from "./actions";
 import { RoutesByStopPoint } from "../api/backend";
-import { Departure, DepartureResponse, Site, StopPoint, TransportationMode } from "../types/sl";
+import {
+    Departure,
+    DepartureResponse,
+    ModeWithOther,
+    Site,
+    StopPoint,
+    TransportationMode,
+} from "../types/sl";
 import { DelaySummary } from "../types/historicalDelay";
-import { DatePreset, EventType } from "../types/departureDelay";
-import { RouteDelayTrendPoint } from "../types/routeDelays";
+import { CustomDateRange, DatePreset, EventType } from "../types/departureDelay";
+import {
+    RouteDelayTrendPoint,
+    RouteDelayTimeGranularity,
+    RouteDelaySection,
+    PageSizeOption,
+} from "../types/routeDelays";
 import { StopPointGidsBySiteId } from "../utils/site";
 
 type SitesState = {
     data: Site[] | null;
     selectedSiteId: number | null;
+    userLocation: { lat: number; lon: number } | null;
+    mapCenterOnUserRequestedAt: number;
     isLoading: boolean;
     error: Error | null;
 };
@@ -28,7 +42,6 @@ type DeparturesState = {
     isLoading: boolean;
     error: Error | null;
     currentRequestId: string | null;
-    lastUpdated: string | null;
 };
 
 type StopPointsState = {
@@ -77,23 +90,54 @@ type RouteDelayTrendState = {
 type DepartureUIState = {
     selectedDeparture: Departure | null;
     selectedDatePreset: DatePreset;
-    selectedCustomDate: string | null;
+    selectedCustomDateRange: CustomDateRange | null;
+    selectedMode: ModeWithOther | null;
+    uniqueModes: ModeWithOther[];
+    searchQuery: string;
 };
 
 type RouteDelayUIState = {
     selectedDatePreset: DatePreset;
-    selectedCustomDate: string | null;
+    selectedCustomDateRange: CustomDateRange | null;
     selectedEventType: EventType;
     selectedTransportationMode: TransportationMode;
     selectedRouteKey: string | null;
+    selectedTimeGranularity: RouteDelayTimeGranularity;
+    selectedSection: RouteDelaySection;
+    searchQuery: string;
+    routesPerPage: PageSizeOption;
+    currentPage: number;
 };
 
 export const sitesSlice = createSlice({
     name: "sites",
-    initialState: { data: null, selectedSiteId: null, isLoading: false, error: null } as SitesState,
+    initialState: {
+        data: null,
+        selectedSiteId: null,
+        userLocation: null,
+        mapCenterOnUserRequestedAt: 0,
+        isLoading: false,
+        error: null,
+    } as SitesState,
     reducers: {
         setSelectedSiteId: (state: SitesState, action: { payload: number | null }) => {
             state.selectedSiteId = action.payload;
+        },
+        setUserLocation: (
+            state: SitesState,
+            action: { payload: { lat: number; lon: number } | null }
+        ) => {
+            state.userLocation = action.payload;
+        },
+        requestMapCenterOnUser: {
+            // reducers should be pure functions, so we can't use Date.now() inside the reducer.
+            // instead we use a prepare function to generate a unique timestamp for each action.
+            prepare: () => {
+                return { payload: Date.now() };
+            },
+            reducer: (state: SitesState, action: PayloadAction<number>) => {
+                state.mapCenterOnUserRequestedAt = action.payload;
+            },
         },
     },
     extraReducers: (builder) => {
@@ -115,7 +159,7 @@ export const sitesSlice = createSlice({
     },
 });
 
-export const { setSelectedSiteId } = sitesSlice.actions;
+export const { setSelectedSiteId, setUserLocation, requestMapCenterOnUser } = sitesSlice.actions;
 
 export const departuresSlice = createSlice({
     name: "departures",
@@ -124,7 +168,6 @@ export const departuresSlice = createSlice({
         isLoading: false,
         error: null,
         currentRequestId: null,
-        lastUpdated: null,
     } as DeparturesState,
     reducers: {},
     extraReducers: (builder) => {
@@ -135,6 +178,8 @@ export const departuresSlice = createSlice({
                 state.currentRequestId = action.meta.requestId;
             })
             .addCase(getDepartures.fulfilled, (state, action) => {
+                // Ignore responses from stale requests using currentRequestId
+                // This prevents race conditions when multiple requests overlap
                 if (state.currentRequestId !== action.meta.requestId) {
                     return;
                 }
@@ -142,10 +187,9 @@ export const departuresSlice = createSlice({
                 state.isLoading = false;
                 state.data = action.payload;
                 state.error = null;
-                state.currentRequestId = null;
-                state.lastUpdated = new Date().toISOString();
             })
             .addCase(getDepartures.rejected, (state, action) => {
+                // Same guard for rejected: only clear state for the active request
                 if (state.currentRequestId !== action.meta.requestId) {
                     return;
                 }
@@ -234,6 +278,8 @@ export const departureHistoricalDelaySlice = createSlice({
                 state.currentRequestId = action.meta.requestId;
             })
             .addCase(getDepartureHistoricalDelaySummary.fulfilled, (state, action) => {
+                // Ignore responses from stale requests using currentRequestId
+                // This prevents race conditions when multiple requests overlap
                 if (state.currentRequestId !== action.meta.requestId) {
                     return;
                 }
@@ -244,6 +290,7 @@ export const departureHistoricalDelaySlice = createSlice({
                 state.currentRequestId = null;
             })
             .addCase(getDepartureHistoricalDelaySummary.rejected, (state, action) => {
+                // Same guard for rejected: only clear state for the active request
                 if (state.currentRequestId !== action.meta.requestId) {
                     return;
                 }
@@ -273,6 +320,8 @@ export const routeDelaysSlice = createSlice({
                 state.currentRequestId = action.meta.requestId;
             })
             .addCase(getRouteDelays.fulfilled, (state, action) => {
+                // Ignore responses from stale requests using currentRequestId
+                // This prevents race conditions when multiple requests overlap
                 if (state.currentRequestId !== action.meta.requestId) {
                     return;
                 }
@@ -283,6 +332,7 @@ export const routeDelaysSlice = createSlice({
                 state.currentRequestId = null;
             })
             .addCase(getRouteDelays.rejected, (state, action) => {
+                // Same guard for rejected: only clear state for the active request
                 if (state.currentRequestId !== action.meta.requestId) {
                     return;
                 }
@@ -375,63 +425,114 @@ export const departureUISlice = createSlice({
     initialState: {
         selectedDeparture: null,
         selectedDatePreset: "sameDayLastWeek",
-        selectedCustomDate: null,
+        selectedCustomDateRange: null,
+        selectedMode: null,
+        uniqueModes: [],
+        searchQuery: "",
     } as DepartureUIState,
     reducers: {
         setSelectedDeparture: (state, action: { payload: Departure | null }) => {
             state.selectedDeparture = action.payload;
             state.selectedDatePreset = "sameDayLastWeek";
-            state.selectedCustomDate = null;
+            state.selectedCustomDateRange = null;
+            state.searchQuery = "";
         },
         setSelectedDatePreset: (state, action: { payload: DatePreset }) => {
             state.selectedDatePreset = action.payload;
         },
-        setSelectedCustomDate: (state, action: { payload: string | null }) => {
-            state.selectedCustomDate = action.payload;
+        setSelectedCustomDateRange: (state, action: { payload: CustomDateRange | null }) => {
+            state.selectedCustomDateRange = action.payload;
+        },
+        setSelectedMode: (state, action: { payload: ModeWithOther | null }) => {
+            state.selectedMode = action.payload;
+        },
+        setUniqueModes: (state, action: { payload: ModeWithOther[] }) => {
+            state.uniqueModes = action.payload;
+        },
+        setSearchQuery: (state, action: { payload: string }) => {
+            state.searchQuery = action.payload;
         },
     },
 });
 
-export const { setSelectedDeparture, setSelectedDatePreset, setSelectedCustomDate } =
-    departureUISlice.actions;
+export const {
+    setSelectedDeparture,
+    setSelectedDatePreset,
+    setSelectedCustomDateRange,
+    setSelectedMode,
+    setUniqueModes,
+    setSearchQuery,
+} = departureUISlice.actions;
 
 export const routeDelayUISlice = createSlice({
     name: "routeDelayUI",
     initialState: {
         selectedDatePreset: "last7Days",
-        selectedCustomDate: null,
+        selectedCustomDateRange: null,
         selectedEventType: "departure",
         selectedTransportationMode: "BUS",
         selectedRouteKey: null,
+        selectedTimeGranularity: "daily",
+        selectedSection: "routes",
+        searchQuery: "",
+        routesPerPage: 25,
+        currentPage: 1,
     } as RouteDelayUIState,
     reducers: {
         setRouteDelayDatePreset: (state, action: { payload: DatePreset }) => {
             state.selectedDatePreset = action.payload;
 
             if (action.payload !== "customDate") {
-                state.selectedCustomDate = null;
+                state.selectedCustomDateRange = null;
             }
+            state.currentPage = 1;
         },
-        setRouteDelayCustomDate: (state, action: { payload: string | null }) => {
-            state.selectedCustomDate = action.payload;
+        setRouteDelayCustomDateRange: (state, action: { payload: CustomDateRange | null }) => {
+            state.selectedCustomDateRange = action.payload;
+            state.currentPage = 1;
         },
         setRouteDelayEventType: (state, action: { payload: EventType }) => {
             state.selectedEventType = action.payload;
+            state.currentPage = 1;
         },
         setRouteDelayTransportationMode: (state, action: { payload: TransportationMode }) => {
             state.selectedTransportationMode = action.payload;
             state.selectedRouteKey = null;
+            state.currentPage = 1;
         },
         setRouteDelaySelectedRouteKey: (state, action: { payload: string | null }) => {
             state.selectedRouteKey = action.payload;
+        },
+        setRouteDelayTimeGranularity: (state, action: { payload: RouteDelayTimeGranularity }) => {
+            state.selectedTimeGranularity = action.payload;
+        },
+        setRouteDelaySelectedSection: (state, action: { payload: RouteDelaySection }) => {
+            state.selectedSection = action.payload;
+            state.selectedRouteKey = null;
+        },
+        setRouteDelaySearchQuery: (state, action: { payload: string }) => {
+            state.searchQuery = action.payload;
+            state.currentPage = 1;
+        },
+        setRouteDelayRoutesPerPage: (state, action: { payload: PageSizeOption }) => {
+            state.routesPerPage = action.payload;
+            state.currentPage = 1;
+        },
+        setRouteDelayCurrentPage: (state, action: { payload: number }) => {
+            state.currentPage = action.payload;
         },
     },
 });
 
 export const {
     setRouteDelayDatePreset,
-    setRouteDelayCustomDate,
+    setRouteDelayCustomDateRange,
     setRouteDelayEventType,
     setRouteDelayTransportationMode,
     setRouteDelaySelectedRouteKey,
+    setRouteDelayTimeGranularity,
+    setRouteDelaySelectedSection,
+    setRouteDelaySearchQuery,
+    setRouteDelayRoutesPerPage,
+    setRouteDelayCurrentPage,
 } = routeDelayUISlice.actions;

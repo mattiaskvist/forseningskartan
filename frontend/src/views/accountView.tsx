@@ -1,13 +1,43 @@
-import { Box, Paper, Typography, Avatar, Button, Divider } from "@mui/material";
+import { useState } from "react";
+import {
+    Box,
+    Paper,
+    Typography,
+    Avatar,
+    Button,
+    Divider,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+} from "@mui/material";
 import { AuthUserState } from "../store/authSlice";
+import { TranslationStrings } from "../utils/translations";
 
 type AccountViewProps = {
     user: AuthUserState;
     onLogout: () => void;
     onDelete: () => void;
+    t: TranslationStrings["account"];
 };
 
-export function AccountView({ user, onLogout, onDelete }: AccountViewProps) {
+export function AccountView({ user, onLogout, onDelete, t }: AccountViewProps) {
+    const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+    function handleDeleteRequestedACB() {
+        setDeleteDialogOpen(true);
+    }
+
+    function handleDeleteCancelledACB() {
+        setDeleteDialogOpen(false);
+    }
+
+    function handleDeleteConfirmedACB() {
+        setDeleteDialogOpen(false);
+        onDelete();
+    }
+
     return (
         <Box
             sx={{
@@ -37,7 +67,7 @@ export function AccountView({ user, onLogout, onDelete }: AccountViewProps) {
                     variant="subtitle1"
                     sx={{ fontWeight: 600, mb: 1, color: "text.primary" }}
                 >
-                    My Account
+                    {t.title}
                 </Typography>
 
                 <Box
@@ -52,7 +82,7 @@ export function AccountView({ user, onLogout, onDelete }: AccountViewProps) {
                     {user.photoURL ? (
                         <Avatar
                             src={user.photoURL}
-                            alt={`${user.displayName || "User"}'s avatar`}
+                            alt={`${user.displayName || t.user}'s avatar`}
                             sx={{ width: 96, height: 96, boxShadow: 3 }}
                         />
                     ) : (
@@ -71,7 +101,7 @@ export function AccountView({ user, onLogout, onDelete }: AccountViewProps) {
 
                     <Box sx={{ textAlign: "center" }}>
                         <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                            {user.displayName || "User"}
+                            {user.displayName || t.user}
                         </Typography>
                         <Typography color="text.secondary">{user.email}</Typography>
                     </Box>
@@ -81,13 +111,30 @@ export function AccountView({ user, onLogout, onDelete }: AccountViewProps) {
 
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, pt: 3 }}>
                     <Button fullWidth variant="outlined" onClick={onLogout}>
-                        Sign Out
+                        {t.signOut}
                     </Button>
-                    <Button fullWidth variant="outlined" color="error" onClick={onDelete}>
-                        Delete Account
+                    <Button
+                        fullWidth
+                        variant="outlined"
+                        color="error"
+                        onClick={handleDeleteRequestedACB}
+                    >
+                        {t.deleteAccount}
                     </Button>
                 </Box>
             </Paper>
+            <Dialog open={isDeleteDialogOpen} onClose={handleDeleteCancelledACB}>
+                <DialogTitle>{t.deleteAccount}</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>{t.deleteConfirm}</DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDeleteCancelledACB}>{t.cancelDelete}</Button>
+                    <Button color="error" variant="contained" onClick={handleDeleteConfirmedACB}>
+                        {t.deleteAccount}
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 }

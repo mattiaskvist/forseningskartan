@@ -1,12 +1,15 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AppStyle, appStyles } from "../types/appStyle";
+import { LanguageCode, isLanguageCode } from "../utils/translations";
 import { TransportationMode } from "../types/sl";
 
 const APP_STYLE_STORAGE_KEY = "appStyle";
 const RECENT_SEARCH_STORAGE_KEY = "recentSearchSiteIds";
+const LANGUAGE_STORAGE_KEY = "language";
 const APP_INTRO_SEEN_STORAGE_KEY = "hasSeenIntro";
 
 function getStoredAppStyle(): AppStyle {
+    // Read persisted app style with safe fallbacks for test environments
     try {
         const stored = localStorage.getItem(APP_STYLE_STORAGE_KEY);
         if (stored && (appStyles as readonly string[]).includes(stored)) {
@@ -19,10 +22,31 @@ function getStoredAppStyle(): AppStyle {
 }
 
 function storeAppStyle(style: AppStyle) {
+    // Persist chosen app style to localStorage, ignore errors in tests
     try {
         localStorage.setItem(APP_STYLE_STORAGE_KEY, style);
     } catch {
         // ignore — test environments
+    }
+}
+
+function getStoredLanguage(): LanguageCode {
+    try {
+        const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+        if (stored && isLanguageCode(stored)) {
+            return stored;
+        }
+    } catch {
+        // ignore
+    }
+    return "en";
+}
+
+function storeLanguage(language: LanguageCode) {
+    try {
+        localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+    } catch {
+        // ignore
     }
 }
 
@@ -106,29 +130,34 @@ export function clearStoredRecentSearchSiteIds() {
     }
 }
 
-export type UserPreferencesState = {
+export type PersistedUserPreferencesState = {
     favoriteSiteIds: number[];
     recentSearchSiteIds: number[];
     appStyle: AppStyle;
+    language: LanguageCode;
     mapTransportationModeFilter: TransportationMode | null;
     hideStopsWithoutDepartures: boolean;
     hasSeenAppIntro: boolean;
-    isLoadingFirebasePreferences: boolean;
 };
 
-export type UserPreferencesData = Omit<UserPreferencesState, "isLoadingFirebasePreferences">;
+// no need to persist the loading state
+export type UserPreferencesState = PersistedUserPreferencesState & {
+    isLoadingSavedPreferences: boolean;
+};
 
 export const defaultUserPreferencesState: UserPreferencesState = {
     favoriteSiteIds: [],
     recentSearchSiteIds: getStoredRecentSearchSiteIds(),
     appStyle: getStoredAppStyle(),
+    language: getStoredLanguage(),
     mapTransportationModeFilter: null,
     hideStopsWithoutDepartures: true,
     hasSeenAppIntro: getStoredHasSeenAppIntro(),
-    isLoadingFirebasePreferences: true,
+    isLoadingSavedPreferences: false,
 };
 
 function normalizeFavoriteSiteIds(favoriteSiteIds: number[]): number[] {
+    // Deduplicate favorite site ids and drop non-integer values
     const uniqueFavoriteSiteIds = new Set<number>();
 
     for (const siteId of favoriteSiteIds) {
@@ -184,7 +213,14 @@ export const userPreferencesSlice = createSlice({
             state.appStyle = action.payload;
             storeAppStyle(action.payload);
         },
-        applyLoadedUserPreferences: (state, action: PayloadAction<UserPreferencesData>) => {
+        setLanguagePreference: (state, action: PayloadAction<LanguageCode>) => {
+            state.language = action.payload;
+            storeLanguage(action.payload);
+        },
+        applyLoadedUserPreferences: (
+            state,
+            action: PayloadAction<PersistedUserPreferencesState>
+        ) => {
             state.favoriteSiteIds = normalizeFavoriteSiteIds(action.payload.favoriteSiteIds);
             state.recentSearchSiteIds = normalizeRecentSearchSiteIds(
                 action.payload.recentSearchSiteIds
@@ -193,15 +229,17 @@ export const userPreferencesSlice = createSlice({
             state.mapTransportationModeFilter = action.payload.mapTransportationModeFilter;
             state.hideStopsWithoutDepartures = action.payload.hideStopsWithoutDepartures;
             state.hasSeenAppIntro = action.payload.hasSeenAppIntro;
-            state.isLoadingFirebasePreferences = false;
+            state.isLoadingSavedPreferences = false;
             storeAppStyle(action.payload.appStyle);
+            state.language = action.payload.language;
+            storeLanguage(action.payload.language);
         },
         setHasSeenAppIntro: (state, action: PayloadAction<boolean>) => {
             state.hasSeenAppIntro = action.payload;
             storeHasSeenAppIntro(action.payload);
         },
         setUserPreferencesLoading: (state, action: PayloadAction<boolean>) => {
-            state.isLoadingFirebasePreferences = action.payload;
+            state.isLoadingSavedPreferences = action.payload;
         },
         setMapTransportationModeFilter: (
             state,
@@ -218,10 +256,11 @@ export const userPreferencesSlice = createSlice({
 export const {
     toggleFavoriteSiteId,
     setAppStylePreference,
+    setLanguagePreference,
     applyLoadedUserPreferences,
+    setHasSeenAppIntro,
     recordRecentSearchSiteId,
     clearRecentSearchSiteIds,
-    setHasSeenAppIntro,
     setUserPreferencesLoading,
     setMapTransportationModeFilter,
     setHideStopsWithoutDepartures,

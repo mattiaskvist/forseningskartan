@@ -1,24 +1,22 @@
 import { createSelector } from "@reduxjs/toolkit";
-import { DatePreset } from "../types/departureDelay";
+import { CustomDateRange, DatePreset } from "../types/departureDelay";
 import { Site } from "../types/sl";
-import { getDatesForPreset, sortDatesDescendingCB } from "../utils/time";
+import { getDatesForPreset } from "../utils/time";
 import { RootState } from "./store";
 
 type SelectedDelayDatesInput = {
     selectedDatePreset: DatePreset;
-    selectedCustomDate: string | null;
+    selectedCustomDateRange: CustomDateRange | null;
     availableDates: string[];
 };
 
+// Compute list of dates based on selected preset and custom date range
 function getSelectedDelayDates({
     selectedDatePreset,
-    selectedCustomDate,
+    selectedCustomDateRange,
     availableDates,
 }: SelectedDelayDatesInput): string[] {
-    const latestDate = [...availableDates].sort(sortDatesDescendingCB)[0];
-    const effectiveCustomDate = selectedCustomDate ?? latestDate ?? null;
-
-    return getDatesForPreset(selectedDatePreset, effectiveCustomDate, availableDates);
+    return getDatesForPreset(selectedDatePreset, selectedCustomDateRange, availableDates);
 }
 
 function getAuthUserCB(state: RootState) {
@@ -39,6 +37,14 @@ function getSitesLoadingCB(state: RootState) {
 
 function getSelectedSiteIdCB(state: RootState) {
     return state.sites.selectedSiteId;
+}
+
+function getUserLocationCB(state: RootState) {
+    return state.sites.userLocation;
+}
+
+function getMapCenterOnUserRequestedAtCB(state: RootState) {
+    return state.sites.mapCenterOnUserRequestedAt;
 }
 
 function getSelectedSiteCB(state: RootState) {
@@ -111,10 +117,6 @@ function getDeparturesLoadingCB(state: RootState) {
     return state.departures.isLoading;
 }
 
-function getDeparturesLastUpdatedCB(state: RootState) {
-    return state.departures.lastUpdated;
-}
-
 function getSelectedDepartureCB(state: RootState) {
     return state.departureUI.selectedDeparture;
 }
@@ -123,16 +125,28 @@ function getSelectedDatePresetCB(state: RootState) {
     return state.departureUI.selectedDatePreset;
 }
 
-function getSelectedCustomDateCB(state: RootState) {
-    return state.departureUI.selectedCustomDate;
+function getSelectedCustomDateRangeCB(state: RootState) {
+    return state.departureUI.selectedCustomDateRange;
+}
+
+function getDepartureSelectedModeCB(state: RootState) {
+    return state.departureUI.selectedMode;
+}
+
+function getDepartureUniqueModesCB(state: RootState) {
+    return state.departureUI.uniqueModes;
+}
+
+function getDepartureSearchQueryCB(state: RootState) {
+    return state.departureUI.searchQuery;
 }
 
 function getRouteDelaySelectedDatePresetCB(state: RootState) {
     return state.routeDelayUI.selectedDatePreset;
 }
 
-function getRouteDelaySelectedCustomDateCB(state: RootState) {
-    return state.routeDelayUI.selectedCustomDate;
+function getRouteDelaySelectedCustomDateRangeCB(state: RootState) {
+    return state.routeDelayUI.selectedCustomDateRange;
 }
 
 function getRouteDelaySelectedEventTypeCB(state: RootState) {
@@ -145,6 +159,26 @@ function getRouteDelaySelectedTransportationModeCB(state: RootState) {
 
 function getRouteDelaySelectedRouteKeyCB(state: RootState) {
     return state.routeDelayUI.selectedRouteKey;
+}
+
+function getRouteDelaySelectedTimeGranularityCB(state: RootState) {
+    return state.routeDelayUI.selectedTimeGranularity;
+}
+
+function getRouteDelaySelectedSectionCB(state: RootState) {
+    return state.routeDelayUI.selectedSection;
+}
+
+function getRouteDelaySearchQueryCB(state: RootState) {
+    return state.routeDelayUI.searchQuery;
+}
+
+function getRouteDelayRoutesPerPageCB(state: RootState) {
+    return state.routeDelayUI.routesPerPage;
+}
+
+function getRouteDelayCurrentPageCB(state: RootState) {
+    return state.routeDelayUI.currentPage;
 }
 
 function getRouteDelayTrendPointsCB(state: RootState) {
@@ -175,6 +209,10 @@ function getAppStylePreferenceCB(state: RootState) {
     return state.userPreferences.appStyle;
 }
 
+function getCurrentLanguageCB(state: RootState) {
+    return state.userPreferences.language;
+}
+
 function getRecentSearchSiteIdsCB(state: RootState) {
     return state.userPreferences.recentSearchSiteIds ?? [];
 }
@@ -192,33 +230,38 @@ function getHasSeenAppIntroCB(state: RootState) {
 }
 
 function getUserPreferencesLoadingCB(state: RootState) {
-    return state.userPreferences.isLoadingFirebasePreferences;
+    return state.userPreferences.isLoadingSavedPreferences;
 }
 
 // use createSelector for computationally expensive selectors
 // to memoize results and avoid unnecessary recalculations
 const getSelectedDelayDatesCB = createSelector(
-    [getSelectedDatePresetCB, getSelectedCustomDateCB, getAggregatedDatesCB],
-    (selectedDatePreset, selectedCustomDate, availableDates) => {
+    [getSelectedDatePresetCB, getSelectedCustomDateRangeCB, getAggregatedDatesCB],
+    (selectedDatePreset, selectedCustomDateRange, availableDates) => {
         return getSelectedDelayDates({
             selectedDatePreset,
-            selectedCustomDate,
+            selectedCustomDateRange,
             availableDates,
         });
     }
 );
 
 const getSelectedRouteDelayDatesCB = createSelector(
-    [getRouteDelaySelectedDatePresetCB, getRouteDelaySelectedCustomDateCB, getAggregatedDatesCB],
-    (selectedDatePreset, selectedCustomDate, availableDates) => {
+    [
+        getRouteDelaySelectedDatePresetCB,
+        getRouteDelaySelectedCustomDateRangeCB,
+        getAggregatedDatesCB,
+    ],
+    (selectedDatePreset, selectedCustomDateRange, availableDates) => {
         return getSelectedDelayDates({
             selectedDatePreset,
-            selectedCustomDate,
+            selectedCustomDateRange,
             availableDates,
         });
     }
 );
 
+// Map favorite site IDs to Site objects using a temporary map
 const getFavoriteSitesCB = createSelector(
     [getFavoriteSiteIdsCB, getSitesCB],
     (favoriteSiteIds, sites): Site[] => {
@@ -263,15 +306,22 @@ export {
     getAggregatedDatesLoadingCB,
     getDeparturesCB,
     getDeparturesLoadingCB,
-    getDeparturesLastUpdatedCB,
     getSelectedDepartureCB,
     getSelectedDatePresetCB,
-    getSelectedCustomDateCB,
+    getSelectedCustomDateRangeCB,
+    getDepartureSelectedModeCB,
+    getDepartureUniqueModesCB,
+    getDepartureSearchQueryCB,
     getRouteDelaySelectedDatePresetCB,
-    getRouteDelaySelectedCustomDateCB,
+    getRouteDelaySelectedCustomDateRangeCB,
     getRouteDelaySelectedEventTypeCB,
     getRouteDelaySelectedTransportationModeCB,
     getRouteDelaySelectedRouteKeyCB,
+    getRouteDelaySelectedTimeGranularityCB,
+    getRouteDelaySelectedSectionCB,
+    getRouteDelaySearchQueryCB,
+    getRouteDelayRoutesPerPageCB,
+    getRouteDelayCurrentPageCB,
     getRouteDelayTrendPointsCB,
     getRouteDelayTrendLoadingCB,
     getSnackbarOpenCB,
@@ -280,11 +330,14 @@ export {
     getFavoriteSiteIdsCB,
     getAppStylePreferenceCB,
     getRecentSearchSiteIdsCB,
+    getCurrentLanguageCB,
     getMapTransportationModeFilterCB,
     getHideStopsWithoutDeparturesCB,
     getHasSeenAppIntroCB,
     getUserPreferencesLoadingCB,
     getFavoriteSitesCB,
+    getUserLocationCB,
+    getMapCenterOnUserRequestedAtCB,
     getSelectedDelayDates,
     getSelectedDelayDatesCB,
     getSelectedRouteDelayDatesCB,

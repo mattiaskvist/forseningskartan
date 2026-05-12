@@ -7,9 +7,11 @@ import TextField from "@mui/material/TextField";
 import HistoryIcon from "@mui/icons-material/History";
 import { useMemo } from "react";
 import { Site } from "../types/sl";
+import { TranslationStrings } from "../utils/translations";
 
 const defaultFilterOptions = createFilterOptions<Site>({
     ignoreCase: true, // case insensitive matching
+    ignoreAccents: true, // accent insensitive matching
     trim: true, // trim whitespace
     limit: 100, // max number of suggestions to show, no limit is a bit laggy
 });
@@ -20,6 +22,7 @@ type SearchBarProps = {
     selectedSite: Site | null;
     handleSelectSiteCB: (siteId: number | null) => void;
     recentSearchSiteIds?: number[];
+    t: TranslationStrings["searchBar"];
 };
 
 export function SearchBar({
@@ -28,6 +31,7 @@ export function SearchBar({
     selectedSite,
     handleSelectSiteCB,
     recentSearchSiteIds = [],
+    t,
 }: SearchBarProps) {
     // useMemo to avoid unnecessary recalculations on every render
     const visibleSiteIds = useMemo(
@@ -62,7 +66,7 @@ export function SearchBar({
     }
 
     function getRenderInputCB(params: AutocompleteRenderInputParams): React.ReactNode {
-        return <TextField {...params} label="Search stops" placeholder="Type a stop name" />;
+        return <TextField {...params} label={t.searchStops} placeholder={t.typeStopName} />;
     }
 
     function renderOptionCB(
@@ -121,7 +125,7 @@ export function SearchBar({
             filterOptions={customFilterOptionsCB}
             getOptionLabel={getSiteNameCB}
             isOptionEqualToValue={isOptionEqualToValueCB}
-            noOptionsText="No stops found"
+            noOptionsText={t.noStopsFound}
             onChange={handleChangeCB}
             openOnFocus
             options={allSites}

@@ -14,13 +14,15 @@ const testTheme = createAppMuiTheme("Dark");
 type RenderPresenterOptions = {
     hasSeenAppIntro?: boolean;
     isAuthLoading?: boolean;
-    isLoadingFirebasePreferences?: boolean;
+    isLoadingSavedPreferences?: boolean;
+    language?: "en" | "sv";
 };
 
 function renderPresenter({
     hasSeenAppIntro = false,
     isAuthLoading = false,
-    isLoadingFirebasePreferences = false,
+    isLoadingSavedPreferences = false,
+    language = "en",
 }: RenderPresenterOptions = {}) {
     const store = configureStore({
         reducer: {
@@ -43,7 +45,8 @@ function renderPresenter({
             userPreferences: {
                 ...defaultUserPreferencesState,
                 hasSeenAppIntro,
-                isLoadingFirebasePreferences,
+                isLoadingSavedPreferences,
+                language,
             },
         },
     });
@@ -88,9 +91,16 @@ describe("AppIntroPresenter", () => {
     });
 
     it("does not show the app intro while Firebase preferences are loading", () => {
-        renderPresenter({ isLoadingFirebasePreferences: true });
+        renderPresenter({ isLoadingSavedPreferences: true });
 
         expect(screen.queryByText("Welcome to Förseningskartan")).not.toBeInTheDocument();
+    });
+
+    it("uses the selected language", () => {
+        renderPresenter({ language: "sv" });
+
+        expect(screen.getByText("Välkommen till Förseningskartan")).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: "Kom igång" })).toBeInTheDocument();
     });
 
     it("stores dismissal when the user closes the intro", () => {

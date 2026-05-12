@@ -2,6 +2,7 @@ import { fireEvent, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { SearchBar } from "./SearchBar";
 import { renderWithTheme } from "../test/renderWithTheme";
+import { translations } from "../utils/translations";
 
 // Simplified fixture
 const sites = [
@@ -19,6 +20,7 @@ describe("SearchBar", () => {
                 selectedSite={null}
                 handleSelectSiteCB={() => {}}
                 recentSearchSiteIds={[3, 1]}
+                t={translations.en.searchBar}
             />
         );
 
@@ -45,6 +47,7 @@ describe("SearchBar", () => {
                 selectedSite={null}
                 handleSelectSiteCB={() => {}}
                 recentSearchSiteIds={[2]}
+                t={translations.en.searchBar}
             />
         );
 

@@ -4,9 +4,10 @@ import type { RoutesByStopPoint } from "../api/backend";
 import type { RouteMeta, RouteType } from "../types/historicalDelay";
 import type { Site, StopPoint, TransportationMode } from "../types/sl";
 import { transportationModes, transportationModeToRouteType } from "../types/sl";
+import { translations } from "./translations";
 import {
     getSitesByTransportationMode,
-    getTransportationModeButtonCB,
+    getTransportationModeButton,
     getTransportationModeLabel,
     routeTypesToTransportationModes,
 } from "./transportationMode";
@@ -54,12 +55,22 @@ describe("getTransportationModeLabel", () => {
         expect(getTransportationModeLabel("BUS")).toBe("Bus");
         expect(getTransportationModeLabel("OTHER")).toBe("Other");
     });
+
+    it("uses translated labels when provided", () => {
+        expect(getTransportationModeLabel("BUS", translations.sv.transportModes)).toBe("Buss");
+        expect(getTransportationModeLabel("OTHER", translations.sv.transportModes)).toBe("Övrigt");
+    });
 });
 
-describe("getTransportationModeButtonCB", () => {
+describe("getTransportationModeButton", () => {
     it("returns a toggle button element with the mode label", () => {
-        render(getTransportationModeButtonCB("BUS"));
+        render(getTransportationModeButton("BUS"));
         expect(screen.getByText("Bus")).toBeInTheDocument();
+    });
+
+    it("returns a toggle button element with translated mode label", () => {
+        render(getTransportationModeButton("BUS", translations.sv.transportModes));
+        expect(screen.getByText("Buss")).toBeInTheDocument();
     });
 });
 

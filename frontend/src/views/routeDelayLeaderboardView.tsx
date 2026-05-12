@@ -1,11 +1,13 @@
 import { Box, Typography } from "@mui/material";
 import { RouteDelayListItem } from "../types/routeDelays";
+import { TranslationStrings } from "../utils/translations";
 
 type RouteDelayLeaderboardViewProps = {
     leaderboardItems: RouteDelayListItem[];
+    t: TranslationStrings["routeDelayLeaderboard"];
 };
 
-export function RouteDelayLeaderboardView({ leaderboardItems }: RouteDelayLeaderboardViewProps) {
+export function RouteDelayLeaderboardView({ leaderboardItems, t }: RouteDelayLeaderboardViewProps) {
     function getLeaderboardItemCB(item: RouteDelayListItem, index: number) {
         const { id, label, avgDelayMinutes, uniqueTrips } = item;
 
@@ -27,7 +29,9 @@ export function RouteDelayLeaderboardView({ leaderboardItems }: RouteDelayLeader
                     <span>{label}</span>
                 </span>
                 <span className="flex font-medium tabular-nums">
-                    <span className="text-right">{avgDelayMinutes} min</span>
+                    <span className="text-right">
+                        {avgDelayMinutes} {t.min}
+                    </span>
                     <span className="w-24 text-right">{uniqueTrips}</span>
                 </span>
             </li>
@@ -72,12 +76,12 @@ export function RouteDelayLeaderboardView({ leaderboardItems }: RouteDelayLeader
                         }}
                     >
                         <span className="flex items-center gap-3">
-                            <span className="w-6 text-right">Rank</span>
-                            <span>Route</span>
+                            <span className="w-6 text-right">{t.rank}</span>
+                            <span>{t.route}</span>
                         </span>
                         <span className="flex tabular-nums">
-                            <span className="text-right">Avg delay</span>
-                            <span className="w-24 text-right">Unique trips</span>
+                            <span className="text-right">{t.avgDelay}</span>
+                            <span className="w-24 text-right">{t.uniqueTrips}</span>
                         </span>
                     </Box>
                     <ol className="space-y-1 p-3">{leaderboardItems.map(getLeaderboardItemCB)}</ol>

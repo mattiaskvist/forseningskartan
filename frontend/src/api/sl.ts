@@ -1,4 +1,4 @@
-import { Site, DepartureResponse, StopPoint } from "../types/sl";
+import { Site, DepartureResponse, StopPoint, Departure } from "../types/sl";
 import { backendBaseURL, getBackendAuthHeaders } from "./backend";
 
 const BASE_URL = "https://transport.integration.sl.se/v1";
@@ -34,9 +34,43 @@ export function fetchSitesACB(): Promise<Site[]> {
         .catch(throwErrorACB);
 }
 
-export function fetchDeparturesACB(siteId: number): Promise<DepartureResponse> {
-    return fetch(`${BASE_URL}/sites/${siteId}/departures`)
+function normalizeDeparturesACB(departureResponse: DepartureResponse): DepartureResponse {
+    if (!departureResponse.departures) {
+        return departureResponse;
+    }
+
+    function normalizeDepartureCB(departure: Departure): Departure {
+        if (departure.line.transport_mode === "SHIP") {
+            return {
+                ...departure,
+                line: {
+                    ...departure.line,
+                    transport_mode: "FERRY",
+                },
+            };
+        }
+        return departure;
+    }
+
+    // Normalize SHIP to FERRY to ensure consistent handling of transportation modes across the app
+    const normalizedDepartures = departureResponse.departures.map(normalizeDepartureCB);
+
+    return {
+        ...departureResponse,
+        departures: normalizedDepartures,
+    };
+}
+
+export function fetchDeparturesACB(
+    siteId: number,
+    forecastMinutes: number = 1200 // max value allowed by API
+): Promise<DepartureResponse> {
+    if (forecastMinutes < 0 || forecastMinutes > 1200) {
+        throw new Error("forecastMinutes must be between 0 and 1200");
+    }
+    return fetch(`${BASE_URL}/sites/${siteId}/departures?forecast=${forecastMinutes}`)
         .then(handleResponseACB)
+        .then(normalizeDeparturesACB)
         .catch(throwErrorACB);
 }
 

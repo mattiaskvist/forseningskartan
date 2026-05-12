@@ -1,36 +1,39 @@
 import { Departure, ModeWithOther } from "../types/sl";
 import { formatDelay, formatTime, getDelayMinutes, getDelayColorToken } from "../utils/time";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Box, Card, TextField, Typography } from "@mui/material";
-import { FilterToggleButtonGroup } from "./FilterToggleButtonGroup";
+import { FilterToggleButtonGroup } from "../components/FilterToggleButtonGroup";
+import { TranslationStrings } from "../utils/translations";
 import {
-    getTransportationModeButtonCB,
+    getTransportationModeButton,
     getTransportationModeLabel,
 } from "../utils/transportationMode";
+import { normalizeText } from "../utils/text";
 
-type DepartureListProps = {
+type DepartureListViewProps = {
     departures: Departure[];
     onSelectDeparture: (departure: Departure) => void;
+    uniqueModes: ModeWithOther[];
+    selectedMode: ModeWithOther | null;
+    onSelectedModeChange: (mode: ModeWithOther | null) => void;
+    searchQuery: string;
+    onSearchQueryChange: (query: string) => void;
+    t: TranslationStrings["departureList"];
+    tTransportModes: TranslationStrings["transportModes"];
 };
 
-export function DepartureList({ departures, onSelectDeparture }: DepartureListProps) {
-    const uniqueModes = useMemo(() => {
-        const modes = new Set<ModeWithOther>();
-
-        for (const departure of departures) {
-            const mode = departure.line.transport_mode ?? "OTHER";
-            if (!modes.has(mode)) {
-                modes.add(mode);
-            }
-        }
-
-        return Array.from(modes).sort();
-    }, [departures]);
-
-    const [selectedMode, setSelectedMode] = useState<ModeWithOther | null>(uniqueModes[0] ?? null);
-    const [searchQuery, setSearchQuery] = useState("");
-
+export function DepartureListView({
+    departures,
+    onSelectDeparture,
+    uniqueModes,
+    selectedMode,
+    onSelectedModeChange,
+    searchQuery,
+    onSearchQueryChange,
+    t,
+    tTransportModes,
+}: DepartureListViewProps) {
     const departuresByMode = useMemo(() => {
         const groupedDepartures = new Map<ModeWithOther, Departure[]>();
 
@@ -40,11 +43,10 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
             const line = departure.line.designation ?? `${departure.line.id}`;
 
             // Filter by search query
-            const normalizedQuery = searchQuery.trim().toLowerCase();
+            const normalizedQuery = normalizeText(searchQuery);
             if (normalizedQuery) {
-                const matchesDestination =
-                    destination.toLowerCase().includes(normalizedQuery) ?? false;
-                const matchesLine = line.toLowerCase().includes(normalizedQuery) ?? false;
+                const matchesDestination = normalizeText(destination).includes(normalizedQuery);
+                const matchesLine = normalizeText(line).includes(normalizedQuery);
                 // Allow if either destination or line matches query
                 if (!matchesDestination && !matchesLine) {
                     continue;
@@ -68,7 +70,9 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
 
         const destination = departure.destination ?? departure.direction;
         const transportMode = departure.line.transport_mode;
-        const transportModeLabel = transportMode ? getTransportationModeLabel(transportMode) : "-";
+        const transportModeLabel = transportMode
+            ? getTransportationModeLabel(transportMode, tTransportModes)
+            : "-";
         const line = departure.line.designation ?? `${departure.line.id}`;
         const departureKey = `${departure.journey.id}-${departure.scheduled}-${departure.stop_point.id}`;
         const delayMinutes = getDelayMinutes(departure);
@@ -103,10 +107,10 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
                     <Typography
                         sx={{ fontSize: "0.875rem", fontWeight: 600, color: "text.primary" }}
                     >
-                        {transportModeLabel} {line} to {destination}
+                        {transportModeLabel} {line} {t.to} {destination}
                     </Typography>
                     <Typography sx={{ fontSize: "0.875rem", color: "text.primary" }}>
-                        Planned {formatTime(departure.scheduled)} · Predicted{" "}
+                        {t.planned} {formatTime(departure.scheduled)} · {t.predicted}{" "}
                         {formatTime(departure.expected ?? departure.scheduled)}
                     </Typography>
                     <Typography
@@ -140,7 +144,7 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
                         color: "text.primary",
                     }}
                 >
-                    {getTransportationModeLabel(mode)}
+                    {getTransportationModeLabel(mode, tTransportModes)}
                 </Box>
                 {modeDepartures.map(renderDepartureCB)}
             </Card>
@@ -148,32 +152,32 @@ export function DepartureList({ departures, onSelectDeparture }: DepartureListPr
     }
 
     function handleSearchChangeACB(e: React.ChangeEvent<HTMLInputElement>) {
-        setSearchQuery(e.target.value);
+        onSearchQueryChange(e.target.value);
     }
 
     return (
         <div className="flex flex-col gap-3">
             <TextField
-                placeholder="Search by destination or line"
+                placeholder={t.searchPlaceholder}
                 variant="outlined"
                 size="small"
                 value={searchQuery}
                 onChange={handleSearchChangeACB}
             />
-            {uniqueModes.length > 0 && selectedMode ? (
+            {uniqueModes.length > 0 && (
                 <FilterToggleButtonGroup
                     options={uniqueModes}
                     selectedValue={selectedMode}
-                    onValueChange={setSelectedMode}
-                    renderButtonCB={getTransportationModeButtonCB}
+                    onValueChange={onSelectedModeChange}
+                    renderButtonCB={(mode) => getTransportationModeButton(mode, tTransportModes)}
                 />
-            ) : null}
+            )}
 
             {selectedMode ? (
                 renderModeDepartures(selectedMode)
             ) : (
                 <Typography sx={{ fontSize: "0.875rem", color: "text.secondary" }}>
-                    No transport modes selected
+                    {t.noTransportModes}
                 </Typography>
             )}
         </div>

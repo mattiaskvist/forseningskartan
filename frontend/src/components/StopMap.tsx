@@ -18,11 +18,17 @@ type StopMapProps = {
     selectedSite: Site | null;
     handleSelectSiteCB: (siteId: number | null) => void;
     appStyle: AppStyle;
+    userLocation: { lat: number; lon: number } | null;
+    mapCenterOnUserRequestedAt: number;
 };
 
 const STOCKHOLM_CENTER: [number, number] = [59.3293, 18.0686];
 const STOCKHOLM_ZOOM = 13;
 const SELECTED_SITE_ZOOM = 14;
+const MAX_ZOOM = 19;
+const INCREASE_MARKER_SIZE_ZOOM = 15; // zoom level after which marker sizes start increasing to remain visible when zooming in
+const BASE_MARKER_RADIUS = 4;
+const SELECTED_MARKER_RADIUS = 7;
 const ZOOM_CONTROL_POSITION: ControlPosition = "bottomleft";
 
 const MAP_TILES: Record<AppStyle, { url: string; attribution: string }> = {
@@ -44,7 +50,7 @@ const MAP_TILES: Record<AppStyle, { url: string; attribution: string }> = {
 };
 
 const SELECTED_MARKER_STYLE: CircleMarkerOptions = {
-    radius: 7,
+    radius: SELECTED_MARKER_RADIUS,
     color: "#ef4444",
     fillColor: "#ef4444",
     fillOpacity: 0.95,
@@ -59,7 +65,7 @@ function getUnselectedMarkerStyle(appStyle: AppStyle): CircleMarkerOptions {
     };
     const color = UNSELECTED_MARKER_COLOR_BY_STYLE[appStyle];
     return {
-        radius: 4,
+        radius: BASE_MARKER_RADIUS,
         color,
         fillColor: color,
         fillOpacity: 0.7,
@@ -71,12 +77,22 @@ function setMarkerSelectedStyle(marker: CircleMarker, isSelected: boolean, appSt
     marker.setStyle(isSelected ? SELECTED_MARKER_STYLE : getUnselectedMarkerStyle(appStyle));
 }
 
+function getBaseMarkerRadius(zoom: number) {
+    if (zoom <= INCREASE_MARKER_SIZE_ZOOM) {
+        return BASE_MARKER_RADIUS;
+    }
+
+    return BASE_MARKER_RADIUS + (zoom - INCREASE_MARKER_SIZE_ZOOM);
+}
+
 export function StopMap({
     allSites,
     filteredSites,
     selectedSite,
     handleSelectSiteCB,
     appStyle,
+    userLocation,
+    mapCenterOnUserRequestedAt,
 }: StopMapProps) {
     const mapContainerRef = useRef<HTMLDivElement | null>(null);
     const mapRef = useRef<LeafletMap | null>(null);
@@ -88,12 +104,15 @@ export function StopMap({
     const selectedMarkerRef = useRef<CircleMarker | null>(null);
     const selectedSiteIdRef = useRef<number | null>(null);
     const mapStyleRef = useRef(appStyle);
+    const userMarkerRef = useRef<CircleMarker | null>(null);
 
     useEffect(() => {
         mapStyleRef.current = appStyle;
     }, [appStyle]);
 
     useEffect(() => {
+        // Initialize leaflet map once and set up layers/controls
+        // Clean up fully on unmount to avoid leaking DOM or map instances
         if (!mapContainerRef.current || mapRef.current) {
             return;
         }
@@ -115,6 +134,33 @@ export function StopMap({
 
         mapRef.current = map;
         markersLayerRef.current = new LayerGroup().addTo(map);
+
+        // Update marker sizes on zoom to keep them visible and
+        // appropriately sized at different zoom levels
+        function updateMarkerSizesACB() {
+            const zoom = map.getZoom();
+            const radius = getBaseMarkerRadius(zoom);
+
+            function setMarkerSizeCB(marker: CircleMarker, siteId: number) {
+                const isSelected = siteId === selectedSiteIdRef.current;
+
+                marker.setStyle({
+                    radius: isSelected
+                        ? radius + (SELECTED_MARKER_RADIUS - BASE_MARKER_RADIUS)
+                        : radius,
+                });
+            }
+            allMarkersBySiteIdRef.current.forEach(setMarkerSizeCB);
+
+            // user position marker
+            if (userMarkerRef.current) {
+                userMarkerRef.current.setStyle({
+                    radius: radius + (SELECTED_MARKER_RADIUS - BASE_MARKER_RADIUS),
+                });
+            }
+        }
+
+        map.on("zoomend", updateMarkerSizesACB);
         const allMarkersBySiteId = allMarkersBySiteIdRef.current;
         const allSitesById = allSitesByIdRef.current;
         const visibleSiteIds = visibleSiteIdsRef.current;
@@ -124,11 +170,13 @@ export function StopMap({
             mapRef.current = null;
             tileLayerRef.current = null;
             markersLayerRef.current = null;
+            map.off("zoomend", updateMarkerSizesACB);
             allMarkersBySiteId.clear();
             allSitesById.clear();
             visibleSiteIds.clear();
             selectedMarkerRef.current = null;
             selectedSiteIdRef.current = null;
+            userMarkerRef.current = null;
         };
     }, []);
 
@@ -147,7 +195,7 @@ export function StopMap({
 
         const tileLayer = new TileLayer(style.url, {
             attribution: style.attribution,
-            maxZoom: 19,
+            maxZoom: MAX_ZOOM,
         });
         tileLayer.addTo(map);
         tileLayerRef.current = tileLayer;
@@ -155,6 +203,8 @@ export function StopMap({
 
     const createSiteMarker = useCallback(
         (site: Site): CircleMarker => {
+            // Create a CircleMarker for a site and bind click handler to
+            // toggle selection. Markers are created once and cached
             const marker = new CircleMarker(
                 [site.lat, site.lon],
                 getUnselectedMarkerStyle(mapStyleRef.current)
@@ -230,7 +280,8 @@ export function StopMap({
         const visibleSiteIds = visibleSiteIdsRef.current;
         const nextVisibleSiteIds = new Set<number>(filteredSites.map((site) => site.id));
 
-        // Remove markers for sites that are no longer visible
+        // Sync visible marker layer with filteredSites: remove hidden markers
+        // and add newly visible ones without recreating cached markers
         function hideNoLongerVisibleSiteCB(siteId: number) {
             if (nextVisibleSiteIds.has(siteId)) {
                 return;
@@ -243,7 +294,7 @@ export function StopMap({
         }
         Array.from(visibleSiteIds).forEach(hideNoLongerVisibleSiteCB);
 
-        // Add markers for newly visible sites
+        // Add markers for newly visible sites from cached marker map
         function showNewlyVisibleSiteCB(siteId: number) {
             if (visibleSiteIds.has(siteId)) {
                 return;
@@ -311,6 +362,45 @@ export function StopMap({
             });
         }
     }, [selectedSite]);
+
+    // Fly to user location when trigger changes
+    useEffect(() => {
+        const map = mapRef.current;
+        if (!map || !userLocation || mapCenterOnUserRequestedAt === 0) {
+            return;
+        }
+
+        map.flyTo([userLocation.lat, userLocation.lon], SELECTED_SITE_ZOOM, {
+            animate: true,
+            duration: 0.6,
+        });
+    }, [mapCenterOnUserRequestedAt, userLocation]);
+
+    // Update user marker when location changes
+    useEffect(() => {
+        const map = mapRef.current;
+        if (!map || !userLocation) {
+            if (userMarkerRef.current) {
+                userMarkerRef.current.remove();
+                userMarkerRef.current = null;
+            }
+            return;
+        }
+
+        if (userMarkerRef.current) {
+            userMarkerRef.current.setLatLng([userLocation.lat, userLocation.lon]);
+        } else {
+            userMarkerRef.current = new CircleMarker([userLocation.lat, userLocation.lon], {
+                radius: SELECTED_MARKER_RADIUS,
+                color: "#ffffff",
+                fillColor: "#3b82f6",
+                fillOpacity: 1,
+                weight: 2,
+            })
+                .bindTooltip("You are here")
+                .addTo(map);
+        }
+    }, [userLocation]);
 
     return <div ref={mapContainerRef} className="h-full w-full" aria-label="Stockholm stop map" />;
 }

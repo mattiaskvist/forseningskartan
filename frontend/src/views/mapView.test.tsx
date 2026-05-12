@@ -2,6 +2,7 @@ import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { MapView } from "./mapView";
 import { renderWithTheme } from "../test/renderWithTheme";
+import { translations } from "../utils/translations";
 
 vi.mock("../components/StopMap", () => ({
     StopMap: () => <div data-testid="stop-map" />,
@@ -29,6 +30,14 @@ describe("MapView", () => {
                 departureViewProps={null}
                 appStyle="Dark"
                 onAppStyleChange={onAppStyleChange}
+                userLocation={null}
+                mapCenterOnUserRequestedAt={0}
+                onRequestMapCenterOnUser={vi.fn()}
+                tMapDeparturePanel={translations.en.mapDeparturePanel}
+                tMap={translations.en.map}
+                tSearchBar={translations.en.searchBar}
+                tMapSearch={translations.en.mapSearch}
+                tAppStyleSelector={translations.en.appStyleSelector}
                 selectedTransportationMode={null}
                 transportationModeOptions={[]}
                 onTransportationModeChange={vi.fn()}
@@ -36,6 +45,7 @@ describe("MapView", () => {
                 isHideStopsWithoutDeparturesBoxHidden={false}
                 onHideStopsWithoutDeparturesChange={vi.fn()}
                 totalSiteCount={0}
+                tTransportModes={translations.en.transportModes}
             />
         );
 
