@@ -25,6 +25,10 @@ type StopMapProps = {
 const STOCKHOLM_CENTER: [number, number] = [59.3293, 18.0686];
 const STOCKHOLM_ZOOM = 13;
 const SELECTED_SITE_ZOOM = 14;
+const MAX_ZOOM = 19;
+const INCREASE_MARKER_SIZE_ZOOM = 15; // zoom level after which marker sizes start increasing to remain visible when zooming in
+const BASE_MARKER_RADIUS = 4;
+const SELECTED_MARKER_RADIUS = 7;
 const ZOOM_CONTROL_POSITION: ControlPosition = "bottomleft";
 
 const MAP_TILES: Record<AppStyle, { url: string; attribution: string }> = {
@@ -46,7 +50,7 @@ const MAP_TILES: Record<AppStyle, { url: string; attribution: string }> = {
 };
 
 const SELECTED_MARKER_STYLE: CircleMarkerOptions = {
-    radius: 7,
+    radius: SELECTED_MARKER_RADIUS,
     color: "#ef4444",
     fillColor: "#ef4444",
     fillOpacity: 0.95,
@@ -61,7 +65,7 @@ function getUnselectedMarkerStyle(appStyle: AppStyle): CircleMarkerOptions {
     };
     const color = UNSELECTED_MARKER_COLOR_BY_STYLE[appStyle];
     return {
-        radius: 4,
+        radius: BASE_MARKER_RADIUS,
         color,
         fillColor: color,
         fillOpacity: 0.7,
@@ -71,6 +75,14 @@ function getUnselectedMarkerStyle(appStyle: AppStyle): CircleMarkerOptions {
 
 function setMarkerSelectedStyle(marker: CircleMarker, isSelected: boolean, appStyle: AppStyle) {
     marker.setStyle(isSelected ? SELECTED_MARKER_STYLE : getUnselectedMarkerStyle(appStyle));
+}
+
+function getBaseMarkerRadius(zoom: number) {
+    if (zoom <= INCREASE_MARKER_SIZE_ZOOM) {
+        return BASE_MARKER_RADIUS;
+    }
+
+    return BASE_MARKER_RADIUS + (zoom - INCREASE_MARKER_SIZE_ZOOM);
 }
 
 export function StopMap({
@@ -122,6 +134,33 @@ export function StopMap({
 
         mapRef.current = map;
         markersLayerRef.current = new LayerGroup().addTo(map);
+
+        // Update marker sizes on zoom to keep them visible and
+        // appropriately sized at different zoom levels
+        function updateMarkerSizesACB() {
+            const zoom = map.getZoom();
+            const radius = getBaseMarkerRadius(zoom);
+
+            function setMarkerSizeCB(marker: CircleMarker, siteId: number) {
+                const isSelected = siteId === selectedSiteIdRef.current;
+
+                marker.setStyle({
+                    radius: isSelected
+                        ? radius + (SELECTED_MARKER_RADIUS - BASE_MARKER_RADIUS)
+                        : radius,
+                });
+            }
+            allMarkersBySiteIdRef.current.forEach(setMarkerSizeCB);
+
+            // user position marker
+            if (userMarkerRef.current) {
+                userMarkerRef.current.setStyle({
+                    radius: radius + (SELECTED_MARKER_RADIUS - BASE_MARKER_RADIUS),
+                });
+            }
+        }
+
+        map.on("zoomend", updateMarkerSizesACB);
         const allMarkersBySiteId = allMarkersBySiteIdRef.current;
         const allSitesById = allSitesByIdRef.current;
         const visibleSiteIds = visibleSiteIdsRef.current;
@@ -131,6 +170,7 @@ export function StopMap({
             mapRef.current = null;
             tileLayerRef.current = null;
             markersLayerRef.current = null;
+            map.off("zoomend", updateMarkerSizesACB);
             allMarkersBySiteId.clear();
             allSitesById.clear();
             visibleSiteIds.clear();
@@ -155,7 +195,7 @@ export function StopMap({
 
         const tileLayer = new TileLayer(style.url, {
             attribution: style.attribution,
-            maxZoom: 19,
+            maxZoom: MAX_ZOOM,
         });
         tileLayer.addTo(map);
         tileLayerRef.current = tileLayer;
@@ -351,7 +391,7 @@ export function StopMap({
             userMarkerRef.current.setLatLng([userLocation.lat, userLocation.lon]);
         } else {
             userMarkerRef.current = new CircleMarker([userLocation.lat, userLocation.lon], {
-                radius: 7,
+                radius: SELECTED_MARKER_RADIUS,
                 color: "#ffffff",
                 fillColor: "#3b82f6",
                 fillOpacity: 1,

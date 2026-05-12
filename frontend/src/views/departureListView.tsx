@@ -9,6 +9,7 @@ import {
     getTransportationModeButton,
     getTransportationModeLabel,
 } from "../utils/transportationMode";
+import { normalizeText } from "../utils/text";
 
 type DepartureListViewProps = {
     departures: Departure[];
@@ -42,11 +43,10 @@ export function DepartureListView({
             const line = departure.line.designation ?? `${departure.line.id}`;
 
             // Filter by search query
-            const normalizedQuery = searchQuery.trim().toLowerCase();
+            const normalizedQuery = normalizeText(searchQuery);
             if (normalizedQuery) {
-                const matchesDestination =
-                    destination.toLowerCase().includes(normalizedQuery) ?? false;
-                const matchesLine = line.toLowerCase().includes(normalizedQuery) ?? false;
+                const matchesDestination = normalizeText(destination).includes(normalizedQuery);
+                const matchesLine = normalizeText(line).includes(normalizedQuery);
                 // Allow if either destination or line matches query
                 if (!matchesDestination && !matchesLine) {
                     continue;

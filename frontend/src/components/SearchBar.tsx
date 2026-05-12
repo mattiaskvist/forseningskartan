@@ -11,6 +11,7 @@ import { TranslationStrings } from "../utils/translations";
 
 const defaultFilterOptions = createFilterOptions<Site>({
     ignoreCase: true, // case insensitive matching
+    ignoreAccents: true, // accent insensitive matching
     trim: true, // trim whitespace
     limit: 100, // max number of suggestions to show, no limit is a bit laggy
 });
