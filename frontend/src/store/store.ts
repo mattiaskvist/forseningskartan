@@ -65,7 +65,7 @@ import { buildStopPointGidsBySiteId } from "../utils/site";
 import { translations } from "../utils/translations";
 import { getGeolocationSnackbarPayload } from "../utils/geolocation";
 import { Departure, ModeWithOther } from "../types/sl";
-import { getUpcomingDepartures } from "../utils/departures";
+import { getUpcomingDepartures, isSameDeparture } from "../utils/departures";
 const listenerMiddleware = createListenerMiddleware();
 
 function mergeRecentSearchSiteIds(
@@ -136,7 +136,7 @@ listenerMiddleware.startListening({
     },
 });
 
-// Compute unique modes when new stop is selected and departures are loaded
+// Compute derived departure UI state when departures load or preferences change.
 listenerMiddleware.startListening({
     matcher: isAnyOf(getDepartures.fulfilled, applyLoadedUserPreferences),
     effect: (action, listenerApi) => {
@@ -170,9 +170,38 @@ listenerMiddleware.startListening({
 
         if (getDepartures.fulfilled.match(action)) {
             dispatch(setDeparturesLastUpdated(new Date().toISOString()));
+
+            // A refresh may change prediction data, but the selected trip should stay open if it still exists.
+            const selectedDeparture = state.departureUI.selectedDeparture;
+            if (selectedDeparture && state.sites.selectedSiteId === action.meta.arg) {
+                const refreshedDeparture =
+                    departures.find((departure) => isSameDeparture(departure, selectedDeparture)) ??
+                    null;
+                dispatch(setSelectedDeparture(refreshedDeparture));
+            }
         }
         dispatch(setUniqueModes(uniqueModes));
         dispatch(setSelectedMode(selectedMode));
+    },
+});
+
+// Surface all active departure fetch failures from one model-side listener instead of per-button try/catch.
+listenerMiddleware.startListening({
+    actionCreator: getDepartures.rejected,
+    effect: (action, listenerApi) => {
+        const originalState = listenerApi.getOriginalState() as RootState;
+        if (originalState.departures.currentRequestId !== action.meta.requestId) {
+            return;
+        }
+
+        const state = listenerApi.getState() as RootState;
+        const tMap = translations[state.userPreferences.language].map;
+        listenerApi.dispatch(
+            showSnackbar({
+                message: tMap.refreshDeparturesFailed,
+                severity: "error",
+            })
+        );
     },
 });
 

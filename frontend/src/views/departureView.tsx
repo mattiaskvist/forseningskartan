@@ -5,9 +5,6 @@ import { DepartureContentView, DepartureContentViewProps } from "./departureCont
 export type DepartureViewProps = {
     selectedSiteName: string;
     onClose: () => void;
-    isLoading: boolean;
-    lastUpdatedText: string | null;
-    onRefreshDepartures: () => void;
     isFavoriteStop: boolean;
     isUserLoggedIn: boolean;
     onToggleFavoriteStop: () => void;
@@ -18,9 +15,6 @@ export type DepartureViewProps = {
 export function DepartureView({
     selectedSiteName,
     onClose,
-    isLoading,
-    lastUpdatedText,
-    onRefreshDepartures,
     isFavoriteStop,
     isUserLoggedIn,
     onToggleFavoriteStop,
@@ -35,9 +29,6 @@ export function DepartureView({
                 isFavoriteStop={isFavoriteStop}
                 isUserLoggedIn={isUserLoggedIn}
                 onToggleFavoriteStop={onToggleFavoriteStop}
-                isLoading={isLoading}
-                lastUpdatedText={lastUpdatedText}
-                onRefreshDepartures={onRefreshDepartures}
                 onClose={onClose}
                 t={tHeader}
             />

@@ -1,5 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
-import { departuresSlice, requestMapCenterOnUser, setSelectedSiteId, sitesSlice } from "./reducers";
+import { getDepartures } from "./actions";
+import {
+    departuresSlice,
+    requestMapCenterOnUser,
+    setDeparturesLastUpdated,
+    setSelectedSiteId,
+    sitesSlice,
+} from "./reducers";
 
 describe("sitesSlice", () => {
     it("starts with expected initial state", () => {
@@ -67,5 +74,27 @@ describe("departuresSlice", () => {
             currentRequestId: null,
             lastUpdated: null,
         });
+    });
+
+    it("resets last updated when departures fetch starts", () => {
+        const stateWithLastUpdated = departuresSlice.reducer(
+            undefined,
+            setDeparturesLastUpdated("2026-05-08T08:00:00.000Z")
+        );
+
+        const state = departuresSlice.reducer(
+            stateWithLastUpdated,
+            getDepartures.pending("request-1", 42)
+        );
+
+        expect(state.lastUpdated).toBeNull();
+    });
+
+    it("stores the provided last updated timestamp", () => {
+        const timestamp = "2026-05-08T08:00:00.000Z";
+
+        const state = departuresSlice.reducer(undefined, setDeparturesLastUpdated(timestamp));
+
+        expect(state.lastUpdated).toBe(timestamp);
     });
 });

@@ -1,13 +1,24 @@
-import { Paper, Typography } from "@mui/material";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import { IconButton, Paper, Tooltip, Typography } from "@mui/material";
 import { DepartureView, DepartureViewProps } from "./departureView";
 import { TranslationStrings } from "../utils/translations";
 
 type MapDeparturesPanelViewProps = {
     departureViewProps: DepartureViewProps;
+    isLoading: boolean;
+    lastUpdatedText: string | null;
+    onRefreshDepartures: () => void;
     t: TranslationStrings["mapDeparturePanel"];
 };
 
-export function MapDeparturesPanelView({ departureViewProps, t }: MapDeparturesPanelViewProps) {
+export function MapDeparturesPanelView({
+    departureViewProps,
+    isLoading,
+    lastUpdatedText,
+    onRefreshDepartures,
+    t,
+}: MapDeparturesPanelViewProps) {
+    // The panel owns panel-level chrome; DepartureView only renders the selected stop content.
     return (
         <aside className="pointer-events-auto z-[1000] w-[min(420px,calc(100vw-2rem))]">
             <Paper
@@ -23,9 +34,30 @@ export function MapDeparturesPanelView({ departureViewProps, t }: MapDeparturesP
                     backdropFilter: "blur(4px)",
                 }}
             >
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "text.primary" }}>
-                    {t.departures}
-                </Typography>
+                <div className="flex justify-between gap-2">
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "text.primary" }}>
+                        {t.departures}
+                    </Typography>
+                    <div className="flex items-center gap-1">
+                        {lastUpdatedText ? (
+                            <Typography sx={{ fontSize: "0.75rem", color: "text.secondary" }}>
+                                {lastUpdatedText}
+                            </Typography>
+                        ) : null}
+                        <Tooltip title={t.refresh}>
+                            <span>
+                                <IconButton
+                                    size="small"
+                                    onClick={onRefreshDepartures}
+                                    disabled={isLoading}
+                                    aria-label={t.refresh}
+                                >
+                                    <RefreshIcon fontSize="small" />
+                                </IconButton>
+                            </span>
+                        </Tooltip>
+                    </div>
+                </div>
                 <DepartureView {...departureViewProps} />
             </Paper>
         </aside>

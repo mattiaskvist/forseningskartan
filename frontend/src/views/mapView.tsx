@@ -16,6 +16,9 @@ type MapViewProps = {
     handleSelectSiteCB: (siteId: number | null) => void;
     recentSearchSiteIds: number[];
     departureViewProps: DepartureViewProps | null;
+    isDeparturesLoading: boolean;
+    departuresLastUpdatedText: string | null;
+    onRefreshDepartures: () => void;
     appStyle: AppStyle;
     onAppStyleChange: (style: AppStyle) => void;
     userLocation: { lat: number; lon: number } | null;
@@ -43,6 +46,9 @@ export function MapView({
     handleSelectSiteCB,
     recentSearchSiteIds,
     departureViewProps,
+    isDeparturesLoading,
+    departuresLastUpdatedText,
+    onRefreshDepartures,
     appStyle,
     onAppStyleChange,
     userLocation,
@@ -122,6 +128,9 @@ export function MapView({
                     {departureViewProps && (
                         <MapDeparturesPanelView
                             departureViewProps={departureViewProps}
+                            isLoading={isDeparturesLoading}
+                            lastUpdatedText={departuresLastUpdatedText}
+                            onRefreshDepartures={onRefreshDepartures}
                             t={tMapDeparturePanel}
                         />
                     )}

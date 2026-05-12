@@ -27,8 +27,6 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             unfavorite: "Unfavorite",
             favorite: "Favorite",
             loginFavorite: "Log in to favorite",
-            refresh: "Refresh",
-            lastUpdated: (time) => `Last updated ${time}`,
             close: "Close",
         },
         departureDetails: {
@@ -43,6 +41,8 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
         },
         mapDeparturePanel: {
             departures: "Departures",
+            refresh: "Refresh",
+            lastUpdated: (time) => `Last updated ${time}`,
         },
         routeDelayLeaderboard: {
             min: "min",
@@ -222,8 +222,6 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
             unfavorite: "Ta bort från favoriter",
             favorite: "Gör till favorit",
             loginFavorite: "Logga in för att göra till favorit",
-            refresh: "Uppdatera",
-            lastUpdated: (time) => `Senast uppdaterad ${time}`,
             close: "Stäng",
         },
         departureDetails: {
@@ -238,6 +236,8 @@ export const translations: Record<LanguageCode, TranslationStrings> = {
         },
         mapDeparturePanel: {
             departures: "Avgångar",
+            refresh: "Uppdatera",
+            lastUpdated: (time) => `Senast uppdaterad ${time}`,
         },
         routeDelayLeaderboard: {
             min: "min",

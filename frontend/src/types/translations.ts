@@ -26,8 +26,6 @@ export interface DepartureHeaderStrings {
     unfavorite: string;
     favorite: string;
     loginFavorite: string;
-    refresh: string;
-    lastUpdated: (time: string) => string;
     close: string;
 }
 
@@ -45,6 +43,8 @@ export interface DepartureStrings {
 
 export interface MapDeparturesPanelStrings {
     departures: string;
+    refresh: string;
+    lastUpdated: (time: string) => string;
 }
 
 export interface MapStrings {

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useMemo } from "react";
 import { MapView } from "../views/mapView";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import {
@@ -66,16 +66,6 @@ import { getDepartures, requestUserGeolocation } from "../store/actions";
 import { formatTime } from "../utils/time";
 import { translations } from "../utils/translations";
 
-// Presenter refreshes can receive new prediction data for the same trip.
-// Match on stable trip identity so the selected detail view survives a refresh.
-function isSameDepartureCB(a: Departure, b: Departure): boolean {
-    return (
-        a.journey.id === b.journey.id &&
-        a.stop_point.id === b.stop_point.id &&
-        a.scheduled === b.scheduled
-    );
-}
-
 export function MapPresenter() {
     const dispatch = useAppDispatch();
     const selectedSite = useAppSelector(getSelectedSiteCB);
@@ -109,16 +99,6 @@ export function MapPresenter() {
     const departureSearchQuery = useAppSelector(getDepartureSearchQueryCB);
     const departureUniqueModes = useAppSelector(getDepartureUniqueModesCB);
     const tMap = translations[currentLanguage].map;
-
-    // Refresh requests can resolve after the user has selected another stop/departure.
-    // Keep refs to the latest model state so the async refresh completion can detect that race.
-    const selectedSiteRef = useRef(selectedSite);
-    const selectedDepartureRef = useRef(selectedDeparture);
-
-    useEffect(() => {
-        selectedSiteRef.current = selectedSite;
-        selectedDepartureRef.current = selectedDeparture;
-    }, [selectedDeparture, selectedSite]);
 
     const routesByStopPointsUnavailable = routesByStopPointError !== null || !routesByStopPoint;
     const transportationModeOptions = useMemo(() => {
@@ -240,42 +220,13 @@ export function MapPresenter() {
         dispatch(setHideStopsWithoutDepartures(value));
     }
 
-    async function refreshDeparturesACB() {
+    function refreshDeparturesACB() {
         if (!selectedSite) {
             return;
         }
 
-        const refreshedSiteId = selectedSite.id;
-        const departureBeforeRefresh = selectedDeparture;
-
-        try {
-            const refreshedDepartureResponse = await dispatch(
-                getDepartures(refreshedSiteId)
-            ).unwrap();
-            if (!departureBeforeRefresh) {
-                return;
-            }
-
-            const currentSelectedSite = selectedSiteRef.current;
-            const currentSelectedDeparture = selectedDepartureRef.current;
-            // Only preserve selection if the user is still looking at the same stop and departure.
-            if (
-                currentSelectedSite?.id !== refreshedSiteId ||
-                !currentSelectedDeparture ||
-                !isSameDepartureCB(currentSelectedDeparture, departureBeforeRefresh)
-            ) {
-                return;
-            }
-
-            // keep the detail panel on the same trip after refresh, or return to the list if it disappeared.
-            const refreshedDeparture =
-                refreshedDepartureResponse.departures?.find((departure) =>
-                    isSameDepartureCB(departure, departureBeforeRefresh)
-                ) ?? null;
-            dispatch(setSelectedDeparture(refreshedDeparture));
-        } catch {
-            dispatch(showSnackbar({ message: tMap.refreshDeparturesFailed, severity: "error" }));
-        }
+        // Keep the presenter thin: dispatch the model action and let listeners reconcile side effects.
+        dispatch(getDepartures(selectedSite.id));
     }
 
     function handleSelectedModeChangeACB(mode: ModeWithOther | null) {
@@ -289,19 +240,11 @@ export function MapPresenter() {
     const departures = departureResponse?.departures ?? [];
     const upcomingDepartures = getUpcomingDepartures(departures);
 
-    // The presenter is the MVP glue: read model state from Redux, turn it into
-    // plain view props, and pass callbacks that dispatch model changes.
+    // The presenter is the MVP glue: read model state, create plain view props, and expose dispatch callbacks.
     const departureViewProps: DepartureViewProps | null = selectedSite
         ? {
               selectedSiteName: selectedSite.name,
               onClose: closeDeparturesViewACB,
-              isLoading: isDeparturesLoading,
-              lastUpdatedText: departuresLastUpdated
-                  ? translations[currentLanguage].departureHeader.lastUpdated(
-                        formatTime(departuresLastUpdated)
-                    )
-                  : null,
-              onRefreshDepartures: refreshDeparturesACB,
               isFavoriteStop: favoriteSiteIds.includes(selectedSite.id),
               isUserLoggedIn: Boolean(user),
               onToggleFavoriteStop: toggleFavoriteStopACB,
@@ -346,6 +289,15 @@ export function MapPresenter() {
             handleSelectSiteCB={handleSelectSiteCB}
             recentSearchSiteIds={recentSearchSiteIds}
             departureViewProps={departureViewProps}
+            isDeparturesLoading={isDeparturesLoading}
+            departuresLastUpdatedText={
+                departuresLastUpdated
+                    ? translations[currentLanguage].mapDeparturePanel.lastUpdated(
+                          formatTime(departuresLastUpdated)
+                      )
+                    : null
+            }
+            onRefreshDepartures={refreshDeparturesACB}
             appStyle={appStyle}
             onAppStyleChange={handleAppStyleChangeACB}
             userLocation={userLocation}

@@ -43,3 +43,12 @@ function compareDeparturesCB(a: Departure, b: Departure) {
 export function getUpcomingDepartures(departures: Departure[]): Departure[] {
     return departures.filter(isUpcomingDepartureCB).sort(compareDeparturesCB);
 }
+
+// Prediction fields can change between fetches, so preserve detail selection by stable trip identity.
+export function isSameDeparture(a: Departure, b: Departure): boolean {
+    return (
+        a.journey.id === b.journey.id &&
+        a.stop_point.id === b.stop_point.id &&
+        a.scheduled === b.scheduled
+    );
+}
