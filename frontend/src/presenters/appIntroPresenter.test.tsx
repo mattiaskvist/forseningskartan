@@ -103,6 +103,15 @@ describe("AppIntroPresenter", () => {
         expect(screen.getByRole("button", { name: "Kom igång" })).toBeInTheDocument();
     });
 
+    it("lets first-time users switch language before closing the intro", () => {
+        renderPresenter();
+
+        fireEvent.click(screen.getByRole("button", { name: "Swedish" }));
+
+        expect(screen.getByText("Välkommen till Förseningskartan")).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: "Kom igång" })).toBeInTheDocument();
+    });
+
     it("stores dismissal when the user closes the intro", () => {
         renderPresenter();
 

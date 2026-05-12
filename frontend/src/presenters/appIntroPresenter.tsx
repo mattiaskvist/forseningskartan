@@ -6,8 +6,8 @@ import {
     getUserPreferencesLoadingCB,
 } from "../store/selectors";
 import { useAppDispatch, useAppSelector } from "../store/store";
-import { setHasSeenAppIntro } from "../store/userPreferencesSlice";
-import { translations } from "../utils/translations";
+import { setHasSeenAppIntro, setLanguagePreference } from "../store/userPreferencesSlice";
+import { LanguageCode, translations } from "../utils/translations";
 
 export function AppIntroPresenter() {
     const dispatch = useAppDispatch();
@@ -25,14 +25,18 @@ export function AppIntroPresenter() {
         dispatch(setHasSeenAppIntro(true));
     }
 
+    function handleLanguageChangeACB(nextLanguage: LanguageCode) {
+        dispatch(setLanguagePreference(nextLanguage));
+    }
+
     return (
         <AppIntroView
             isOpen={shouldShowIntro}
-            title={t.title}
-            description={t.description}
-            items={t.items}
-            actionLabel={t.actionLabel}
+            currentLanguage={currentLanguage}
+            onLanguageChange={handleLanguageChangeACB}
             onClose={closeIntroACB}
+            t={t}
+            tLanguageSelector={translations[currentLanguage].sideBar.languageSelector}
         />
     );
 }

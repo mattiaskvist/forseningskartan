@@ -9,47 +9,53 @@ import {
     ListItemText,
     Typography,
 } from "@mui/material";
+import { LanguageSelector } from "../components/LanguageSelector";
+import { LanguageCode, TranslationStrings } from "../utils/translations";
 
 type AppIntroViewProps = {
     isOpen: boolean;
-    title: string;
-    description: string;
-    items: {
-        title: string;
-        description: string;
-    }[];
-    actionLabel: string;
+    currentLanguage: LanguageCode;
+    onLanguageChange: (language: LanguageCode) => void;
     onClose: () => void;
+    t: TranslationStrings["appIntro"];
+    tLanguageSelector: TranslationStrings["sideBar"]["languageSelector"];
 };
 
 export function AppIntroView({
     isOpen,
-    title,
-    description,
-    items,
-    actionLabel,
+    currentLanguage,
+    onLanguageChange,
     onClose,
+    t,
+    tLanguageSelector,
 }: AppIntroViewProps) {
+    function renderIntroItemCB(item: TranslationStrings["appIntro"]["items"][number]) {
+        return (
+            <ListItem key={item.title} disableGutters>
+                <ListItemText
+                    primary={item.title}
+                    secondary={item.description}
+                    primaryTypographyProps={{ fontWeight: 600 }}
+                />
+            </ListItem>
+        );
+    }
+
     return (
         <Dialog open={isOpen} onClose={onClose} maxWidth="sm" fullWidth>
-            <DialogTitle>{title}</DialogTitle>
+            <DialogTitle>{t.title}</DialogTitle>
             <DialogContent>
-                <Typography sx={{ color: "text.secondary", mb: 1 }}>{description}</Typography>
-                <List disablePadding>
-                    {items.map((item) => (
-                        <ListItem key={item.title} disableGutters>
-                            <ListItemText
-                                primary={item.title}
-                                secondary={item.description}
-                                primaryTypographyProps={{ fontWeight: 600 }}
-                            />
-                        </ListItem>
-                    ))}
-                </List>
+                <Typography sx={{ color: "text.secondary", mb: 1 }}>{t.description}</Typography>
+                <List disablePadding>{t.items.map(renderIntroItemCB)}</List>
+                <LanguageSelector
+                    currentLanguage={currentLanguage}
+                    onLanguageChange={onLanguageChange}
+                    t={tLanguageSelector}
+                />
             </DialogContent>
             <DialogActions>
                 <Button onClick={onClose} variant="contained">
-                    {actionLabel}
+                    {t.actionLabel}
                 </Button>
             </DialogActions>
         </Dialog>
