@@ -97,6 +97,26 @@ After addressing 1, 3, and 4:
 
 ![](images/eval-user-consultation/after.png)
 
+Before adapting to mobile (map view):
+
+![](images/eval-user-consultation/mobile-map-before.png)
+![](images/eval-user-consultation/mobile-departure-before.png)
+
+After adapting to mobile (map view):
+
+![](images/eval-user-consultation/mobile-map-after.png)
+![](images/eval-user-consultation/mobile-departure-after.png)
+
+Before adapting to mobile (route delay view):
+
+![](images/eval-user-consultation/mobile-delaychart-before.png)
+![](images/eval-user-consultation/mobile-delayleaderboard-before.png)
+
+After adapting to mobile (route delay view):
+
+![](images/eval-user-consultation/mobile-delaychart-after.png)
+![](images/eval-user-consultation/mobile-delayleaderboard-after.png)
+
 ## Project file structure
 
 Directory overview:
