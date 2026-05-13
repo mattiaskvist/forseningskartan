@@ -20,9 +20,11 @@ describe("RouteDelayLeaderboardView", () => {
             />
         );
 
-        expect(screen.getByText("Rank")).toBeInTheDocument();
-        expect(screen.getByText("Route")).toBeInTheDocument();
-        expect(screen.getByText("Avg delay")).toBeInTheDocument();
-        expect(screen.getByText("Unique trips")).toBeInTheDocument();
+        expect(screen.getByRole("table", { name: /route delay leaderboard/i })).toBeInTheDocument();
+        expect(screen.getByRole("columnheader", { name: "Rank" })).toBeInTheDocument();
+        expect(screen.getByRole("columnheader", { name: "Route" })).toBeInTheDocument();
+        expect(screen.getByRole("columnheader", { name: "Avg delay" })).toBeInTheDocument();
+        expect(screen.getByRole("columnheader", { name: "Unique trips" })).toBeInTheDocument();
+        expect(screen.getByRole("row", { name: /1\. 4 Radiohuset 4 min 7/i })).toBeInTheDocument();
     });
 });
