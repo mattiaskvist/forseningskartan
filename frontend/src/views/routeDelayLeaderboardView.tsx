@@ -72,7 +72,7 @@ export function RouteDelayLeaderboardView({ leaderboardItems, t }: RouteDelayLea
                         borderRadius: 1,
                     }}
                 >
-                    <Table size="small">
+                    <Table size="small" aria-label="Route delay leaderboard">
                         <TableHead sx={{ backgroundColor: "action.hover" }}>
                             <TableRow>
                                 <TableCell sx={leaderboardHeaderCellSx}>{t.rank}</TableCell>
