@@ -51,7 +51,7 @@ export function MapSearchView({
                 left: 72,
                 top: 16,
                 zIndex: 1000,
-                width: "min(420px, calc(100vw - 2rem))",
+                width: "min(420px, calc(100vw - 5rem))",
                 p: 1,
                 borderRadius: 2,
                 backdropFilter: "blur(4px)",
