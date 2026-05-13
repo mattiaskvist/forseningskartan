@@ -126,12 +126,16 @@ export function MapView({
                             <MyLocationIcon />
                         </IconButton>
                     </Tooltip>
-                    <AppStyleSelector
-                        appStyle={appStyle}
-                        setAppStyle={onAppStyleChange}
-                        isQuickOverlay
-                        t={tAppStyleSelector}
-                    />
+                    {/* Hide on extra-small (xs) and small (sm) screens, show on medium (md) and larger screens */}
+                    {/* block makes the element block-level (like a div: full width, starts on new line) */}
+                    <Box sx={{ display: { xs: "none", sm: "none", md: "block" } }}>
+                        <AppStyleSelector
+                            appStyle={appStyle}
+                            setAppStyle={onAppStyleChange}
+                            isQuickOverlay
+                            t={tAppStyleSelector}
+                        />
+                    </Box>
                     {departureViewProps && (
                         <MapDeparturesPanelView
                             departureViewProps={departureViewProps}
