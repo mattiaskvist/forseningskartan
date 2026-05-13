@@ -51,7 +51,7 @@ export function RouteDelayLeaderboardView({ leaderboardItems, t }: RouteDelayLea
                         color: "text.secondary",
                     }}
                 >
-                    No leaderboard data available.
+                    {t.noData}
                 </Typography>
             ) : (
                 <Box
@@ -76,7 +76,7 @@ export function RouteDelayLeaderboardView({ leaderboardItems, t }: RouteDelayLea
                         }}
                     >
                         <span className="flex items-center gap-3">
-                            <span className="w-6 text-right">{t.rank}</span>
+                            <span className="text-right">{t.rank}</span>
                             <span>{t.route}</span>
                         </span>
                         <span className="flex tabular-nums">
