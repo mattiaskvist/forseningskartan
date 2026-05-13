@@ -43,7 +43,7 @@ export function SidebarPresenter() {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("md"));
     // hide sidebar on mobile when a site is selected (departure panel is open)
-    const hideSidebar = isMobile && selectedSite !== null;
+    const hideSidebar = isMobile && selectedSite !== null && location.pathname === "/";
 
     function toggleSidebarCB() {
         setIsOpen(!isOpen);
