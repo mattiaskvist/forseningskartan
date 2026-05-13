@@ -13,7 +13,8 @@ export function RouteDelayLeaderboardView({ leaderboardItems, t }: RouteDelayLea
 
         return (
             <li key={id} className="flex items-center justify-between text-sm">
-                <span className="flex items-center gap-3">
+                <span className="grid grid-cols-[70px_1fr] items-center">
+                    {/* 70px_1fr = 70px for rank and rest for route label */}
                     <Typography
                         component="span"
                         sx={{
@@ -75,8 +76,9 @@ export function RouteDelayLeaderboardView({ leaderboardItems, t }: RouteDelayLea
                             color: "text.secondary",
                         }}
                     >
-                        <span className="flex items-center gap-3">
-                            <span className="text-right">{t.rank}</span>
+                        <span className="grid grid-cols-[70px_1fr] items-center">
+                            {/* 70px_1fr = 70px for rank and rest for route label */}
+                            <span>{t.rank}</span>
                             <span>{t.route}</span>
                         </span>
                         <span className="flex tabular-nums">
