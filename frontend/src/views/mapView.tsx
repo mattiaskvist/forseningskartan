@@ -17,6 +17,7 @@ type MapViewProps = {
     handleSelectSiteCB: (siteId: number | null) => void;
     onSiteMarkerClick: (siteId: number) => void;
     recentSearchSiteIds: number[];
+    showSearch: boolean;
     departureViewProps: DepartureViewProps | null;
     isDeparturesLoading: boolean;
     departuresLastUpdatedText: string | null;
@@ -50,6 +51,7 @@ export function MapView({
     handleSelectSiteCB,
     onSiteMarkerClick,
     recentSearchSiteIds,
+    showSearch,
     departureViewProps,
     isDeparturesLoading,
     departuresLastUpdatedText,
@@ -157,23 +159,25 @@ export function MapView({
                     </IconButton>
                 </Tooltip>
             </Box>
-            <MapSearchView
-                allSites={allSites}
-                filteredSites={filteredSites}
-                selectedSite={selectedSite}
-                handleSelectSiteCB={handleSelectSiteCB}
-                recentSearchSiteIds={recentSearchSiteIds}
-                t={tSearchBar}
-                tMapSearch={tMapSearch}
-                tTransportModes={tTransportModes}
-                selectedTransportationMode={selectedTransportationMode}
-                transportationModeOptions={transportationModeOptions}
-                onTransportationModeChange={onTransportationModeChange}
-                hideStopsWithoutDepartures={hideStopsWithoutDepartures}
-                isHideStopsWithoutDeparturesBoxHidden={isHideStopsWithoutDeparturesBoxHidden}
-                onHideStopsWithoutDeparturesChange={onHideStopsWithoutDeparturesChange}
-                totalSiteCount={totalSiteCount}
-            />
+            <Box hidden={!showSearch}>
+                <MapSearchView
+                    allSites={allSites}
+                    filteredSites={filteredSites}
+                    selectedSite={selectedSite}
+                    handleSelectSiteCB={handleSelectSiteCB}
+                    recentSearchSiteIds={recentSearchSiteIds}
+                    t={tSearchBar}
+                    tMapSearch={tMapSearch}
+                    tTransportModes={tTransportModes}
+                    selectedTransportationMode={selectedTransportationMode}
+                    transportationModeOptions={transportationModeOptions}
+                    onTransportationModeChange={onTransportationModeChange}
+                    hideStopsWithoutDepartures={hideStopsWithoutDepartures}
+                    isHideStopsWithoutDeparturesBoxHidden={isHideStopsWithoutDeparturesBoxHidden}
+                    onHideStopsWithoutDeparturesChange={onHideStopsWithoutDeparturesChange}
+                    totalSiteCount={totalSiteCount}
+                />
+            </Box>
         </div>
     );
 }

@@ -52,6 +52,7 @@ export function MapSearchView({
                 top: 16,
                 zIndex: 1000,
                 width: "min(420px, calc(100vw - 5rem))",
+                // max width of 420px or 100% of viewport width minus some margin on smaller screens
                 p: 1,
                 borderRadius: 2,
                 backdropFilter: "blur(4px)",
