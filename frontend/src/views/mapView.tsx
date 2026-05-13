@@ -18,6 +18,8 @@ type MapViewProps = {
     onSiteMarkerClick: (siteId: number) => void;
     recentSearchSiteIds: number[];
     showSearch: boolean;
+    showUserLocationButton: boolean;
+    isDeparturePanelFullscreen: boolean;
     departureViewProps: DepartureViewProps | null;
     isDeparturesLoading: boolean;
     departuresLastUpdatedText: string | null;
@@ -52,6 +54,8 @@ export function MapView({
     onSiteMarkerClick,
     recentSearchSiteIds,
     showSearch,
+    showUserLocationButton,
+    isDeparturePanelFullscreen,
     departureViewProps,
     isDeparturesLoading,
     departuresLastUpdatedText,
@@ -122,6 +126,7 @@ export function MapView({
                     {departureViewProps && (
                         <MapDeparturesPanelView
                             departureViewProps={departureViewProps}
+                            isFullscreen={isDeparturePanelFullscreen}
                             isLoading={isDeparturesLoading}
                             lastUpdatedText={departuresLastUpdatedText}
                             onRefreshDepartures={onRefreshDepartures}
@@ -131,6 +136,7 @@ export function MapView({
                 </Box>
             </Box>
             <Box
+                hidden={!showUserLocationButton}
                 sx={{
                     position: "absolute",
                     left: 8,

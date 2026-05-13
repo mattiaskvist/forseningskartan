@@ -112,7 +112,11 @@ export function MapPresenter() {
     // useMediaQuery returns true when screen width is below md breakpoint (< 900px by default)
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-    // hide search on mobile when site is selected (deprature panel is open)
+    // make departure panel fullscreen on mobile
+    const isDeparturePanelFullscreen = isMobile;
+    // on mobile, when departure panel is open (in fullscreen),
+    // hide the search and user location button so they are not visible over the panel
+    const showUserLocationButton = isMobile ? selectedSite === null : true;
     const showSearch = isMobile ? selectedSite === null : true;
 
     const routesByStopPointsUnavailable = routesByStopPointError !== null || !routesByStopPoint;
@@ -353,6 +357,8 @@ export function MapPresenter() {
             onSiteMarkerClick={handleSiteMarkerClick}
             recentSearchSiteIds={recentSearchSiteIds}
             showSearch={showSearch}
+            showUserLocationButton={showUserLocationButton}
+            isDeparturePanelFullscreen={isDeparturePanelFullscreen}
             departureViewProps={departureViewProps}
             isDeparturesLoading={isDeparturesLoading}
             departuresLastUpdatedText={
