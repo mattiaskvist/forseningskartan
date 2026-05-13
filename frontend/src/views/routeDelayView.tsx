@@ -90,6 +90,7 @@ export function RouteDelayView({
                     sx={{
                         fontWeight: 600,
                         mb: 1,
+                        textAlign: "center",
                         color: "text.primary",
                     }}
                 >
