@@ -85,6 +85,7 @@ export function RouteDelayPresenter() {
     // useMediaQuery returns true when screen width is below md breakpoint (< 900px by default)
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+    const isSmallMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
     const matchesTransportationFilterCB = useCallback(
         (summary: DelaySummary): boolean => {
@@ -243,6 +244,7 @@ export function RouteDelayPresenter() {
 
     const isRouteDetailsOpen = selectedRouteKey !== null;
     const routeDelayContentViewProps: RouteDelayContentViewProps = {
+        isSmallMobile,
         selectedSection,
         isRouteDetailsOpen,
         pagedRouteItems,

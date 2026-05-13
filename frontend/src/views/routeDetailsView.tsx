@@ -10,6 +10,7 @@ import { RouteDelayTrendPoint, RouteDelayTimeGranularity } from "../types/routeD
 import { TranslationStrings } from "../utils/translations";
 
 type RouteDetailsViewProps = {
+    isSmallMobile: boolean;
     routeSummary: DelaySummary;
     selectedEventType: EventType;
     trendPoints: RouteDelayTrendPoint[];
@@ -22,6 +23,7 @@ type RouteDetailsViewProps = {
 };
 
 export function RouteDetailsView({
+    isSmallMobile,
     routeSummary,
     selectedEventType,
     trendPoints,
@@ -85,6 +87,7 @@ export function RouteDetailsView({
                     <Suspense message={t.loadingTrend} />
                 ) : (
                     <RouteDelayTrendChart
+                        isSmallMobile={isSmallMobile}
                         points={trendPoints}
                         title={`${
                             selectedEventType === "departure"
