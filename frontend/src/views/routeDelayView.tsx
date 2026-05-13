@@ -9,6 +9,7 @@ import { TranslationStrings } from "../utils/translations";
 import { RouteDelayContentView, RouteDelayContentViewProps } from "./routeDelayContentView";
 
 type RouteDelayViewProps = {
+    isMobile: boolean;
     selectedSection: RouteDelaySection;
     selectedDateText: string;
     routesInfoText: string;
@@ -35,6 +36,7 @@ type RouteDelayViewProps = {
 };
 
 export function RouteDelayView({
+    isMobile,
     selectedSection,
     selectedDateText,
     routesInfoText,
@@ -101,6 +103,7 @@ export function RouteDelayView({
                             t={tSectionToggle}
                         />
                         <RouteDelayControls
+                            isMobile={isMobile}
                             selectedSection={selectedSection}
                             isRouteDetailsOpen={isRouteDetailsOpen}
                             availableDates={availableDates}

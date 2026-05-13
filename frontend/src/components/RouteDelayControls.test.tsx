@@ -10,6 +10,7 @@ describe("RouteDelayControls", () => {
     it("renders transportation mode labels in title case", () => {
         renderWithTheme(
             <RouteDelayControls
+                isMobile={false}
                 selectedSection="routes"
                 isRouteDetailsOpen={false}
                 availableDates={[]}
@@ -37,6 +38,7 @@ describe("RouteDelayControls", () => {
     it("renders from and to date pickers for the custom date range preset", () => {
         renderWithTheme(
             <RouteDelayControls
+                isMobile={false}
                 selectedSection="routes"
                 isRouteDetailsOpen={false}
                 availableDates={["2024-01-01", "2024-01-02"]}

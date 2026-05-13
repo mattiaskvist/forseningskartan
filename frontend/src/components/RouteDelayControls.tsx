@@ -9,6 +9,7 @@ import { TranslationStrings } from "../utils/translations";
 import { getTransportationModeButton } from "../utils/transportationMode";
 
 type RouteDelayControlsProps = {
+    isMobile: boolean;
     selectedSection: RouteDelaySection;
     isRouteDetailsOpen: boolean;
     availableDates: string[];
@@ -29,6 +30,7 @@ type RouteDelayControlsProps = {
 };
 
 export function RouteDelayControls({
+    isMobile,
     selectedSection,
     isRouteDetailsOpen,
     availableDates,
@@ -79,57 +81,50 @@ export function RouteDelayControls({
             sx={{
                 display: "flex",
                 flexDirection: "column",
-                gap: 1.5,
+                gap: 1,
                 borderRadius: 1,
                 border: 1,
                 borderColor: "divider",
                 p: 1.5,
             }}
         >
-            <div>
-                <FilterToggleButtonGroup
-                    label={t.dateSelection}
-                    options={DatePresets}
-                    selectedValue={selectedDatePreset}
-                    onValueChange={onDatePresetChange}
-                    renderButtonCB={getPresetButtonCB}
-                />
-            </div>
+            <FilterToggleButtonGroup
+                label={t.dateSelection}
+                options={DatePresets}
+                selectedValue={selectedDatePreset}
+                onValueChange={onDatePresetChange}
+                renderButtonCB={getPresetButtonCB}
+            />
 
             {selectedDatePreset === "customDate" && (
-                <div>
-                    <AvailableDatesPicker
-                        availableDates={availableDates}
-                        selectedDateRange={selectedCustomDateRange}
-                        onSelectDateRange={onCustomDateRangeChange}
-                        t={tDatePicker}
-                    />
-                </div>
+                <AvailableDatesPicker
+                    availableDates={availableDates}
+                    selectedDateRange={selectedCustomDateRange}
+                    onSelectDateRange={onCustomDateRangeChange}
+                    t={tDatePicker}
+                />
             )}
 
-            <div className="flex items-center gap-20">
-                <div>
-                    <FilterToggleButtonGroup
-                        label={t.eventType}
-                        options={["departure", "arrival"] as EventType[]}
-                        selectedValue={selectedEventType}
-                        onValueChange={onEventTypeChange}
-                        renderButtonCB={getEventTypeButtonCB}
-                    />
-                </div>
+            {/* Side-by-side on desktop, stacked on mobile */}
+            <div className={isMobile ? "flex flex-col gap-1" : "flex items-center gap-20"}>
+                <FilterToggleButtonGroup
+                    label={t.eventType}
+                    options={["departure", "arrival"] as EventType[]}
+                    selectedValue={selectedEventType}
+                    onValueChange={onEventTypeChange}
+                    renderButtonCB={getEventTypeButtonCB}
+                />
 
                 {!isRouteDetailsOpen ? (
-                    <div>
-                        <FilterToggleButtonGroup
-                            label={t.transportMode}
-                            options={transportationModeOptions}
-                            selectedValue={selectedTransportationMode}
-                            onValueChange={onTransportationModeChange}
-                            renderButtonCB={(mode) =>
-                                getTransportationModeButton(mode, tTransportModes)
-                            }
-                        />
-                    </div>
+                    <FilterToggleButtonGroup
+                        label={t.transportMode}
+                        options={transportationModeOptions}
+                        selectedValue={selectedTransportationMode}
+                        onValueChange={onTransportationModeChange}
+                        renderButtonCB={(mode) =>
+                            getTransportationModeButton(mode, tTransportModes)
+                        }
+                    />
                 ) : null}
             </div>
 
