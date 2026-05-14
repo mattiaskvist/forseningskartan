@@ -152,6 +152,10 @@ export function MapView({
                             backgroundColor: "background.paper",
                             color: "primary.main",
                             boxShadow: 2,
+                            // The overlay wrapper has pointerEvents: "none" so empty overlay space
+                            // does not block map dragging. This visible button must opt back into
+                            // clicks itself so the location handler can run.
+                            pointerEvents: "auto",
                             "&:hover": {
                                 backgroundColor: "action.hover",
                             },
