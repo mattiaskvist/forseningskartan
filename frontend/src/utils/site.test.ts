@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { RoutesByStopPoint } from "../api/backend";
 import type { RouteMeta } from "../types/historicalDelay";
-import { getStopPointGidsForSite, StopPointGidsBySiteId } from "./site";
+import { getRouteSiteIds, getStopPointGidsForSite, StopPointGidsBySiteId } from "./site";
 import { Site, StopPoint } from "../types/sl";
 
 function makeRoute(type: RouteMeta["type"]): RouteMeta {
@@ -219,5 +219,31 @@ describe("getSitesWithRoutes", () => {
         );
 
         expect(result).toEqual([]);
+    });
+});
+
+describe("getRouteSiteIds", () => {
+    it("returns existing route site ids without duplicating a site", () => {
+        const sites: Site[] = [
+            { id: 1, name: "Route site", stop_areas: [10] } as Site,
+            { id: 2, name: "Other route site", stop_areas: [20] } as Site,
+            { id: 3, name: "Route site 2", stop_areas: [30] } as Site,
+        ];
+        const stopPoints: StopPoint[] = [
+            { id: 1, gid: "A", stop_area: { id: 10, name: "Area 10" } } as StopPoint,
+            { id: 2, gid: "A2", stop_area: { id: 10, name: "Area 10" } } as StopPoint,
+            { id: 3, gid: "B", stop_area: { id: 20, name: "Area 20" } } as StopPoint,
+            { id: 4, gid: "C", stop_area: { id: 30, name: "Area 30" } } as StopPoint,
+        ];
+        const routesByStopPoint: RoutesByStopPoint = {
+            A: [makeRoute("700")],
+            A2: [makeRoute("700")],
+            B: [makeRoute("401")],
+            C: [makeRoute("700")],
+        };
+
+        expect(getRouteSiteIds(sites, stopPoints, routesByStopPoint, {}, "1", "700")).toEqual([
+            1, 3,
+        ]);
     });
 });

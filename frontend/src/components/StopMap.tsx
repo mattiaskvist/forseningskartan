@@ -19,6 +19,7 @@ type StopMapProps = {
     onSiteMarkerClick: (siteId: number) => void;
     appStyle: AppStyle;
     userLocation: { lat: number; lon: number } | null;
+    selectedRouteSiteIds: number[];
     selectedSiteCameraTarget: MapCameraTarget | null;
     userLocationCameraTarget: MapCameraTarget | null;
 };
@@ -38,6 +39,14 @@ const INCREASE_MARKER_SIZE_ZOOM = 15; // zoom level after which marker sizes sta
 const BASE_MARKER_RADIUS = 4;
 const SELECTED_MARKER_RADIUS = 7;
 const ZOOM_CONTROL_POSITION: ControlPosition = "bottomleft";
+
+const ROUTE_MARKER_STYLE: CircleMarkerOptions = {
+    radius: BASE_MARKER_RADIUS,
+    color: "#f59e0b", // bright orange
+    fillColor: "#f59e0b",
+    fillOpacity: 0.9,
+    weight: 2, // thicker border
+};
 
 const MAP_TILES: Record<AppStyle, { url: string; attribution: string }> = {
     Dark: {
@@ -81,8 +90,21 @@ function getUnselectedMarkerStyle(appStyle: AppStyle): CircleMarkerOptions {
     };
 }
 
-function setMarkerSelectedStyle(marker: CircleMarker, isSelected: boolean, appStyle: AppStyle) {
-    marker.setStyle(isSelected ? SELECTED_MARKER_STYLE : getUnselectedMarkerStyle(appStyle));
+function getSiteMarkerStyle(
+    siteId: number,
+    selectedSiteId: number | null,
+    routeSiteIds: Set<number>,
+    appStyle: AppStyle
+): CircleMarkerOptions {
+    if (siteId === selectedSiteId) {
+        return SELECTED_MARKER_STYLE;
+    }
+
+    if (routeSiteIds.has(siteId)) {
+        return ROUTE_MARKER_STYLE;
+    }
+
+    return getUnselectedMarkerStyle(appStyle);
 }
 
 function getBaseMarkerRadius(zoom: number) {
@@ -100,6 +122,7 @@ export function StopMap({
     onSiteMarkerClick,
     appStyle,
     userLocation,
+    selectedRouteSiteIds,
     selectedSiteCameraTarget,
     userLocationCameraTarget,
 }: StopMapProps) {
@@ -113,6 +136,8 @@ export function StopMap({
     const visibleSiteIdsRef = useRef<Set<number>>(new Set());
     const selectedMarkerRef = useRef<CircleMarker | null>(null);
     const selectedSiteIdRef = useRef<number | null>(null);
+    // route highlighting restyles existing site markers. it should not create separate map points.
+    const selectedRouteSiteIdsRef = useRef<Set<number>>(new Set());
     const mapStyleRef = useRef(appStyle);
     const userMarkerRef = useRef<CircleMarker | null>(null);
     // Cached Leaflet handlers read this ref so they call the latest presenter callback.
@@ -196,6 +221,7 @@ export function StopMap({
             visibleSiteIds.clear();
             selectedMarkerRef.current = null;
             selectedSiteIdRef.current = null;
+            selectedRouteSiteIdsRef.current.clear();
             userMarkerRef.current = null;
             selectedSiteCameraRequestKeyRef.current = null;
             userLocationCameraRequestKeyRef.current = null;
@@ -228,7 +254,12 @@ export function StopMap({
         // Markers are cached, so selection policy stays outside this Leaflet adapter.
         const marker = new CircleMarker(
             [site.lat, site.lon],
-            getUnselectedMarkerStyle(mapStyleRef.current)
+            getSiteMarkerStyle(
+                site.id,
+                selectedSiteIdRef.current,
+                selectedRouteSiteIdsRef.current,
+                mapStyleRef.current
+            )
         );
         marker.bindTooltip(site.name);
 
@@ -336,29 +367,52 @@ export function StopMap({
         nextVisibleSiteIds.forEach(showNewlyVisibleSiteCB);
     }, [filteredSites, createSiteMarker]);
 
-    // Update marker styles when map style changes
+    // update marker styles when map style or selected route changes.
     useEffect(() => {
-        const selectedSiteId = selectedSiteIdRef.current;
+        selectedRouteSiteIdsRef.current = new Set(selectedRouteSiteIds);
         function setMarkerStyleCB(marker: CircleMarker, siteId: number) {
-            setMarkerSelectedStyle(marker, siteId === selectedSiteId, appStyle);
+            marker.setStyle(
+                getSiteMarkerStyle(
+                    siteId,
+                    selectedSiteIdRef.current,
+                    selectedRouteSiteIdsRef.current,
+                    appStyle
+                )
+            );
         }
         allMarkersBySiteIdRef.current.forEach(setMarkerStyleCB);
-    }, [appStyle]);
+    }, [appStyle, selectedRouteSiteIds]);
 
+    // update marker styles when selected site changes
     useEffect(() => {
         if (!mapRef.current) {
             return;
         }
+        const previousSelectedSiteId = selectedSiteIdRef.current;
         selectedSiteIdRef.current = selectedSiteId;
 
         if (selectedMarkerRef.current) {
-            setMarkerSelectedStyle(selectedMarkerRef.current, false, mapStyleRef.current);
+            selectedMarkerRef.current.setStyle(
+                getSiteMarkerStyle(
+                    previousSelectedSiteId ?? -1,
+                    selectedSiteId,
+                    selectedRouteSiteIdsRef.current,
+                    mapStyleRef.current
+                )
+            );
         }
 
         if (selectedSiteId !== null) {
             const selectedMarker = allMarkersBySiteIdRef.current.get(selectedSiteId) ?? null;
             if (selectedMarker) {
-                setMarkerSelectedStyle(selectedMarker, true, mapStyleRef.current);
+                selectedMarker.setStyle(
+                    getSiteMarkerStyle(
+                        selectedSiteId,
+                        selectedSiteId,
+                        selectedRouteSiteIdsRef.current,
+                        mapStyleRef.current
+                    )
+                );
             }
             selectedMarkerRef.current = selectedMarker;
             return;
@@ -367,6 +421,7 @@ export function StopMap({
         selectedMarkerRef.current = null;
     }, [selectedSiteId]);
 
+    // update map camera when selected site changes
     useEffect(() => {
         const map = mapRef.current;
         if (!selectedSiteCameraTarget) {

@@ -24,6 +24,7 @@ type MapViewProps = {
     appStyle: AppStyle;
     onAppStyleChange: (style: AppStyle) => void;
     userLocation: { lat: number; lon: number } | null;
+    selectedRouteSiteIds: number[];
     selectedSiteCameraTarget: MapCameraTarget | null;
     userLocationCameraTarget: MapCameraTarget | null;
     onRequestMapCenterOnUser: () => void;
@@ -57,6 +58,7 @@ export function MapView({
     appStyle,
     onAppStyleChange,
     userLocation,
+    selectedRouteSiteIds,
     selectedSiteCameraTarget,
     userLocationCameraTarget,
     onRequestMapCenterOnUser,
@@ -83,6 +85,7 @@ export function MapView({
                 onSiteMarkerClick={onSiteMarkerClick}
                 appStyle={appStyle}
                 userLocation={userLocation}
+                selectedRouteSiteIds={selectedRouteSiteIds}
                 selectedSiteCameraTarget={selectedSiteCameraTarget}
                 userLocationCameraTarget={userLocationCameraTarget}
             />
