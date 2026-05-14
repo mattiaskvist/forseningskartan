@@ -27,6 +27,8 @@ The following has been implemented:
   - Favorite stops shown in sidebar for logged-in users
   - User preferences (favorite stops, app style, search history, language, map stop filters) persisted to Firestore
 - Live persistence update: when a user changes a preference in one tab the change is immediately reflected in all other tabs
+- App intro on first visit with persisted dismissal state so it only shows once
+- Adaptations to make the app more mobile-friendly
 
 For an up-to-date list of completed work, please visit [the project board and roadmap](https://github.com/users/mattiaskvist/projects/5).
 
@@ -85,7 +87,7 @@ The consultation produced the following suggestions:
 3. Addressed in [Issue #153: Addressing feedback from evaluation stage user consultation](https://github.com/mattiaskvist/forseningskartan/issues/153).
 4. Addressed in [Issue #153: Addressing feedback from evaluation stage user consultation](https://github.com/mattiaskvist/forseningskartan/issues/153).
 5. Was already an idea to implement in [Issue #12: Get live vehicle position and draw route on map](https://github.com/mattiaskvist/forseningskartan/issues/12).
-6. Probably quite a bit of work and we have limited time left, added as a stretch goal in [Issue #154: Adapt frontend to mobile](https://github.com/mattiaskvist/forseningskartan/issues/154)
+6. Addressed in [Issue #154: Adapt frontend to mobile](https://github.com/mattiaskvist/forseningskartan/issues/154)
 
 Before addressing 1, 3, and 4:
 
@@ -94,6 +96,26 @@ Before addressing 1, 3, and 4:
 After addressing 1, 3, and 4:
 
 ![](images/eval-user-consultation/after.png)
+
+Before adapting to mobile (map view):
+
+![](images/eval-user-consultation/mobile-map-before.png)
+![](images/eval-user-consultation/mobile-departure-before.png)
+
+After adapting to mobile (map view):
+
+![](images/eval-user-consultation/mobile-map-after.png)
+![](images/eval-user-consultation/mobile-departure-after.png)
+
+Before adapting to mobile (route delay view):
+
+![](images/eval-user-consultation/mobile-delaychart-before.png)
+![](images/eval-user-consultation/mobile-delayleaderboard-before.png)
+
+After adapting to mobile (route delay view):
+
+![](images/eval-user-consultation/mobile-delaychart-after.png)
+![](images/eval-user-consultation/mobile-delayleaderboard-after.png)
 
 ## Project file structure
 

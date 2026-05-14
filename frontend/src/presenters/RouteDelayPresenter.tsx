@@ -54,6 +54,8 @@ import { compareRouteNamesCB, getRouteDisplayName, getRouteIdentityKey } from ".
 import { routeTypesToTransportationModes } from "../utils/transportationMode";
 import { RouteDelayContentViewProps } from "../views/routeDelayContentView";
 import { normalizeText } from "../utils/text";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 
 function getRouteModeKey(summary: DelaySummary): RouteType | null {
     return summary.route?.type ?? null;
@@ -79,6 +81,11 @@ export function RouteDelayPresenter() {
     const searchQuery = useAppSelector(getRouteDelaySearchQueryCB);
     const routesPerPage = useAppSelector(getRouteDelayRoutesPerPageCB);
     const currentPage = useAppSelector(getRouteDelayCurrentPageCB);
+
+    // useMediaQuery returns true when screen width is below md breakpoint (< 900px by default)
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+    const isSmallMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
     const matchesTransportationFilterCB = useCallback(
         (summary: DelaySummary): boolean => {
@@ -237,6 +244,7 @@ export function RouteDelayPresenter() {
 
     const isRouteDetailsOpen = selectedRouteKey !== null;
     const routeDelayContentViewProps: RouteDelayContentViewProps = {
+        isSmallMobile,
         selectedSection,
         isRouteDetailsOpen,
         pagedRouteItems,
@@ -265,6 +273,7 @@ export function RouteDelayPresenter() {
 
     return (
         <RouteDelayView
+            isMobile={isMobile}
             selectedSection={selectedSection}
             selectedDateText={selectedDateText}
             routesInfoText={routesInfoText}

@@ -9,6 +9,7 @@ import { TranslationStrings } from "../utils/translations";
 import { FilterToggleButtonGroup } from "./FilterToggleButtonGroup";
 
 type RouteDelayTrendChartProps = {
+    isSmallMobile: boolean;
     points: RouteDelayTrendPoint[];
     title: string;
     timeGranularity: RouteDelayTimeGranularity;
@@ -17,6 +18,7 @@ type RouteDelayTrendChartProps = {
 };
 
 export function RouteDelayTrendChart({
+    isSmallMobile,
     points,
     title,
     timeGranularity,
@@ -75,28 +77,43 @@ export function RouteDelayTrendChart({
                 border: 1,
                 borderColor: "divider",
                 borderRadius: 1,
-                p: 1.5,
+                p: 1,
             }}
         >
             <Box
                 sx={{
                     display: "flex",
+                    flexDirection: isSmallMobile ? "column" : "row",
                     justifyContent: "space-between",
                 }}
             >
                 <Typography sx={{ fontSize: "0.875rem", color: "text.primary" }}>
                     {title}
                 </Typography>
-                <FilterToggleButtonGroup
-                    options={RouteDelayTimeGranularityOptions}
-                    selectedValue={timeGranularity}
-                    onValueChange={onTimeGranularityChange}
-                    renderButtonCB={getTimeGranularityButtonCB}
-                />
+                {/* flex: 1 takes remaining space so the toggle group is pushed to the right edge */}
+                <Box
+                    sx={{
+                        flex: 1,
+                        display: "flex",
+                        justifyContent: isSmallMobile ? "flex-start" : "flex-end",
+                    }}
+                >
+                    <FilterToggleButtonGroup
+                        options={RouteDelayTimeGranularityOptions}
+                        selectedValue={timeGranularity}
+                        onValueChange={onTimeGranularityChange}
+                        renderButtonCB={getTimeGranularityButtonCB}
+                    />
+                </Box>
             </Box>
             <LineChart
                 height={250}
-                margin={{ top: 24, right: 32, bottom: 4, left: 16 }}
+                margin={{
+                    top: 24,
+                    right: isSmallMobile ? 16 : 32,
+                    bottom: 4,
+                    left: isSmallMobile ? -16 : 0,
+                }}
                 xAxis={[
                     {
                         scaleType: "point",

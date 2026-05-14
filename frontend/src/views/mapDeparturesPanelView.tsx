@@ -5,6 +5,7 @@ import { TranslationStrings } from "../utils/translations";
 
 type MapDeparturesPanelViewProps = {
     departureViewProps: DepartureViewProps;
+    isFullscreen: boolean;
     isLoading: boolean;
     lastUpdatedText: string | null;
     onRefreshDepartures: () => void;
@@ -13,24 +14,43 @@ type MapDeparturesPanelViewProps = {
 
 export function MapDeparturesPanelView({
     departureViewProps,
+    isFullscreen,
     isLoading,
     lastUpdatedText,
     onRefreshDepartures,
     t,
 }: MapDeparturesPanelViewProps) {
+    const layout = isFullscreen
+        ? {
+              position: "fixed",
+              inset: 0, // top/right/bottom/left = 0, panel fills the entire screen
+              width: "100%",
+              height: "100%",
+              maxHeight: "100%",
+              borderRadius: 0,
+          }
+        : {
+              position: "static",
+              inset: "auto", // let the document flow determine the position
+              width: "420px",
+              height: "auto",
+              maxHeight: "calc(100vh - 2rem)", // max height of viewport minus some margin
+              borderRadius: 2,
+          };
+
     // The panel owns panel-level chrome; DepartureView only renders the selected stop content.
     return (
-        <aside className="pointer-events-auto z-[1000] w-[min(420px,calc(100vw-2rem))]">
+        // pointerEvents: "auto" allows clicks to pass through the panel when it's transparent (no stop selected)
+        <aside style={{ pointerEvents: "auto", zIndex: 1000 }}>
             <Paper
                 variant="outlined"
                 sx={{
-                    maxHeight: "calc(100vh - 2rem)",
+                    ...layout,
                     display: "flex",
                     flexDirection: "column",
                     gap: 1.5,
                     overflowY: "auto",
                     p: 1.5,
-                    borderRadius: 2,
                     backdropFilter: "blur(4px)",
                 }}
             >

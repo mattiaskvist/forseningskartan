@@ -17,6 +17,9 @@ type MapViewProps = {
     handleSelectSiteCB: (siteId: number | null) => void;
     onSiteMarkerClick: (siteId: number) => void;
     recentSearchSiteIds: number[];
+    showSearch: boolean;
+    showUserLocationButton: boolean;
+    isDeparturePanelFullscreen: boolean;
     departureViewProps: DepartureViewProps | null;
     isDeparturesLoading: boolean;
     departuresLastUpdatedText: string | null;
@@ -50,6 +53,9 @@ export function MapView({
     handleSelectSiteCB,
     onSiteMarkerClick,
     recentSearchSiteIds,
+    showSearch,
+    showUserLocationButton,
+    isDeparturePanelFullscreen,
     departureViewProps,
     isDeparturesLoading,
     departuresLastUpdatedText,
@@ -107,34 +113,20 @@ export function MapView({
                         },
                     }}
                 >
-                    <Tooltip title={tMap.centerOnMyLocation}>
-                        <IconButton
-                            onClick={onRequestMapCenterOnUser}
-                            sx={{
-                                backgroundColor: "background.paper",
-                                color: "primary.main",
-                                boxShadow: 2,
-                                "&:hover": {
-                                    backgroundColor: "action.hover",
-                                },
-                                // ensure consistent size with other overlay elements
-                                width: 44,
-                                height: 44,
-                            }}
-                            aria-label={tMap.centerOnMyLocationAriaLabel}
-                        >
-                            <MyLocationIcon />
-                        </IconButton>
-                    </Tooltip>
-                    <AppStyleSelector
-                        appStyle={appStyle}
-                        setAppStyle={onAppStyleChange}
-                        isQuickOverlay
-                        t={tAppStyleSelector}
-                    />
+                    {/* Hide on extra-small (xs), small (sm) and medium (md) screens, show on large (lg) and extra-large (xl) screens */}
+                    {/* block makes the element block-level (like a div: full width, starts on new line) */}
+                    <Box sx={{ display: { xs: "none", sm: "none", md: "none", lg: "block" } }}>
+                        <AppStyleSelector
+                            appStyle={appStyle}
+                            setAppStyle={onAppStyleChange}
+                            isQuickOverlay
+                            t={tAppStyleSelector}
+                        />
+                    </Box>
                     {departureViewProps && (
                         <MapDeparturesPanelView
                             departureViewProps={departureViewProps}
+                            isFullscreen={isDeparturePanelFullscreen}
                             isLoading={isDeparturesLoading}
                             lastUpdatedText={departuresLastUpdatedText}
                             onRefreshDepartures={onRefreshDepartures}
@@ -143,23 +135,55 @@ export function MapView({
                     )}
                 </Box>
             </Box>
-            <MapSearchView
-                allSites={allSites}
-                filteredSites={filteredSites}
-                selectedSite={selectedSite}
-                handleSelectSiteCB={handleSelectSiteCB}
-                recentSearchSiteIds={recentSearchSiteIds}
-                t={tSearchBar}
-                tMapSearch={tMapSearch}
-                tTransportModes={tTransportModes}
-                selectedTransportationMode={selectedTransportationMode}
-                transportationModeOptions={transportationModeOptions}
-                onTransportationModeChange={onTransportationModeChange}
-                hideStopsWithoutDepartures={hideStopsWithoutDepartures}
-                isHideStopsWithoutDeparturesBoxHidden={isHideStopsWithoutDeparturesBoxHidden}
-                onHideStopsWithoutDeparturesChange={onHideStopsWithoutDeparturesChange}
-                totalSiteCount={totalSiteCount}
-            />
+            <Box
+                hidden={!showUserLocationButton}
+                sx={{
+                    position: "absolute",
+                    left: 8,
+                    bottom: 84,
+                    zIndex: 1000,
+                    pointerEvents: "none",
+                }}
+            >
+                <Tooltip title={tMap.centerOnMyLocation}>
+                    <IconButton
+                        onClick={onRequestMapCenterOnUser}
+                        sx={{
+                            backgroundColor: "background.paper",
+                            color: "primary.main",
+                            boxShadow: 2,
+                            "&:hover": {
+                                backgroundColor: "action.hover",
+                            },
+                            // ensure consistent size with other overlay elements
+                            width: 44,
+                            height: 44,
+                        }}
+                        aria-label={tMap.centerOnMyLocationAriaLabel}
+                    >
+                        <MyLocationIcon />
+                    </IconButton>
+                </Tooltip>
+            </Box>
+            <Box hidden={!showSearch}>
+                <MapSearchView
+                    allSites={allSites}
+                    filteredSites={filteredSites}
+                    selectedSite={selectedSite}
+                    handleSelectSiteCB={handleSelectSiteCB}
+                    recentSearchSiteIds={recentSearchSiteIds}
+                    t={tSearchBar}
+                    tMapSearch={tMapSearch}
+                    tTransportModes={tTransportModes}
+                    selectedTransportationMode={selectedTransportationMode}
+                    transportationModeOptions={transportationModeOptions}
+                    onTransportationModeChange={onTransportationModeChange}
+                    hideStopsWithoutDepartures={hideStopsWithoutDepartures}
+                    isHideStopsWithoutDeparturesBoxHidden={isHideStopsWithoutDeparturesBoxHidden}
+                    onHideStopsWithoutDeparturesChange={onHideStopsWithoutDeparturesChange}
+                    totalSiteCount={totalSiteCount}
+                />
+            </Box>
         </div>
     );
 }

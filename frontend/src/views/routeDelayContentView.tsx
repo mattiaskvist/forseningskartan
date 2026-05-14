@@ -15,6 +15,7 @@ import { EventType } from "../types/departureDelay";
 import { Suspense } from "../components/Suspense";
 
 export type RouteDelayContentViewProps = {
+    isSmallMobile: boolean;
     selectedSection: RouteDelaySection;
     isRouteDetailsOpen: boolean;
     pagedRouteItems: RouteDelayListItem[];
@@ -42,6 +43,7 @@ export type RouteDelayContentViewProps = {
 };
 
 export function RouteDelayContentView({
+    isSmallMobile,
     selectedSection,
     isRouteDetailsOpen,
     pagedRouteItems,
@@ -100,6 +102,7 @@ export function RouteDelayContentView({
     if (selectedRouteSummary) {
         return (
             <RouteDetailsView
+                isSmallMobile={isSmallMobile}
                 routeSummary={selectedRouteSummary}
                 selectedEventType={selectedEventType}
                 trendPoints={trendPoints}

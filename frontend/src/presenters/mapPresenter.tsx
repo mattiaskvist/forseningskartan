@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from "react";
+import { useMediaQuery, useTheme } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { MapView } from "../views/mapView";
 import { useAppDispatch, useAppSelector } from "../store/store";
@@ -107,6 +108,16 @@ export function MapPresenter() {
     const departureSearchQuery = useAppSelector(getDepartureSearchQueryCB);
     const departureUniqueModes = useAppSelector(getDepartureUniqueModesCB);
     const tMap = translations[currentLanguage].map;
+
+    // useMediaQuery returns true when screen width is below md breakpoint (< 900px by default)
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+    // make departure panel fullscreen on mobile
+    const isDeparturePanelFullscreen = isMobile;
+    // on mobile, when departure panel is open (in fullscreen),
+    // hide the search and user location button so they are not visible over the panel
+    const showUserLocationButton = isMobile ? selectedSite === null : true;
+    const showSearch = isMobile ? selectedSite === null : true;
 
     const routesByStopPointsUnavailable = routesByStopPointError !== null || !routesByStopPoint;
     const transportationModeOptions = useMemo(() => {
@@ -345,6 +356,9 @@ export function MapPresenter() {
             handleSelectSiteCB={handleSelectSiteCB}
             onSiteMarkerClick={handleSiteMarkerClick}
             recentSearchSiteIds={recentSearchSiteIds}
+            showSearch={showSearch}
+            showUserLocationButton={showUserLocationButton}
+            isDeparturePanelFullscreen={isDeparturePanelFullscreen}
             departureViewProps={departureViewProps}
             isDeparturesLoading={isDeparturesLoading}
             departuresLastUpdatedText={

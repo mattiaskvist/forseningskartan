@@ -7,6 +7,7 @@ import {
     getAuthLoadingCB,
     getAuthUserCB,
     getFavoriteSitesCB,
+    getSelectedSiteCB,
     getSitesLoadingCB,
     getUserPreferencesLoadingCB,
 } from "../store/selectors";
@@ -18,6 +19,8 @@ import { setAppStylePreference } from "../store/userPreferencesSlice";
 import { getCurrentLanguageCB } from "../store/selectors";
 import { setLanguagePreference } from "../store/userPreferencesSlice";
 import { LanguageCode, translations } from "../utils/translations";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 
 export function SidebarPresenter() {
     const [isOpen, setIsOpen] = useState(false);
@@ -34,6 +37,13 @@ export function SidebarPresenter() {
         isAuthLoading || Boolean(user && (isUserPreferencesLoading || isSitesLoading));
     const currentLanguage = useAppSelector(getCurrentLanguageCB);
     const tAccount = translations[currentLanguage].account;
+    const selectedSite = useAppSelector(getSelectedSiteCB);
+
+    // useMediaQuery returns true when screen width is below md breakpoint (< 900px by default)
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+    // hide sidebar on mobile when a site is selected (departure panel is open)
+    const hideSidebar = isMobile && selectedSite !== null && location.pathname === "/";
 
     function toggleSidebarCB() {
         setIsOpen(!isOpen);
@@ -75,22 +85,24 @@ export function SidebarPresenter() {
     const t = translations[currentLanguage].sideBar;
 
     return (
-        <SidebarView
-            isOpen={isOpen}
-            currentPath={location.pathname}
-            user={user}
-            favoriteStops={favoriteSites}
-            isFavoriteStopsLoading={isFavoriteStopsLoading}
-            onToggle={toggleSidebarCB}
-            onNavigate={navigateCB}
-            onLogout={handleLogoutACB}
-            onSelectFavoriteStop={selectFavoriteStopACB}
-            appStyle={appStyle}
-            onAppStyleChange={handleAppStyleChangeACB}
-            currentLanguage={currentLanguage}
-            onLanguageChange={handleLanguageChangeACB}
-            t={t}
-            tAppStyleSelector={translations[currentLanguage].appStyleSelector}
-        />
+        !hideSidebar && (
+            <SidebarView
+                isOpen={isOpen}
+                currentPath={location.pathname}
+                user={user}
+                favoriteStops={favoriteSites}
+                isFavoriteStopsLoading={isFavoriteStopsLoading}
+                onToggle={toggleSidebarCB}
+                onNavigate={navigateCB}
+                onLogout={handleLogoutACB}
+                onSelectFavoriteStop={selectFavoriteStopACB}
+                appStyle={appStyle}
+                onAppStyleChange={handleAppStyleChangeACB}
+                currentLanguage={currentLanguage}
+                onLanguageChange={handleLanguageChangeACB}
+                t={t}
+                tAppStyleSelector={translations[currentLanguage].appStyleSelector}
+            />
+        )
     );
 }
