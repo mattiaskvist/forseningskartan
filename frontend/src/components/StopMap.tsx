@@ -35,13 +35,14 @@ export type MapCameraTarget = {
 const STOCKHOLM_CENTER: [number, number] = [59.3293, 18.0686];
 const STOCKHOLM_ZOOM = 13;
 const MAX_ZOOM = 19;
-const INCREASE_MARKER_SIZE_ZOOM = 15; // zoom level after which marker sizes start increasing to remain visible when zooming in
+// Marker circles become visually tiny at high zoom, so keep the base radius
+// until this zoom level and then grow it one pixel per zoom step.
+const INCREASE_MARKER_SIZE_ZOOM = 15;
 const BASE_MARKER_RADIUS = 4;
 const SELECTED_MARKER_RADIUS = 7;
 const ZOOM_CONTROL_POSITION: ControlPosition = "bottomleft";
 
 const ROUTE_MARKER_STYLE: CircleMarkerOptions = {
-    radius: BASE_MARKER_RADIUS,
     color: "#f59e0b", // bright orange
     fillColor: "#f59e0b",
     fillOpacity: 0.9,
@@ -67,7 +68,6 @@ const MAP_TILES: Record<AppStyle, { url: string; attribution: string }> = {
 };
 
 const SELECTED_MARKER_STYLE: CircleMarkerOptions = {
-    radius: SELECTED_MARKER_RADIUS,
     color: "#ef4444",
     fillColor: "#ef4444",
     fillOpacity: 0.95,
@@ -82,7 +82,6 @@ function getUnselectedMarkerStyle(appStyle: AppStyle): CircleMarkerOptions {
     };
     const color = UNSELECTED_MARKER_COLOR_BY_STYLE[appStyle];
     return {
-        radius: BASE_MARKER_RADIUS,
         color,
         fillColor: color,
         fillOpacity: 0.7,
@@ -94,17 +93,25 @@ function getSiteMarkerStyle(
     siteId: number,
     selectedSiteId: number | null,
     routeSiteIds: Set<number>,
-    appStyle: AppStyle
+    appStyle: AppStyle,
+    zoom: number
 ): CircleMarkerOptions {
+    // Radius depends on current Leaflet zoom, so every full style refresh must
+    // include it. Otherwise route/theme updates would reset zoom-scaled markers.
+    const radius =
+        siteId === selectedSiteId
+            ? getBaseMarkerRadius(zoom) + (SELECTED_MARKER_RADIUS - BASE_MARKER_RADIUS)
+            : getBaseMarkerRadius(zoom);
+
     if (siteId === selectedSiteId) {
-        return SELECTED_MARKER_STYLE;
+        return { ...SELECTED_MARKER_STYLE, radius };
     }
 
     if (routeSiteIds.has(siteId)) {
-        return ROUTE_MARKER_STYLE;
+        return { ...ROUTE_MARKER_STYLE, radius };
     }
 
-    return getUnselectedMarkerStyle(appStyle);
+    return { ...getUnselectedMarkerStyle(appStyle), radius };
 }
 
 function getBaseMarkerRadius(zoom: number) {
@@ -180,25 +187,27 @@ export function StopMap({
         mapRef.current = map;
         markersLayerRef.current = new LayerGroup().addTo(map);
 
-        // Update marker sizes on zoom to keep them visible and
-        // appropriately sized at different zoom levels
+        // Recompute full marker styles on zoom because radius is part of the
+        // style object and selected/route markers must preserve their colors.
         function updateMarkerSizesACB() {
             const zoom = map.getZoom();
-            const radius = getBaseMarkerRadius(zoom);
 
-            function setMarkerSizeCB(marker: CircleMarker, siteId: number) {
-                const isSelected = siteId === selectedSiteIdRef.current;
-
-                marker.setStyle({
-                    radius: isSelected
-                        ? radius + (SELECTED_MARKER_RADIUS - BASE_MARKER_RADIUS)
-                        : radius,
-                });
+            function setMarkerStyleCB(marker: CircleMarker, siteId: number) {
+                marker.setStyle(
+                    getSiteMarkerStyle(
+                        siteId,
+                        selectedSiteIdRef.current,
+                        selectedRouteSiteIdsRef.current,
+                        mapStyleRef.current,
+                        zoom
+                    )
+                );
             }
-            allMarkersBySiteIdRef.current.forEach(setMarkerSizeCB);
+            allMarkersBySiteIdRef.current.forEach(setMarkerStyleCB);
 
             // user position marker
             if (userMarkerRef.current) {
+                const radius = getBaseMarkerRadius(zoom);
                 userMarkerRef.current.setStyle({
                     radius: radius + (SELECTED_MARKER_RADIUS - BASE_MARKER_RADIUS),
                 });
@@ -258,7 +267,8 @@ export function StopMap({
                 site.id,
                 selectedSiteIdRef.current,
                 selectedRouteSiteIdsRef.current,
-                mapStyleRef.current
+                mapStyleRef.current,
+                mapRef.current?.getZoom() ?? STOCKHOLM_ZOOM
             )
         );
         marker.bindTooltip(site.name);
@@ -367,16 +377,19 @@ export function StopMap({
         nextVisibleSiteIds.forEach(showNewlyVisibleSiteCB);
     }, [filteredSites, createSiteMarker]);
 
-    // update marker styles when map style or selected route changes.
+    // Update marker styles when map style or selected route changes. Read the
+    // current zoom so this restyle keeps whatever zoom-scaled radius is active.
     useEffect(() => {
         selectedRouteSiteIdsRef.current = new Set(selectedRouteSiteIds);
+        const zoom = mapRef.current?.getZoom() ?? STOCKHOLM_ZOOM;
         function setMarkerStyleCB(marker: CircleMarker, siteId: number) {
             marker.setStyle(
                 getSiteMarkerStyle(
                     siteId,
                     selectedSiteIdRef.current,
                     selectedRouteSiteIdsRef.current,
-                    appStyle
+                    appStyle,
+                    zoom
                 )
             );
         }
@@ -390,6 +403,7 @@ export function StopMap({
         }
         const previousSelectedSiteId = selectedSiteIdRef.current;
         selectedSiteIdRef.current = selectedSiteId;
+        const zoom = mapRef.current.getZoom();
 
         if (selectedMarkerRef.current) {
             selectedMarkerRef.current.setStyle(
@@ -397,7 +411,8 @@ export function StopMap({
                     previousSelectedSiteId ?? -1,
                     selectedSiteId,
                     selectedRouteSiteIdsRef.current,
-                    mapStyleRef.current
+                    mapStyleRef.current,
+                    zoom
                 )
             );
         }
@@ -410,7 +425,8 @@ export function StopMap({
                         selectedSiteId,
                         selectedSiteId,
                         selectedRouteSiteIdsRef.current,
-                        mapStyleRef.current
+                        mapStyleRef.current,
+                        zoom
                     )
                 );
             }
