@@ -36,6 +36,7 @@ describe("MapView", () => {
             durationSeconds: 0.6,
             requestKey: 123,
         };
+        const selectedRouteSiteIds = [1, 3];
 
         renderWithTheme(
             <MapView
@@ -53,6 +54,7 @@ describe("MapView", () => {
                 appStyle="Dark"
                 onAppStyleChange={onAppStyleChange}
                 userLocation={null}
+                selectedRouteSiteIds={selectedRouteSiteIds}
                 selectedSiteCameraTarget={selectedSiteCameraTarget}
                 userLocationCameraTarget={userLocationCameraTarget}
                 onRequestMapCenterOnUser={vi.fn()}
@@ -77,6 +79,7 @@ describe("MapView", () => {
             expect.objectContaining({
                 selectedSiteId: 7,
                 onSiteMarkerClick,
+                selectedRouteSiteIds,
                 selectedSiteCameraTarget,
                 userLocationCameraTarget,
             })

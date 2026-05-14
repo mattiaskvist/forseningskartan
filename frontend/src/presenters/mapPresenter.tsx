@@ -45,7 +45,12 @@ import {
     setSelectedSiteId,
     setRouteDelaySelectedRouteKey,
 } from "../store/reducers";
-import { Departure, ModeWithOther, TransportationMode } from "../types/sl";
+import {
+    Departure,
+    ModeWithOther,
+    TransportationMode,
+    transportationModeToRouteType,
+} from "../types/sl";
 import { CustomDateRange, DatePreset } from "../types/departureDelay";
 import { AppStyle } from "../types/appStyle";
 import { DepartureViewProps } from "../views/departureView";
@@ -64,7 +69,7 @@ import {
     getSitesByTransportationMode,
     routeTypesToTransportationModes,
 } from "../utils/transportationMode";
-import { getSitesWithRoutes } from "../utils/site";
+import { getRouteSiteIds, getSitesWithRoutes } from "../utils/site";
 import { getDepartures, requestUserGeolocation } from "../store/actions";
 import { formatTime } from "../utils/time";
 import { translations } from "../utils/translations";
@@ -164,6 +169,34 @@ export function MapPresenter() {
         stopPointGidsBySiteId,
         stopPoints,
     ]);
+
+    // deriving route sites scans sites, stop points, and static route mappings.
+    // useMemo only recomputes that scan when those inputs change so StopMap does
+    // not restyle markers on unrelated presenter renders.
+    const selectedRouteSiteIds = useMemo(() => {
+        if (!selectedDeparture || !routesByStopPoint || !sites || !stopPoints) {
+            return [];
+        }
+
+        const routeShortName =
+            selectedDeparture.line.designation ?? selectedDeparture.line.id.toString();
+        const routeType = selectedDeparture.line.transport_mode
+            ? transportationModeToRouteType[selectedDeparture.line.transport_mode]
+            : null;
+
+        if (!routeType) {
+            return [];
+        }
+
+        return getRouteSiteIds(
+            sites,
+            stopPoints,
+            routesByStopPoint,
+            stopPointGidsBySiteId,
+            routeShortName,
+            routeType
+        );
+    }, [routesByStopPoint, selectedDeparture, sites, stopPointGidsBySiteId, stopPoints]);
 
     const handleSelectSiteCB = useCallback(
         (siteId: number | null) => {
@@ -372,6 +405,7 @@ export function MapPresenter() {
             appStyle={appStyle}
             onAppStyleChange={handleAppStyleChangeACB}
             userLocation={userLocation}
+            selectedRouteSiteIds={selectedRouteSiteIds}
             selectedSiteCameraTarget={selectedSiteCameraTarget}
             userLocationCameraTarget={userLocationCameraTarget}
             onRequestMapCenterOnUser={handleRequestMapCenterOnUserACB}

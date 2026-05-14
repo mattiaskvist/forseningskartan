@@ -1,5 +1,6 @@
-import { RoutesByStopPoint } from "../api/backend";
-import { Site, StopPoint } from "../types/sl";
+import type { RoutesByStopPoint } from "../api/backend";
+import type { RouteType } from "../types/historicalDelay";
+import type { Site, StopPoint } from "../types/sl";
 
 export type StopPointGidsBySiteId = Record<number, string[]>;
 
@@ -77,4 +78,38 @@ export function getSitesWithRoutes(
     }
 
     return sites.filter(siteHasAnyRoutes);
+}
+
+// find the existing site markers that should be highlighted for a selected route.
+// The route data is keyed by stop point GID, while the map renders site markers,
+// so this bridges route-stop metadata back to site ids.
+export function getRouteSiteIds(
+    sites: Site[],
+    stopPoints: StopPoint[],
+    routesByStopPoint: RoutesByStopPoint,
+    stopPointGidsBySiteId: StopPointGidsBySiteId,
+    routeShortName: string,
+    routeType: RouteType
+): number[] {
+    const normalizedRouteShortName = routeShortName.trim();
+    if (normalizedRouteShortName === "") {
+        return [];
+    }
+
+    // identify stop points served by the selected route.
+    function stopPointHasSelectedRouteCB(stopPointGid: string): boolean {
+        return (routesByStopPoint[stopPointGid] ?? []).some(
+            (route) => route.shortName === normalizedRouteShortName && route.type === routeType
+        );
+    }
+
+    // mark a site as part of the route if any of its stop points match.
+    function siteHasSelectedRouteCB(site: Site): boolean {
+        return getStopPointGidsForSite(site, stopPoints, stopPointGidsBySiteId).some(
+            stopPointHasSelectedRouteCB
+        );
+    }
+
+    // return site ids, not stop point coordinates, so the map restyles existing markers.
+    return sites.filter(siteHasSelectedRouteCB).map((site) => site.id);
 }
