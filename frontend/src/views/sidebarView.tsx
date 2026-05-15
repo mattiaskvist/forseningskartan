@@ -20,7 +20,6 @@ import {
     Divider,
 } from "@mui/material";
 import { AuthUserState } from "../store/authSlice";
-import { ROUTES, type RouteConfig } from "../routes";
 import favicon from "/favicon.png";
 import { Site } from "../types/sl";
 import { AppStyle } from "../types/appStyle";
@@ -28,10 +27,10 @@ import { AppStyleSelector } from "../components/AppStyleSelector";
 import { Suspense } from "../components/Suspense";
 import { LanguageSelector } from "../components/LanguageSelector";
 import { LanguageCode, TranslationStrings } from "../utils/translations";
+import type { ReactNode } from "react";
 
 type SidebarViewProps = {
     isOpen: boolean;
-    currentPath: string;
     user: AuthUserState | null;
     favoriteStops: Site[];
     isFavoriteStopsLoading: boolean;
@@ -45,11 +44,18 @@ type SidebarViewProps = {
     onLanguageChange: (lang: LanguageCode) => void;
     t: TranslationStrings["sideBar"];
     tAppStyleSelector: TranslationStrings["appStyleSelector"];
+    navItems: SidebarNavItem[];
+};
+
+export type SidebarNavItem = {
+    path: string;
+    label: string;
+    icon: ReactNode;
+    isActive: boolean;
 };
 
 export function SidebarView({
     isOpen,
-    currentPath,
     user,
     favoriteStops,
     isFavoriteStopsLoading,
@@ -63,21 +69,13 @@ export function SidebarView({
     onLanguageChange,
     t,
     tAppStyleSelector,
+    navItems,
 }: SidebarViewProps) {
-    function isActive(path: string): boolean {
-        if (path === "/") {
-            return currentPath === "/" || currentPath === "";
-        }
-        return currentPath.startsWith(path);
-    }
-
     function navigateToAccountACB() {
         onNavigate("/account");
     }
 
-    function renderNavItemCB(item: RouteConfig) {
-        const active = isActive(item.path);
-
+    function renderNavItemCB(item: SidebarNavItem) {
         function handleClickCB() {
             onNavigate(item.path);
         }
@@ -86,7 +84,7 @@ export function SidebarView({
             <ListItem key={item.path} disablePadding>
                 <ListItemButton
                     onClick={handleClickCB}
-                    selected={active}
+                    selected={item.isActive}
                     sx={{
                         borderRadius: 1,
                         "&.Mui-selected": {
@@ -100,7 +98,7 @@ export function SidebarView({
                 >
                     <ListItemIcon sx={{ minWidth: 36, color: "inherit" }}>{item.icon}</ListItemIcon>
                     <ListItemText
-                        primary={t[item.sidebarLabelKey]}
+                        primary={item.label}
                         primaryTypographyProps={{ fontSize: "0.875rem", fontWeight: 500 }}
                     />
                 </ListItemButton>
@@ -269,7 +267,7 @@ export function SidebarView({
                             {t.navigation}
                         </Typography>
                     </ListItem>
-                    {ROUTES.map(renderNavItemCB)}
+                    {navItems.map(renderNavItemCB)}
 
                     <ListItem
                         sx={{ mt: 2, px: 1.5, flexDirection: "column", alignItems: "flex-start" }}
