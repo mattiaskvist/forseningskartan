@@ -39,6 +39,7 @@ export function SidebarPresenter() {
     const currentLanguage = useAppSelector(getCurrentLanguageCB);
     const tAccount = translations[currentLanguage].account;
     const selectedSite = useAppSelector(getSelectedSiteCB);
+    const t = translations[currentLanguage].sideBar;
 
     function getSidebarNavItemCB(route: RouteConfig): SidebarNavItem {
         const isActive =
@@ -97,8 +98,6 @@ export function SidebarPresenter() {
             dispatch(setLanguagePreference(nextLanguage));
         }
     }
-
-    const t = translations[currentLanguage].sideBar;
 
     return (
         !hideSidebar && (
