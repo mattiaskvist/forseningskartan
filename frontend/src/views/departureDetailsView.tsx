@@ -1,5 +1,4 @@
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { useState } from "react";
 import { Button, Box, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -31,8 +30,10 @@ type DepartureDetailsViewProps = {
     isDepartureHistoricalDelayLoading: boolean;
     selectedDatePreset: DatePreset;
     selectedCustomDateRange: CustomDateRange | null;
+    selectedEventType: EventType;
     onDatePresetChange: (preset: DatePreset) => void;
     onCustomDateRangeChange: (dateRange: CustomDateRange | null) => void;
+    onEventTypeChange: (eventType: EventType) => void;
     t: TranslationStrings["departureDetails"];
     tHistoricalDelays: TranslationStrings["departureHistoricalDelays"];
     tDelayStats: TranslationStrings["departureDelayStats"];
@@ -50,16 +51,16 @@ export function DepartureDetailsView({
     isDepartureHistoricalDelayLoading,
     selectedDatePreset,
     selectedCustomDateRange,
+    selectedEventType,
     onDatePresetChange,
     onCustomDateRangeChange,
+    onEventTypeChange,
     t,
     tHistoricalDelays,
     tDelayStats,
     tDelayControls,
     tDatePicker,
 }: DepartureDetailsViewProps) {
-    const [selectedEventType, setSelectedEventType] = useState<EventType>("departure");
-
     const selectedDepartureDate = dayjs(departure.expected ?? departure.scheduled).utc();
     // use departure hour, fall back to current hour
     const selectedDepartureHourUTC = selectedDepartureDate.isValid()
@@ -117,7 +118,7 @@ export function DepartureDetailsView({
                 selectedEventType={selectedEventType}
                 onDatePresetChange={onDatePresetChange}
                 onCustomDateRangeChange={onCustomDateRangeChange}
-                onEventTypeChange={setSelectedEventType}
+                onEventTypeChange={onEventTypeChange}
                 onViewRouteDelayDetails={onViewRouteDelayDetails}
                 isLoadingData={isDepartureHistoricalDelayLoading}
                 routeSummary={selectedDepartureDelaySummary}

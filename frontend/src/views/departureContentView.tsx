@@ -1,5 +1,5 @@
 import { Suspense } from "../components/Suspense";
-import { CustomDateRange, DatePreset } from "../types/departureDelay";
+import { CustomDateRange, DatePreset, EventType } from "../types/departureDelay";
 import { DelaySummary } from "../types/historicalDelay";
 import { Departure, ModeWithOther } from "../types/sl";
 import { TranslationStrings } from "../types/translations";
@@ -19,8 +19,10 @@ export type DepartureContentViewProps = {
     isDepartureHistoricalDelayLoading: boolean;
     selectedDatePreset: DatePreset;
     selectedCustomDateRange: CustomDateRange | null;
+    selectedEventType: EventType;
     onDatePresetChange: (preset: DatePreset) => void;
     onCustomDateRangeChange: (dateRange: CustomDateRange | null) => void;
+    onEventTypeChange: (eventType: EventType) => void;
     onSelectDeparture: (departure: Departure) => void;
     selectedMode: ModeWithOther | null;
     onSelectedModeChange: (mode: ModeWithOther | null) => void;
@@ -50,8 +52,10 @@ export function DepartureContentView({
     isDepartureHistoricalDelayLoading,
     selectedDatePreset,
     selectedCustomDateRange,
+    selectedEventType,
     onDatePresetChange,
     onCustomDateRangeChange,
+    onEventTypeChange,
     onSelectDeparture,
     selectedMode,
     onSelectedModeChange,
@@ -81,8 +85,10 @@ export function DepartureContentView({
             isDepartureHistoricalDelayLoading={isDepartureHistoricalDelayLoading}
             selectedDatePreset={selectedDatePreset}
             selectedCustomDateRange={selectedCustomDateRange}
+            selectedEventType={selectedEventType}
             onDatePresetChange={onDatePresetChange}
             onCustomDateRangeChange={onCustomDateRangeChange}
+            onEventTypeChange={onEventTypeChange}
             t={tDepartureDetails}
             tHistoricalDelays={tHistoricalDelays}
             tDelayStats={tDelayStats}

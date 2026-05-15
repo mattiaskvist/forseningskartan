@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useMediaQuery, useTheme } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { MapView } from "../views/mapView";
@@ -51,7 +51,7 @@ import {
     TransportationMode,
     transportationModeToRouteType,
 } from "../types/sl";
-import { CustomDateRange, DatePreset } from "../types/departureDelay";
+import { CustomDateRange, DatePreset, EventType } from "../types/departureDelay";
 import { AppStyle } from "../types/appStyle";
 import { DepartureViewProps } from "../views/departureView";
 import {
@@ -113,6 +113,8 @@ export function MapPresenter() {
     const departureSearchQuery = useAppSelector(getDepartureSearchQueryCB);
     const departureUniqueModes = useAppSelector(getDepartureUniqueModesCB);
     const tMap = translations[currentLanguage].map;
+    const [selectedDepartureEventType, setSelectedDepartureEventType] =
+        useState<EventType>("departure");
 
     // useMediaQuery returns true when screen width is below md breakpoint (< 900px by default)
     const theme = useTheme();
@@ -359,8 +361,10 @@ export function MapPresenter() {
                   isDepartureHistoricalDelayLoading,
                   selectedDatePreset,
                   selectedCustomDateRange,
+                  selectedEventType: selectedDepartureEventType,
                   onDatePresetChange: setSelectedDatePresetACB,
                   onCustomDateRangeChange: setSelectedCustomDateRangeACB,
+                  onEventTypeChange: setSelectedDepartureEventType,
                   onSelectDeparture: selectDepartureACB,
                   uniqueModes: departureUniqueModes,
                   selectedMode: departureSelectedMode,
