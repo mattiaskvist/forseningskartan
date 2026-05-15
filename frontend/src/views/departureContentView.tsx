@@ -10,7 +10,7 @@ import { DepartureListView } from "./departureListView";
 export type DepartureContentViewProps = {
     isDeparturesLoading: boolean;
     selectedDeparture: Departure | null;
-    upcomingDepartures: Departure[];
+    filteredDepartures: Departure[];
     onBackToList: () => void;
     onViewRouteDelayDetails: () => void;
     availableDates: string[];
@@ -43,7 +43,7 @@ export type DepartureContentViewProps = {
 export function DepartureContentView({
     isDeparturesLoading,
     selectedDeparture,
-    upcomingDepartures,
+    filteredDepartures,
     onBackToList,
     onViewRouteDelayDetails,
     availableDates,
@@ -95,9 +95,9 @@ export function DepartureContentView({
             tDelayControls={tDelayControls}
             tDatePicker={tDatePicker}
         />
-    ) : upcomingDepartures.length > 0 ? (
+    ) : filteredDepartures.length > 0 ? (
         <DepartureListView
-            departures={upcomingDepartures}
+            departures={filteredDepartures}
             onSelectDeparture={onSelectDeparture}
             uniqueModes={uniqueModes}
             selectedMode={selectedMode}

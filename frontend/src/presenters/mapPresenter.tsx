@@ -63,7 +63,7 @@ import {
 } from "../store/userPreferencesSlice";
 import { showSnackbar } from "../store/snackbarSlice";
 import { Suspense } from "../components/Suspense";
-import { getRouteDelayKey, getUpcomingDepartures } from "../utils/departures";
+import { getRouteDelayKey, getUpcomingDepartures, getDeparturesByMode } from "../utils/departures";
 import { RouteMeta, RouteType } from "../types/historicalDelay";
 import {
     getSitesByTransportationMode,
@@ -339,6 +339,11 @@ export function MapPresenter() {
 
     const departures = departureResponse?.departures ?? [];
     const upcomingDepartures = getUpcomingDepartures(departures);
+    const departuresByMode = getDeparturesByMode(upcomingDepartures, departureSearchQuery);
+    // If a mode is selected, show only that mode, otherwise show all upcoming departures
+    const filteredDepartures = departureSelectedMode
+        ? (departuresByMode.get(departureSelectedMode) ?? [])
+        : upcomingDepartures;
 
     // The presenter is the MVP glue: read model state, create plain view props, and expose dispatch callbacks.
     const departureViewProps: DepartureViewProps | null = selectedSite
@@ -352,7 +357,7 @@ export function MapPresenter() {
               departureViewContentProps: {
                   isDeparturesLoading,
                   selectedDeparture,
-                  upcomingDepartures,
+                  filteredDepartures,
                   onBackToList: returnToDepartureListACB,
                   onViewRouteDelayDetails: handleViewRouteDelayDetailsACB,
                   availableDates,

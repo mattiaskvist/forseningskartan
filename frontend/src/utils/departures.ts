@@ -1,4 +1,5 @@
-import { Departure, transportationModeToRouteType } from "../types/sl";
+import { Departure, transportationModeToRouteType, ModeWithOther } from "../types/sl";
+import { normalizeText } from "./text";
 
 const nonUpcomingStates = new Set([
     "DEPARTED",
@@ -44,6 +45,38 @@ export function getUpcomingDepartures(departures: Departure[]): Departure[] {
     // Filter out non-upcoming states and departures with unparsable timestamps,
     // then sort the remaining departures by timestamp
     return departures.filter(isUpcomingDepartureCB).sort(compareDeparturesCB);
+}
+
+export function getDeparturesByMode(
+    departures: Departure[],
+    searchQuery: string
+): Map<ModeWithOther, Departure[]> {
+    const groupedDepartures = new Map<ModeWithOther, Departure[]>();
+
+    for (const departure of departures) {
+        const mode = departure.line.transport_mode ?? "OTHER";
+        const destination = departure.destination ?? departure.direction;
+        const line = departure.line.designation ?? `${departure.line.id}`;
+
+        // Filter by search query
+        const normalizedQuery = normalizeText(searchQuery);
+        if (normalizedQuery) {
+            const matchesDestination = normalizeText(destination).includes(normalizedQuery);
+            const matchesLine = normalizeText(line).includes(normalizedQuery);
+            // Allow if either destination or line matches query
+            if (!matchesDestination && !matchesLine) {
+                continue;
+            }
+        }
+
+        if (!groupedDepartures.has(mode)) {
+            groupedDepartures.set(mode, []);
+        }
+
+        groupedDepartures.get(mode)?.push(departure);
+    }
+
+    return groupedDepartures;
 }
 
 // Prediction fields can change between fetches, so preserve detail selection by stable trip identity.
