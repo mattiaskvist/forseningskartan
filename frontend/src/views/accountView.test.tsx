@@ -18,18 +18,20 @@ describe("AccountView", () => {
                     photoURL: null,
                 }}
                 onLogout={vi.fn()}
-                onDelete={onDelete}
+                isDeleteDialogOpen={true}
+                onDeleteRequested={vi.fn()}
+                onDeleteCancelled={vi.fn()}
+                onDeleteConfirmed={onDelete}
                 t={t}
             />
         );
 
         fireEvent.click(screen.getByRole("button", { name: t.deleteAccount }));
-        fireEvent.click(screen.getByRole("button", { name: t.deleteAccount }));
         expect(onDelete).toHaveBeenCalledTimes(1);
     });
 
     it("does not call onDelete when delete is cancelled", () => {
-        const onDelete = vi.fn();
+        const onDeleteCancelled = vi.fn();
         const t = translations.en.account;
 
         renderWithTheme(
@@ -41,13 +43,40 @@ describe("AccountView", () => {
                     photoURL: null,
                 }}
                 onLogout={vi.fn()}
-                onDelete={onDelete}
+                isDeleteDialogOpen={true}
+                onDeleteRequested={vi.fn()}
+                onDeleteCancelled={onDeleteCancelled}
+                onDeleteConfirmed={vi.fn()}
+                t={t}
+            />
+        );
+
+        fireEvent.click(screen.getByRole("button", { name: t.cancelDelete }));
+        expect(onDeleteCancelled).toHaveBeenCalledTimes(1);
+    });
+
+    it("requests delete through the presenter callback", () => {
+        const onDeleteRequested = vi.fn();
+        const t = translations.en.account;
+
+        renderWithTheme(
+            <AccountView
+                user={{
+                    uid: "uid-3",
+                    email: "test3@example.com",
+                    displayName: "Test User 3",
+                    photoURL: null,
+                }}
+                onLogout={vi.fn()}
+                isDeleteDialogOpen={false}
+                onDeleteRequested={onDeleteRequested}
+                onDeleteCancelled={vi.fn()}
+                onDeleteConfirmed={vi.fn()}
                 t={t}
             />
         );
 
         fireEvent.click(screen.getByRole("button", { name: t.deleteAccount }));
-        fireEvent.click(screen.getByRole("button", { name: t.cancelDelete }));
-        expect(onDelete).not.toHaveBeenCalled();
+        expect(onDeleteRequested).toHaveBeenCalledTimes(1);
     });
 });

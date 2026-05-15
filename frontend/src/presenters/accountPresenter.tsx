@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import { AccountView } from "../views/accountView";
@@ -15,6 +15,7 @@ export function AccountPresenter() {
     const loading = useAppSelector(getAuthLoadingCB);
     const currentLanguage = useAppSelector(getCurrentLanguageCB);
     const t = translations[currentLanguage].account;
+    const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
     useEffect(() => {
         if (!loading && !user) {
@@ -32,7 +33,7 @@ export function AccountPresenter() {
         }
     }
 
-    async function handleDeleteACB() {
+    async function handleDelete() {
         try {
             await dispatch(deleteCurrentUser()).unwrap();
             dispatch(showSnackbar({ message: t.deleteSuccess, severity: "success" }));
@@ -63,9 +64,32 @@ export function AccountPresenter() {
         }
     }
 
+    function handleDeleteRequestedACB() {
+        setDeleteDialogOpen(true);
+    }
+
+    function handleDeleteCancelledACB() {
+        setDeleteDialogOpen(false);
+    }
+
+    function handleDeleteConfirmedACB() {
+        setDeleteDialogOpen(false);
+        handleDelete();
+    }
+
     if (loading || !user) {
         return <Suspense fullscreen message={translations[currentLanguage].account.loading} />;
     }
 
-    return <AccountView user={user} onLogout={handleLogoutACB} onDelete={handleDeleteACB} t={t} />;
+    return (
+        <AccountView
+            user={user}
+            onLogout={handleLogoutACB}
+            isDeleteDialogOpen={isDeleteDialogOpen}
+            onDeleteRequested={handleDeleteRequestedACB}
+            onDeleteCancelled={handleDeleteCancelledACB}
+            onDeleteConfirmed={handleDeleteConfirmedACB}
+            t={t}
+        />
+    );
 }
