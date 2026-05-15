@@ -137,6 +137,10 @@ function getDepartureSelectedModeCB(state: RootState) {
     return state.departureUI.selectedMode;
 }
 
+function getDepartureSelectedEventTypeCB(state: RootState) {
+    return state.departureUI.selectedEventType;
+}
+
 function getDepartureUniqueModesCB(state: RootState) {
     return state.departureUI.uniqueModes;
 }
@@ -315,6 +319,7 @@ export {
     getSelectedDatePresetCB,
     getSelectedCustomDateRangeCB,
     getDepartureSelectedModeCB,
+    getDepartureSelectedEventTypeCB,
     getDepartureUniqueModesCB,
     getDepartureSearchQueryCB,
     getRouteDelaySelectedDatePresetCB,

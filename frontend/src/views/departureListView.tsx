@@ -1,7 +1,6 @@
 import { Departure, ModeWithOther } from "../types/sl";
 import { formatDelay, formatTime, getDelayMinutes, getDelayColorToken } from "../utils/time";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import { useMemo } from "react";
 import { Box, Card, TextField, Typography } from "@mui/material";
 import { FilterToggleButtonGroup } from "../components/FilterToggleButtonGroup";
 import { TranslationStrings } from "../utils/translations";
@@ -9,7 +8,6 @@ import {
     getTransportationModeButton,
     getTransportationModeLabel,
 } from "../utils/transportationMode";
-import { normalizeText } from "../utils/text";
 
 type DepartureListViewProps = {
     departures: Departure[];
@@ -34,35 +32,6 @@ export function DepartureListView({
     t,
     tTransportModes,
 }: DepartureListViewProps) {
-    const departuresByMode = useMemo(() => {
-        const groupedDepartures = new Map<ModeWithOther, Departure[]>();
-
-        for (const departure of departures) {
-            const mode = departure.line.transport_mode ?? "OTHER";
-            const destination = departure.destination ?? departure.direction;
-            const line = departure.line.designation ?? `${departure.line.id}`;
-
-            // Filter by search query
-            const normalizedQuery = normalizeText(searchQuery);
-            if (normalizedQuery) {
-                const matchesDestination = normalizeText(destination).includes(normalizedQuery);
-                const matchesLine = normalizeText(line).includes(normalizedQuery);
-                // Allow if either destination or line matches query
-                if (!matchesDestination && !matchesLine) {
-                    continue;
-                }
-            }
-
-            if (!groupedDepartures.has(mode)) {
-                groupedDepartures.set(mode, []);
-            }
-
-            groupedDepartures.get(mode)?.push(departure);
-        }
-
-        return groupedDepartures;
-    }, [departures, searchQuery]);
-
     function renderDepartureCB(departure: Departure) {
         function handleSelectDepartureACB() {
             onSelectDeparture(departure);
@@ -129,7 +98,6 @@ export function DepartureListView({
     }
 
     function renderModeDepartures(mode: ModeWithOther) {
-        const modeDepartures = departuresByMode.get(mode) ?? [];
         return (
             <Card key={mode} variant="outlined">
                 <Box
@@ -146,7 +114,7 @@ export function DepartureListView({
                 >
                     {getTransportationModeLabel(mode, tTransportModes)}
                 </Box>
-                {modeDepartures.map(renderDepartureCB)}
+                {departures.map(renderDepartureCB)}
             </Card>
         );
     }

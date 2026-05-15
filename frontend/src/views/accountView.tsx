@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
     Box,
     Paper,
@@ -18,26 +17,22 @@ import { TranslationStrings } from "../utils/translations";
 type AccountViewProps = {
     user: AuthUserState;
     onLogout: () => void;
-    onDelete: () => void;
+    isDeleteDialogOpen: boolean;
+    onDeleteRequested: () => void;
+    onDeleteCancelled: () => void;
+    onDeleteConfirmed: () => void;
     t: TranslationStrings["account"];
 };
 
-export function AccountView({ user, onLogout, onDelete, t }: AccountViewProps) {
-    const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
-
-    function handleDeleteRequestedACB() {
-        setDeleteDialogOpen(true);
-    }
-
-    function handleDeleteCancelledACB() {
-        setDeleteDialogOpen(false);
-    }
-
-    function handleDeleteConfirmedACB() {
-        setDeleteDialogOpen(false);
-        onDelete();
-    }
-
+export function AccountView({
+    user,
+    onLogout,
+    isDeleteDialogOpen,
+    onDeleteRequested,
+    onDeleteCancelled,
+    onDeleteConfirmed,
+    t,
+}: AccountViewProps) {
     return (
         <Box
             sx={{
@@ -113,24 +108,19 @@ export function AccountView({ user, onLogout, onDelete, t }: AccountViewProps) {
                     <Button fullWidth variant="outlined" onClick={onLogout}>
                         {t.signOut}
                     </Button>
-                    <Button
-                        fullWidth
-                        variant="outlined"
-                        color="error"
-                        onClick={handleDeleteRequestedACB}
-                    >
+                    <Button fullWidth variant="outlined" color="error" onClick={onDeleteRequested}>
                         {t.deleteAccount}
                     </Button>
                 </Box>
             </Paper>
-            <Dialog open={isDeleteDialogOpen} onClose={handleDeleteCancelledACB}>
+            <Dialog open={isDeleteDialogOpen} onClose={onDeleteCancelled}>
                 <DialogTitle>{t.deleteAccount}</DialogTitle>
                 <DialogContent>
                     <DialogContentText>{t.deleteConfirm}</DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleDeleteCancelledACB}>{t.cancelDelete}</Button>
-                    <Button color="error" variant="contained" onClick={handleDeleteConfirmedACB}>
+                    <Button onClick={onDeleteCancelled}>{t.cancelDelete}</Button>
+                    <Button color="error" variant="contained" onClick={onDeleteConfirmed}>
                         {t.deleteAccount}
                     </Button>
                 </DialogActions>

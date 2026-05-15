@@ -1,4 +1,5 @@
-import { Departure, transportationModeToRouteType } from "../types/sl";
+import { Departure, transportationModeToRouteType, ModeWithOther } from "../types/sl";
+import { normalizeText } from "./text";
 
 const nonUpcomingStates = new Set([
     "DEPARTED",
@@ -44,6 +45,51 @@ export function getUpcomingDepartures(departures: Departure[]): Departure[] {
     // Filter out non-upcoming states and departures with unparsable timestamps,
     // then sort the remaining departures by timestamp
     return departures.filter(isUpcomingDepartureCB).sort(compareDeparturesCB);
+}
+
+// Filter departures by search query
+export function getQueryDepartures(departures: Departure[], searchQuery: string): Departure[] {
+    // If search query is empty, return all departures
+    const normalizedQuery = normalizeText(searchQuery);
+    if (!normalizedQuery) {
+        return departures;
+    }
+
+    function matchesQueryCB(departure: Departure): boolean {
+        const destination = departure.destination ?? departure.direction;
+        const line = departure.line.designation ?? `${departure.line.id}`;
+        const normalizedQuery = normalizeText(searchQuery);
+        if (normalizedQuery) {
+            const matchesDestination = normalizeText(destination).includes(normalizedQuery);
+            const matchesLine = normalizeText(line).includes(normalizedQuery);
+            // Allow if either destination or line matches query
+            // But if neither matches, filter out departure
+            if (!matchesDestination && !matchesLine) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    return departures.filter(matchesQueryCB);
+}
+
+// Filter departures by selected transportation mode
+export function getModeDepartures(
+    departures: Departure[],
+    selectedMode: ModeWithOther | null
+): Departure[] {
+    // If no mode is selected, return all departures
+    if (!selectedMode) {
+        return departures;
+    }
+
+    function matchesModeCB(departure: Departure): boolean {
+        const mode = departure.line.transport_mode ?? "OTHER";
+        return mode === selectedMode;
+    }
+
+    return departures.filter(matchesModeCB);
 }
 
 // Prediction fields can change between fetches, so preserve detail selection by stable trip identity.

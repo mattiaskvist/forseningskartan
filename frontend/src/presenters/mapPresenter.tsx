@@ -34,6 +34,7 @@ import {
     getDepartureSelectedModeCB,
     getDepartureSearchQueryCB,
     getDepartureUniqueModesCB,
+    getDepartureSelectedEventTypeCB,
 } from "../store/selectors";
 import { selectSite } from "../store/selection";
 import {
@@ -44,6 +45,7 @@ import {
     setSelectedMode,
     setSelectedSiteId,
     setRouteDelaySelectedRouteKey,
+    setSelectedEventType,
 } from "../store/reducers";
 import {
     Departure,
@@ -51,7 +53,7 @@ import {
     TransportationMode,
     transportationModeToRouteType,
 } from "../types/sl";
-import { CustomDateRange, DatePreset } from "../types/departureDelay";
+import { CustomDateRange, DatePreset, EventType } from "../types/departureDelay";
 import { AppStyle } from "../types/appStyle";
 import { DepartureViewProps } from "../views/departureView";
 import {
@@ -63,7 +65,12 @@ import {
 } from "../store/userPreferencesSlice";
 import { showSnackbar } from "../store/snackbarSlice";
 import { Suspense } from "../components/Suspense";
-import { getRouteDelayKey, getUpcomingDepartures } from "../utils/departures";
+import {
+    getRouteDelayKey,
+    getUpcomingDepartures,
+    getModeDepartures,
+    getQueryDepartures,
+} from "../utils/departures";
 import { RouteMeta, RouteType } from "../types/historicalDelay";
 import {
     getSitesByTransportationMode,
@@ -112,6 +119,7 @@ export function MapPresenter() {
     const departureSelectedMode = useAppSelector(getDepartureSelectedModeCB);
     const departureSearchQuery = useAppSelector(getDepartureSearchQueryCB);
     const departureUniqueModes = useAppSelector(getDepartureUniqueModesCB);
+    const selectedDepartureEventType = useAppSelector(getDepartureSelectedEventTypeCB);
     const tMap = translations[currentLanguage].map;
 
     // useMediaQuery returns true when screen width is below md breakpoint (< 900px by default)
@@ -317,6 +325,10 @@ export function MapPresenter() {
         dispatch(setSelectedMode(mode));
     }
 
+    function handleSelectedEventTypeChangeACB(eventType: EventType) {
+        dispatch(setSelectedEventType(eventType));
+    }
+
     function handleSearchQueryChangeACB(query: string) {
         dispatch(setSearchQuery(query));
     }
@@ -337,6 +349,8 @@ export function MapPresenter() {
 
     const departures = departureResponse?.departures ?? [];
     const upcomingDepartures = getUpcomingDepartures(departures);
+    const departuresByQuery = getQueryDepartures(upcomingDepartures, departureSearchQuery);
+    const filteredDepartures = getModeDepartures(departuresByQuery, departureSelectedMode);
 
     // The presenter is the MVP glue: read model state, create plain view props, and expose dispatch callbacks.
     const departureViewProps: DepartureViewProps | null = selectedSite
@@ -351,6 +365,7 @@ export function MapPresenter() {
                   isDeparturesLoading,
                   selectedDeparture,
                   upcomingDepartures,
+                  filteredDepartures,
                   onBackToList: returnToDepartureListACB,
                   onViewRouteDelayDetails: handleViewRouteDelayDetailsACB,
                   availableDates,
@@ -359,8 +374,10 @@ export function MapPresenter() {
                   isDepartureHistoricalDelayLoading,
                   selectedDatePreset,
                   selectedCustomDateRange,
+                  selectedEventType: selectedDepartureEventType,
                   onDatePresetChange: setSelectedDatePresetACB,
                   onCustomDateRangeChange: setSelectedCustomDateRangeACB,
+                  onEventTypeChange: handleSelectedEventTypeChangeACB,
                   onSelectDeparture: selectDepartureACB,
                   uniqueModes: departureUniqueModes,
                   selectedMode: departureSelectedMode,

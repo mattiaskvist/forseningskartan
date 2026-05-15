@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { SidebarView } from "../views/sidebarView";
+import { SidebarNavItem, SidebarView } from "../views/sidebarView";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import {
     getAppStylePreferenceCB,
@@ -21,6 +21,7 @@ import { setLanguagePreference } from "../store/userPreferencesSlice";
 import { LanguageCode, translations } from "../utils/translations";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
+import { RouteConfig, ROUTES } from "../routes";
 
 export function SidebarPresenter() {
     const [isOpen, setIsOpen] = useState(false);
@@ -38,6 +39,22 @@ export function SidebarPresenter() {
     const currentLanguage = useAppSelector(getCurrentLanguageCB);
     const tAccount = translations[currentLanguage].account;
     const selectedSite = useAppSelector(getSelectedSiteCB);
+    const t = translations[currentLanguage].sideBar;
+
+    function getSidebarNavItemCB(route: RouteConfig): SidebarNavItem {
+        const isActive =
+            route.path === "/"
+                ? location.pathname === "/" || location.pathname === ""
+                : location.pathname.startsWith(route.path);
+
+        return {
+            path: route.path,
+            label: t[route.sidebarLabelKey],
+            icon: route.icon,
+            isActive: isActive,
+        };
+    }
+    const navItems = ROUTES.map(getSidebarNavItemCB);
 
     // useMediaQuery returns true when screen width is below md breakpoint (< 900px by default)
     const theme = useTheme();
@@ -82,13 +99,10 @@ export function SidebarPresenter() {
         }
     }
 
-    const t = translations[currentLanguage].sideBar;
-
     return (
         !hideSidebar && (
             <SidebarView
                 isOpen={isOpen}
-                currentPath={location.pathname}
                 user={user}
                 favoriteStops={favoriteSites}
                 isFavoriteStopsLoading={isFavoriteStopsLoading}
@@ -102,6 +116,7 @@ export function SidebarPresenter() {
                 onLanguageChange={handleLanguageChangeACB}
                 t={t}
                 tAppStyleSelector={translations[currentLanguage].appStyleSelector}
+                navItems={navItems}
             />
         )
     );

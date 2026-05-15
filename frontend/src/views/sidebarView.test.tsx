@@ -5,6 +5,12 @@ import { SidebarView } from "./sidebarView";
 import { renderWithTheme } from "../test/renderWithTheme";
 import { translations } from "../utils/translations";
 
+const navItems = [
+    { path: "/", label: "Map", icon: <span />, isActive: true },
+    { path: "/route-delays", label: "Route Delays", icon: <span />, isActive: false },
+    { path: "/about", label: "About", icon: <span />, isActive: false },
+];
+
 // simulate a logged in user
 const mockUser: AuthUserState = {
     uid: "uid-1",
@@ -22,7 +28,6 @@ describe("SidebarView favorites", () => {
         renderWithTheme(
             <SidebarView
                 isOpen
-                currentPath="/"
                 user={mockUser}
                 favoriteStops={[
                     { id: 10, name: "Odenplan", gid: 10, lat: 0, lon: 0 },
@@ -39,6 +44,7 @@ describe("SidebarView favorites", () => {
                 onLanguageChange={vi.fn()}
                 t={translations.en.sideBar}
                 tAppStyleSelector={translations.en.appStyleSelector}
+                navItems={navItems}
             />
         );
 
@@ -56,7 +62,6 @@ describe("SidebarView favorites", () => {
         renderWithTheme(
             <SidebarView
                 isOpen
-                currentPath="/"
                 user={null}
                 favoriteStops={[{ id: 10, name: "Odenplan", gid: 10, lat: 0, lon: 0 }]}
                 isFavoriteStopsLoading={false}
@@ -70,6 +75,7 @@ describe("SidebarView favorites", () => {
                 onLanguageChange={vi.fn()}
                 t={translations.en.sideBar}
                 tAppStyleSelector={translations.en.appStyleSelector}
+                navItems={navItems}
             />
         );
 
@@ -81,7 +87,6 @@ describe("SidebarView favorites", () => {
         renderWithTheme(
             <SidebarView
                 isOpen
-                currentPath="/"
                 user={mockUser}
                 favoriteStops={[]}
                 isFavoriteStopsLoading={false}
@@ -95,6 +100,7 @@ describe("SidebarView favorites", () => {
                 onLanguageChange={vi.fn()}
                 t={translations.en.sideBar}
                 tAppStyleSelector={translations.en.appStyleSelector}
+                navItems={navItems}
             />
         );
 
@@ -108,7 +114,6 @@ describe("SidebarView favorites", () => {
         renderWithTheme(
             <SidebarView
                 isOpen
-                currentPath="/"
                 user={mockUser}
                 favoriteStops={[]}
                 isFavoriteStopsLoading={false}
@@ -122,6 +127,7 @@ describe("SidebarView favorites", () => {
                 onLanguageChange={vi.fn()}
                 t={translations.en.sideBar}
                 tAppStyleSelector={translations.en.appStyleSelector}
+                navItems={navItems}
             />
         );
 
@@ -133,7 +139,6 @@ describe("SidebarView favorites", () => {
         renderWithTheme(
             <SidebarView
                 isOpen
-                currentPath="/"
                 user={mockUser}
                 favoriteStops={[]}
                 isFavoriteStopsLoading
@@ -147,6 +152,7 @@ describe("SidebarView favorites", () => {
                 onLanguageChange={vi.fn()}
                 t={translations.en.sideBar}
                 tAppStyleSelector={translations.en.appStyleSelector}
+                navItems={navItems}
             />
         );
 
