@@ -357,6 +357,7 @@ export function MapPresenter() {
               departureViewContentProps: {
                   isDeparturesLoading,
                   selectedDeparture,
+                  upcomingDepartures,
                   filteredDepartures,
                   onBackToList: returnToDepartureListACB,
                   onViewRouteDelayDetails: handleViewRouteDelayDetailsACB,
