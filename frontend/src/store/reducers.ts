@@ -93,6 +93,7 @@ type DepartureUIState = {
     selectedDatePreset: DatePreset;
     selectedCustomDateRange: CustomDateRange | null;
     selectedMode: ModeWithOther | null;
+    selectedEventType: EventType;
     uniqueModes: ModeWithOther[];
     searchQuery: string;
 };
@@ -436,6 +437,7 @@ export const departureUISlice = createSlice({
         selectedDatePreset: "sameDayLastWeek",
         selectedCustomDateRange: null,
         selectedMode: null,
+        selectedEventType: "departure",
         uniqueModes: [],
         searchQuery: "",
     } as DepartureUIState,
@@ -444,6 +446,7 @@ export const departureUISlice = createSlice({
             state.selectedDeparture = action.payload;
             state.selectedDatePreset = "sameDayLastWeek";
             state.selectedCustomDateRange = null;
+            state.selectedEventType = "departure";
             state.searchQuery = "";
         },
         setSelectedDatePreset: (state, action: { payload: DatePreset }) => {
@@ -454,6 +457,9 @@ export const departureUISlice = createSlice({
         },
         setSelectedMode: (state, action: { payload: ModeWithOther | null }) => {
             state.selectedMode = action.payload;
+        },
+        setSelectedEventType: (state, action: { payload: EventType }) => {
+            state.selectedEventType = action.payload;
         },
         setUniqueModes: (state, action: { payload: ModeWithOther[] }) => {
             state.uniqueModes = action.payload;
@@ -469,6 +475,7 @@ export const {
     setSelectedDatePreset,
     setSelectedCustomDateRange,
     setSelectedMode,
+    setSelectedEventType,
     setUniqueModes,
     setSearchQuery,
 } = departureUISlice.actions;

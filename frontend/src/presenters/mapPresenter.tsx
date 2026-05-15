@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { useMediaQuery, useTheme } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { MapView } from "../views/mapView";
@@ -34,6 +34,7 @@ import {
     getDepartureSelectedModeCB,
     getDepartureSearchQueryCB,
     getDepartureUniqueModesCB,
+    getDepartureSelectedEventTypeCB,
 } from "../store/selectors";
 import { selectSite } from "../store/selection";
 import {
@@ -44,6 +45,7 @@ import {
     setSelectedMode,
     setSelectedSiteId,
     setRouteDelaySelectedRouteKey,
+    setSelectedEventType,
 } from "../store/reducers";
 import {
     Departure,
@@ -117,9 +119,8 @@ export function MapPresenter() {
     const departureSelectedMode = useAppSelector(getDepartureSelectedModeCB);
     const departureSearchQuery = useAppSelector(getDepartureSearchQueryCB);
     const departureUniqueModes = useAppSelector(getDepartureUniqueModesCB);
+    const selectedDepartureEventType = useAppSelector(getDepartureSelectedEventTypeCB);
     const tMap = translations[currentLanguage].map;
-    const [selectedDepartureEventType, setSelectedDepartureEventType] =
-        useState<EventType>("departure");
 
     // useMediaQuery returns true when screen width is below md breakpoint (< 900px by default)
     const theme = useTheme();
@@ -324,6 +325,10 @@ export function MapPresenter() {
         dispatch(setSelectedMode(mode));
     }
 
+    function handleSelectedEventTypeChangeACB(eventType: EventType) {
+        dispatch(setSelectedEventType(eventType));
+    }
+
     function handleSearchQueryChangeACB(query: string) {
         dispatch(setSearchQuery(query));
     }
@@ -372,7 +377,7 @@ export function MapPresenter() {
                   selectedEventType: selectedDepartureEventType,
                   onDatePresetChange: setSelectedDatePresetACB,
                   onCustomDateRangeChange: setSelectedCustomDateRangeACB,
-                  onEventTypeChange: setSelectedDepartureEventType,
+                  onEventTypeChange: handleSelectedEventTypeChangeACB,
                   onSelectDeparture: selectDepartureACB,
                   uniqueModes: departureUniqueModes,
                   selectedMode: departureSelectedMode,
