@@ -47,36 +47,49 @@ export function getUpcomingDepartures(departures: Departure[]): Departure[] {
     return departures.filter(isUpcomingDepartureCB).sort(compareDeparturesCB);
 }
 
-export function getDeparturesByMode(
-    departures: Departure[],
-    searchQuery: string
-): Map<ModeWithOther, Departure[]> {
-    const groupedDepartures = new Map<ModeWithOther, Departure[]>();
+// Filter departures by search query
+export function getQueryDepartures(departures: Departure[], searchQuery: string): Departure[] {
+    // If search query is empty, return all departures
+    const normalizedQuery = normalizeText(searchQuery);
+    if (!normalizedQuery) {
+        return departures;
+    }
 
-    for (const departure of departures) {
-        const mode = departure.line.transport_mode ?? "OTHER";
+    function matchesQueryCB(departure: Departure): boolean {
         const destination = departure.destination ?? departure.direction;
         const line = departure.line.designation ?? `${departure.line.id}`;
-
-        // Filter by search query
         const normalizedQuery = normalizeText(searchQuery);
         if (normalizedQuery) {
             const matchesDestination = normalizeText(destination).includes(normalizedQuery);
             const matchesLine = normalizeText(line).includes(normalizedQuery);
             // Allow if either destination or line matches query
+            // But if neither matches, filter out departure
             if (!matchesDestination && !matchesLine) {
-                continue;
+                return false;
             }
         }
-
-        if (!groupedDepartures.has(mode)) {
-            groupedDepartures.set(mode, []);
-        }
-
-        groupedDepartures.get(mode)?.push(departure);
+        return true;
     }
 
-    return groupedDepartures;
+    return departures.filter(matchesQueryCB);
+}
+
+// Filter departures by selected transportation mode
+export function getModeDepartures(
+    departures: Departure[],
+    selectedMode: ModeWithOther | null
+): Departure[] {
+    // If no mode is selected, return all departures
+    if (!selectedMode) {
+        return departures;
+    }
+
+    function matchesModeCB(departure: Departure): boolean {
+        const mode = departure.line.transport_mode ?? "OTHER";
+        return mode === selectedMode;
+    }
+
+    return departures.filter(matchesModeCB);
 }
 
 // Prediction fields can change between fetches, so preserve detail selection by stable trip identity.
