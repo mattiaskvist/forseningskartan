@@ -133,6 +133,9 @@ export function MapPresenter() {
     const showSearch = isMobile ? selectedSite === null : true;
 
     const routesByStopPointsUnavailable = routesByStopPointError !== null || !routesByStopPoint;
+    // useMemo caches this derived list so we only rebuild the available transport
+    // filters when route metadata changes. This avoids repeating the same scan on
+    // unrelated renders.
     const transportationModeOptions = useMemo(() => {
         if (routesByStopPointsUnavailable || !routesByStopPoint) {
             return [];
@@ -146,8 +149,9 @@ export function MapPresenter() {
         return routeTypesToTransportationModes(routeTypes);
     }, [routesByStopPointsUnavailable, routesByStopPoint]);
 
-    // Compute visible sites using filters and route availability
-    // Memoized to avoid recomputing on unrelated store updates
+    // useMemo caches the filtered site list. Filtering can scan many sites, stop
+    // points, and route mappings, so React reuses the previous result until one of
+    // the filter inputs changes.
     const filteredSites = useMemo(() => {
         if (!sites || !stopPoints) {
             return [];
@@ -178,9 +182,9 @@ export function MapPresenter() {
         stopPoints,
     ]);
 
-    // deriving route sites scans sites, stop points, and static route mappings.
-    // useMemo only recomputes that scan when those inputs change so StopMap does
-    // not restyle markers on unrelated presenter renders.
+    // useMemo caches the highlighted route's site ids. This derived value depends on
+    // the selected departure and route metadata, and should not be recalculated on
+    // unrelated renders such as language or snackbar changes.
     const selectedRouteSiteIds = useMemo(() => {
         if (!selectedDeparture || !routesByStopPoint || !sites || !stopPoints) {
             return [];
@@ -206,6 +210,9 @@ export function MapPresenter() {
         );
     }, [routesByStopPoint, selectedDeparture, sites, stopPointGidsBySiteId, stopPoints]);
 
+    // useCallback keeps this callback reference stable as it is passed into child
+    // views. It only depends on dispatch, which is stable, so unrelated presenter
+    // renders do not give those children a new function prop.
     const handleSelectSiteCB = useCallback(
         (siteId: number | null) => {
             selectSite({ dispatch, siteId });

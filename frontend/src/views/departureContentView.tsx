@@ -74,6 +74,7 @@ export function DepartureContentView({
     tTransportModes,
     tDepartureEmpty,
 }: DepartureContentViewProps) {
+    // Render one panel state at a time: loading, selected departure details, list, or empty state.
     return isDeparturesLoading ? (
         <Suspense message={tDeparture.loading} />
     ) : selectedDeparture ? (

@@ -20,6 +20,7 @@ export function MapDeparturesPanelView({
     onRefreshDepartures,
     t,
 }: MapDeparturesPanelViewProps) {
+    // Use a fullscreen panel on mobile and a compact floating panel on desktop.
     const layout = isFullscreen
         ? {
               position: "fixed",
