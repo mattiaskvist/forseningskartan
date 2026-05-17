@@ -52,13 +52,6 @@ export function fetchDepartureHistoricalDelaySummary({
     if (stopPointGIDs.length === 0 || dates.length === 0 || routeShortName.trim() === "") {
         return Promise.resolve(null);
     }
-    console.log("Fetching departure historical delay summary for:", {
-        stopPointGIDs,
-        dates,
-        hourUTC,
-        routeShortName,
-        routeType,
-    });
 
     const params = new URLSearchParams();
     appendListParam(params, "stopPointGIDs", stopPointGIDs);
@@ -83,7 +76,6 @@ export function fetchDepartureHistoricalDelaySummary({
 }
 
 export function fetchAvailableDates(): Promise<string[]> {
-    console.log("Fetching available dates");
     function handleResponseACB(response: Response) {
         if (!response.ok) {
             throw new Error(`Failed to fetch available dates: ${response.status}`);
@@ -108,7 +100,6 @@ export function fetchDailyRouteDelays(dates: string[]): Promise<DelaySummary[] |
     if (dates.length === 0) {
         return Promise.resolve(null);
     }
-    console.log("Fetching daily route delays for:", dates);
     function handleResponseACB(response: Response) {
         if (!response.ok) {
             throw new Error(`Failed to fetch daily route delays: ${response.status}`);
