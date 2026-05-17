@@ -1,8 +1,11 @@
 ---
 geometry: margin=3cm
+title: "DH2642 Project User Consultations"
+author:
+  - Daniel Ruijs
+  - Mattias Kvist
+date: \today
 ---
-
-# User Consultations
 
 ## Prototyping Stage User Consultation (2026-03-21)
 
