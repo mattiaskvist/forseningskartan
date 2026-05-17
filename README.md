@@ -49,6 +49,12 @@ For an up-to-date list of planned work, please visit [the project board and road
 
 User consultations have been carried out in both the prototyping stage and the evaluation stage, and feedback has been collected and addressed. For details, see [the user consultations documentation](user-consultations.md).
 
+To convert the file to PDF, you can use a tool like Pandoc. For example, you can run the following command in your terminal:
+
+```bash
+pandoc user-consultations.md -o user-consultations.pdf
+```
+
 ## Project file structure
 
 Directory overview:
