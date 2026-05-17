@@ -82,6 +82,14 @@ Directory overview:
 ├── gtfsAggregation/             # Go cronjob that downloads GTFS data, aggregates delays, and writes results to PostgreSQL
 ```
 
+## Third-party components in frontend
+
+The project mainly uses [MUI](https://mui.com/) components for UI, and [Leaflet](https://leafletjs.com/) for the map. Examples:
+- **Map**: `StopMap` - Leaflet-based interactive map used across the app; see [frontend/src/components/StopMap.tsx](frontend/src/components/StopMap.tsx#L125).
+- **Route delay leaderboard**: `RouteDelayLeaderboardView` - table view that shows the most delayed routes; see [frontend/src/views/routeDelayLeaderboardView.tsx](frontend/src/views/routeDelayLeaderboardView.tsx#L24).
+- **Route delay trend chart**: `RouteDelayTrendChart` - line chart for visualizing route delay trends over time; see [frontend/src/components/RouteDelayTrendChart.tsx](frontend/src/components/RouteDelayTrendChart.tsx#L20).
+- **Search bar**: `SearchBar` - autocomplete search for stops with recent-history prioritization; see [frontend/src/components/SearchBar.tsx](frontend/src/components/SearchBar.tsx#L28).
+
 ## SL API concepts
 
 **Site**: A Site is a grouping of StopAreas, e.g. Odenplan which has three stop areas (1131 metro station, 10151 bus station, 5320 railway station).
