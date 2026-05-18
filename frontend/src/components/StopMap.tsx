@@ -153,18 +153,20 @@ export function StopMap({
     const selectedSiteCameraRequestKeyRef = useRef<number | null>(null);
     const userLocationCameraRequestKeyRef = useRef<number | null>(null);
 
+    // Keep the latest style available to cached Leaflet code without recreating markers.
     useEffect(() => {
         mapStyleRef.current = appStyle;
     }, [appStyle]);
 
+    // Keep cached marker click handlers connected to the latest presenter callback.
     useEffect(() => {
         // Leaflet keeps the original click handler on cached markers, so keep its callback fresh here.
         siteMarkerClickRef.current = onSiteMarkerClick;
     }, [onSiteMarkerClick]);
 
+    // Create the Leaflet map once. React owns only the container div; Leaflet owns
+    // the map instance, layers, controls, and cleanup for this adapter.
     useEffect(() => {
-        // Initialize leaflet map once and set up layers/controls
-        // Clean up fully on unmount to avoid leaking DOM or map instances
         if (!mapContainerRef.current || mapRef.current) {
             return;
         }
@@ -237,7 +239,7 @@ export function StopMap({
         };
     }, []);
 
-    // Update tile layer when map style changes
+    // Swap the background tile layer when the app style changes.
     useEffect(() => {
         const map = mapRef.current;
         if (!map) {
@@ -282,7 +284,8 @@ export function StopMap({
         return marker;
     }, []);
 
-    // Build and cache markers once for all sites, then reuse them across filter changes
+    // Build and cache Leaflet markers from allSites so filter changes can reuse
+    // existing marker instances instead of recreating every map point.
     useEffect(() => {
         if (!markersLayerRef.current) {
             return;
@@ -326,7 +329,8 @@ export function StopMap({
         }
     }, [allSites, createSiteMarker]);
 
-    // Update markers when sites change
+    // Sync the visible Leaflet layer to filteredSites. Filtering policy lives in
+    // the presenter; this adapter only adds/removes the matching cached markers.
     useEffect(() => {
         const markersLayer = markersLayerRef.current;
         if (!markersLayer) {
@@ -396,7 +400,7 @@ export function StopMap({
         allMarkersBySiteIdRef.current.forEach(setMarkerStyleCB);
     }, [appStyle, selectedRouteSiteIds]);
 
-    // update marker styles when selected site changes
+    // Restyle only the previous and current selected markers when selection changes.
     useEffect(() => {
         if (!mapRef.current) {
             return;
@@ -437,7 +441,8 @@ export function StopMap({
         selectedMarkerRef.current = null;
     }, [selectedSiteId]);
 
-    // update map camera when selected site changes
+    // Move the camera for selected-site requests. The request key prevents a new
+    // object reference from replaying the same Leaflet flyTo command.
     useEffect(() => {
         const map = mapRef.current;
         if (!selectedSiteCameraTarget) {
@@ -464,6 +469,7 @@ export function StopMap({
         );
     }, [selectedSiteCameraTarget]);
 
+    // Move the camera for user-location requests, once per button-triggered request key.
     useEffect(() => {
         const map = mapRef.current;
         if (!map || !userLocationCameraTarget) {
@@ -485,7 +491,7 @@ export function StopMap({
         );
     }, [userLocationCameraTarget]);
 
-    // Update user marker when location changes
+    // Create, move, or remove the user-location marker when geolocation state changes.
     useEffect(() => {
         const map = mapRef.current;
         if (!map || !userLocation) {

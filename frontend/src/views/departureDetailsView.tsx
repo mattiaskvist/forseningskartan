@@ -62,7 +62,7 @@ export function DepartureDetailsView({
     tDatePicker,
 }: DepartureDetailsViewProps) {
     const selectedDepartureDate = dayjs(departure.expected ?? departure.scheduled).utc();
-    // use departure hour, fall back to current hour
+    // Historical delay lookup compares departures by UTC hour, using expected time when available.
     const selectedDepartureHourUTC = selectedDepartureDate.isValid()
         ? selectedDepartureDate.hour()
         : dayjs().utc().hour();

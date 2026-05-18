@@ -23,6 +23,8 @@ type RouteDelayTrendSummaryResponse = Record<string, DelaySummary>;
 
 export type RoutesByStopPoint = Record<string, RouteMeta[]>;
 
+// This file is the backend API adapter for historical delay data.
+// It keeps query strings, auth headers, and response mapping out of presenters and views.
 export const backendBaseURL = import.meta.env.VITE_BACKEND_API_URL ?? "http://localhost:8081";
 const backendAPIKey = import.meta.env.VITE_BACKEND_API_KEY ?? "";
 
@@ -36,6 +38,7 @@ export function getBackendAuthHeaders(): HeadersInit {
 }
 
 function appendListParam(urlSearchParams: URLSearchParams, key: string, values: string[]) {
+    // The backend expects repeated query params for list values, for example dates=...&dates=...
     function appendValueCB(value: string) {
         urlSearchParams.append(key, value);
     }

@@ -87,6 +87,8 @@ export function RouteDelayPresenter() {
     const isMobile = useMediaQuery(theme.breakpoints.down("md"));
     const isSmallMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
+    // useCallback keeps the transport filter function stable for the memoized route lists below.
+    // It only changes when the selected transport mode changes.
     const matchesTransportationFilterCB = useCallback(
         (summary: DelaySummary): boolean => {
             return (
@@ -97,8 +99,8 @@ export function RouteDelayPresenter() {
         [selectedTransportationMode]
     );
 
-    // Apply transportation-mode filter and search, then sort routes
-    // Memoized to avoid re-filtering on unrelated changes
+    // useMemo caches the main route list after transport filtering, search filtering, and sorting.
+    // This can scan every route, so it should only rerun when the source routes or filters change.
     const filteredAndSortedRoutes = useMemo(() => {
         const normalizedSearch = normalizeText(searchQuery);
 
@@ -120,6 +122,7 @@ export function RouteDelayPresenter() {
     // Ensure current page is within bounds after filtering changes
     const safeCurrentPage = Math.min(currentPage, totalPages);
 
+    // useMemo caches the current page slice so pagination changes do not rebuild display items unnecessarily.
     const pagedRoutes = useMemo(() => {
         const startIndex = (safeCurrentPage - 1) * routesPerPage;
         return filteredAndSortedRoutes.slice(startIndex, startIndex + routesPerPage);
@@ -160,7 +163,8 @@ export function RouteDelayPresenter() {
         return routeTypesToTransportationModes(availableRouteTypes);
     }, [routeDelays]);
 
-    // Leaderboard: sort by average delay descending and map to display items
+    // useMemo caches the leaderboard list after filtering, sorting by delay, and mapping to display items.
+    // This keeps the ranking work out of unrelated renders.
     const leaderboardItems = useMemo((): RouteDelayListItem[] => {
         const filteredRoutes = routeDelays.filter(matchesTransportationFilterCB);
 

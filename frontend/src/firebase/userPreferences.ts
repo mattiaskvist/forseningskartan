@@ -32,6 +32,8 @@ function isIntegerSiteIdCB(siteId: unknown): siteId is number {
     return Number.isInteger(siteId);
 }
 
+// Firestore data is external, so validate every field before putting it into Redux.
+// Missing or invalid fields fall back to local defaults.
 export function sanitizeUserPreferences(candidate: unknown): PersistedUserPreferencesState {
     if (candidate === null || typeof candidate !== "object") {
         return {
@@ -135,6 +137,8 @@ export async function saveUserPreferences(uid: string, preferences: PersistedUse
     );
 }
 
+// onSnapshot keeps logged-in preferences live.
+// The first callback gives the current document, and later callbacks apply remote changes.
 export function subscribeUserPreferences(
     uid: string,
     onChange: (prefs: PersistedUserPreferencesState | null) => void,

@@ -1,6 +1,8 @@
 import { Site, DepartureResponse, StopPoint, Departure } from "../types/sl";
 import { backendBaseURL, getBackendAuthHeaders } from "./backend";
 
+// This file is the SL API adapter.
+// Store actions call these functions so presenters and views do not know SL URLs or response quirks.
 const BASE_URL = "https://transport.integration.sl.se/v1";
 
 function handleResponseACB(response: Response) {

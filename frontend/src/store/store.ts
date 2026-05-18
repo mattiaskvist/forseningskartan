@@ -71,6 +71,8 @@ import { translations } from "../utils/translations";
 import { getGeolocationSnackbarPayload } from "../utils/geolocation";
 import { Departure, ModeWithOther } from "../types/sl";
 import { getUpcomingDepartures, isSameDeparture } from "../utils/departures";
+// Listener middleware lets the model react to Redux actions with side effects.
+// Reducers update state, while listeners trigger follow-up work like fetching data.
 const listenerMiddleware = createListenerMiddleware();
 
 function mergeRecentSearchSiteIds(
@@ -96,6 +98,7 @@ function mergeRecentSearchSiteIds(
     return Array.from(uniqueRecentSearchSiteIds);
 }
 
+// configureStore combines all model slices into one Redux store.
 export const store = configureStore({
     reducer: {
         auth: authSlice.reducer,
@@ -113,15 +116,21 @@ export const store = configureStore({
         snackbar: snackbarSlice.reducer,
         userPreferences: userPreferencesSlice.reducer,
     },
+    // Register listener middleware so startListening rules below can observe dispatched actions.
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware().prepend(listenerMiddleware.middleware),
 });
 
-// Fetch stop delays when selected departure or date range changes
+// First listener example:
+// matcher says which actions should trigger this listener.
+// isAnyOf means any listed action is enough.
+// effect runs after a matching action is dispatched and can dispatch async follow-up work.
+// Historical departure stats depend on the selected departure and date range.
+// Refetch the summary when either changes.
 listenerMiddleware.startListening({
     matcher: isAnyOf(setSelectedDeparture, setSelectedDatePreset, setSelectedCustomDateRange),
     effect: (_, listenerApi) => {
-        // avoid rapid updates triggering multiple fetches, only the latest matters
+        // If the user changes selection quickly, cancel older listener work so only the latest fetch matters.
         listenerApi.cancelActiveListeners();
 
         const dispatch = listenerApi.dispatch as AppDispatch;
@@ -217,7 +226,8 @@ listenerMiddleware.startListening({
     },
 });
 
-// Fetch route delays (all routes) when date range changes
+// Route summary data covers all routes for the selected dates.
+// Refetch it when the date selection changes or available dates first load.
 listenerMiddleware.startListening({
     matcher: isAnyOf(
         setRouteDelayDatePreset,
@@ -232,8 +242,8 @@ listenerMiddleware.startListening({
     },
 });
 
-// Fetch route delay trend (single route) when
-// selected route, time granularity, or date range changes
+// Route trend data covers one selected route.
+// Refetch it when the selected route, date range, or trend granularity changes.
 listenerMiddleware.startListening({
     matcher: isAnyOf(
         setRouteDelaySelectedRouteKey,
@@ -249,10 +259,8 @@ listenerMiddleware.startListening({
     },
 });
 
-// Sync user preferences after auth state changes
-// If remote preferences exist merge them with local state apply them, and persist
-// If no remote preferences exist, initialize remote storage from local state
-// Remove locally recent searches after they have been stored remotely to not reapply them on next login
+// When auth changes, switch the active Firestore preference subscription to the current user.
+// On first login snapshot, merge remote preferences with local choices made before login.
 listenerMiddleware.startListening({
     actionCreator: setUser,
     effect: async (action, listenerApi) => {
@@ -283,6 +291,8 @@ listenerMiddleware.startListening({
             const localPreferences = state.userPreferences;
 
             if (loadedPreferences) {
+                // First remote load is special because local anonymous preferences may need to survive login.
+                // After the merge is saved, later snapshots can be applied directly from Firestore.
                 // if we have loaded preferences from firebase but not merged them with the local preferences,
                 // do that and save the merged result to firebase
                 if (!initialMergedPreferencesSaved) {
@@ -371,6 +381,8 @@ listenerMiddleware.startListening({
         const recentSearchSiteIds = state.userPreferences.recentSearchSiteIds ?? [];
 
         if (!user) {
+            // Anonymous users only persist recent searches here.
+            // Style, language, and intro state are already written to localStorage by their reducers.
             storeRecentSearchSiteIds(recentSearchSiteIds);
             return;
         }

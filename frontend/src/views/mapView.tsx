@@ -97,11 +97,15 @@ export function MapView({
             />
             <Box
                 sx={{
+                    // Position this controls area over the map instead of taking layout space.
                     position: "absolute",
                     right: 16,
                     top: 16,
                     zIndex: 1000,
+                    // 100vw is the viewport width; rem is based on the root font size,
+                    // so subtracting 2rem keeps a margin that scales with text size.
                     maxWidth: "calc(100vw - 2rem)",
+                    // Empty overlay space should not block dragging/clicking the map.
                     pointerEvents: "none",
                 }}
             >
@@ -110,8 +114,10 @@ export function MapView({
                         display: "flex",
                         alignItems: { xs: "flex-end", md: "flex-start" },
                         gap: 1.5,
+                        // Stack controls on small screens, but lay them out horizontally on desktop.
                         flexDirection: { xs: "column-reverse", md: "row" },
                         "& > *": {
+                            // Re-enable clicks for the visible controls inside the non-clickable overlay.
                             pointerEvents: "auto",
                         },
                     }}
@@ -141,6 +147,7 @@ export function MapView({
             <Box
                 hidden={!showUserLocationButton}
                 sx={{
+                    // Float the location button above the map controls in the lower-left area.
                     position: "absolute",
                     left: 8,
                     bottom: 84,
