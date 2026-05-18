@@ -39,7 +39,7 @@ AI tools were used to generate code to speed up development. The generated code 
 
 - "help me write some comments in the code about useMemo and useCallback here. Explain what it does and the benefit" 
 
-- "the location button does not work after the mobile feature. nothing happens when i click on it." 
+- "the location button does not work after the mobile feature. nothing happens when i click on it." -> [Commit 149c76f26e1d622eff30ccb6aa457eaf9d101dc9](https://github.com/mattiaskvist/forseningskartan/commit/149c76f26e1d622eff30ccb6aa457eaf9d101dc9)
 
 - "Review the frontend codebase with regards to simplicity, readability and comments, anti-patterns and strict model-view-presenter architecture. document the found issues with suggested fix and motivation in a .md file that i can share with my teammate"
 
