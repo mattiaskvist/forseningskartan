@@ -19,6 +19,7 @@ function getSelectedDelayDates({
     return getDatesForPreset(selectedDatePreset, selectedCustomDateRange, availableDates);
 }
 
+// Selectors are the presenter-facing API for reading Redux state.
 function getAuthUserCB(state: RootState) {
     return state.auth.user;
 }

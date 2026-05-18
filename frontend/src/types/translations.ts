@@ -1,5 +1,7 @@
 export type LanguageCode = "en" | "sv";
 
+// Runtime values from localStorage, Firebase, or UI events can be invalid.
+// This type guard checks them before we treat them as supported language codes.
 export const isLanguageCode = (candidate: unknown): candidate is LanguageCode =>
     typeof candidate === "string" && (candidate === "en" || candidate === "sv");
 

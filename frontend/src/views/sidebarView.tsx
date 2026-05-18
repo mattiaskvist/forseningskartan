@@ -325,6 +325,7 @@ export function SidebarView({
                         </Typography>
                     </ListItem>
 
+                    {/* Favorite stops have three display states: loading, unavailable while logged out, or the saved list. */}
                     {isFavoriteStopsLoading ? (
                         <ListItem sx={{ px: 1.5, py: 0.5 }}>
                             <Suspense message={t.loadingFavoriteStops} />

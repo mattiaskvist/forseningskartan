@@ -28,6 +28,7 @@ import {
 } from "../types/routeDelays";
 import { StopPointGidsBySiteId } from "../utils/site";
 
+// These state types define the model shape stored in Redux.
 type SitesState = {
     data: Site[] | null;
     selectedSiteId: number | null;
@@ -111,6 +112,7 @@ type RouteDelayUIState = {
     currentPage: number;
 };
 
+// Each slice owns one part of the model state plus the reducers that update it.
 export const sitesSlice = createSlice({
     name: "sites",
     initialState: {
@@ -142,6 +144,7 @@ export const sitesSlice = createSlice({
             },
         },
     },
+    // extraReducers handle async thunk states like pending, fulfilled, and rejected.
     extraReducers: (builder) => {
         builder
             .addCase(getSites.pending, (state) => {

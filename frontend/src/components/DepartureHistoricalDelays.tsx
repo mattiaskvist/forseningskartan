@@ -64,6 +64,8 @@ export function DepartureHistoricalDelays({
                     {t.toRouteDelayDetails}
                 </Button>
             </div>
+            {/* This component renders the historical delay controls and the summary it receives.
+            Fetching happens after the callbacks update Redux selection state. */}
             <DepartureDelayControls
                 availableDates={availableDates}
                 selectedDatePreset={selectedDatePreset}

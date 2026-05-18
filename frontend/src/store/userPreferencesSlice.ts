@@ -3,6 +3,8 @@ import { AppStyle, appStyles } from "../types/appStyle";
 import { LanguageCode, isLanguageCode } from "../utils/translations";
 import { TransportationMode } from "../types/sl";
 
+// localStorage gives the app immediate local defaults before auth or Firestore finish loading.
+// Logged-in users may later replace these values with saved Firebase preferences.
 const APP_STYLE_STORAGE_KEY = "appStyle";
 const RECENT_SEARCH_STORAGE_KEY = "recentSearchSiteIds";
 const LANGUAGE_STORAGE_KEY = "language";
@@ -130,6 +132,8 @@ export function clearStoredRecentSearchSiteIds() {
     }
 }
 
+// This is the preference shape that can be saved to localStorage or Firestore.
+// Runtime-only fields like loading state stay outside this persisted shape.
 export type PersistedUserPreferencesState = {
     favoriteSiteIds: number[];
     recentSearchSiteIds: number[];

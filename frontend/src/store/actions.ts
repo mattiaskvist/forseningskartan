@@ -20,6 +20,7 @@ import { hideSnackbar } from "./snackbarSlice";
 import { GeolocationRequestErrorCode } from "../types/geolocation";
 import { getGeolocationRequestErrorCode } from "../utils/geolocation";
 
+// createAsyncThunk wraps an async API call and creates pending, fulfilled, and rejected actions.
 export const getSites = createAsyncThunk("sites/fetch", fetchSitesACB);
 
 export const getDepartures = createAsyncThunk("departures/fetch", (siteId: number) =>
@@ -133,8 +134,8 @@ export const requestUserGeolocation = createAsyncThunk<
     }
 );
 
-// Fetch historical delay summary for selected departure
-// Reads store to build parameters for historical delay query
+// Translate the current selected departure into the backend query.
+// The query needs stop GIDs, selected dates, UTC departure hour, and route identity.
 // Returns early on missing selection or invalid timestamps
 export function fetchSelectedDepartureStopDelays(): AppThunk {
     return (dispatch, getState) => {

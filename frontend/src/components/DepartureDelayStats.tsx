@@ -8,6 +8,8 @@ function pluralize(count: number, singular: string, plural: string) {
 }
 
 const statsMap = {
+    // DelaySummary stores departure and arrival stats separately.
+    // selectedEventType chooses which set this shared stats view should display.
     departure: {
         delay: (s: DelaySummary) => s.departureDelayStats,
         ahead: (s: DelaySummary) => s.departureAheadStats,

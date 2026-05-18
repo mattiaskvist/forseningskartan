@@ -41,6 +41,7 @@ export function SidebarPresenter() {
     const selectedSite = useAppSelector(getSelectedSiteCB);
     const t = translations[currentLanguage].sideBar;
 
+    // Build view-ready navigation items here so SidebarView does not need route config or location logic.
     function getSidebarNavItemCB(route: RouteConfig): SidebarNavItem {
         const isActive =
             route.path === "/"
@@ -79,7 +80,7 @@ export function SidebarPresenter() {
     }
 
     async function handleLogoutACB() {
-        // Logout flow: dispatch thunk, show snackbar on result and navigate home
+        // unwrap makes the async thunk behave like a normal promise so try/catch can show success or error feedback.
         try {
             await dispatch(logoutCurrentUser()).unwrap();
             dispatch(showSnackbar({ message: tAccount.logoutSuccess, severity: "success" }));
