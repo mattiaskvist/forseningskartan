@@ -4,6 +4,29 @@ The application is currently available at https://forseningskartan.web.app/.
 
 Förseningskartan is a web application for exploring public transport delays, currently only in Stockholm. It combines live departure data from SL with historically aggregated GTFS delay data so users can understand both what is happening now and what usually happens at a stop/route/time. GTFS (General Transit Feed Specification) is a standardized data format used by transit agencies to share schedules and real-time updates, including delays, routes, and stop information.
 
+## UX Prize Win 🏆
+
+Förseningskartan won the **Project User eXperience (UX) Prize** in the DH2642 Interaction Programming and the Dynamic Web course at KTH.
+
+> **Project User eXperience prize description:**
+> Projects with great usability, very good attention to the use case, sometimes creating a need that we didn't know existed (like great design often does). More than one project can get this. Code/architecture quality are of secondary importance for the prize (but of course, to be highly usable, it has to be bug-free and work with good performance).
+
+### Presentation & Slide Creation
+
+As part of sharing our work and inspiring classmates, we had to prepare a 15–20 minute presentation focusing on the design choices, user consultations, and implementation decisions that led to a strong user experience.
+
+To create this presentation, we used an AI coding assistant (Antigravity) using the `pptx` skill to programmatically generate both a full presentation script and a PowerPoint slide deck. The process was driven by the following user prompts:
+
+1. **Creating the script (`presentation.md`):**
+
+   > _This project has won a UX prize. I need to share it with the class, this is a great opportunity to showcase your work and inspire your classmates by sharing what you learned during the project. Please prepare an approximately 15–20 minute presentation about this project, focusing on the design choices and implementation decisions that helped create a strong user experience. Check the issues in the repository, the order in which they were created and resolved to create the presentation. You can also use the commit history and all documentation in the repository. Use this to create a markdown file in project root with a full structured presentation script, with ideas of what to include in the slides etc._
+
+2. **Generating the PowerPoint presentation (`presentation.pptx`):**
+
+   > _use the pptx skill to create a powerpoint based on the presentation.md file you created_
+
+The resulting files [presentation.md](presentation.md) (presentation script) and [presentation.pptx](presentation.pptx) (PowerPoint deck with custom layout designs and speaker notes) are both available in the project root.
+
 ## Running the project:
 
 The project consists of a frontend, a backend API, and a GTFS aggregation pipeline. For instructions on how to run each component locally, please see the respective README files in the [frontend](frontend/README.md), [backend](backend/README.md), and [GTFS aggregation](gtfsAggregation/README.md) directories.
@@ -93,6 +116,7 @@ Directory overview:
 ## Third-party components in frontend
 
 The project mainly uses [MUI](https://mui.com/) components for UI, and [Leaflet](https://leafletjs.com/) for the map. Examples:
+
 - **Map**: `StopMap` - Leaflet-based interactive map used across the app; see [frontend/src/components/StopMap.tsx](frontend/src/components/StopMap.tsx#L125).
 - **Route delay leaderboard**: `RouteDelayLeaderboardView` - table view that shows the most delayed routes; see [frontend/src/views/routeDelayLeaderboardView.tsx](frontend/src/views/routeDelayLeaderboardView.tsx#L24).
 - **Route delay trend chart**: `RouteDelayTrendChart` - line chart for visualizing route delay trends over time; see [frontend/src/components/RouteDelayTrendChart.tsx](frontend/src/components/RouteDelayTrendChart.tsx#L20).
