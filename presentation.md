@@ -51,17 +51,17 @@
 
 🖼️ **Slide content:**
 - Live demo of the app (or screenshots if no internet), showing:
-  1. The interactive map with stop points (coloured by transport mode)
+  1. The interactive map with stop points (styled by theme, highlighted by selection/route)
   2. Clicking a stop → departure panel with live arrivals
   3. Searching for a stop with the search bar (with recent search history)
   4. The route delay statistics page with leaderboard and trend chart
-  5. Switching between themes (light/dark/blue)
+  5. Switching between themes (Light, Dark, and Classic Sepia)
   6. Switching language (English ↔ Swedish)
   7. Signing in with Google → favorite stops in sidebar
   8. Mobile view
 
 🎤 **Script:**
-> "Let me walk you through the app. At its core, Förseningskartan is a map-based interface. Every dot on the map is a transit stop point — colour-coded by mode: blue for metro, red for bus, green for tram, and so on. You can filter which modes to show, and even hide stops that currently have no departures.
+> "Let me walk you through the app. At its core, Förseningskartan is a map-based interface. Every dot on the map is a transit stop point. You can filter which modes to show on the map, and even hide stops that currently have no departures. The stop markers automatically adapt their style to match your active theme, and when you select a route, all stops on that route are highlighted in bright orange so you can trace it visually. The selected stop itself highlights in red.
 >
 > Clicking a stop opens a live departure panel showing upcoming arrivals with their delays. You can search and filter within the departure list, and you can favorite stops for quick access.
 >
@@ -79,7 +79,7 @@
   ┌──────────────┐     ┌──────────────┐     ┌──────────────────┐
   │   Frontend   │────▶│  Backend API │────▶│   PostgreSQL DB  │
   │  (React/TS)  │     │    (Go)      │     │  (historical     │
-  │  Vite + MUI  │     │              │     │   delay data)    │
+  │ Vite+MUI+TW  │     │              │     │   delay data)    │
   └──────┬───────┘     └──────────────┘     └──────────────────┘
          │                                          ▲
          │                                          │
@@ -98,11 +98,11 @@
   └──────────────┘
   ```
 - Tech stack summary:
-  - **Frontend:** React + TypeScript + Vite, MUI components, Leaflet maps, Redux
-  - **Backend:** Go REST API
-  - **Database:** PostgreSQL
-  - **Data pipeline:** Go cron job processing GTFS Realtime data
-  - **Auth & user data:** Firebase / Firestore
+  - **Frontend:** React + TypeScript + Vite, MUI components + Tailwind CSS, Leaflet maps, Redux Toolkit
+  - **Backend:** Go REST API (exposing Prometheus metrics)
+  - **Database:** PostgreSQL 16 (Dockerized)
+  - **Data pipeline:** Go aggregator service (with internal cron scheduler)
+  - **Auth & user data:** Firebase Auth / Firestore
   - **Hosting:** Firebase Hosting (frontend), self-hosted backend + DB
   - **CI/CD:** GitHub Actions
 
@@ -154,7 +154,7 @@
   - 🗺️ Spatial context: users think in geography, not route numbers
   - 🔍 Search as an overlay, not a separate page
   - 📍 Geolocation button: "show me what's near me"
-  - 🎨 Colour-coded stop markers by transport mode (bus, metro, tram, train, ferry)
+  - 🎨 Theme-integrated stop markers (color adjusted for Light, Dark, or Classic mode) with interactive selected/route highlights
   - 🔄 Progressive disclosure: click a stop → departure panel → route delay stats
 - Reference issues: #3 (Add map), #10 (Search bar), #87 (Filter by transport mode), #88 (Hide stops without departures)
 
@@ -163,7 +163,7 @@
 >
 > The search bar overlays the map rather than living on a separate page, which keeps the spatial context. Your recent searches are remembered and shown as suggestions. We also added a geolocation button so you can instantly centre the map on your location.
 >
-> Stop markers are colour-coded by transport mode, and you can filter by mode or hide stops with no departures — something users explicitly asked for. This reduces visual noise.
+> Stop markers are styled to match the active theme. To keep the map clean and prevent noise, we allow users to filter stops by transport mode or hide stops with no active departures. When a route is highlighted, we trace all its stops in orange, and highlight the selected stop in red.
 >
 > We use progressive disclosure: the map → clicking a stop → the departure panel → and from there a button takes you to detailed route delay statistics. Each step reveals more detail without overwhelming the user upfront."
 
@@ -227,14 +227,14 @@
 ### Slide 9 — Design Choice #5: Theming, i18n, and Visual Polish ⏱️ ~1 min
 
 🖼️ **Slide content:**
-- Three theme screenshots side by side (light / dark / blue)
+- Three theme screenshots side by side (Light, Dark, and Classic Sepia)
 - Language switcher: English ↔ Swedish
 - MUI theming approach: custom theme definitions per colour mode
 - Consistent styling across all components via MUI's theme system
 - Reference: `frontend/src/theme/` directory
 
 🎤 **Script:**
-> "We built three full colour themes — light, dark, and a blue accent mode — using Material UI's theming system. Each theme is defined as a complete MUI theme object, so every component in the app respects the chosen palette consistently.
+> "We built three full colour themes — Light, Dark, and a Classic Sepia/Cream mode — using Material UI's theming system. Each theme is defined as a complete MUI theme object, so every component in the app respects the chosen palette consistently.
 >
 > We also implemented full Swedish and English translations. This is important for a Stockholm-focused app where the user base is bilingual. The language preference is of course persisted.
 >
@@ -336,7 +336,7 @@
 | Transport mode filters | Show only buses, metro, etc. | Reduces visual noise on the map |
 | Favourite stops | Star stops, see in sidebar | Personalised quick access |
 | Live cross-tab persistence | Preferences sync instantly | Feels modern and seamless |
-| Three colour themes | Light / dark / blue | Respects user preference for visual comfort |
+| Three colour themes | Light / Dark / Classic | Respects user preference for visual comfort |
 | Mobile adaptation | Fullscreen panels, stacked controls | App usable on any device |
 | First-visit intro | Guided onboarding, shown once | Reduces confusion for new users |
 
@@ -438,12 +438,13 @@
 | Layer | Technology |
 |---|---|
 | Frontend | React + TypeScript + Vite |
-| UI Library | Material UI (MUI) |
+| UI Library | Material UI (MUI) + Tailwind CSS |
+| Charts | MUI X Charts |
 | Map | Leaflet |
-| State Management | Redux (with async thunks) |
-| Backend | Go (net/http) |
-| Database | PostgreSQL 16 |
-| Data Pipeline | Go + GTFS Realtime (protobuf) |
+| State Management | Redux Toolkit (with async thunks) |
+| Backend | Go (net/http, exposing Prometheus metrics) |
+| Database | PostgreSQL 16 (Dockerized) |
+| Data Pipeline | Go + GTFS Realtime (protobuf, with internal cron scheduler) |
 | Auth | Firebase Auth (Google) |
 | User Data | Firestore |
 | Frontend Hosting | Firebase Hosting |
