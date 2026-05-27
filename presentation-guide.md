@@ -42,79 +42,89 @@ The presentation structure below highlights both the **design choices (UX)** and
 
 ---
 
-## 🖥️ Live Demo Script (Chronological Order)
+## 🖥️ Live Demo Script (Step-by-Step)
 
-Perform this live demo directly in the web browser, walking the class through the features in the order they were built, pointing out the UX reasoning and code decisions.
+Perform this live demo directly in the web browser, starting as an anonymous user (not logged in) to show how the application welcomes new visitors and scales dynamically as they log in.
 
-### Step 1: The App Intro & Map Foundation
-* **Action**: Open the app in a fresh private window (or clear local storage) to trigger the **First-Visit Intro**.
-* **Highlight (UX)**: 
-  * The [App Intro Dialog](frontend/src/utils/translations.ts#L47-L73) sets expectations. It guides the user through four simple steps (Hitta hållplats, Se avgångar, Jämför historik, Utforska trender).
-  * Persisted dismissal: Once dismissed, it writes `hasSeenAppIntro: true` to Redux and Firestore/localStorage, so returning users aren't pestered.
-* **Under the Hood**: Passive Leaflet integration. Explain that you write to Leaflet refs directly rather than recreating layers on every render, keeping map panning and zooming buttery smooth.
-
-### Step 2: Stop Search & Geolocation
-* **Action**: Click the **Geolocation button** in the bottom left. Then search for a stop (e.g., type "Fruangen" with no Swedish characters).
+### Step 1: Initial Welcome (App Intro)
+* **Action**: Open the app in a private browsing window (or clear local storage/cookies) to show the **First-Visit Intro**.
 * **Highlight (UX)**:
-  * **Accent-insensitive search** (Evaluation Feedback, Issue #153): Typing `Fruangen` matches `Fruängen`. Essential for international students or users with US/UK keyboards.
-  * **Camera FlyTo**: Smooth animated camera pan when centering on the user or selecting a stop.
-  * **Zoom Sizing Policy**: Stop markers (circles) stop shrinking below zoom level 15 so they remain clickable on any screen size.
+  * **Welcoming UX**: The intro panel sets expectations, guiding new users through four simple tasks: *Find a stop*, *Check live departures*, *Compare historical delays*, and *Explore route delays*.
+  * **Persisted Dismissal State**: Once the user clicks "Get started" ("Kom igång"), it stores `hasSeenAppIntro: true` in user preferences so they aren't pestered on future visits.
+* **Under the Hood**: Preference loading utilizes Redux actions, ensuring that visual startup side-effects are decoupled from the main react render cycle.
+
+### Step 2: The Stockholm Interactive Map
+* **Action**: Pan and zoom around the Leaflet map. Focus on Stockholm Central.
+* **Highlight (UX)**:
+  * **Smooth Pan/Zoom**: Fast, buttery rendering of transit stops as circles.
+  * **Zoom-Scaling Markers**: Stop markers stop shrinking past zoom level 15, ensuring they remain easy to tap or click even when zoomed out.
 * **Under the Hood**:
-  * Redux Toolkit `listenerMiddleware` listens for the `requestUserGeolocation` action and triggers the browser API, showing a helpful snackbar ("Finding your location...").
-  * Autocomplete search options are cached in Redux for instantaneous rendering.
+  * Instead of rebuilding Leaflet layers on every React state change (a major performance issue in mapping), the custom `StopMap` component uses internal refs to cache and reuse Leaflet marker instances.
 
-### Step 3: Departure List & Live vs. Historical Delays
-* **Action**: Select the stop (e.g., `Fruängen`). The sidebar panels slide open. Point out the live departures. Click the **Refresh button** in the departure header. Select a specific departure to open its details.
+### Step 3: Hot-Swappable Themes (Visual Styling)
+* **Action**: Open the sidebar (or map controls) and toggle between **Light**, **Dark**, and **Classic** themes.
 * **Highlight (UX)**:
-  * **Refresh Button**: Keeps users in control. Live predicted time vs planned time is visible.
-  * **Historical Delays Panel**: Shows how this specific departure line performs on this day/hour historically (e.g., "delayed on average by 3 minutes, 70% on time").
-  * **Grouping & Filtering**: Departures are grouped by transport mode (Metro, Bus) with toggle chips at the top to prevent cognitive overload.
+  * **Classic Theme**: A retro wood-beige layout paying homage to Stockholm's vintage transit tickets and signs, enhancing readability and branding.
+  * **Zero-Flicker Change**: Swapping themes re-skins the entire UI and swaps Leaflet tile layers instantly without reloading stop points.
+* **Under the Hood**: MUI's theme engine customizes all elements (buttons, inputs, toggle buttons) dynamically using HSL/RGBA palettes mapped in `muiTheme.ts`.
+
+### Step 4: Search Bar, History, & Stop Filters
+* **Action**: Type a stop name in the search bar. Show search history. Toggle the transport mode filters, then toggle **"Hide unused stops"** ("Dölj oanvända hållplatser").
+* **Highlight (UX)**:
+  * **Map Stop Filters**: Toggling chips (Bus, Metro, Train, Ferry) filters stops on the map to remove clutter.
+  * **Hide Unused Stops**: Hides stops that have no upcoming departures, allowing passengers to focus on active routes.
+  * **Recent Search History**: Prioritizes stops the user previously searched for.
+* **Under the Hood**: Stop filters are calculated in Redux slices and synced to local storage. Derived data filtering runs in presenters using `useMemo` hooks for maximum UI efficiency.
+
+### Step 5: Selecting a Stop, Departure Search, & Refresh
+* **Action**: Search for `Fruangen` (without Swedish letters) or select the stop on the map. In the departures drawer, search for a line in the search input. Click the **Refresh** button.
+* **Highlight (UX)**:
+  * **Accent-Insensitive Search** (Evaluation Feedback, Issue #153): Typing `Fruangen` automatically finds `Fruängen`. Essential for international travellers and US/UK keyboards.
+  * **Manual Refresh Control**: Lets users pull live SL data on demand.
+  * **Departure Search**: Search inside the stop's departures list (by designation or destination) to quickly find a train/bus on busy hubs.
 * **Under the Hood**:
-  * The departures are fetched from the SL API via the Go backend.
-  * Once a departure is selected, `listenerMiddleware` detects the change and automatically fires a thunk to retrieve historical delay summaries for that specific trip slot.
+  * Auto-refresh is managed by Redux Thunks. Stale requests are automatically cancelled if the user rapidly switches stops, preventing racing conditions.
 
-### Step 4: Multi-Theme & Localization Switchers
-* **Action**: Go to the Sidebar. Toggle between English and Swedish. Switch themes between **Light**, **Dark**, and **Classic**.
+### Step 6: Departure Selection, Delays & Route Highlights
+* **Action**: Click on a specific departure. Look at the **Historical Delays** panel. Note the highlighted stops on the map.
 * **Highlight (UX)**:
-  * **Classic Theme**: A retro beige-brown layout that aligns with vintage Stockholm transit aesthetics (improving visual character).
-  * **Language Switcher**: Full Swedish flag icon details. Real-time language updates across all components.
-  * **Mobile Auto-Hide**: The theme switcher on the map hides on small mobile screens to keep the viewport clean.
+  * **Live vs. Historical Comparison**: Compares the live prediction (e.g. expected departure +2 mins) with the historical performance for that slot.
+  * **Route Highlighting on Map** (Prototyping Feedback, Issue #12 / PR #163): When a departure is selected, the map highlights all stop markers served by that route in bright orange, letting the user visually trace the path of the vehicle.
 * **Under the Hood**:
-  * Custom MUI themes are created dynamically inside [muiTheme.ts](frontend/src/theme/muiTheme.ts).
-  * The translation mappings are structured cleanly in [translations.ts](frontend/src/utils/translations.ts).
+  * Selecting a departure triggers a Redux listener that fetches aggregated Go backend historical statistics for that specific line and preset.
+  * The presenter calculates the route's stop point GIDs, and the map applies style overrides (`ROUTE_MARKER_STYLE`) to existing cached markers.
 
-### Step 5: User Accounts & Real-Time Sync (The A+ Feature)
-* **Action**: Open two separate browser tabs side-by-side. Log in with Google. Favorite a stop on one tab, or change the app theme. Watch the other tab update *instantly* without a page reload.
+### Step 7: Sidebar & Language Switcher
+* **Action**: Hover over/open the navigation sidebar. Toggle between **English** and **Swedish** using the flag selectors.
 * **Highlight (UX)**:
-  * A logged-in user gets their preferences synced.
-  * **Live Tab Persistence**: Changes propagate instantly. If a user favorites a stop in one tab, the sidebar in the other tab updates.
+  * **Language Accessibility**: Fully localized UI. Switching languages alters the entire app's text immediately (including map tooltips, charts, dates, and buttons).
 * **Under the Hood**:
-  * Inside [store.ts](frontend/src/store/store.ts#L265-L353), when a user logs in, the `setUser` listener sets up a Firestore `onSnapshot` listener. 
-  * The listener subscribes to preference updates in the cloud and dispatches `applyLoadedUserPreferences` to synchronize the Redux store instantly across active sessions.
+  * Translatables are mapped in a lightweight dictionary `translations.ts` and selected via the global state.
 
-### Step 6: Analytical Trends & Custom Dates
-* **Action**: Navigate to the **Route Delays** view in the sidebar. Show the **Delay Leaderboard** (which routes are most delayed). Select a route to view its detail page. Toggle between **Daily** and **Hourly** trends. Drag the date slider to select a custom date range.
+### Step 8: User Login, Logout & Account Management
+* **Action**: Open a second browser tab next to the first one. In the first tab, click **Log In** in the sidebar. Log in with Google.
 * **Highlight (UX)**:
-  * **Granularity Toggle**: Lets users see delays by day of the week or by hour of the day (e.g., morning rush hour spike).
-  * **Custom Date Ranges**: Gives power users the ability to investigate delays during snowstorms or holidays.
+  * **Google Auth Integration**: Smooth, secure pop-up.
+  * **Protected Account Actions**: The "Delete Account" action is secured using a custom MUI Dialog confirmation instead of generic browser prompt boxes, matching the premium visual design.
 * **Under the Hood**:
-  * Chart data is rendered via Recharts.
-  * Hourly aggregation queries are served by Go backend SQL grouping statements.
+  * Firebase Authentication handles token sessions, bound to the Redux `auth` slice.
 
-### Step 7: Route Highlighting on Map (Closing the Loop)
-* **Action**: Go back to the Map View. Select a departure from the list. Notice the highlighted stops on the map.
+### Step 9: Personalization & Real-Time Cloud Sync
+* **Action**: Click the star icon to favorite the current stop. Show it appearing instantly in the sidebar's favorites.
 * **Highlight (UX)**:
-  * Readdresses the prototyping user feedback (Issue #12 / #163): "Highlight where the route goes." The map highlights all stops on the selected departure route in bright orange.
+  * **Multi-Tab Preference Sync** (Issue #145 / PR #150): Show the second browser tab you opened. It updates *instantly* with the favorite stop and chosen theme/language without any reload!
 * **Under the Hood**:
-  * The presenter computes the list of site IDs served by the selected route.
-  * The map component applies the orange `ROUTE_MARKER_STYLE` to existing markers rather than creating new layers, avoiding rendering lag.
+  * Logging in triggers a Redux listener that mounts a Firestore `onSnapshot` listener.
+  * When a user changes a preference, it is pushed to Firestore, triggering the snapshot listener in all open sessions/tabs, instantly updating the Redux store.
 
-### Step 8: Mobile-Friendly Layout
-* **Action**: Toggle Chrome Developer Tools to Mobile view (or explain how mobile layouts work).
+### Step 10: Analytical Trends (Route Delays Page)
+* **Action**: Navigate to the **Route Delays** view in the sidebar. Show the **Delay Leaderboard**. Select a route, then toggle the **Daily / Hourly** trends and adjust the date slider.
 * **Highlight (UX)**:
-  * The departure panel slides up into full screen.
-  * Sidebar navigations and map overlays hide when panels are active to prevent overlapping text and clutter.
-  * Route filters stack vertically, and trend charts adjust width dynamically.
+  * **Route Leaderboard**: Ranks routes by delay severity, giving a bird's-eye view of transit health.
+  * **Daily vs Hourly Chart Granularity**: Hourly granularity exposes peak delay hours (e.g. morning rush hours) vs daily trends.
+  * **Custom Date Ranges**: Lets users select date boundaries (e.g. comparing delays during winter snowstorms).
+* **Under the Hood**:
+  * Chart visualization uses Recharts. Go API endpoints aggregate delay hours using database timezone calculations.
 
 ---
 
