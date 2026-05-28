@@ -1,5 +1,5 @@
-import { screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { fireEvent, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import { RouteDelayLeaderboardView } from "./routeDelayLeaderboardView";
 import { renderWithTheme } from "../test/renderWithTheme";
 import { translations } from "../utils/translations";
@@ -17,6 +17,7 @@ describe("RouteDelayLeaderboardView", () => {
                     },
                 ]}
                 t={translations.en.routeDelayLeaderboard}
+                onSelectRoute={() => {}}
             />
         );
 
@@ -26,5 +27,28 @@ describe("RouteDelayLeaderboardView", () => {
         expect(screen.getByRole("columnheader", { name: "Avg delay" })).toBeInTheDocument();
         expect(screen.getByRole("columnheader", { name: "Unique trips" })).toBeInTheDocument();
         expect(screen.getByRole("row", { name: /1\. 4 Radiohuset 4 min 7/i })).toBeInTheDocument();
+    });
+
+    it("triggers onSelectRoute when a row is clicked", () => {
+        const onSelectRouteMock = vi.fn();
+        renderWithTheme(
+            <RouteDelayLeaderboardView
+                leaderboardItems={[
+                    {
+                        id: "route-1",
+                        label: "4 Radiohuset",
+                        avgDelayMinutes: 4,
+                        uniqueTrips: 7,
+                    },
+                ]}
+                t={translations.en.routeDelayLeaderboard}
+                onSelectRoute={onSelectRouteMock}
+            />
+        );
+
+        const row = screen.getByRole("row", { name: /1\. 4 Radiohuset 4 min 7/i });
+        fireEvent.click(row);
+
+        expect(onSelectRouteMock).toHaveBeenCalledWith("route-1");
     });
 });

@@ -93,6 +93,7 @@ export function RouteDelayContentView({
                     <RouteDelayLeaderboardView
                         leaderboardItems={leaderboardItems}
                         t={tRouteDelayLeaderboard}
+                        onSelectRoute={onSelectRoute}
                     />
                 )}
             </div>
