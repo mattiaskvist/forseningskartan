@@ -13,6 +13,7 @@ import { TranslationStrings } from "../utils/translations";
 type RouteDelayLeaderboardViewProps = {
     leaderboardItems: RouteDelayListItem[];
     t: TranslationStrings["routeDelayLeaderboard"];
+    onSelectRoute: (routeKey: string) => void;
 };
 
 const leaderboardHeaderCellSx = {
@@ -21,12 +22,20 @@ const leaderboardHeaderCellSx = {
     color: "text.secondary",
 };
 
-export function RouteDelayLeaderboardView({ leaderboardItems, t }: RouteDelayLeaderboardViewProps) {
+export function RouteDelayLeaderboardView({
+    leaderboardItems,
+    t,
+    onSelectRoute,
+}: RouteDelayLeaderboardViewProps) {
     function getLeaderboardItemCB(item: RouteDelayListItem, index: number) {
         const { id, label, avgDelayMinutes, uniqueTrips } = item;
 
+        function handleClickRowACB() {
+            onSelectRoute(id);
+        }
+
         return (
-            <TableRow key={id} hover>
+            <TableRow key={id} hover onClick={handleClickRowACB} sx={{ cursor: "pointer" }}>
                 <TableCell
                     component="th"
                     scope="row"
