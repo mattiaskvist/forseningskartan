@@ -25,7 +25,7 @@ To create this presentation, we used an AI coding assistant (Antigravity) using 
 
    > _use the pptx skill to create a powerpoint based on the presentation.md file you created_
 
-The resulting files [presentation.md](presentation.md) (presentation script) and [presentation.pptx](presentation.pptx) (PowerPoint deck with custom layout designs and speaker notes) are both available in the project root.
+The resulting files [presentation.md](presentation.md) (presentation script) and [presentation.pptx](presentation.pptx) (PowerPoint deck with custom layout designs and speaker notes) are both available in the project root. The powerpoint file was later refined manually.
 
 ## Running the project:
 
