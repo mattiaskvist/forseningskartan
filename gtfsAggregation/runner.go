@@ -57,8 +57,7 @@ func runAggregation(config Config) error {
 
 		// found a pb file, process it
 		if err := agg.addFile(path); err != nil {
-			fmt.Printf("Warning: could not aggregate file %s: %v. Skipping file.\n", path, err)
-			return nil
+			return fmt.Errorf("could not aggregate file %v: %w", path, err)
 		}
 		filesParsed++
 		RecordFileProcessed(config.Date, filesParsed)
