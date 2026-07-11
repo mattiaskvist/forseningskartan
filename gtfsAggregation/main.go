@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -196,15 +197,21 @@ func runRecentMissingAggregations(config Config) error {
 	slices.Sort(missingDates)
 	fmt.Printf("Found %d missing date(s) to process\n", len(missingDates))
 
+	var errs []error
 	for _, date := range missingDates {
 		dayConfig := config
 		dayConfig.Date = date
 
 		if err := runAggregation(dayConfig); err != nil {
-			return fmt.Errorf("process %s: %w", date, err)
+			err = fmt.Errorf("process %s: %w", date, err)
+			fmt.Printf("Error processing date %s: %v\n", date, err)
+			errs = append(errs, err)
 		}
 	}
 
+	if len(errs) > 0 {
+		return errors.Join(errs...)
+	}
 	return nil
 }
 
